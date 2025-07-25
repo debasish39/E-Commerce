@@ -12,8 +12,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Install Create React App Sample',
-        short_name: 'ReactApp',
+        name: 'E-Com',
+        short_name: 'E-Com',
         description: 'A sample PWA built with React, Vite, and Tailwind CSS',
         theme_color: 'black',
         background_color: '#ffffff',

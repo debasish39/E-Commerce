@@ -54,8 +54,8 @@ const AppWrapper = () => {
           <Route path="/products/:id" element={<SingleProduct />} />
           <Route path="/catagory/:category" element={<CategoryProduct />} />
           <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
-          <Route path="/cart" element={<ProtectedRoute><Cart location={locationData} getLocation={getLocation} /></ProtectedRoute>} />
+          <Route path="/contact" element={<ProtectedRoute><Contact /><Footer/></ProtectedRoute>} />
+          <Route path="/cart" element={<ProtectedRoute><Cart location={locationData} getLocation={getLocation} /><Footer/></ProtectedRoute>} />
         </Routes>
         {!hideFooter && <Footer />}
       </div>
