@@ -1,0 +1,12 @@
+@import "slick-carousel/slick/slick.css";
+@import "slick-carousel/slick/slick-theme.css";
+@import "tailwindcss";
+body {
+  margin: 0;
+  padding: 0;
+  
+}
+::selection{
+  background-color: rgb(5, 5, 5);
+  color:rgb(248, 162, 3);
+}
