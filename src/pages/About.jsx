@@ -14,7 +14,7 @@ export default function About() {
         <div className="  rounded-xl p-6 md:p-10 space-y-8">
 
           <p className="text-lg leading-relaxed">
-            👋 Welcome to <span className="font-bold text-red-600">E-Com</span>, your go-to
+            👋 Welcome to <span className="font-bold text-red-600"style={{ fontFamily: "'Pacifico', cursive" }}>E-Shop</span>, your go-to
             destination for quality products at unbeatable prices. We're a passionate team of
             developers and designers focused on creating a smooth shopping experience.
           </p>

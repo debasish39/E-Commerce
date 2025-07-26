@@ -102,8 +102,7 @@ export default function Navbar({ location, onLocationChange}) {
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
           {/* Logo + Location */}
           <div className="flex items-center gap-4">
-            <Link to="/" className="text-2xl sm:text-3xl font-bold text-red-600"style={{ fontFamily: "'Pacifico', cursive" }}>              E-Shop
-            </Link>
+            <Link to="/" className="text-2xl sm:text-3xl font-bold text-red-600"style={{ fontFamily: "'Pacifico', cursive" }}>E-Shop</Link>
             <div className="hidden sm:flex">{renderLocation()}</div>
           </div>
 

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { getData } from '../context/DataContext';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -7,14 +7,20 @@ import { AiOutlineArrowLeft, AiOutlineArrowRight } from 'react-icons/ai';
 import { FaStar } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
-import Loading from '../assets/Loading4.webm'
+import Loading from '../assets/Loading4.webm';
+
 const Carousel = () => {
   const { data, fetchAllProducts } = getData();
-  const {addToCart}=useCart();
+  const { addToCart } = useCart();
   const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     if (!data || data.length === 0) {
-      fetchAllProducts();
+      fetchAllProducts().finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
   }, []);
 
@@ -50,15 +56,21 @@ const Carousel = () => {
   };
 
   return (
-    <div className="w-full py-3 ">
+    <div className="w-full py-3">
       <div className="max-w-screen mx-auto relative">
         <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-12 text-gray-800">
           🛍️ Featured Products
         </h2>
 
-        {!data || data.length === 0 ? (
-            <div className="flex justify-center items-center min-h-[300px]">
-            <video autoPlay loop muted playsInline className="w-50 h-50 object-contain">
+        {loading ? (
+          <div className="flex justify-center items-center min-h-[300px] py-10">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-32 h-32 sm:w-48 sm:h-48 object-contain"
+            >
               <source src={Loading} type="video/webm" />
               Your browser does not support the video tag.
             </video>
@@ -67,15 +79,16 @@ const Carousel = () => {
           <Slider {...settings}>
             {data.map((item, index) => (
               <div key={index} className="px-4 sm:px-6 lg:px-10">
-                <div className="flex flex-col lg:flex-row items-center gap-8  rounded-2xl  p-6 md:p-10 transition-all duration-300 hover:scale-[1.01] active:scale-[1.01]">
+                <div className="flex flex-col lg:flex-row items-center gap-8 rounded-2xl p-6 md:p-10 transition-all duration-300 hover:scale-[1.01] active:scale-[1.01]">
 
                   {/* Image */}
                   <div className="w-full lg:w-1/2 relative flex justify-center">
                     <img
                       src={item.thumbnail}
                       alt={item.title}
-                      className="h-64 sm:h-72 md:h-80 w-full object-contain"
-                    onClick={()=>navigate(`/products/${item.id}`)}/>
+                      className="h-64 sm:h-72 md:h-80 w-full object-contain cursor-pointer"
+                      onClick={() => navigate(`/products/${item.id}`)}
+                    />
                     <span className="absolute top-4 left-4 bg-[#f53347] text-white text-[12px] sm:text-sm md:text-base font-semibold px-3 py-1 rounded-full shadow-sm">
                       Featured
                     </span>
@@ -97,20 +110,19 @@ const Carousel = () => {
                     <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#f53347]">
                       ₹{item.price}
                     </p>
-                    <button className="mt-4 bg-[#f53347] hover:bg-[#d02b3b] text-white text-xl sm:text-base px-6 py-2 rounded-full shadow-md transition duration-300 cursor-pointer"onClick={()=>addToCart(item)}>
+                    <button
+                      className="mt-4 bg-[#f53347] hover:bg-[#d02b3b] text-white text-xl sm:text-base px-6 py-2 rounded-full shadow-md transition duration-300 cursor-pointer"
+                      onClick={() => addToCart(item)}
+                    >
                       Add to Cart
                     </button>
                   </div>
                 </div>
-                
               </div>
-              
             ))}
           </Slider>
         )}
       </div>
-
-    
     </div>
   );
 };
