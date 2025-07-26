@@ -7,6 +7,7 @@ import { AiOutlineArrowLeft, AiOutlineArrowRight } from 'react-icons/ai';
 import { FaStar } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
+import Loading from '../assets/Loading4.webm'
 const Carousel = () => {
   const { data, fetchAllProducts } = getData();
   const {addToCart}=useCart();
@@ -56,7 +57,12 @@ const Carousel = () => {
         </h2>
 
         {!data || data.length === 0 ? (
-          <p className="text-center text-gray-600 text-base sm:text-lg">Loading...</p>
+            <div className="flex justify-center items-center min-h-[300px]">
+            <video autoPlay loop muted playsInline className="w-50 h-50 object-contain">
+              <source src={Loading} type="video/webm" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
         ) : (
           <Slider {...settings}>
             {data.map((item, index) => (

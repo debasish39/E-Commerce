@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { ShoppingCart, MapPin, ChevronDown } from "lucide-react";
 import { HiMenuAlt1, HiMenuAlt3 } from "react-icons/hi";
-import { FaBolt } from 'react-icons/fa'; // or FaShoppingCart
+import { FaBolt } from 'react-icons/fa'; 
 import {
   SignedIn,
   SignedOut,
@@ -102,8 +102,7 @@ export default function Navbar({ location, onLocationChange}) {
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
           {/* Logo + Location */}
           <div className="flex items-center gap-4">
-            <Link to="/" className="text-2xl sm:text-3xl font-bold text-red-600"style={{ fontFamily: "'Pacifico', cursive" }}
->              E-com
+            <Link to="/" className="text-2xl sm:text-3xl font-bold text-red-600"style={{ fontFamily: "'Pacifico', cursive" }}>              E-Shop
             </Link>
             <div className="hidden sm:flex">{renderLocation()}</div>
           </div>
@@ -206,7 +205,7 @@ export default function Navbar({ location, onLocationChange}) {
         }`}
       >
         <div className="flex items-center justify-between px-4 py-3.5 border-b-3 border-red-500">
-          <h2 className="text-lg font-bold text-red-500">E-com</h2>
+          <h2 className="text-lg font-bold text-red-500">E-Shop</h2>
         </div>
 
         <div className="p-4 space-y-4">
