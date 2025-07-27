@@ -15,6 +15,7 @@ import { Toaster } from 'react-hot-toast';
 import ScrollToTop from './components/scrollToTop'; // ✅ Add this
 import AOS from 'aos'; // ✅ Import AOS
 import 'aos/dist/aos.css'; // ✅ Import AOS CSS
+import NotFound from './components/NotFound';
 
 const AppWrapper = () => {
   const [locationData, setLocationData] = useState();
@@ -56,6 +57,7 @@ const AppWrapper = () => {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<ProtectedRoute><Contact /><Footer/></ProtectedRoute>} />
           <Route path="/cart" element={<ProtectedRoute><Cart location={locationData} getLocation={getLocation} /><Footer/></ProtectedRoute>} />
+          <Route path='*' element={<NotFound/>}/>
         </Routes>
         {!hideFooter && <Footer />}
       </div>
