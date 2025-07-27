@@ -16,6 +16,7 @@ import ScrollToTop from './components/scrollToTop'; // ✅ Add this
 import AOS from 'aos'; // ✅ Import AOS
 import 'aos/dist/aos.css'; // ✅ Import AOS CSS
 import NotFound from './components/NotFound';
+import ClickSpark from './components/ClickSpark';
 
 const AppWrapper = () => {
   const [locationData, setLocationData] = useState();
@@ -68,8 +69,10 @@ const AppWrapper = () => {
 export default function App() {
   return (
     <BrowserRouter>
+    <ClickSpark>
       <ScrollToTop /> {/* ✅ Scroll to Top on route change */}
       <AppWrapper />
+      </ClickSpark>
     </BrowserRouter>
   );
 }
