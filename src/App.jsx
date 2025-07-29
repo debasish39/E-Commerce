@@ -1,22 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import Home from './pages/Home';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import Cart from './pages/Cart';
-import Products from './pages/Products';
-import Navbar from './components/Navbar';
-import axios from 'axios';
-import Footer from './components/Footer';
-import SingleProduct from './pages/SingleProduct';
-import CategoryProduct from './CategoryProduct';
-import ProtectedRoute from './components/ProtectedRoute';
-import { Toaster } from 'react-hot-toast';
-import ScrollToTop from './components/scrollToTop'; // ✅ Add this
-import AOS from 'aos'; // ✅ Import AOS
-import 'aos/dist/aos.css'; // ✅ Import AOS CSS
-import NotFound from './components/NotFound';
-import ClickSpark from './components/ClickSpark';
+import React, { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import Home from "./pages/Home";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Cart from "./pages/Cart";
+import Products from "./pages/Products";
+import Navbar from "./components/Navbar";
+import axios from "axios";
+import Footer from "./components/Footer";
+import SingleProduct from "./pages/SingleProduct";
+import CategoryProduct from "./CategoryProduct";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { Toaster } from "react-hot-toast";
+import ScrollToTop from "./components/scrollToTop"; // ✅ Add this
+import AOS from "aos"; // ✅ Import AOS
+import "aos/dist/aos.css"; // ✅ Import AOS CSS
+import NotFound from "./components/NotFound";
+import ClickSpark from "./components/ClickSpark";
 
 const AppWrapper = () => {
   const [locationData, setLocationData] = useState();
@@ -42,7 +42,8 @@ const AppWrapper = () => {
     AOS.init({ duration: 800, once: true }); // ✅ Init AOS
   }, []);
 
-  const hideFooter = location.pathname === "/contact" || location.pathname === "/cart";
+  const hideFooter =
+    location.pathname === "/contact" || location.pathname === "/cart";
 
   return (
     <div className="flex flex-col items-center overflow-x-hidden justify-center min-h-screen bg-gradient-to-b from-gray-100 via-orange-300 to-orange-300">
@@ -56,9 +57,26 @@ const AppWrapper = () => {
           <Route path="/products/:id" element={<SingleProduct />} />
           <Route path="/catagory/:category" element={<CategoryProduct />} />
           <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<ProtectedRoute><Contact /><Footer/></ProtectedRoute>} />
-          <Route path="/cart" element={<ProtectedRoute><Cart location={locationData} getLocation={getLocation} /><Footer/></ProtectedRoute>} />
-          <Route path='*' element={<NotFound/>}/>
+          <Route
+            path="/contact"
+            element={
+              <ProtectedRoute>
+                <Contact />
+                <Footer />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cart"
+            element={
+              <ProtectedRoute>
+                <Cart location={locationData} getLocation={getLocation} />
+                <Footer />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="*" element={<NotFound />} />
         </Routes>
         {!hideFooter && <Footer />}
       </div>
@@ -69,9 +87,9 @@ const AppWrapper = () => {
 export default function App() {
   return (
     <BrowserRouter>
-    <ClickSpark>
-      <ScrollToTop /> {/* ✅ Scroll to Top on route change */}
-      <AppWrapper />
+      <ClickSpark>
+        <ScrollToTop /> {/* ✅ Scroll to Top on route change */}
+        <AppWrapper />
       </ClickSpark>
     </BrowserRouter>
   );
