@@ -9,10 +9,9 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading time (like fetching data or waiting for initial animation)
     const timeout = setTimeout(() => {
       setLoading(false);
-    }, 900); // 2 seconds
+    }, 900); 
 
     return () => clearTimeout(timeout);
   }, []);

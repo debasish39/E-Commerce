@@ -3,8 +3,8 @@ import { useRef, useEffect, useCallback } from "react";
 const ClickSpark = ({
   sparkColor = "#FB2C36",
   sparkSize = 23,
-  sparkRadius = 3,
-  sparkCount = 15,
+  sparkRadius = 1,
+  sparkCount = 69,
   duration = 400,
   easing = "ease-out",
   extraScale = 1.0,

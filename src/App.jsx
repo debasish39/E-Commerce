@@ -12,12 +12,12 @@ import SingleProduct from "./pages/SingleProduct";
 import CategoryProduct from "./CategoryProduct";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Toaster } from "react-hot-toast";
-import ScrollToTop from "./components/scrollToTop"; // ✅ Add this
-import AOS from "aos"; // ✅ Import AOS
-import "aos/dist/aos.css"; // ✅ Import AOS CSS
+import ScrollToTop from "./components/scrollToTop";
+import AOS from "aos"; 
+import "aos/dist/aos.css"; 
 import NotFound from "./components/NotFound";
 import ClickSpark from "./components/ClickSpark";
-
+import WishlistPage from "./pages/WishlistPage";
 const AppWrapper = () => {
   const [locationData, setLocationData] = useState();
   const location = useLocation();
@@ -55,6 +55,15 @@ const AppWrapper = () => {
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/:id" element={<SingleProduct />} />
+          <Route
+           path="/wishlist"
+            element={
+              <ProtectedRoute>
+               <WishlistPage location={locationData} getLocation={getLocation} />
+                <Footer />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/catagory/:category" element={<CategoryProduct />} />
           <Route path="/about" element={<About />} />
           <Route
@@ -88,7 +97,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <ClickSpark>
-        <ScrollToTop /> {/* ✅ Scroll to Top on route change */}
+        <ScrollToTop />
         <AppWrapper />
       </ClickSpark>
     </BrowserRouter>

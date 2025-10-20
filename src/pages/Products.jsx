@@ -70,7 +70,6 @@ export default function Products() {
           </div>
 
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Filter Section */}
             {(showFilters || window.innerWidth >= 1024) && (
               <div className={`w-full lg:w-1/4 ${showFilters ? 'block' : 'hidden'} lg:block`}>
                 <FilterSection
@@ -89,7 +88,6 @@ export default function Products() {
               </div>
             )}
 
-            {/* Products Grid */}
             <div className="w-full sm:mt-18 lg:w-4/4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-3">
               {filteredProducts.length === 0 ? (
               <div className="col-span-full flex justify-center items-center min-h-[400px]">
@@ -103,7 +101,6 @@ export default function Products() {
             </div>
           </div>
 
-          {/* Pagination */}
           {filteredProducts.length > 0 && (
             <div className="overflow-x-auto mt-10">
               <div className="flex flex-wrap justify-center gap-x-2 gap-y-3 items-center px-2">
@@ -120,7 +117,6 @@ export default function Products() {
                   <FaAngleLeft className="text-sm sm:text-base" />
                 </button>
 
-                {/* Dynamic Page Numbers */}
                 {(() => {
                   const pageButtons = [];
 
@@ -159,7 +155,6 @@ export default function Products() {
                   );
                 })()}
 
-                {/* Next Button */}
                 <button
                   onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
                   disabled={page === totalPages}

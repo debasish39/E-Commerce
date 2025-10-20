@@ -44,7 +44,6 @@ const Cart = ({ location, getLocation }) => {
             ))}
           </div>
 
-          {/* Delivery & Billing */}
           <div className='grid grid-cols-1 md:grid-cols-2 md:gap-20'>
             <div className='shadow-2xl rounded-md p-7 mt-4 space-y-2'>
               <h1 className='text-gray-800 font-bold text-xl'>Delivery Info</h1>
@@ -83,7 +82,6 @@ const Cart = ({ location, getLocation }) => {
               </div>
             </div>
 
-            {/* Bill Details */}
             <div className='shadow-md border border-gray-100 rounded-md p-7 mt-4 space-y-2 h-max'>
               <h1 className='text-gray-800 font-bold text-xl'>Bill details</h1>
               <div className='flex justify-between items-center'>

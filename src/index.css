@@ -10,23 +10,19 @@ body {
   background-color: rgb(5, 5, 5);
   color:rgb(248, 162, 3);
 }
-/* Target all scrollbars */
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 3px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #010101; /* light gray track */
+  background: #010101;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #E9E1DA; /* Tailwind's rose-600 or red-600 */
+  background-color: #E9E1DA; 
   border-radius: 10px;
-  border: 2px solid rgb(246, 246, 246); /* spacing inside thumb */
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: #be123c; /* darker red on hover */
+  border: 2px solid rgb(246, 246, 246); 
 }

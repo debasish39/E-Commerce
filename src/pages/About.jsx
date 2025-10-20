@@ -5,12 +5,12 @@ export default function About() {
     <section className="min-h-screen text-gray-800 py-16 px-6 md:px-12">
       <div className="max-w-full mx-auto">
 
-        {/* Header */}
+   
         <h1 className="text-3xl md:text-5xl font-bold text-red-600 text-center mb-10">
           About This Website
         </h1>
 
-        {/* Info Card */}
+   
         <div className="  rounded-xl p-6 md:p-10 space-y-8">
 
           <p className="text-lg leading-relaxed">
@@ -31,7 +31,6 @@ export default function About() {
             authentication, shopping cart, and payment integration!
           </p>
 
-          {/* Technologies */}
           <div className="space-y-2">
             <h2 className="text-xl font-semibold text-gray-900">🧩 Technologies Used:</h2>
             <ul className="list-disc list-inside space-y-1 text-base">
