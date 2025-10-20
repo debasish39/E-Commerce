@@ -26,7 +26,6 @@ export default function Contact() {
 
   const { name, email, inquiryType, message } = formData;
 
-  // Basic required field validation
   if (!name.trim() || !email.trim() || !inquiryType || !message.trim()) {
     toast.error(
       <span className="flex items-center gap-2">
