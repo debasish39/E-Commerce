@@ -60,7 +60,6 @@ const AppWrapper = () => {
             element={
               <ProtectedRoute>
                <WishlistPage location={locationData} getLocation={getLocation} />
-                <Footer />
               </ProtectedRoute>
             }
           />
