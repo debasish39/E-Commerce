@@ -31,11 +31,10 @@ export default function SingleProduct() {
   return (
     <>
       {product ? (
-        <div className="px-4 pb-16 pt-5 md:px-8">
+        <div className="px-4 pb-16  md:px-8">
           <Breadcrums title={product.title} />
 
           <div className="max-w-6xl mx-auto py-8 grid grid-cols-1 md:grid-cols-2 gap-10 rounded-2xl p-6 md:p-10">
-            {/* Product Image Section */}
             <div className="flex flex-col items-center">
               <div className="relative group w-full">
                 <img
@@ -45,7 +44,6 @@ export default function SingleProduct() {
                 />
               </div>
 
-              {/* Thumbnails */}
               <div className="flex gap-3 mt-4 overflow-x-auto">
                 {product.images?.map((img, idx) => (
                   <img
@@ -63,7 +61,6 @@ export default function SingleProduct() {
               </div>
             </div>
 
-            {/* Product Details Section */}
             <div className="flex flex-col justify-center gap-6">
               <div>
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
@@ -78,7 +75,6 @@ export default function SingleProduct() {
                 {product.description}
               </p>
 
-              {/* Price and Discount */}
               <div className="flex items-center gap-2">
                 <h2 className="text-2xl font-semibold text-red-500">
                   ₹{product.price}
@@ -94,7 +90,6 @@ export default function SingleProduct() {
                 </span>
               </div>
 
-              {/* Rating */}
               <div className="flex items-center gap-2">
                 <span className="text-yellow-400 text-lg">⭐</span>
                 <span className="text-gray-700 font-medium">
@@ -102,7 +97,6 @@ export default function SingleProduct() {
                 </span>
               </div>
 
-              {/* Quantity Selector */}
               <div className="flex items-center gap-4">
                 <label className="text-sm font-medium text-gray-700">
                   Quantity:
@@ -115,7 +109,6 @@ export default function SingleProduct() {
                 />
               </div>
 
-              {/* Buttons */}
               <div className="flex gap-4 mt-6">
                 <button
                   className="flex items-center justify-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-md transition-all cursor-pointer"
@@ -134,7 +127,6 @@ export default function SingleProduct() {
                 </button>
               </div>
 
-              {/* Extra Info */}
               <div className="mt-6 text-sm text-gray-500 border-t pt-4">
                 <p>🚚 Free Delivery on orders above ₹500</p>
                 <p>🔁 7-Day Replacement Guarantee</p>

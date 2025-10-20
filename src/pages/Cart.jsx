@@ -6,7 +6,8 @@ import { MdDeliveryDining } from 'react-icons/md';
 import { GiShoppingBag } from 'react-icons/gi';
 import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
-import emptyCart from "../assets/empty-cart.png"
+import emptyCart from "../assets/empty-cart.png";
+
 const Cart = ({ location, getLocation }) => {
   const { cartItem, removeFromCart, increaseQty, decreaseQty } = useCart();
   const { user } = useUser();
@@ -19,6 +20,8 @@ const Cart = ({ location, getLocation }) => {
       {cartItem.length > 0 ? (
         <div>
           <h1 className='font-bold text-2xl'>My Cart ({cartItem.length})</h1>
+          
+          {/* Cart Items */}
           <div className='mt-10'>
             {cartItem.map((item, index) => (
               <div key={index} className='shadow-2xl p-5 rounded-md flex items-center justify-between mt-3 w-full'>
@@ -29,46 +32,56 @@ const Cart = ({ location, getLocation }) => {
                     <p className='text-red-500 font-semibold text-lg'>₹{item.price}</p>
                   </div>
                 </div>
+
+                {/* Quantity Controls */}
                 <div className='bg-red-500 text-white flex gap-4 p-2 rounded-md font-bold text-xl'>
                   <button onClick={() => decreaseQty(item.id)}>-</button>
                   <span>{item.quantity}</span>
                   <button onClick={() => increaseQty(item.id)}>+</button>
                 </div>
+
+                {/* Delete Button with Confirmation */}
                 <span className='hover:bg-white/60 transition-all rounded-full p-3 hover:shadow-2xl'>
                   <FaRegTrashAlt
                     className='text-red-500 text-2xl cursor-pointer'
-                    onClick={() => removeFromCart(item.id)}
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to remove this item from the cart?")) {
+                        removeFromCart(item.id);
+                      }
+                    }}
                   />
                 </span>
               </div>
             ))}
           </div>
 
-          <div className='grid grid-cols-1 md:grid-cols-2 md:gap-20'>
+          {/* Delivery Info and Bill Details */}
+          <div className='grid grid-cols-1 md:grid-cols-2 md:gap-20 mt-10'>
+            {/* Delivery Info */}
             <div className='shadow-2xl rounded-md p-7 mt-4 space-y-2'>
               <h1 className='text-gray-800 font-bold text-xl'>Delivery Info</h1>
               <div className='flex flex-col space-y-1'>
                 <label>Full Name</label>
-                <input type='text' className='p-2 rounded-md' value={user?.fullName} />
+                <input type='text' className='p-2 rounded-md' value={user?.fullName || ''} readOnly />
               </div>
               <div className='flex flex-col space-y-1'>
                 <label>Address</label>
-                <input type='text' className='p-2 rounded-md' value={location?.county} />
+                <input type='text' className='p-2 rounded-md' value={location?.county || ''} readOnly />
               </div>
               <div className='flex w-full gap-5'>
                 <div className='flex flex-col space-y-1 w-full'>
                   <label>State</label>
-                  <input type='text' className='p-2 rounded-md w-full' value={location?.state} />
+                  <input type='text' className='p-2 rounded-md w-full' value={location?.state || ''} readOnly />
                 </div>
                 <div className='flex flex-col space-y-1 w-full'>
                   <label>PostCode</label>
-                  <input type='text' className='p-2 rounded-md w-full' value={location?.postcode} />
+                  <input type='text' className='p-2 rounded-md w-full' value={location?.postcode || ''} readOnly />
                 </div>
               </div>
               <div className='flex w-full gap-5'>
                 <div className='flex flex-col space-y-1 w-full'>
                   <label>Country</label>
-                  <input type='text' className='p-2 rounded-md w-full' value={location?.country} />
+                  <input type='text' className='p-2 rounded-md w-full' value={location?.country || ''} readOnly />
                 </div>
                 <div className='flex flex-col space-y-1 w-full'>
                   <label>Phone No</label>
@@ -78,22 +91,25 @@ const Cart = ({ location, getLocation }) => {
               <button className='bg-red-500 text-white px-3 py-1 rounded-md mt-3 cursor-pointer'>Submit</button>
               <div className='flex justify-center text-gray-700'>---------OR-----------</div>
               <div className='flex justify-center'>
-                <button onClick={getLocation} className='bg-red-500 text-white px-3 py-2 rounded-md'>Detect Location</button>
+                <button onClick={getLocation} className='bg-red-500 text-white px-3 py-2 rounded-md'>
+                  Detect Location
+                </button>
               </div>
             </div>
 
+            {/* Bill Details */}
             <div className='shadow-md border border-gray-100 rounded-md p-7 mt-4 space-y-2 h-max'>
               <h1 className='text-gray-800 font-bold text-xl'>Bill details</h1>
               <div className='flex justify-between items-center'>
-                <h1 className='flex gap-1 items-center text-gray-700'><LuNotebookText />Items total</h1>
+                <h1 className='flex gap-1 items-center text-gray-700'><LuNotebookText /> Items total</h1>
                 <p>₹{totalPrice}</p>
               </div>
               <div className='flex justify-between items-center'>
-                <h1 className='flex gap-1 items-center text-gray-700'><MdDeliveryDining />Delivery Charge</h1>
+                <h1 className='flex gap-1 items-center text-gray-700'><MdDeliveryDining /> Delivery Charge</h1>
                 <p className='text-red-500 font-semibold'><span className='line-through text-gray-600'>₹25</span> FREE</p>
               </div>
               <div className='flex justify-between items-center'>
-                <h1 className='flex gap-1 items-center text-gray-700'><GiShoppingBag />Handling Charge</h1>
+                <h1 className='flex gap-1 items-center text-gray-700'><GiShoppingBag /> Handling Charge</h1>
                 <p className='text-red-500 font-semibold'>₹5</p>
               </div>
               <hr className='text-gray-200 mt-2' />
@@ -108,14 +124,16 @@ const Cart = ({ location, getLocation }) => {
                   <button className='bg-white text-black border border-gray-200 px-4 cursor-pointer py-1 rounded-md'>Apply</button>
                 </div>
               </div>
-              <button className='bg-red-500 text-white px-3 py-2 rounded-md w-full cursor-pointer mt-3'>Proceed to Checkout</button>
+              <button className='bg-red-500 text-white px-3 py-2 rounded-md w-full cursor-pointer mt-3'>
+                Proceed to Checkout
+              </button>
             </div>
           </div>
         </div>
       ) : (
         <div className='flex flex-col gap-3 justify-center items-center h-[600px]'>
           <h1 className='text-2xl text-red-500/80 font-bold md:text-5xl'>Oh no! Your cart is empty</h1>
-           <img src={emptyCart} alt="" className='w-[400px]'/>
+          <img src={emptyCart} alt="Empty Cart" className='w-[400px]' />
           <button onClick={() => navigate('/products')} className='bg-red-500 text-white px-3 py-2 rounded-md cursor-pointer'>
             Continue Shopping
           </button>
