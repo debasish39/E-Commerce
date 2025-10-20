@@ -10,6 +10,8 @@ export default function WishlistPage() {
   const [showClearModal, setShowClearModal] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState(null);
 
+  const [activeCardId, setActiveCardId] = useState(null);
+
   const handleRemoveItem = (id) => {
     setSelectedItemId(id);
     setShowModal(true);
@@ -30,6 +32,14 @@ export default function WishlistPage() {
     setShowClearModal(false);
   };
 
+  const toggleOverlay = (id) => {
+    if (activeCardId === id) {
+      setActiveCardId(null);
+    } else {
+      setActiveCardId(id);
+    }
+  };
+
   if (wishlist.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[70vh] text-gray-500 p-3">
@@ -43,6 +53,7 @@ export default function WishlistPage() {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
+      {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-[18px] sm:text-3xl font-bold text-gray-900 tracking-wide">
           My Wishlist ❤️
@@ -59,24 +70,35 @@ export default function WishlistPage() {
         {wishlist.map((item) => (
           <div
             key={item.id}
-            className="relative bg-gray-200 border rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+            className="relative bg-gray-200 border rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
+            onClick={() => toggleOverlay(item.id)}
           >
-            <div className="relative group w-full h-56 overflow-hidden">
+            <div className="relative w-full h-56 overflow-hidden">
               <img
                 src={item.thumbnail}
                 alt={item.title}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
 
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex justify-center items-center gap-3">
+              <div
+                className={`absolute inset-0 bg-black/40 flex justify-center items-center gap-3 transition-all duration-300 ${
+                  activeCardId === item.id
+                    ? "opacity-100"
+                    : "opacity-0 sm:opacity-0 sm:group-hover:opacity-100"
+                }`}
+              >
                 <Link
                   to={`/products/${item.id}`}
                   className="bg-white text-gray-800 font-semibold px-4 py-2 rounded-md flex items-center gap-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={(e) => e.stopPropagation()}
                 >
                   <FaEye /> View
                 </Link>
                 <button
-                  onClick={() => handleRemoveItem(item.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveItem(item.id);
+                  }}
                   className="bg-red-500 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-red-600 cursor-pointer"
                 >
                   <FaTrash /> Remove
@@ -146,7 +168,7 @@ export default function WishlistPage() {
               </button>
               <button
                 onClick={confirmClearAll}
-                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 cursor-pointer" 
+                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 cursor-pointer"
               >
                 Clear All
               </button>
