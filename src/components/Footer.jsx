@@ -60,7 +60,7 @@ const Footer = () => {
           <p className="text-sm">
             Email: <a href="mailto:djproject963@gmail.com" className="text-red-400">djproject963@gmail.com</a>
           </p>
-          <p className="text-sm">Phone:  <a href="tel:+91 6370 195 243" className="text-red-400">+91 6370195243 </a>/<a href="tel:+91 7978558099" className="text-red-400">+91 7978558099 </a></p>
+          <p className="text-sm">Phone: <a href="tel:+91 7978558099" className="text-red-400">+91 7978558099 </a>/ <a href="tel:+91 6370195243" className="text-red-400">+91 6370195243 </a>/</p>
         </div>
 
         {/* Customer Service Links */}
