@@ -9,8 +9,8 @@ import {
   Package,
   Phone,
 } from "lucide-react";
+import { FaHeart, FaSignInAlt } from "react-icons/fa";
 import { HiMenuAlt1, HiMenuAlt3 } from "react-icons/hi";
-import { FaHeart } from "react-icons/fa";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../hooks/useWishlist";
@@ -166,8 +166,8 @@ export default function Navbar({ location, onLocationChange }) {
             <div className="ml-4">
               <SignedOut>
                 <SignInButton>
-                  <button className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-1.5 rounded-md transition">
-                    Sign In
+                  <button className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-1.5 rounded-md transition flex items-center gap-1 justify-center flex-row">
+                    <FaSignInAlt /> <span>Sign In</span>
                   </button>
                 </SignInButton>
               </SignedOut>
@@ -204,8 +204,8 @@ export default function Navbar({ location, onLocationChange }) {
             <div className="flex items-center gap-2">
               <SignedOut>
                 <SignInButton>
-                  <button className="bg-red-500 hover:bg-red-600 text-white text-sm font-medium px-3 py-1 rounded transition">
-                    Sign In
+                  <button className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-1.5 rounded-md transition flex items-center gap-1 justify-center flex-row">
+                    <FaSignInAlt />Sign In
                   </button>
                 </SignInButton>
               </SignedOut>
