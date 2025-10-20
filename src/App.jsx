@@ -43,7 +43,7 @@ const AppWrapper = () => {
   }, []);
 
   const hideFooter =
-    location.pathname === "/contact" || location.pathname === "/cart";
+    location.pathname === "/contact" || location.pathname === "/cart"|| location.pathname === "/wishlist";
 
   return (
     <div className="flex flex-col items-center overflow-x-hidden justify-center min-h-screen bg-gradient-to-b from-gray-100 via-orange-300 to-orange-300">
@@ -59,7 +59,8 @@ const AppWrapper = () => {
            path="/wishlist"
             element={
               <ProtectedRoute>
-               <WishlistPage location={locationData} getLocation={getLocation} />
+               <WishlistPage />
+                <Footer />
               </ProtectedRoute>
             }
           />
