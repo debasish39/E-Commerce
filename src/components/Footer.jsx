@@ -60,7 +60,7 @@ const Footer = () => {
           <p className="text-sm">
             Email: <a href="mailto:djproject963@gmail.com" className="text-red-400">djproject963@gmail.com</a>
           </p>
-          <p className="text-sm">Phone: <a href="tel:+91 7978558099" className="text-red-400">+91 7978558099 </a>/ <a href="tel:+91 6370195243" className="text-red-400">+91 6370195243 </a>/</p>
+          <p className="text-sm">Phone: <a href="tel:+91 7978558099" className="text-red-400">+91 7978558099 </a>/ <a href="tel:+91 6370195243" className="text-red-400">+91 6370195243 </a></p>
         </div>
 
         {/* Customer Service Links */}
@@ -81,9 +81,9 @@ const Footer = () => {
           <p className="text-sm mb-2">Stay connected on social media</p>
           <div className="flex space-x-4 text-xl">
             <a href="https://facebook.com" aria-label="Facebook" className="hover:text-red-500"><FaFacebook /></a>
-            <a href="https://instagram.com/deba_963" aria-label="Instagram" className="hover:text-red-500"><FaInstagram /></a>
+            <a href="https://instagram.com" aria-label="Instagram" className="hover:text-red-500"><FaInstagram /></a>
             <a href="https://twitter.com" aria-label="Twitter" className="hover:text-red-500"><FaTwitter /></a>
-            <a href="https://www.linkedin.com/in/debasish-panda-857715314/" aria-label="Linkedin" className="hover:text-red-500"><FaLinkedin /></a>
+            <a href="https://www.linkedin.com/"aria-label="Linkedin" className="hover:text-red-500"><FaLinkedin /></a>
           </div>
         </div>
 

@@ -11,8 +11,10 @@ export default function SingleProduct() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+
   const { addToCart } = useCart();
-  const { addToWishlist } = useWishlist();
+  const { addToWishlist, removeFromWishlist } = useWishlist();
 
   const getSingleProduct = async () => {
     try {
@@ -28,13 +30,24 @@ export default function SingleProduct() {
     getSingleProduct();
   }, [id]);
 
+  const handleWishlist = () => {
+    if (isWishlisted) {
+      removeFromWishlist(product);
+      setIsWishlisted(false);
+    } else {
+      addToWishlist(product);
+      setIsWishlisted(true);
+    }
+  };
+
   return (
     <>
       {product ? (
-        <div className="px-4 pb-16  md:px-8">
+        <div className="px-4 pb-16 md:px-8">
           <Breadcrums title={product.title} />
 
           <div className="max-w-6xl mx-auto py-8 grid grid-cols-1 md:grid-cols-2 gap-10 rounded-2xl p-6 md:p-10">
+            {/* Left Side - Image Gallery */}
             <div className="flex flex-col items-center">
               <div className="relative group w-full">
                 <img
@@ -61,6 +74,7 @@ export default function SingleProduct() {
               </div>
             </div>
 
+            {/* Right Side - Product Details */}
             <div className="flex flex-col justify-center gap-6">
               <div>
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
@@ -109,28 +123,39 @@ export default function SingleProduct() {
                 />
               </div>
 
-              <div className="flex gap-4 mt-6">
-                <button
-                  className="flex items-center justify-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-md transition-all cursor-pointer"
-                  onClick={() => addToCart(product)}
-                >
-                  <FaShoppingCart className="text-lg" />
-                  Add to Cart
-                </button>
+             {/* Add to Cart & Wishlist Buttons */}
+<div className="flex flex-col sm:flex-row gap-4 mt-6 w-full">
+  {/* Add to Cart Button */}
+  <button
+    className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-sm sm:text-base font-medium rounded-lg shadow-md transition-all cursor-pointer"
+    onClick={() => addToCart(product)}
+  >
+    <FaShoppingCart className="text-lg" />
+    Add to Cart
+  </button>
 
-                <button
-                  className="flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg shadow-md transition-all cursor-pointer"
-                  onClick={() => addToWishlist(product)}
-                >
-                  <FaHeart className="text-red-500 text-lg" />
-                  Wishlist
-                </button>
-              </div>
+  {/* Wishlist Button */}
+  <button
+    onClick={handleWishlist}
+    className={`flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-lg text-sm sm:text-base font-medium shadow-md transition-all cursor-pointer ${
+      isWishlisted
+        ? "bg-gray-100 text-gray-800 hover:bg-gray-200"
+        : "bg-red-600 text-white hover:bg-red-700"
+    }`}
+  >
+    <FaHeart
+      className={`text-lg ${
+        isWishlisted ? "text-red-500" : "text-white"
+      }`}
+    />
+    {isWishlisted ? "Wishlisted" : "Add to Wishlist"}
+  </button>
+</div>
 
-            <div className="mt-6 text-sm text-gray-500 border-t pt-4">
+
+              <div className="mt-6 text-sm text-gray-500 border-t pt-4">
                 <p>🚚 Free Delivery on orders above ₹500</p>
                 <p>🔁 7-Day Replacement Guarantee</p>
-               
               </div>
             </div>
           </div>
@@ -138,7 +163,7 @@ export default function SingleProduct() {
       ) : (
         <div className="flex items-center justify-center h-screen bg-gray-50">
           <video muted autoPlay loop className="w-40 opacity-70">
-            <source src={Loading} type="video/webm" />
+            <source src={Loading} type="video/wewebm" />
           </video>
         </div>
       )}
