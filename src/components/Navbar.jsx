@@ -74,8 +74,8 @@ export default function Navbar({ location, onLocationChange }) {
         onClick={() => setOpenDropdown(!openDropdown)}
       />
       {openDropdown && (
-        <div className="absolute top-10 left-0 w-[250px] bg-[#FFFFFF] shadow-xl border rounded-md p-4 z-50">
-          <h1 className="font-semibold mb-2 text-lg">Change Location</h1>
+        <div className="absolute top-10 left-0 w-[250px] bg-[#d0bcbc] shadow-xl border rounded-md p-4 z-50">
+          <h1 className="font-semibold mb-2 text-lg text-black">Change Location</h1>
           <button
             onClick={handleUseMyLocation}
             className="text-sm text-red-600 cursor-pointer mb-3 flex items-center gap-1"
@@ -155,11 +155,11 @@ export default function Navbar({ location, onLocationChange }) {
             {/* Wishlist Icon */}
             <Link to="/wishlist" className="relative">
               <FaHeart className="h-6 w-6 text-red-500" />
-              {wishlist.length > 0 && (
+              
                 <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
                   {wishlist.length}
                 </span>
-              )}
+             
             </Link>
 
             {/* Auth Buttons */}
@@ -193,11 +193,11 @@ export default function Navbar({ location, onLocationChange }) {
 
             <Link to="/wishlist" className="relative">
               <FaHeart className="h-6 w-6 text-red-500" />
-              {wishlist.length > 0 && (
+              
                 <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
                   {wishlist.length}
                 </span>
-              )}
+              
             </Link>
 
             {/* Auth Buttons */}
@@ -241,7 +241,7 @@ export default function Navbar({ location, onLocationChange }) {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3.5 border-b-4 border-red-500">
-          <h2 className="text-lg font-bold text-red-500">E-Shop</h2>
+          <h2 className="text-lg font-bold text-red-500" style={{ fontFamily: "'Pacifico', cursive" }}>E-Shop</h2>
         </div>
 
         {/* Scrollable menu */}
@@ -266,20 +266,10 @@ export default function Navbar({ location, onLocationChange }) {
               </NavLink>
             ))}
 
-            {/* Mobile Wishlist Link */}
-            <Link
-              to="/wishlist"
-              onClick={() => setIsMobileNavOpen(false)}
-              className="flex items-center gap-2 text-red-500 px-3 py-2 rounded-md hover:bg-red-50 font-semibold"
-            >
-              <FaHeart /> Wishlist ({wishlist.length})
-            </Link>
+        
           </div>
 
-          {/* Footer */}
-          <div className="border-t border-red-300 py-3 text-center text-gray-700 text-sm bg-[#FBDCC0]/80">
-            Created by <span className="font-semibold text-red-600">JSK</span>
-          </div>
+  
         </div>
       </aside>
     </>

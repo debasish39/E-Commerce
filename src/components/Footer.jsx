@@ -56,7 +56,7 @@ const Footer = () => {
             <h1 className="text-red-500 text-3xl font-bold mb-3" style={{ fontFamily: "'Pacifico', cursive" }}>E-Shop</h1>
           </Link>
           <p className="text-sm">Powering your world with top-notch electronics and gadgets.</p>
-          <p className="mt-2 text-sm">Berhampur, Odisha, India</p>
+          <p className="mt-2 text-sm">EATM,Baniatangi,Khurdha,Odisha</p>
           <p className="text-sm">
             Email: <a href="mailto:djproject963@gmail.com" className="text-red-400">djproject963@gmail.com</a>
           </p>

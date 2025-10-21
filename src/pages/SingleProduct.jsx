@@ -127,10 +127,10 @@ export default function SingleProduct() {
                 </button>
               </div>
 
-              <div className="mt-6 text-sm text-gray-500 border-t pt-4">
+            <div className="mt-6 text-sm text-gray-500 border-t pt-4">
                 <p>🚚 Free Delivery on orders above ₹500</p>
                 <p>🔁 7-Day Replacement Guarantee</p>
-                <p>💳 Secure Payment via UPI, Cards, and Netbanking</p>
+               
               </div>
             </div>
           </div>
