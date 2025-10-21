@@ -22,7 +22,7 @@ export default function ScrollToTopButton() {
     showButton && (
       <button
         onClick={handleClick}
-        className="fixed bottom-12 right-9 z-50 bg-red-500 hover:bg-red-600 text-white p-3 rounded-full shadow-lg transition duration-300 cursor-pointer"
+        className="fixed bottom-33 right-9 z-50 bg-red-500 hover:bg-red-600 text-white p-3 rounded-full shadow-lg transition duration-300 cursor-pointer"
         title="Scroll to Top" style={{boxShadow:'3px 3px 39px red'}}
       >
         <ArrowUp className="w-6 h-6" />

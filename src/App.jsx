@@ -13,11 +13,12 @@ import CategoryProduct from "./CategoryProduct";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Toaster } from "react-hot-toast";
 import ScrollToTop from "./components/scrollToTop";
-import AOS from "aos"; 
-import "aos/dist/aos.css"; 
+import AOS from "aos";
+import "aos/dist/aos.css";
 import NotFound from "./components/NotFound";
 import ClickSpark from "./components/ClickSpark";
 import WishlistPage from "./pages/WishlistPage";
+
 const AppWrapper = () => {
   const [locationData, setLocationData] = useState();
   const location = useLocation();
@@ -39,11 +40,26 @@ const AppWrapper = () => {
 
   useEffect(() => {
     getLocation();
-    AOS.init({ duration: 800, once: true }); // ✅ Init AOS
+    AOS.init({ duration: 800, once: true });
+  }, []);
+
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.async = true;
+    script.src = "https://embed.tawk.to/68f50d067d479d194d3b7f14/1j7ujlpa6"; 
+    script.charset = "UTF-8";
+    script.setAttribute("crossorigin", "*");
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
   }, []);
 
   const hideFooter =
-    location.pathname === "/contact" || location.pathname === "/cart"|| location.pathname === "/wishlist";
+    location.pathname === "/contact" ||
+    location.pathname === "/cart" ||
+    location.pathname === "/wishlist";
 
   return (
     <div className="flex flex-col items-center overflow-x-hidden justify-center min-h-screen bg-gradient-to-b from-gray-100 via-orange-300 to-orange-300">
@@ -56,10 +72,10 @@ const AppWrapper = () => {
           <Route path="/products" element={<Products />} />
           <Route path="/products/:id" element={<SingleProduct />} />
           <Route
-           path="/wishlist"
+            path="/wishlist"
             element={
               <ProtectedRoute>
-               <WishlistPage />
+                <WishlistPage />
                 <Footer />
               </ProtectedRoute>
             }
@@ -84,9 +100,9 @@ const AppWrapper = () => {
               </ProtectedRoute>
             }
           />
-
           <Route path="*" element={<NotFound />} />
         </Routes>
+
         {!hideFooter && <Footer />}
       </div>
     </div>
