@@ -98,17 +98,16 @@ export default function Contact() {
     <div className="min-h-screen py-10 px-4 bg-transparent">
       <Toaster position="top-center" reverseOrder={false} />
 
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
+      <div className="max-w-6xl mx-auto flex flex-col-reverse sm:flex-row gap-10 items-stretch h-full">
         {/* Google Map on the LEFT */}
         <div
-          className="w-full h-[100%] rounded-xl overflow-hidden shadow-lg border border-red-200"
+          className="w-full sm:w-1/2 h-[80vh] sm:h-auto rounded-xl overflow-hidden shadow-lg border border-red-200"
           data-aos="fade-right"
           data-aos-delay="200"
         >
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3311.9316664188245!2d85.61682517655123!3d20.13223376978005!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a19ad20457753ef%3A0x8d2834dd8305ea76!2sEinstein%20Academy%20of%20Technology%20and%20Management!5e1!3m2!1sen!2sin!4v1761017897848!5m2!1sen!2sin"
-            width="100%"
-            height="100%"
+            className="w-full h-full"
             style={{ border: 0 }}
             allowFullScreen
             loading="lazy"
@@ -119,7 +118,7 @@ export default function Contact() {
 
         {/* Contact Form on the RIGHT */}
         <div
-          className="p-8 rounded-xl shadow-lg border border-red-200"
+          className="p-8 w-full sm:w-1/2 rounded-xl shadow-lg border border-red-200"
           data-aos="fade-left"
           data-aos-delay="100"
         >
