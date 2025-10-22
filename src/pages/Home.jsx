@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+
 import Carousel from '../components/Carousel';
 import MidBanner from '../components/MidBanner';
 import Features from '../components/Features';
@@ -9,9 +12,19 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    AOS.init({
+      duration: 300,   
+      easing: 'ease-in-out',
+      once: false,      
+       
+    });
+
+    
+    AOS.refresh();
+
     const timeout = setTimeout(() => {
       setLoading(false);
-    }, 900); 
+    }, 900);
 
     return () => clearTimeout(timeout);
   }, []);
@@ -35,10 +48,21 @@ export default function Home() {
 
   return (
     <div>
-      <Carousel />
-      <Category />
-      <MidBanner />
-      <Features />
+      <div data-aos="fade-up">
+        <Carousel />
+      </div>
+
+      <div data-aos="fade-right">
+        <Category />
+      </div>
+
+      <div data-aos="zoom-in">
+        <MidBanner />
+      </div>
+
+      <div data-aos="fade-left">
+        <Features />
+      </div>
     </div>
   );
 }

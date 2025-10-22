@@ -4,8 +4,10 @@ import FilterSection from '../components/FilterSection';
 import Loading from '../assets/Loading4.webm';
 import ProductCard from '../components/ProductCard';
 import { FaFilter, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
-import Lottie from 'lottie-react'
-import notfound from "../assets/notfound.json"
+import Lottie from 'lottie-react';
+import notfound from '../assets/notfound.json';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 export default function Products() {
   const {
@@ -32,6 +34,15 @@ export default function Products() {
   }, []);
 
   useEffect(() => {
+    AOS.init({
+      duration: 300,
+      easing: 'ease-in',
+      once: false,
+    });
+  }, []);
+
+  useEffect(() => {
+    // Reset pagination when filters change
     setPage(1);
   }, [search, brand, category, priceRange]);
 
@@ -47,22 +58,25 @@ export default function Products() {
       (product) => brand === 'ALL' || brand === 'All' || product.brand === brand
     )
     .filter(
-      (product) => product.price >= priceRange[0] && product.price <= priceRange[1]
+      (product) =>
+        product.price >= priceRange[0] && product.price <= priceRange[1]
     );
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
-  const paginatedProducts = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedProducts = filteredProducts.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
       {data?.length > 0 ? (
         <>
-          {/* Mobile Filter Toggle Button */}
-          <div className="lg:hidden flex justify-end mb-4">
+          <div className="lg:hidden flex justify-end mb-4" data-aos="fade-down">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-3 py-2 border rounded-md text-sm bg-white text-gray-700 hover:bg-red-100 border-gray-300"
+              className="flex items-center gap-2 px-3 py-2 border rounded-md text-sm bg-white text-gray-700 hover:bg-red-100 border-gray-300 cursor-pointer"
             >
               <FaFilter />
               Filters
@@ -71,7 +85,10 @@ export default function Products() {
 
           <div className="flex flex-col lg:flex-row gap-8">
             {(showFilters || window.innerWidth >= 1024) && (
-              <div className={`w-full lg:w-1/4 ${showFilters ? 'block' : 'hidden'} lg:block`}>
+              <div
+                className={`w-full lg:w-1/4 ${showFilters ? 'block' : 'hidden'} lg:block`}
+                data-aos="fade-right"
+              >
                 <FilterSection
                   data={data}
                   search={search}
@@ -88,21 +105,26 @@ export default function Products() {
               </div>
             )}
 
-            <div className="w-full sm:mt-18 lg:w-4/4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-3">
+            <div
+              className="w-full sm:mt-18 lg:w-4/4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-3"
+              data-aos="fade-up"
+            >
               {filteredProducts.length === 0 ? (
-              <div className="col-span-full flex justify-center items-center min-h-[400px]">
-                    <Lottie animationData={notfound} className="w-3/4 max-w-md" />
-                  </div>
+                <div className="col-span-full flex justify-center items-center min-h-[400px]" data-aos="zoom-in">
+                  <Lottie animationData={notfound} className="w-3/4 max-w-md" />
+                </div>
               ) : (
                 paginatedProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <div key={product.id} data-aos="zoom-in">
+                    <ProductCard product={product} />
+                  </div>
                 ))
               )}
             </div>
           </div>
 
           {filteredProducts.length > 0 && (
-            <div className="overflow-x-auto mt-10">
+            <div className="overflow-x-auto mt-10" data-aos="fade-up">
               <div className="flex flex-wrap justify-center gap-x-2 gap-y-3 items-center px-2">
                 {/* Previous Button */}
                 <button
@@ -117,13 +139,12 @@ export default function Products() {
                   <FaAngleLeft className="text-sm sm:text-base" />
                 </button>
 
+                {/* Dynamic Pagination */}
                 {(() => {
                   const pageButtons = [];
 
                   if (totalPages <= 5) {
-                    for (let i = 1; i <= totalPages; i++) {
-                      pageButtons.push(i);
-                    }
+                    for (let i = 1; i <= totalPages; i++) pageButtons.push(i);
                   } else {
                     if (page <= 3) {
                       pageButtons.push(1, 2, 3, '...', totalPages);
@@ -155,6 +176,7 @@ export default function Products() {
                   );
                 })()}
 
+                {/* Next Button */}
                 <button
                   onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
                   disabled={page === totalPages}
@@ -171,7 +193,7 @@ export default function Products() {
           )}
         </>
       ) : (
-        <div className="flex items-center justify-center h-[400px]">
+        <div className="flex items-center justify-center h-[400px]" data-aos="fade-in">
           <video muted autoPlay loop aria-hidden="true">
             <source src={Loading} type="video/webm" />
           </video>

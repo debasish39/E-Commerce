@@ -40,7 +40,7 @@ const AppWrapper = () => {
 
   useEffect(() => {
     getLocation();
-    AOS.init({ duration: 800, once: true });
+    AOS.init({ duration: 200, once: false, });
   }, []);
 
   useEffect(() => {
