@@ -9,7 +9,7 @@ import Navbar from "./components/Navbar";
 import axios from "axios";
 import Footer from "./components/Footer";
 import SingleProduct from "./pages/SingleProduct";
-import CategoryProduct from "./CategoryProduct";
+import CategoryProduct from "./pages/CategoryProduct";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { Toaster } from "react-hot-toast";
 import ScrollToTop from "./components/scrollToTop";
@@ -46,7 +46,7 @@ const AppWrapper = () => {
   useEffect(() => {
     const script = document.createElement("script");
     script.async = true;
-    script.src = "https://embed.tawk.to/68f50d067d479d194d3b7f14/1j7ujlpa6"; 
+    script.src = "https://embed.tawk.to/68f50d067d479d194d3b7f14/1j7ujlpa6";
     script.charset = "UTF-8";
     script.setAttribute("crossorigin", "*");
     document.body.appendChild(script);
@@ -80,7 +80,7 @@ const AppWrapper = () => {
               </ProtectedRoute>
             }
           />
-          <Route path="/catagory/:category" element={<CategoryProduct />} />
+          <Route path="/category/:category" element={<CategoryProduct />} />
           <Route path="/about" element={<About />} />
           <Route
             path="/contact"

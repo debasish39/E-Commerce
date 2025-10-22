@@ -58,7 +58,7 @@ const Carousel = () => {
   return (
     <div className="w-full py-3">
       <div className="max-w-screen mx-auto relative">
-        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-12 text-gray-800"style={{ fontFamily: "'Pacifico', cursive" }}>
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-12 text-gray-800" style={{ fontFamily: "'Pacifico', cursive" }}>
           🛍️ Featured Products
         </h2>
 
@@ -110,14 +110,14 @@ const Carousel = () => {
                     <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#f53347]">
                       ₹{item.price}
                     </p>
-              <div className="flex justify-center lg:justify-start">
-  <button
-    className="mt-4 bg-[#f53347] hover:bg-[#d02b3b] text-white text-lg sm:text-base px-6 py-2 rounded-full shadow-md transition duration-300 cursor-pointer flex justify-center items-center gap-3"
-    onClick={() => addToCart(item)}
-  >
-    <FaShoppingCart className="text-lg" /> Add to Cart
-  </button>
-</div>
+                    <div className="flex justify-center lg:justify-start">
+                      <button
+                        className="mt-4 bg-[#f53347] hover:bg-[#d02b3b] text-white text-lg sm:text-base px-6 py-2 rounded-full shadow-md transition duration-300 cursor-pointer flex justify-center items-center gap-3"
+                        onClick={() => addToCart(item)}
+                      >
+                        <FaShoppingCart className="text-lg" /> Add to Cart
+                      </button>
+                    </div>
 
                   </div>
                 </div>

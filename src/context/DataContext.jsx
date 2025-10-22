@@ -16,17 +16,17 @@ export const DataProvider = ({ children }) => {
       const res = await axios.get("https://dummyjson.com/products?limit=150");
       const productsData = res.data.products;
       setData(productsData);
-      // toast.success("Products loaded successfully ✅"); // ✅ Toast on success
+      // toast.success("Products loaded successfully ");
     } catch (error) {
       console.error(error);
-      // toast.error("Failed to fetch products ❌"); // ✅ Toast on error
+      // toast.error("Failed to fetch products "); 
     }
   };
 
   const getUniqueCategory = (data, property) => {
     if (!Array.isArray(data) || data.length === 0) return [];
     const values = data.map((item) => item[property]);
-    return ["ALL", ...new Set(values)];
+    return [ ...new Set(values)];
   };
 
   const categoryOnlyData = useMemo(() => getUniqueCategory(data, "category"), [data]);
