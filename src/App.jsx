@@ -18,7 +18,7 @@ import "aos/dist/aos.css";
 import NotFound from "./components/NotFound";
 import ClickSpark from "./components/ClickSpark";
 import WishlistPage from "./pages/WishlistPage";
-
+import ScrollProgressBar from "./components/ScrollProgressBar";
 const AppWrapper = () => {
   const [locationData, setLocationData] = useState();
   const location = useLocation();
@@ -63,6 +63,7 @@ const AppWrapper = () => {
 
   return (
     <div className="flex flex-col items-center overflow-x-hidden justify-center min-h-screen bg-gradient-to-b from-orange-200 via-gray-50 to-orange-200">
+          <ScrollProgressBar />
       <Toaster position="top-center" reverseOrder={false} />
       <Navbar location={locationData} />
       <div className="pt-16" />
