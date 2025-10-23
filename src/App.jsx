@@ -62,7 +62,7 @@ const AppWrapper = () => {
     location.pathname === "/wishlist";
 
   return (
-    <div className="flex flex-col items-center overflow-x-hidden justify-center min-h-screen bg-gradient-to-b from-gray-100 via-orange-300 to-orange-300">
+    <div className="flex flex-col items-center overflow-x-hidden justify-center min-h-screen bg-gradient-to-b from-orange-200 via-gray-50 to-orange-200">
       <Toaster position="top-center" reverseOrder={false} />
       <Navbar location={locationData} />
       <div className="pt-16" />
