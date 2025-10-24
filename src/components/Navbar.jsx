@@ -23,7 +23,7 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 
 export default function Navbar({ location, onLocationChange }) {
-  const [openDropdown, setOpenDropdown] = useState(false);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const { cartItem } = useCart();
   const { wishlist } = useWishlist();
@@ -45,7 +45,7 @@ export default function Navbar({ location, onLocationChange }) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         onLocationChange(position.coords.latitude, position.coords.longitude);
-        setOpenDropdown(false);
+        setIsLocationModalOpen(false);
       },
       (error) => {
         alert("Failed to get location: " + error.message);
@@ -65,7 +65,7 @@ export default function Navbar({ location, onLocationChange }) {
       className="flex items-center gap-1 text-gray-600 text-sm relative cursor-pointer"
       onClick={(e) => {
         e.stopPropagation();
-        setOpenDropdown(!openDropdown);
+        setIsLocationModalOpen(true);
       }}
       data-aos="fade-up"
     >
@@ -85,33 +85,13 @@ export default function Navbar({ location, onLocationChange }) {
           "Add Location"
         )}
       </span>
-      <ChevronDown
-        className={`ml-1 transition-transform ${
-          openDropdown ? "rotate-180" : ""
-        }`}
-      />
-      {openDropdown && (
-        <div
-          className="absolute top-10 left-0 w-[250px] bg-[#d0bcbc] shadow-xl border rounded-md p-4 z-50"
-          data-aos="zoom-in"
-        >
-          <h1 className="font-semibold mb-2 text-lg text-black">
-            Change Location
-          </h1>
-          <button
-            onClick={handleUseMyLocation}
-            className="text-sm text-red-600 cursor-pointer mb-3 flex items-center gap-1"
-          >
-            <MapPin /> Use My Current Location
-          </button>
-        </div>
-      )}
+      <ChevronDown className="ml-1 transition-transform" />
     </div>
   );
 
   return (
     <>
-      {/* Background overlay for mobile menu */}
+      {/* ===== Background overlay for mobile menu ===== */}
       {isMobileNavOpen && (
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-sm"
@@ -120,14 +100,11 @@ export default function Navbar({ location, onLocationChange }) {
         ></div>
       )}
 
-      {/* Navbar */}
+      {/* ===== Navbar ===== */}
       <header
         className="bg-[#F9E4D1]/90 border-b-[3px] shadow-2xl border-red-500 py-3 fixed top-0 left-0 right-0 z-30 backdrop-blur-md"
         data-aos="fade-down"
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpenDropdown(false);
-        }}
+        onClick={() => setIsLocationModalOpen(false)}
       >
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
           {/* Logo + Location */}
@@ -168,7 +145,7 @@ export default function Navbar({ location, onLocationChange }) {
               ))}
             </ul>
 
-            {/* Cart Icon */}
+            {/* Cart */}
             <Link to="/cart" className="relative" data-aos="fade-left">
               <ShoppingCart className="h-6 w-6 text-gray-700" />
               <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
@@ -176,7 +153,7 @@ export default function Navbar({ location, onLocationChange }) {
               </span>
             </Link>
 
-            {/* Wishlist Icon */}
+            {/* Wishlist */}
             <Link to="/wishlist" className="relative" data-aos="fade-left">
               <FaHeart className="h-6 w-6 text-red-500" />
               <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
@@ -184,7 +161,7 @@ export default function Navbar({ location, onLocationChange }) {
               </span>
             </Link>
 
-            {/* Auth Buttons */}
+            {/* Auth */}
             <div className="ml-4" data-aos="fade-left">
               <SignedOut>
                 <SignInButton>
@@ -204,7 +181,7 @@ export default function Navbar({ location, onLocationChange }) {
             </div>
           </nav>
 
-          {/* Mobile Cart + Wishlist + Auth + Menu Toggle */}
+          {/* ===== Mobile Nav + Cart + Auth ===== */}
           <div className="sm:hidden flex items-center gap-4" data-aos="fade-right">
             <Link to="/cart" className="relative">
               <ShoppingCart className="h-6 w-6 text-gray-700" />
@@ -220,7 +197,6 @@ export default function Navbar({ location, onLocationChange }) {
               </span>
             </Link>
 
-            {/* Auth Buttons */}
             <div className="flex items-center gap-2">
               <SignedOut>
                 <SignInButton>
@@ -239,7 +215,7 @@ export default function Navbar({ location, onLocationChange }) {
               </SignedIn>
             </div>
 
-            {/* Mobile Menu Toggle */}
+            {/* Toggle */}
             {isMobileNavOpen ? (
               <HiMenuAlt3
                 onClick={() => setIsMobileNavOpen(false)}
@@ -255,14 +231,57 @@ export default function Navbar({ location, onLocationChange }) {
         </div>
       </header>
 
-      {/* Mobile Offcanvas Menu */}
+    {/* ===== Location Modal ===== */}
+{isLocationModalOpen && (
+  <>
+    {/* Overlay (click to close) */}
+    <div
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+      onClick={() => setIsLocationModalOpen(false)}
+    ></div>
+
+    {/* Modal Content (click inside won’t close) */}
+    <div
+      className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-2xl w-11/12 max-w-md z-50 p-6 border-t-4 border-red-500"
+      data-aos="zoom-in"
+      onClick={(e) => e.stopPropagation()} // ⬅ Prevent modal from closing when clicked inside
+    >
+      <h2 className="text-xl font-semibold text-gray-800 mb-3">
+        Change Your Location
+      </h2>
+      <p className="text-sm text-gray-600 mb-5">
+        Allow us to access your location for a better shopping experience.
+      </p>
+      <button
+        // onClick={handleUseMyLocation} //When we want for only one function 
+          onClick={() => {
+    handleUseMyLocation();
+    setIsLocationModalOpen(false);
+  }}
+
+        className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-md font-medium transition w-full cursor-pointer"
+      >
+        <MapPin className="inline-block mr-2" />
+        Use My Current Location
+      </button>
+      <button
+        onClick={() => setIsLocationModalOpen(false)}
+        className="mt-4 text-gray-500 hover:text-gray-800 text-sm w-full cursor-pointer"
+      >
+        Cancel
+      </button>
+    </div>
+  </>
+)}
+
+
+      {/* ===== Mobile Offcanvas Menu ===== */}
       <aside
         className={`sm:hidden fixed top-0 left-0 w-3/4 max-w-xs h-full bg-[#FBDCC0]/95 transform transition-transform z-40 duration-300 border-r-4 border-red-200 rounded-r-2xl shadow-2xl ease-in-out ${
           isMobileNavOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         data-aos="fade-right"
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-4 py-3.5 border-b-4 border-red-500">
           <h2
             className="text-lg font-bold text-red-500"
@@ -272,7 +291,6 @@ export default function Navbar({ location, onLocationChange }) {
           </h2>
         </div>
 
-        {/* Scrollable menu */}
         <div className="flex flex-col justify-between h-full">
           <div className="p-4 space-y-4 overflow-y-auto">
             <div>{renderLocation()}</div>
