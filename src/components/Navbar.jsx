@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { FaHeart, FaSignInAlt } from "react-icons/fa";
 import { HiMenuAlt1, HiMenuAlt3 } from "react-icons/hi";
+import { AiOutlineHeart } from "react-icons/ai";
 import {
   SignedIn,
   SignedOut,
@@ -127,19 +128,17 @@ export default function Navbar({ location, onLocationChange }) {
                   <NavLink
                     to={path}
                     className={({ isActive }) =>
-                      `flex items-center gap-1 pb-1 transition-all duration-300 ${
-                        isActive
-                          ? "text-red-600 font-bold"
-                          : "text-gray-800 hover:text-red-600 font-semibold"
+                      `flex items-center gap-1 pb-1 transition-all duration-300 ${isActive
+                        ? "text-red-600 font-bold"
+                        : "text-gray-800 hover:text-red-600 font-semibold"
                       }`
                     }
                   >
                     {icon} {name}
                   </NavLink>
                   <span
-                    className={`absolute bottom-0 left-0 w-0 h-[2px] bg-red-600 transition-all duration-300 group-hover:w-full ${
-                      window.location.pathname === path ? "w-full" : "w-0"
-                    }`}
+                    className={`absolute bottom-0 left-0 w-0 h-[3px] bg-red-600 transition-all duration-300 group-hover:w-full ${window.location.pathname === path ? "w-full" : "w-0"
+                      }`}
                   ></span>
                 </li>
               ))}
@@ -155,7 +154,8 @@ export default function Navbar({ location, onLocationChange }) {
 
             {/* Wishlist */}
             <Link to="/wishlist" className="relative" data-aos="fade-left">
-              <FaHeart className="h-6 w-6 text-red-500" />
+              {/* <FaHeart className="h-6 w-6 text-white" /> */}
+              <AiOutlineHeart className="h-6 w-6"/>
               <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
                 {wishlist.length}
               </span>
@@ -191,7 +191,8 @@ export default function Navbar({ location, onLocationChange }) {
             </Link>
 
             <Link to="/wishlist" className="relative">
-              <FaHeart className="h-6 w-6 text-red-500" />
+                         <AiOutlineHeart className="h-6 w-6"/>
+
               <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
                 {wishlist.length}
               </span>
@@ -231,55 +232,54 @@ export default function Navbar({ location, onLocationChange }) {
         </div>
       </header>
 
-    {/* ===== Location Modal ===== */}
-{isLocationModalOpen && (
-  <>
-    {/* Overlay (click to close) */}
-    <div
-      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
-      onClick={() => setIsLocationModalOpen(false)}
-    ></div>
+      {/* ===== Location Modal ===== */}
+      {isLocationModalOpen && (
+        <>
+          {/* Overlay (click to close) */}
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+            onClick={() => setIsLocationModalOpen(false)}
+          ></div>
 
-    {/* Modal Content (click inside won’t close) */}
-    <div
-      className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-2xl w-11/12 max-w-md z-50 p-6 border-t-4 border-red-500"
-      data-aos="zoom-in"
-      onClick={(e) => e.stopPropagation()} // ⬅ Prevent modal from closing when clicked inside
-    >
-      <h2 className="text-xl font-semibold text-gray-800 mb-3">
-        Change Your Location
-      </h2>
-      <p className="text-sm text-gray-600 mb-5">
-        Allow us to access your location for a better shopping experience.
-      </p>
-      <button
-        // onClick={handleUseMyLocation} //When we want for only one function 
-          onClick={() => {
-    handleUseMyLocation();
-    setIsLocationModalOpen(false);
-  }}
+          {/* Modal Content (click inside won’t close) */}
+          <div
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gradient-to-b from-orange-300 via-gray-100 to-orange-100 rounded-lg shadow-2xl w-11/12 max-w-md z-50 p-6  border-red-500"
+            data-aos="zoom-in"
+            onClick={(e) => e.stopPropagation()} // ⬅ Prevent modal from closing when clicked inside
+          >
+            <h2 className="text-xl font-semibold text-gray-800 mb-3">
+              Change Your Location
+            </h2>
+            <p className="text-sm text-gray-600 mb-5">
+              Allow us to access your location for a better shopping experience.
+            </p>
+            <button
+              // onClick={handleUseMyLocation} //When we want for only one function 
+              onClick={() => {
+                handleUseMyLocation();
+                setIsLocationModalOpen(false);
+              }}
 
-        className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-md font-medium transition w-full cursor-pointer"
-      >
-        <MapPin className="inline-block mr-2" />
-        Use My Current Location
-      </button>
-      <button
-        onClick={() => setIsLocationModalOpen(false)}
-        className="mt-4 text-gray-500 hover:text-gray-800 text-sm w-full cursor-pointer"
-      >
-        Cancel
-      </button>
-    </div>
-  </>
-)}
+              className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-md font-medium transition w-full cursor-pointer"
+            >
+              <MapPin className="inline-block mr-2" />
+              Use My Current Location
+            </button>
+            <button
+              onClick={() => setIsLocationModalOpen(false)}
+              className="mt-4 text-gray-500 hover:text-gray-800 text-sm w-full cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
+        </>
+      )}
 
 
       {/* ===== Mobile Offcanvas Menu ===== */}
       <aside
-        className={`sm:hidden fixed top-0 left-0 w-3/4 max-w-xs h-full bg-[#FBDCC0]/95 transform transition-transform z-40 duration-300 border-r-4 border-red-200 rounded-r-2xl shadow-2xl ease-in-out ${
-          isMobileNavOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`sm:hidden fixed top-0 left-0 w-3/4 max-w-xs h-full bg-[#FBDCC0]/95 transform transition-transform z-40 duration-300 border-r-4 border-red-200 rounded-r-2xl shadow-2xl ease-in-out ${isMobileNavOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
         data-aos="fade-right"
       >
         <div className="flex items-center justify-between px-4 py-3.5 border-b-4 border-red-500">

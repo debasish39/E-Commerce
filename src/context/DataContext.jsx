@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useMemo } from "react";
 import axios from "axios";
-import { toast } from "react-hot-toast"; // ✅ Import toast
+import { toast } from "react-hot-toast"; 
 
 export const DataContext = createContext(null);
 
@@ -13,10 +13,10 @@ export const DataProvider = ({ children }) => {
 
   const fetchAllProducts = async () => {
     try {
-      const res = await axios.get("https://dummyjson.com/products?limit=150");
+      const res = await axios.get("https://dummyjson.com/products?limit=350");
       const productsData = res.data.products;
       setData(productsData);
-      // toast.success("Products loaded successfully ");
+      console.log(productsData);
     } catch (error) {
       console.error(error);
       // toast.error("Failed to fetch products "); 

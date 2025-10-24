@@ -22,9 +22,9 @@ const ScrollProgressBar = () => {
                 position: "fixed",
                 top: 0,
                 left: 0,
-                height: "4px",
+                height: "5px",
                 width: `${scrollWidth}%`,
-                background: "linear-gradient(to right, #ff0000, #ff7a00, red)",
+                background: "linear-gradient(to right, black, #ff7a00, red)",
                 zIndex: 9999,
                 transition: "width 0.1s ease-out",
             }}
