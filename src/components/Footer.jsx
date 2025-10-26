@@ -120,9 +120,7 @@ const Footer = () => {
         </p>
       </div>
 
-      {/* Toast Notifications (React Hot Toast) */}
-      <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
-    </footer>
+      </footer>
   );
 };
 

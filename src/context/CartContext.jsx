@@ -9,7 +9,7 @@ export default function CartProvider({ children }) {
     const storedCart = localStorage.getItem('cart');
     return storedCart ? JSON.parse(storedCart) : [];
   });
-
+  console.log(cartItem);
   // Save cart to localStorage whenever cartItem changes
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cartItem));

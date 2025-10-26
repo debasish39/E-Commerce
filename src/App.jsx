@@ -25,11 +25,17 @@ const AppWrapper = () => {
 
   const getLocation = async () => {
     navigator.geolocation.getCurrentPosition(async (pos) => {
+      console.log(pos.coords);
       const { latitude, longitude } = pos.coords;
+      console.log(latitude);
+      console.log(longitude);
       const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
+      console.log(apiKey);
       const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${apiKey}`;
+      console.log(url);
       try {
         const response = await axios.get(url);
+        console.log(response);
         const exactLocation = response.data.features[0].properties;
         setLocationData(exactLocation);
       } catch (error) {
@@ -64,7 +70,7 @@ const AppWrapper = () => {
   return (
     <div className="flex flex-col items-center overflow-x-hidden justify-center min-h-screen bg-gradient-to-b from-orange-200 via-gray-50 to-orange-200">
           <ScrollProgressBar />
-      <Toaster position="top-center" reverseOrder={false} />
+      <Toaster position="top-right" reverseOrder={false} />
       <Navbar location={locationData} />
       <div className="pt-16" />
       <div className="w-full max-w-screen">

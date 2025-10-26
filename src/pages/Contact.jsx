@@ -96,7 +96,6 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen py-10 px-4 bg-transparent">
-      <Toaster position="top-center" reverseOrder={false} />
 
       <div className="max-w-6xl mx-auto flex flex-col-reverse sm:flex-row gap-10 items-stretch h-full">
         {/* Google Map on the LEFT */}
