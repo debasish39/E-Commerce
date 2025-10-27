@@ -99,7 +99,7 @@ export default function Contact() {
 
       <div className="max-w-6xl mx-auto flex flex-col-reverse sm:flex-row gap-10 items-stretch h-full">
         <div
-          className="w-full sm:w-1/2 sm:h-[80vh] sm:h-auto rounded-xl overflow-hidden shadow-lg border border-red-200"
+          className="w-full sm:w-1/2 sm:h-[80vh]  rounded-xl overflow-hidden shadow-lg border border-red-200"
           data-aos="fade-right"
           data-aos-delay="200"
         >
