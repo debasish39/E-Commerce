@@ -102,11 +102,13 @@ export default function Navbar({ location, onLocationChange }) {
       )}
 
       {/* ===== Navbar ===== */}
-      <header
-        className="bg-[#F9E4D1]/90 border-b-[3px] shadow-2xl border-red-500 py-3 fixed top-0 left-0 right-0 z-30 backdrop-blur-md"
-        data-aos="fade-down"
-        onClick={() => setIsLocationModalOpen(false)}
-      >
+<header
+  className="bg-[#F9E4D1]/90 border-b-[3px] border-red-400 py-3 fixed top-0 left-0 right-0 z-30 backdrop-blur-md shadow-[0_4px_10px_rgba(0,0,0,0.15),0_8px_30px_rgba(255,107,53,0.15)]"
+  data-aos="fade-down"
+  onClick={() => setIsLocationModalOpen(false)}
+>
+
+
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
           {/* Logo + Location */}
           <div className="flex items-center gap-4" data-aos="zoom-in">

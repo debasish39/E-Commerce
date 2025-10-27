@@ -15,13 +15,14 @@ import {
   FaTag,
   FaTruck,
   FaUndoAlt,
-  FaBoxOpen,
   FaIndustry,
   FaListAlt,
   FaRupeeSign,
 } from "react-icons/fa";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import { Tooltip } from "react-tooltip";
+import "react-tooltip/dist/react-tooltip.css";
 
 export default function SingleProduct() {
   const { id } = useParams();
@@ -96,9 +97,14 @@ export default function SingleProduct() {
                   className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 {/* Discount Tag */}
-                <div className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1 text-xs rounded-full flex items-center gap-1 shadow-md">
+                <div
+                  className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1 text-xs rounded-full flex items-center gap-1 shadow-md"
+                  data-tooltip-id="discount-tooltip"
+                  data-tooltip-content="Discount applied on MRP"
+                >
                   <FaTag /> {Math.round(product.discountPercentage)}% OFF
                 </div>
+                <Tooltip id="discount-tooltip" place="top" />
               </div>
 
               {/* Thumbnail Images */}
@@ -114,8 +120,12 @@ export default function SingleProduct() {
                         ? "border-red-500 shadow-xl"
                         : "border-gray-200"
                     }`}
-                    
+                    data-tooltip-id={`thumb-${idx}`}
+                    data-tooltip-content="Click to view this image"
                   />
+                ))}
+                {product.images?.map((_, idx) => (
+                  <Tooltip key={`thumb-tip-${idx}`} id={`thumb-${idx}`} place="top" />
                 ))}
               </div>
             </div>
@@ -126,18 +136,27 @@ export default function SingleProduct() {
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2 flex items-center gap-2">
                   {product.title}
                 </h1>
-                <div className="text-sm text-gray-500 uppercase tracking-wide flex items-center gap-2">
+                <div
+                  className="text-sm text-gray-500 uppercase tracking-wide flex items-center gap-2"
+                  data-tooltip-id="brand-cat-tooltip"
+                  data-tooltip-content="Brand and product category"
+                >
                   <FaIndustry className="text-gray-400" />
                   {product.brand} <span className="text-gray-400">/</span>{" "}
                   <FaListAlt className="text-gray-400" />
                   {product.category}
                 </div>
+                <Tooltip id="brand-cat-tooltip" place="top" />
               </div>
 
               <p className="text-gray-700 leading-relaxed">{product.description}</p>
 
               {/* Price Section */}
-              <div className="flex items-center gap-3">
+              <div
+                className="flex items-center gap-3"
+                data-tooltip-id="price-tooltip"
+                data-tooltip-content="Displayed price includes discounts"
+              >
                 <h2 className="text-2xl font-semibold text-red-600 flex items-center gap-1">
                   <FaRupeeSign /> {product.price}
                 </h2>
@@ -145,18 +164,26 @@ export default function SingleProduct() {
                   ₹{Math.round(product.price / (1 - product.discountPercentage / 100))}
                 </span>
               </div>
+              <Tooltip id="price-tooltip" place="top" />
 
               {/* Rating */}
-              <div className="flex items-center gap-1">
+              <div
+                className="flex items-center gap-1"
+                data-tooltip-id="rating-tooltip"
+                data-tooltip-content={`Average rating: ${product.rating}/5`}
+              >
                 {renderRatingStars()}
                 <span className="ml-2 text-gray-600 text-sm">({product.rating})</span>
               </div>
+              <Tooltip id="rating-tooltip" place="top" />
 
               {/* Quantity */}
-              <div className="flex items-center gap-4">
-                <label className="text-sm font-medium text-gray-700">
-                  Quantity:
-                </label>
+              <div
+                className="flex items-center gap-4"
+                data-tooltip-id="qty-tooltip"
+                data-tooltip-content="Select quantity to add to cart"
+              >
+                <label className="text-sm font-medium text-gray-700">Quantity:</label>
                 <input
                   type="number"
                   min={1}
@@ -164,6 +191,7 @@ export default function SingleProduct() {
                   className="w-20 border border-gray-300 rounded-md px-3 py-2 text-center focus:outline-none focus:ring-2 focus:ring-red-400"
                 />
               </div>
+              <Tooltip id="qty-tooltip" place="top" />
 
               {/* Buttons */}
               <div
@@ -174,10 +202,13 @@ export default function SingleProduct() {
                 <button
                   className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-sm sm:text-base font-medium rounded-lg shadow-md transition-all cursor-pointer"
                   onClick={() => addToCart(product)}
+                  data-tooltip-id="cart-tooltip"
+                  data-tooltip-content="Add this item to your cart"
                 >
                   <FaShoppingCart className="text-lg" />
                   Add to Cart
                 </button>
+                <Tooltip id="cart-tooltip" place="top" />
 
                 <button
                   onClick={handleWishlist}
@@ -186,6 +217,12 @@ export default function SingleProduct() {
                       ? "bg-gray-100 text-gray-800 hover:bg-gray-200"
                       : "bg-red-600 text-white hover:bg-red-700"
                   }`}
+                  data-tooltip-id="wishlist-tooltip"
+                  data-tooltip-content={
+                    isWishlisted
+                      ? "Remove from your wishlist"
+                      : "Add this item to your wishlist"
+                  }
                 >
                   {isWishlisted ? (
                     <FaHeart className="text-red-500 text-lg" />
@@ -194,6 +231,7 @@ export default function SingleProduct() {
                   )}
                   {isWishlisted ? "Wishlisted" : "Add to Wishlist"}
                 </button>
+                <Tooltip id="wishlist-tooltip" place="top" />
               </div>
 
               {/* Delivery Info */}
@@ -202,15 +240,31 @@ export default function SingleProduct() {
                 data-aos="fade-up"
                 data-aos-delay="300"
               >
-                <p className="flex items-center gap-2">
+                <p
+                  className="flex items-center gap-2"
+                  data-tooltip-id="delivery-tooltip"
+                  data-tooltip-content="Free delivery for orders above ₹500"
+                >
                   <FaTruck className="text-green-500" /> Free Delivery on orders above ₹500
                 </p>
-                <p className="flex items-center gap-2">
+                <p
+                  className="flex items-center gap-2"
+                  data-tooltip-id="replace-tooltip"
+                  data-tooltip-content="7 days easy replacement policy"
+                >
                   <FaUndoAlt className="text-blue-500" /> 7-Day Replacement Guarantee
                 </p>
-                <p className="flex items-center gap-2">
+                <p
+                  className="flex items-center gap-2"
+                  data-tooltip-id="tax-tooltip"
+                  data-tooltip-content="All prices include applicable taxes"
+                >
                   <FaTag className="text-orange-500" /> Inclusive of all taxes
                 </p>
+
+                <Tooltip id="delivery-tooltip" place="top" />
+                <Tooltip id="replace-tooltip" place="top" />
+                <Tooltip id="tax-tooltip" place="top" />
               </div>
             </div>
           </div>
