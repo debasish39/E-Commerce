@@ -70,7 +70,40 @@ const AppWrapper = () => {
   return (
     <div className="flex flex-col items-center overflow-x-hidden justify-center min-h-screen bg-gradient-to-b from-orange-200 via-gray-50 to-orange-200">
           <ScrollProgressBar />
-      <Toaster position="top-right" reverseOrder={false} />
+ <Toaster
+  position="top-right"
+  reverseOrder={false}
+  toastOptions={{
+    duration: 900,
+    style: {
+      background: "linear-gradient(to right, #ff9a3c, #ffb347, #ffd56f)", 
+      color: "#1f2937",
+      borderRadius: "10px",
+      padding: "12px 18px",
+      fontWeight: "500",
+      boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+    },
+    success: {
+      style: {
+        background: "linear-gradient(to right, #22c55e, #16a34e, #15803d)", 
+        color: "#fff",
+      },
+    },
+    error: {
+      style: {
+        background: "linear-gradient(to right, #ef4444, #dc2626, #991b1b)", 
+        color: "#fff",
+      },
+    },
+    loading: {
+      style: {
+        background: "linear-gradient(to right, #f59e0b, #fbbf24, #fde68a)",
+        color: "#000",
+      },
+    },
+  }}
+/>
+
       <Navbar location={locationData} />
       <div className="pt-16" />
       <div className="w-full max-w-screen">

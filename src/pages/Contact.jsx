@@ -39,7 +39,7 @@ export default function Contact() {
     if (!name.trim() || !email.trim() || !inquiryType || !message.trim()) {
       toast.error(
         <span className="flex items-center gap-2">
-          <FaTimesCircle className="text-red-500" /> Please fill all required fields.
+          Please fill all required fields.
         </span>
       );
       return;
@@ -66,7 +66,7 @@ export default function Contact() {
       if (result.success) {
         toast.success(
           <span className="flex items-center gap-2">
-            <FaCheckCircle className="text-green-500" /> Message sent successfully!
+            Message sent successfully!
           </span>
         );
         setFormData({
@@ -79,14 +79,14 @@ export default function Contact() {
       } else {
         toast.error(
           <span className="flex items-center gap-2">
-            <FaTimesCircle className="text-red-500" /> Something went wrong. Try again.
+           Something went wrong. Try again.
           </span>
         );
       }
     } catch (error) {
       toast.error(
         <span className="flex items-center gap-2">
-          <FaTimesCircle className="text-red-500" /> Submission failed. Check your network.
+         Submission failed. Check your network.
         </span>
       );
     } finally {
@@ -98,9 +98,8 @@ export default function Contact() {
     <div className="min-h-screen py-10 px-4 bg-transparent">
 
       <div className="max-w-6xl mx-auto flex flex-col-reverse sm:flex-row gap-10 items-stretch h-full">
-        {/* Google Map on the LEFT */}
         <div
-          className="w-full sm:w-1/2 h-[80vh] sm:h-auto rounded-xl overflow-hidden shadow-lg border border-red-200"
+          className="w-full sm:w-1/2 sm:h-[80vh] sm:h-auto rounded-xl overflow-hidden shadow-lg border border-red-200"
           data-aos="fade-right"
           data-aos-delay="200"
         >
