@@ -39,7 +39,7 @@ const FilterSection = ({
           placeholder="🔍 Search..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="bg-gray-50 p-2 rounded-md border border-gray-300 w-full focus:outline-none focus:ring-2 focus:ring-red-400"
+          className="bg-white/60 p-2 rounded-md border border-gray-300 w-full focus:outline-none focus:ring-2 focus:ring-red-400 text-black"
         />
       </div>
 
@@ -52,7 +52,7 @@ const FilterSection = ({
               item && (
                 <label
                   key={index}
-                  className="flex items-center gap-2 hover:bg-red-50 transition rounded-md px-2 py-1"
+                  className="flex items-center gap-2 hover:bg-red-50 transition rounded-md px-2 py-1 text-white hover:text-red-500"
                   data-aos="fade-up"
                   data-aos-delay={250 + index * 80}
                 >
@@ -64,7 +64,7 @@ const FilterSection = ({
                     onChange={handleCategoryChange}
                     className="accent-red-500"
                   />
-                  <span className="uppercase cursor-pointer text-gray-700">{item}</span>
+                  <span className="uppercase cursor-pointer text-white hover:text-red-500">{item}</span>
                 </label>
               )
           )}
@@ -75,7 +75,7 @@ const FilterSection = ({
       <div data-aos="fade-right" data-aos-delay="400">
         <h1 className="mt-6 font-semibold text-xl border-b pb-1 border-gray-200">Brand</h1>
         <select
-          className="bg-gray-50 w-full p-2 border border-gray-300 rounded-md mt-3 focus:outline-none focus:ring-2 focus:ring-red-400"
+          className="bg-gray-50 w-full p-2 border border-gray-300 rounded-md mt-3 focus:outline-none focus:ring-2 focus:ring-red-400 text-black"
           value={brand}
           onChange={handleBrandChange}
           data-aos="zoom-in"
@@ -96,7 +96,7 @@ const FilterSection = ({
       <div data-aos="fade-left" data-aos-delay="600">
         <h1 className="mt-6 font-semibold text-xl border-b pb-1 border-gray-200">Price Range</h1>
         <div className="flex flex-col gap-2 mt-3">
-          <label className="text-gray-700 font-medium">
+          <label className="text-white font-medium">
             ₹{priceRange[0]} - ₹{priceRange[1]}
           </label>
           <input

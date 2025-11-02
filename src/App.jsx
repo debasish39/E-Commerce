@@ -16,9 +16,10 @@ import ScrollToTop from "./components/scrollToTop";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import NotFound from "./components/NotFound";
-import ClickSpark from "./components/ClickSpark";
+import Particles from "./components/Particles";
 import WishlistPage from "./pages/WishlistPage";
 import ScrollProgressBar from "./components/ScrollProgressBar";
+import OrderSuccess from "./pages/OrderSuccess";
 const AppWrapper = () => {
   const [locationData, setLocationData] = useState();
   const location = useLocation();
@@ -66,44 +67,68 @@ const AppWrapper = () => {
     location.pathname === "/contact" ||
     location.pathname === "/cart" ||
     location.pathname === "/wishlist";
+return (
+  <>
+    {/* ✅ Toaster placed OUTSIDE so it stays fixed on viewport */}
+    <Toaster
+      position="top-right"
+      containerStyle={{
+        position: "fixed",
+        top: 16,
+        right: 16,
+        zIndex: 9999,
+      }}
+      reverseOrder={false}
+      toastOptions={{
+        duration: 900,
+        style: {
+          background: "linear-gradient(to right, #ff9a3c, #ffb347, #ffd56f)",
+          color: "#1f2937",
+          borderRadius: "10px",
+          padding: "12px 18px",
+          fontWeight: "500",
+          boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+        },
+        success: {
+          style: {
+            background: "linear-gradient(to right, #22c55e, #16a34e, #15803d)",
+            color: "#fff",
+          },
+        },
+        error: {
+          style: {
+            background: "linear-gradient(to right, #ef4444, #dc2626, #991b1b)",
+            color: "#fff",
+          },
+        },
+        loading: {
+          style: {
+            background: "linear-gradient(to right, #f59e0b, #fbbf24, #fde68a)",
+            color: "#000",
+          },
+        },
+      }}
+    />
 
-  return (
-    <div className="flex flex-col items-center overflow-x-hidden justify-center min-h-screen bg-gradient-to-b from-orange-200 via-gray-50 to-orange-200">
-          <ScrollProgressBar />
- <Toaster
-  position="top-right"
-  reverseOrder={false}
-  toastOptions={{
-    duration: 900,
-    style: {
-      background: "linear-gradient(to right, #ff9a3c, #ffb347, #ffd56f)", 
-      color: "#1f2937",
-      borderRadius: "10px",
-      padding: "12px 18px",
-      fontWeight: "500",
-      boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
-    },
-    success: {
-      style: {
-        background: "linear-gradient(to right, #22c55e, #16a34e, #15803d)", 
-        color: "#fff",
-      },
-    },
-    error: {
-      style: {
-        background: "linear-gradient(to right, #ef4444, #dc2626, #991b1b)", 
-        color: "#fff",
-      },
-    },
-    loading: {
-      style: {
-        background: "linear-gradient(to right, #f59e0b, #fbbf24, #fde68a)",
-        color: "#000",
-      },
-    },
-  }}
-/>
+    {/* ✅ Your app layout starts here */}
+    <div className="relative flex flex-col items-center overflow-x-hidden justify-center min-h-screen bg-gray-950 bg-opacity-70 backdrop-blur-sm text-gray-100">
 
+      {/* --- Background Particles Layer --- */}
+      <div className="absolute inset-0 -z-10">
+        <Particles
+          particleColors={['#ffffff', '#ffb347']}
+          particleCount={200}
+          particleSpread={10}
+          speed={0.1}
+          particleBaseSize={90}
+          moveParticlesOnHover={true}
+          alphaParticles={false}
+          disableRotation={false}
+        />
+      </div>
+
+      {/* --- End Background --- */}
+      <ScrollProgressBar />
       <Navbar location={locationData} />
       <div className="pt-16" />
       <div className="w-full max-w-screen">
@@ -122,6 +147,7 @@ const AppWrapper = () => {
           />
           <Route path="/category/:category" element={<CategoryProduct />} />
           <Route path="/about" element={<About />} />
+          <Route path="/order-success" element={<OrderSuccess />} />
           <Route
             path="/contact"
             element={
@@ -146,16 +172,16 @@ const AppWrapper = () => {
         {!hideFooter && <Footer />}
       </div>
     </div>
-  );
-};
+  </>
+);
+
+}
 
 export default function App() {
   return (
     <BrowserRouter>
-      <ClickSpark>
         <ScrollToTop />
         <AppWrapper />
-      </ClickSpark>
     </BrowserRouter>
   );
 }

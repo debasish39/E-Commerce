@@ -12,6 +12,8 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.36.0",
     "@lottiefiles/dotlottie-react": "^0.14.4",
+    "@react-three/drei": "^10.7.6",
+    "@react-three/fiber": "^9.4.0",
     "@tailwindcss/vite": "^4.1.11",
     "aos": "^2.3.4",
     "axios": "^1.10.0",
@@ -19,6 +21,7 @@
     "express": "^5.1.0",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.525.0",
+    "ogl": "^1.0.11",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hot-toast": "^2.5.2",
@@ -27,7 +30,8 @@
     "react-slick": "^0.30.3",
     "react-tooltip": "^5.30.0",
     "slick-carousel": "^1.8.1",
-    "tailwindcss": "^4.1.11"
+    "tailwindcss": "^4.1.11",
+    "three": "^0.181.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",

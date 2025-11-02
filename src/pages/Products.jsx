@@ -106,7 +106,7 @@ export default function Products() {
             )}
 
             <div
-              className="w-full sm:mt-18 lg:w-4/4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-3"
+              className="w-full sm:mt-18  grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-3"
               data-aos="fade-up"
             >
               {filteredProducts.length === 0 ? (

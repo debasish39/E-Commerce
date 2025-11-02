@@ -9,7 +9,7 @@ import {
   Package,
   Phone,
 } from "lucide-react";
-import { FaHeart, FaSignInAlt } from "react-icons/fa";
+import { FaSignInAlt } from "react-icons/fa";
 import { HiMenuAlt1, HiMenuAlt3 } from "react-icons/hi";
 import { AiOutlineHeart } from "react-icons/ai";
 import {
@@ -63,7 +63,7 @@ export default function Navbar({ location, onLocationChange }) {
 
   const renderLocation = () => (
     <div
-      className="flex items-center gap-1 text-gray-600 text-sm relative cursor-pointer"
+      className="flex items-center gap-1 text-gray-300 text-sm relative cursor-pointer hover:text-red-400 transition"
       onClick={(e) => {
         e.stopPropagation();
         setIsLocationModalOpen(true);
@@ -102,19 +102,19 @@ export default function Navbar({ location, onLocationChange }) {
       )}
 
       {/* ===== Navbar ===== */}
-<header
-  className="bg-[#F9E4D1]/90 border-b-[3px] border-red-400 py-3 fixed top-0 left-0 right-0 z-30 backdrop-blur-md shadow-[0_4px_10px_rgba(0,0,0,0.15),0_8px_30px_rgba(255,107,53,0.15)]"
-  data-aos="fade-down"
-  onClick={() => setIsLocationModalOpen(false)}
->
-
-
+      <header
+        className="fixed top-0 left-0 right-0 z-30 
+        bg-black/40 backdrop-blur-md border-b border-red-600/50 
+        py-3 shadow-[0_2px_20px_rgba(255,80,80,0.25)]"
+        data-aos="fade-down"
+        onClick={() => setIsLocationModalOpen(false)}
+      >
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
           {/* Logo + Location */}
           <div className="flex items-center gap-4" data-aos="zoom-in">
             <Link
               to="/"
-              className="text-2xl sm:text-3xl font-bold text-red-600"
+              className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-red-400 to-orange-300 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(255,99,71,0.6)]"
               style={{ fontFamily: "'Pacifico', cursive" }}
             >
               E-Shop
@@ -124,23 +124,25 @@ export default function Navbar({ location, onLocationChange }) {
 
           {/* Desktop Navigation */}
           <nav className="hidden sm:flex items-center gap-6" data-aos="fade-left">
-            <ul className="flex gap-6 font-medium text-gray-800">
+            <ul className="flex gap-6 font-medium">
               {navLinks.map(({ name, path, icon }) => (
                 <li key={name} className="relative group">
                   <NavLink
                     to={path}
                     className={({ isActive }) =>
-                      `flex items-center gap-1 pb-1 transition-all duration-300 ${isActive
-                        ? "text-red-600 font-bold"
-                        : "text-gray-800 hover:text-red-600 font-semibold"
+                      `flex items-center gap-1 pb-1 transition-all duration-300 ${
+                        isActive
+                          ? "text-red-400 font-bold"
+                          : "text-gray-300 hover:text-red-400 font-medium"
                       }`
                     }
                   >
                     {icon} {name}
                   </NavLink>
                   <span
-                    className={`absolute bottom-0 left-0 w-0 h-[3px] bg-red-600 transition-all duration-300 group-hover:w-full ${window.location.pathname === path ? "w-full" : "w-0"
-                      }`}
+                    className={`absolute bottom-0 left-0 w-0 h-[2px] bg-red-400 transition-all duration-300 group-hover:w-full ${
+                      window.location.pathname === path ? "w-full" : "w-0"
+                    }`}
                   ></span>
                 </li>
               ))}
@@ -148,7 +150,7 @@ export default function Navbar({ location, onLocationChange }) {
 
             {/* Cart */}
             <Link to="/cart" className="relative" data-aos="fade-left">
-              <ShoppingCart className="h-6 w-6 text-gray-700" />
+              <ShoppingCart className="h-6 w-6 text-gray-300 hover:text-red-400 transition" />
               <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
                 {cartItem.length}
               </span>
@@ -156,8 +158,7 @@ export default function Navbar({ location, onLocationChange }) {
 
             {/* Wishlist */}
             <Link to="/wishlist" className="relative" data-aos="fade-left">
-              {/* <FaHeart className="h-6 w-6 text-white" /> */}
-              <AiOutlineHeart className="h-6 w-6"/>
+              <AiOutlineHeart className="h-6 w-6 text-gray-300 hover:text-red-400 transition" />
               <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
                 {wishlist.length}
               </span>
@@ -167,7 +168,7 @@ export default function Navbar({ location, onLocationChange }) {
             <div className="ml-4" data-aos="fade-left">
               <SignedOut>
                 <SignInButton>
-                  <button className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-1.5 rounded-md transition flex items-center gap-1 justify-center flex-row">
+                  <button className="bg-gradient-to-r from-red-500 to-orange-400 hover:from-red-600 hover:to-orange-500 text-white font-medium px-4 py-1.5 rounded-md transition flex items-center gap-1 justify-center flex-row shadow-md hover:shadow-red-500/40">
                     <FaSignInAlt /> <span>Sign In</span>
                   </button>
                 </SignInButton>
@@ -186,15 +187,14 @@ export default function Navbar({ location, onLocationChange }) {
           {/* ===== Mobile Nav + Cart + Auth ===== */}
           <div className="sm:hidden flex items-center gap-4" data-aos="fade-right">
             <Link to="/cart" className="relative">
-              <ShoppingCart className="h-6 w-6 text-gray-700" />
+              <ShoppingCart className="h-6 w-6 text-gray-300 hover:text-red-400 transition" />
               <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
                 {cartItem.length}
               </span>
             </Link>
 
             <Link to="/wishlist" className="relative">
-                         <AiOutlineHeart className="h-6 w-6"/>
-
+              <AiOutlineHeart className="h-6 w-6 text-gray-300 hover:text-red-400 transition" />
               <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
                 {wishlist.length}
               </span>
@@ -203,8 +203,8 @@ export default function Navbar({ location, onLocationChange }) {
             <div className="flex items-center gap-2">
               <SignedOut>
                 <SignInButton>
-                  <button className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-1.5 rounded-md transition flex items-center gap-1 justify-center flex-row">
-                    <FaSignInAlt />Sign In
+                  <button className="bg-gradient-to-r from-red-500 to-orange-400 hover:from-red-600 hover:to-orange-500 text-white font-medium px-3 py-1.5 rounded-md transition flex items-center gap-1 justify-center flex-row shadow-md hover:shadow-red-500/40 text-sm">
+                    <FaSignInAlt /> Sign In
                   </button>
                 </SignInButton>
               </SignedOut>
@@ -222,71 +222,97 @@ export default function Navbar({ location, onLocationChange }) {
             {isMobileNavOpen ? (
               <HiMenuAlt3
                 onClick={() => setIsMobileNavOpen(false)}
-                className="h-7 w-7 text-gray-800 cursor-pointer"
+                className="h-7 w-7 text-gray-300 hover:text-red-400 cursor-pointer"
               />
             ) : (
               <HiMenuAlt1
                 onClick={() => setIsMobileNavOpen(true)}
-                className="h-7 w-7 text-gray-800 cursor-pointer"
+                className="h-7 w-7 text-gray-300 hover:text-red-400 cursor-pointer"
               />
             )}
           </div>
         </div>
       </header>
 
-      {/* ===== Location Modal ===== */}
-      {isLocationModalOpen && (
-        <>
-          {/* Overlay (click to close) */}
-          <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
-            onClick={() => setIsLocationModalOpen(false)}
-          ></div>
+  {/* ===== Centered Glassmorphic Location Modal ===== */}
+{isLocationModalOpen && (
+  <>
+    {/* Dimmed backdrop */}
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-fadeIn"
+      onClick={() => setIsLocationModalOpen(false)}
+    ></div>
 
-          {/* Modal Content (click inside won’t close) */}
-          <div
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gradient-to-b from-orange-300 via-gray-100 to-orange-100 rounded-lg shadow-2xl w-11/12 max-w-md z-50 p-6  border-red-500"
-            data-aos="zoom-in"
-            onClick={(e) => e.stopPropagation()} // ⬅ Prevent modal from closing when clicked inside
+    {/* Perfectly centered modal */}
+    <div
+      className="fixed inset-0 flex items-start justify-center z-50 px-4 pt-30 min-h-screen "
+      onClick={() => setIsLocationModalOpen(false)}
+    >
+      <div
+        className="relative bg-gradient-to-br from-gray-900/80 via-black/70 to-gray-800/80
+        backdrop-blur-2xl border border-red-500/30 shadow-[0_0_30px_rgba(255,60,60,0.3)]
+        rounded-2xl w-full max-w-md px-8 py-6 text-center text-gray-100
+        animate-scaleIn"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close Button */}
+        <button
+          onClick={() => setIsLocationModalOpen(false)}
+          className="absolute top-4 right-4 text-gray-400 hover:text-red-400 transition text-xl"
+        >
+          ✕
+        </button>
+
+        {/* Title */}
+        <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-300 mb-3 drop-shadow-[0_0_10px_rgba(255,99,71,0.4)]">
+          Set Your Location
+        </h2>
+
+        <p className="text-sm text-gray-400 mb-6">
+          Allow access to your location for tailored recommendations and faster delivery.
+        </p>
+
+        {/* Buttons and input */}
+        <div className="space-y-4">
+          <button
+            onClick={() => {
+              handleUseMyLocation();
+              setIsLocationModalOpen(false);
+            }}
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg
+            bg-gradient-to-r from-red-500 to-orange-400 
+            hover:from-red-600 hover:to-orange-500
+            text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-red-500/30 cursor-pointer"
           >
-            <h2 className="text-xl font-semibold text-gray-800 mb-3">
-              Change Your Location
-            </h2>
-            <p className="text-sm text-gray-600 mb-5">
-              Allow us to access your location for a better shopping experience.
-            </p>
-            <button
-              // onClick={handleUseMyLocation} //When we want for only one function 
-              onClick={() => {
-                handleUseMyLocation();
-                setIsLocationModalOpen(false);
-              }}
+            <MapPin className="w-5 h-5" />
+            Use My Current Location
+          </button>
 
-              className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-md font-medium transition w-full cursor-pointer"
-            >
-              <MapPin className="inline-block mr-2" />
-              Use My Current Location
-            </button>
-            <button
-              onClick={() => setIsLocationModalOpen(false)}
-              className="mt-4 text-gray-500 hover:text-gray-800 text-sm w-full cursor-pointer"
-            >
-              Cancel
-            </button>
-          </div>
-        </>
-      )}
+        
+          <button
+            onClick={() => setIsLocationModalOpen(false)}
+            className="text-gray-400 hover:text-red-400 text-sm w-full mt-4 transition cursor-pointer"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </>
+)}
 
 
       {/* ===== Mobile Offcanvas Menu ===== */}
       <aside
-        className={`sm:hidden fixed top-0 left-0 w-3/4 max-w-xs h-full bg-[#FBDCC0]/95 transform transition-transform z-40 duration-300 border-r-4 border-red-200 rounded-r-2xl shadow-2xl ease-in-out ${isMobileNavOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`sm:hidden fixed top-0 left-0 w-3/4 max-w-xs h-full 
+        bg-black/90 backdrop-blur-lg border-r border-red-500/40 rounded-r-2xl 
+        transform transition-transform z-40 duration-300 ease-in-out 
+        ${isMobileNavOpen ? "translate-x-0" : "-translate-x-full"}`}
         data-aos="fade-right"
       >
-        <div className="flex items-center justify-between px-4 py-3.5 border-b-4 border-red-500">
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-red-500/40">
           <h2
-            className="text-lg font-bold text-red-500"
+            className="text-lg font-bold bg-gradient-to-r from-red-400 to-orange-300 bg-clip-text text-transparent"
             style={{ fontFamily: "'Pacifico', cursive" }}
           >
             E-Shop
@@ -303,10 +329,11 @@ export default function Navbar({ location, onLocationChange }) {
                 to={path}
                 onClick={() => setIsMobileNavOpen(false)}
                 className={({ isActive }) =>
-                  "flex items-center gap-2 text-left w-full px-3 py-2 rounded-md border-l-4 transition " +
-                  (isActive
-                    ? "text-red-600 border-red-500 bg-red-50 font-semibold"
-                    : "text-gray-700 hover:text-red-500 hover:bg-gray-100 border-transparent")
+                  `flex items-center gap-2 w-full px-3 py-2 rounded-md border-l-4 transition ${
+                    isActive
+                      ? "text-red-400 border-red-500 bg-red-500/10 font-semibold"
+                      : "text-gray-300 hover:text-red-400 hover:bg-white/10 border-transparent"
+                  }`
                 }
                 data-aos="fade-up"
               >
