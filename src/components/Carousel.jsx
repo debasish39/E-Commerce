@@ -120,7 +120,7 @@ const Carousel = () => {
 
                   {/* Info */}
                   <div className="w-full lg:w-1/2 text-center lg:text-left space-y-3 text-white">
-                    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight line-clamp-1 drop-shadow-sm">
+                    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight line-clamp-1 drop-shadow-sm cursor-pointer"  onClick={() => navigate(`/products/${item.id}`)}>
                       {item.title}
                     </h1>
                     <div className="flex items-center justify-center lg:justify-start gap-1 text-yellow-400">

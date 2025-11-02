@@ -26,3 +26,7 @@ body {
   border-radius: 10px;
   border: 2px solid rgb(246, 246, 246); 
 }
+/* Remove dots below slick carousel completely */
+.slick-dots {
+  display: none !important;
+}
