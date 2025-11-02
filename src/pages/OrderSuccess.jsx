@@ -6,7 +6,7 @@ const OrderSuccess = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col justify-center items-center h-[600px] text-center space-y-5">
+    <div className="flex flex-col justify-center items-center min-h-screen text-center space-y-5">
       {successImg && (
         <img
           src={successImg}
