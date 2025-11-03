@@ -50,18 +50,27 @@ const AppWrapper = () => {
     AOS.init({ duration: 200, once: false, });
   }, []);
 
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.async = true;
-    script.src = "https://embed.tawk.to/68f50d067d479d194d3b7f14/1j7ujlpa6";
-    script.charset = "UTF-8";
-    script.setAttribute("crossorigin", "*");
-    document.body.appendChild(script);
+useEffect(() => {
+  // ✅ Tawk.to Script Embed
+  var Tawk_API = Tawk_API || {};
+  var Tawk_LoadStart = new Date();
 
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
+  const s1 = document.createElement("script");
+  const s0 = document.getElementsByTagName("script")[0];
+  s1.async = true;
+  s1.src = "https://embed.tawk.to/69084ab76435f2194e4f2aa9/1j9467o9s"; // your new widget link
+  s1.charset = "UTF-8";
+  s1.setAttribute("crossorigin", "*");
+  s0.parentNode.insertBefore(s1, s0);
+
+  // ✅ Clean up on unmount
+  return () => {
+    if (s1 && s1.parentNode) {
+      s1.parentNode.removeChild(s1);
+    }
+  };
+}, []);
+
 
   const hideFooter =
     location.pathname === "/contact" ||

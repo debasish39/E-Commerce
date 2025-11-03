@@ -26,7 +26,7 @@ export default function Category() {
   };
 
   return (
-    <div className="py-16 bg-gradient-to-b from-[#0f0f10] via-[#141416] to-[#0f0f10] text-white text-center">
+    <div className="py-16  text-white text-center">
       {/* Title */}
       <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-[#f53347] to-pink-500">
         🏷️ Shop by Category

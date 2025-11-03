@@ -7,7 +7,7 @@ import "slick-carousel/slick/slick-theme.css";
 const features = [
   { icon: Truck, text: "Fast Delivery", subtext: "Get your order in record time" },
   { icon: Lock, text: "Secure Payment", subtext: "100% protected payments" },
-  { icon: RotateCcw, text: "Easy Returns", subtext: "30-day return policy" },
+  { icon: RotateCcw, text: "Easy Returns", subtext: "7-days return policy" },
   { icon: Clock, text: "24/7 Support", subtext: "Dedicated customer service" },
 ];
 
@@ -24,7 +24,7 @@ const Features = () => {
   };
 
   return (
-    <section className="relative py-14 px-4 sm:px-8 md:px-12 bg-gradient-to-br from-[#fff7f7] via-white to-[#ffeef0] dark:from-[#0d0d0d] dark:via-[#141414] dark:to-[#1a1a1a] transition-all duration-700">
+    <section className="relative py-14 px-4 sm:px-8 md:px-12  transition-all duration-700">
       <div className="max-w-7xl mx-auto text-center">
         {/* --- Section Title --- */}
         <h2
