@@ -81,7 +81,7 @@ export default function Products() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-10 gap-4" data-aos="fade-down">
         <h2 className="text-3xl sm:text-4xl font-extrabold tracking-wide bg-gradient-to-r from-[#f53347] to-pink-500 text-transparent bg-clip-text">
-          🛍️ Explore Products
+          <span className="text-white">🛍️</span> Explore Products
         </h2>
         <button
           onClick={() => setShowFilters(!showFilters)}
