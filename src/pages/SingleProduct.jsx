@@ -18,6 +18,7 @@ import {
   FaIndustry,
   FaListAlt,
   FaRupeeSign,
+  FaQrcode,
 } from "react-icons/fa";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -70,7 +71,8 @@ export default function SingleProduct() {
     const stars = [];
     const rating = product?.rating || 0;
     for (let i = 1; i <= 5; i++) {
-      if (rating >= i) stars.push(<FaStar key={i} className="text-yellow-400" />);
+      if (rating >= i)
+        stars.push(<FaStar key={i} className="text-yellow-400" />);
       else if (rating >= i - 0.5)
         stars.push(<FaStarHalfAlt key={i} className="text-yellow-400" />);
       else stars.push(<FaRegStar key={i} className="text-yellow-400" />);
@@ -78,14 +80,24 @@ export default function SingleProduct() {
     return stars;
   };
 
+  // 💰 Replace with your real UPI ID
+  const UPI_ID = "6372031949-2@ybl"; // e.g., johndoe@oksbi
+
+  // 🔄 Generate dynamic UPI QR (includes product name and price)
+  const upiQrCodeUrl =
+    product &&
+    `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+      `upi://pay?pa=${UPI_ID}&pn=Your%20Store&am=${product.price}&cu=INR&tn=Payment%20for%20${product.title}`
+    )}`;
+
   return (
     <>
       {product ? (
-        <div className="min-h-screen  px-4 md:px-8 py-12">
+        <div className="min-h-screen px-4 md:px-8 py-12">
           <Breadcrums title={product.title} />
 
           <div
-            className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10  border border-white/30 shadow-2xl rounded-2xl p-6 md:p-10"
+            className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 border border-white/30 shadow-2xl rounded-2xl p-6 md:p-10"
             data-aos="fade-up"
           >
             {/* ===== Left: Image Gallery ===== */}
@@ -124,7 +136,7 @@ export default function SingleProduct() {
               </div>
             </div>
 
-            {/* ===== Right: Details ===== */}
+            {/* ===== Right: Product Details ===== */}
             <div className="flex flex-col justify-center space-y-6">
               {/* Title & Brand */}
               <div>
@@ -149,14 +161,19 @@ export default function SingleProduct() {
                   <FaRupeeSign /> {product.price}
                 </h2>
                 <span className="text-gray-400 line-through">
-                  ₹{Math.round(product.price / (1 - product.discountPercentage / 100))}
+                  ₹
+                  {Math.round(
+                    product.price / (1 - product.discountPercentage / 100)
+                  )}
                 </span>
               </div>
 
               {/* Rating */}
               <div className="flex items-center gap-1">
                 {renderRatingStars()}
-                <span className="ml-2 text-gray-600 text-sm">({product.rating})</span>
+                <span className="ml-2 text-gray-600 text-sm">
+                  ({product.rating})
+                </span>
               </div>
 
               {/* Quantity */}
@@ -201,13 +218,41 @@ export default function SingleProduct() {
               {/* Delivery Info */}
               <div className="mt-6 text-sm text-gray-700 dark:text-gray-400 space-y-2 border-t border-gray-300 dark:border-gray-600 pt-4">
                 <p className="flex items-center gap-2">
-                  <FaTruck className="text-green-500" /> Free Delivery on orders above ₹500
+                  <FaTruck className="text-green-500" /> Free Delivery on orders
+                  above ₹500
                 </p>
                 <p className="flex items-center gap-2">
-                  <FaUndoAlt className="text-blue-500" /> 7-Day Replacement Guarantee
+                  <FaUndoAlt className="text-blue-500" /> 7-Day Replacement
+                  Guarantee
                 </p>
                 <p className="flex items-center gap-2">
                   <FaTag className="text-orange-500" /> Inclusive of all taxes
+                </p>
+              </div>
+
+              {/* ===== Dynamic UPI QR Section ===== */}
+              <div
+                className="mt-6 border-t border-gray-300 dark:border-gray-600 pt-4 text-sm text-gray-700 dark:text-gray-400 space-y-3"
+                data-aos="fade-up"
+              >
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2 flex items-center gap-2">
+                  <FaQrcode /> Pay via UPI
+                </h3>
+                <p>
+                  Scan this QR code to pay securely using UPI apps like Google
+                  Pay, PhonePe, or Paytm.
+                </p>
+
+                {upiQrCodeUrl && (
+                  <img
+                    src={upiQrCodeUrl}
+                    alt="UPI QR Code"
+                    className="w-40 h-40 border border-gray-300 dark:border-gray-600 rounded-lg shadow-md mx-auto"
+                  />
+                )}
+
+                <p className="text-center text-xs text-gray-500 mt-2">
+                  UPI ID: <span className="font-medium">{UPI_ID}</span>
                 </p>
               </div>
             </div>

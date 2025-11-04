@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
-import { FaRegTrashAlt } from 'react-icons/fa';
+import { FaRegTrashAlt, FaQrcode } from 'react-icons/fa';
 import { LuNotebookText } from 'react-icons/lu';
 import { MdDeliveryDining } from 'react-icons/md';
 import { GiShoppingBag } from 'react-icons/gi';
@@ -15,14 +15,33 @@ const Cart = ({ location, getLocation }) => {
   const { user } = useUser();
   const navigate = useNavigate();
 
-  const totalPrice = cartItem.reduce((total, item) => total + item.price * item.quantity, 0);
+  const totalPrice = cartItem.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
+
+  // ✅ Your UPI ID
+  const UPI_ID = "6372031949-2@ybl";
+
+  // 🔄 Generate QR Code with amount and note
+  const upiPaymentLink = `upi://pay?pa=${UPI_ID}&pn=Your%20Store&am=${
+    totalPrice + 5
+  }&cu=INR&tn=Payment%20for%20Order`;
+
+  const upiQrCodeUrl =
+    cartItem.length > 0 &&
+    `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+      upiPaymentLink
+    )}`;
 
   const handleCheckout = () => {
     if (cartItem.length === 0) {
       alert("Your cart is empty!");
       return;
     }
-    if (window.confirm("Are you sure you want to place the order?")) {
+
+    // ✅ Confirm checkout
+    if (window.confirm("Have you completed the UPI payment?")) {
       cartItem.forEach(item => removeFromCart(item.id));
       navigate('/order-success');
     }
@@ -54,7 +73,9 @@ const Cart = ({ location, getLocation }) => {
                     <h1 className="text-base sm:text-lg font-semibold text-white/90 line-clamp-2">
                       {item.title}
                     </h1>
-                    <p className="text-red-400 font-bold text-lg mt-1">₹{item.price}</p>
+                    <p className="text-red-400 font-bold text-lg mt-1">
+                      ₹{item.price}
+                    </p>
                   </div>
                 </div>
 
@@ -76,10 +97,10 @@ const Cart = ({ location, getLocation }) => {
                     </button>
                   </div>
 
-                  {/* Delete */}
                   <button
                     onClick={() => {
-                      if (window.confirm("Remove this item from cart?")) removeFromCart(item.id);
+                      if (window.confirm("Remove this item from cart?"))
+                        removeFromCart(item.id);
                     }}
                     className="bg-white/10 hover:bg-red-500/90 transition-all rounded-full p-3 hover:text-white shadow-md mx-auto sm:mx-0"
                   >
@@ -94,7 +115,9 @@ const Cart = ({ location, getLocation }) => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-10">
             {/* Delivery Info */}
             <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 sm:p-8 shadow-xl text-white/90 space-y-4">
-              <h1 className="text-xl sm:text-2xl font-bold text-red-300 text-center sm:text-left">Delivery Information</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-red-300 text-center sm:text-left">
+                Delivery Information
+              </h1>
 
               <div className="flex flex-col space-y-3">
                 <input
@@ -153,21 +176,31 @@ const Cart = ({ location, getLocation }) => {
               </div>
             </div>
 
-            {/* Bill Details */}
+            {/* Bill Details + UPI Payment */}
             <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 sm:p-8 shadow-xl text-white/90 space-y-3">
-              <h1 className="text-xl sm:text-2xl font-bold text-red-300 text-center sm:text-left">Bill Summary</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-red-300 text-center sm:text-left">
+                Bill Summary
+              </h1>
 
               <div className="space-y-2 text-sm sm:text-base">
                 <div className="flex justify-between items-center">
-                  <h1 className="flex items-center gap-2"><LuNotebookText /> Items Total</h1>
+                  <h1 className="flex items-center gap-2">
+                    <LuNotebookText /> Items Total
+                  </h1>
                   <p>₹{totalPrice}</p>
                 </div>
                 <div className="flex justify-between items-center">
-                  <h1 className="flex items-center gap-2"><MdDeliveryDining /> Delivery</h1>
-                  <p className="text-red-300"><span className="line-through text-gray-400">₹25</span> FREE</p>
+                  <h1 className="flex items-center gap-2">
+                    <MdDeliveryDining /> Delivery
+                  </h1>
+                  <p className="text-red-300">
+                    <span className="line-through text-gray-400">₹25</span> FREE
+                  </p>
                 </div>
                 <div className="flex justify-between items-center">
-                  <h1 className="flex items-center gap-2"><GiShoppingBag /> Handling</h1>
+                  <h1 className="flex items-center gap-2">
+                    <GiShoppingBag /> Handling
+                  </h1>
                   <p>₹5</p>
                 </div>
 
@@ -179,35 +212,55 @@ const Cart = ({ location, getLocation }) => {
                 </div>
               </div>
 
-              <div className="mt-6 space-y-3">
-                <h2 className="font-semibold text-sm sm:text-base">Promo Code</h2>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <input
-                    type="text"
-                    placeholder="Enter code"
-                    className="w-full p-3 rounded-lg bg-white/20 border border-white/30 placeholder-white/60 text-white text-sm sm:text-base focus:outline-none focus:border-red-400"
-                  />
-                  <button className="px-5 py-2 rounded-lg border border-white/40 bg-white/20 hover:bg-red-500/90 hover:text-white transition-all text-sm sm:text-base">
-                    Apply
+              {/* 💳 UPI Payment QR Section */}
+              {cartItem.length > 0 && (
+                <div className="mt-6 text-center space-y-2 border-t border-white/30 pt-4">
+                  <h2 className="font-semibold text-base flex items-center justify-center gap-2">
+                    <FaQrcode /> Pay via UPI
+                  </h2>
+                  <p className="text-xs text-gray-300">
+                    Scan the QR below or tap to pay with your UPI app.
+                  </p>
+
+                  {/* 🔗 Clickable QR */}
+                  <a href={upiPaymentLink} target="_blank" rel="noreferrer">
+                    <img
+                      src={upiQrCodeUrl}
+                      alt="UPI QR Code"
+                      className="w-40 h-40 mx-auto rounded-lg border border-white/20 shadow-md hover:scale-105 transition-transform"
+                    />
+                  </a>
+
+                  <p className="text-xs text-gray-400 mt-1">
+                    UPI ID: <span className="font-medium">{UPI_ID}</span>
+                  </p>
+
+                  {/* ✅ Confirmation Button */}
+                  <button
+                    onClick={handleCheckout}
+                    className="mt-4 bg-green-500/90 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold text-sm sm:text-base transition-all"
+                  >
+                    I have completed payment
                   </button>
                 </div>
-              </div>
-
-              <button
-                onClick={handleCheckout}
-                className="w-full mt-6 bg-gradient-to-r from-red-500 to-pink-500 text-white py-3 rounded-lg font-semibold hover:scale-105 transition-all text-sm sm:text-base"
-              >
-                Proceed to Checkout
-              </button>
+              )}
             </div>
           </div>
         </div>
       ) : (
         // Empty Cart
         <div className="flex flex-col justify-center items-center text-center min-h-[80vh] px-4 space-y-6 text-white">
-          <img src={emptyCart} alt="Empty Cart" className="w-52 sm:w-64 md:w-80 opacity-90 drop-shadow-lg" />
-          <h1 className="text-3xl sm:text-4xl font-bold text-red-300">Your Cart is Empty</h1>
-          <p className="text-white/70 text-sm sm:text-base">Browse products and add something to your cart!</p>
+          <img
+            src={emptyCart}
+            alt="Empty Cart"
+            className="w-52 sm:w-64 md:w-80 opacity-90 drop-shadow-lg"
+          />
+          <h1 className="text-3xl sm:text-4xl font-bold text-red-300">
+            Your Cart is Empty
+          </h1>
+          <p className="text-white/70 text-sm sm:text-base">
+            Browse products and add something to your cart!
+          </p>
           <button
             onClick={() => navigate('/products')}
             className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-6 py-3 rounded-lg font-semibold hover:scale-105 transition-all text-sm sm:text-base"

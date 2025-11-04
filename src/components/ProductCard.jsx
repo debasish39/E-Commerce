@@ -6,6 +6,7 @@ import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import { FaStar } from "react-icons/fa";
 
 export default function ProductCard({ product }) {
   const navigate = useNavigate();
@@ -62,8 +63,18 @@ export default function ProductCard({ product }) {
         <h1 className="text-sm xs:text-base sm:text-lg font-semibold text-gray-300 line-clamp-2 leading-snug">
           {product.title}
         </h1>
+        <p className="text-[12px] text-gray-400">by {product.brand}</p>
+
         <p className="text-lg xs:text-xl sm:text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-500 text-transparent bg-clip-text">
           ₹{product.price}
+        </p>
+        <p>
+          <span className="font-semibold text-gray-200">Stock:</span>{" "}
+          {product.stock > 0 ? (
+            <span className="text-green-400">In Stock ({product.stock})</span>
+          ) : (
+            <span className="text-red-400">Out of Stock</span>
+          )}
         </p>
       </div>
 
