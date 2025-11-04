@@ -154,7 +154,7 @@ useEffect(() => {
                     className={`absolute bottom-0 left-0 w-0 h-[2px] bg-red-400 transition-all duration-300 group-hover:w-full ${
                       window.location.pathname === path ? "w-full" : "w-0"
                     }`}
-                  ></span>
+                   onClick={() => setIsMobileNavOpen(false)}></span>
                 </li>
               ))}
             </ul>
@@ -266,13 +266,6 @@ useEffect(() => {
         animate-scaleIn"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button */}
-        <button
-          onClick={() => setIsLocationModalOpen(false)}
-          className="absolute top-4 right-4 text-gray-400 hover:text-red-400 transition text-xl"
-        >
-          ✕
-        </button>
 
         {/* Title */}
         <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-300 mb-3 drop-shadow-[0_0_10px_rgba(255,99,71,0.4)]">
