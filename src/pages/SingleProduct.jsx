@@ -80,14 +80,19 @@ export default function SingleProduct() {
     return stars;
   };
 
-  // 💰 Replace with your real UPI ID
-  const UPI_ID = "6372031949-2@ybl"; // e.g., johndoe@oksbi
+  // 💰 Your real UPI ID
+  const UPI_ID = "6372031949-2@ybl";
 
-  // 🔄 Generate dynamic UPI QR (includes product name and price)
+  // 🔗 Generate dynamic UPI link
+  const upiPaymentLink =
+    product &&
+    `upi://pay?pa=${UPI_ID}&pn=Your%20Store&am=${product.price}&cu=INR&tn=Payment%20for%20${product.title}`;
+
+  // 🧾 QR code URL
   const upiQrCodeUrl =
     product &&
     `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-      `upi://pay?pa=${UPI_ID}&pn=Your%20Store&am=${product.price}&cu=INR&tn=Payment%20for%20${product.title}`
+      upiPaymentLink
     )}`;
 
   return (
@@ -232,26 +237,39 @@ export default function SingleProduct() {
 
               {/* ===== Dynamic UPI QR Section ===== */}
               <div
-                className="mt-6 border-t border-gray-300 dark:border-gray-600 pt-4 text-sm text-gray-700 dark:text-gray-400 space-y-3"
+                className="mt-6 border-t border-gray-300 dark:border-gray-600 pt-4 text-sm text-gray-700 dark:text-gray-400 space-y-3 text-center"
                 data-aos="fade-up"
               >
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2 flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2 flex justify-center items-center gap-2">
                   <FaQrcode /> Pay via UPI
                 </h3>
-                <p>
-                  Scan this QR code to pay securely using UPI apps like Google
-                  Pay, PhonePe, or Paytm.
+                <p className="text-sm text-gray-500">
+                  Scan this QR code or tap below to pay securely via UPI apps.
                 </p>
 
                 {upiQrCodeUrl && (
-                  <img
-                    src={upiQrCodeUrl}
-                    alt="UPI QR Code"
-                    className="w-40 h-40 border border-gray-300 dark:border-gray-600 rounded-lg shadow-md mx-auto"
-                  />
+                  <div>
+                    <a href={upiPaymentLink} target="_blank" rel="noreferrer">
+                      <img
+                        src={upiQrCodeUrl}
+                        alt="UPI QR Code"
+                        className="w-40 h-40 border border-gray-300 dark:border-gray-600 rounded-lg shadow-md mx-auto hover:scale-105 transition-transform"
+                      />
+                    </a>
+
+                    {/* 💰 Pay Now Button */}
+                    <a
+                      href={upiPaymentLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-block mt-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:scale-105 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all duration-300"
+                    >
+                      Pay Now
+                    </a>
+                  </div>
                 )}
 
-                <p className="text-center text-xs text-gray-500 mt-2">
+                <p className="text-xs text-gray-500 mt-2">
                   UPI ID: <span className="font-medium">{UPI_ID}</span>
                 </p>
               </div>

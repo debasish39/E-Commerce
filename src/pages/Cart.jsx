@@ -40,7 +40,6 @@ const Cart = ({ location, getLocation }) => {
       return;
     }
 
-    // ✅ Confirm checkout
     if (window.confirm("Have you completed the UPI payment?")) {
       cartItem.forEach(item => removeFromCart(item.id));
       navigate('/order-success');
@@ -222,14 +221,26 @@ const Cart = ({ location, getLocation }) => {
                     Scan the QR below or tap to pay with your UPI app.
                   </p>
 
-                  {/* 🔗 Clickable QR */}
-                  <a href={upiPaymentLink} target="_blank" rel="noreferrer">
-                    <img
-                      src={upiQrCodeUrl}
-                      alt="UPI QR Code"
-                      className="w-40 h-40 mx-auto rounded-lg border border-white/20 shadow-md hover:scale-105 transition-transform"
-                    />
-                  </a>
+                  {/* 🔗 QR Code + Pay Now Button */}
+                  <div className="text-center">
+                    <a href={upiPaymentLink} target="_blank" rel="noreferrer">
+                      <img
+                        src={upiQrCodeUrl}
+                        alt="UPI QR Code"
+                        className="w-40 h-40 mx-auto rounded-lg border border-white/20 shadow-md hover:scale-105 transition-transform"
+                      />
+                    </a>
+
+                    {/* 💰 Pay Now Button */}
+                    <a
+                      href={upiPaymentLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-block mt-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:scale-105 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all duration-300"
+                    >
+                      Pay Now
+                    </a>
+                  </div>
 
                   <p className="text-xs text-gray-400 mt-1">
                     UPI ID: <span className="font-medium">{UPI_ID}</span>
