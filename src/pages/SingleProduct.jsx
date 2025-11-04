@@ -18,7 +18,6 @@ import {
   FaIndustry,
   FaListAlt,
   FaRupeeSign,
-  FaQrcode,
 } from "react-icons/fa";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -80,21 +79,6 @@ export default function SingleProduct() {
     return stars;
   };
 
-  // 💰 Your real UPI ID
-  const UPI_ID = "6372031949-2@ybl";
-
-  // 🔗 Generate dynamic UPI link
-  const upiPaymentLink =
-    product &&
-    `upi://pay?pa=${UPI_ID}&pn=Your%20Store&am=${product.price}&cu=INR&tn=Payment%20for%20${product.title}`;
-
-  // 🧾 QR code URL
-  const upiQrCodeUrl =
-    product &&
-    `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-      upiPaymentLink
-    )}`;
-
   return (
     <>
       {product ? (
@@ -105,8 +89,9 @@ export default function SingleProduct() {
             className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 border border-white/30 shadow-2xl rounded-2xl p-6 md:p-10"
             data-aos="fade-up"
           >
-            {/* ===== Left: Image Gallery ===== */}
+            {/* ===== LEFT COLUMN ===== */}
             <div className="flex flex-col items-center">
+              {/* --- Main Image --- */}
               <div className="relative group w-full rounded-2xl overflow-hidden shadow-lg">
                 <img
                   src={selectedImage}
@@ -123,7 +108,7 @@ export default function SingleProduct() {
                 <Tooltip id="discount-tooltip" place="top" />
               </div>
 
-              {/* Thumbnails */}
+              {/* --- Thumbnails --- */}
               <div className="flex gap-3 mt-4 overflow-x-auto justify-center w-full px-2 scrollbar-hide">
                 {product.images?.map((img, idx) => (
                   <img
@@ -139,9 +124,77 @@ export default function SingleProduct() {
                   />
                 ))}
               </div>
+
+              {/* --- Highlights Section --- */}
+              <div className="mt-8 w-full" data-aos="fade-up">
+                <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-3">
+                  Highlights
+                </h3>
+                <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 text-sm">
+                  <li>Discount: {Math.round(product.discountPercentage)}% OFF</li>
+                  <li>High-quality build by {product.brand}</li>
+                  <li>Category: {product.category}</li>
+                  <li>Free Delivery above ₹500</li>
+                  <li>7-Day Replacement Guarantee</li>
+                </ul>
+              </div>
+
+              {/* --- Product Specifications Below Highlights --- */}
+              <div
+                className="mt-8 border-t border-gray-300 dark:border-gray-600 pt-6 w-full"
+                data-aos="fade-up"
+              >
+                <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                  <FaListAlt className="text-red-500" /> Product Specifications
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700 dark:text-gray-300">
+                  <div className="flex justify-between border-b border-gray-300 dark:border-gray-600 py-2">
+                    <span className="font-semibold">Brand</span>
+                    <span>{product.brand || "Not specified"}</span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-gray-300 dark:border-gray-600 py-2">
+                    <span className="font-semibold">Category</span>
+                    <span>{product.category || "N/A"}</span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-gray-300 dark:border-gray-600 py-2">
+                    <span className="font-semibold">Stock</span>
+                    <span>
+                      {product.stock > 0 ? `${product.stock} Units` : "Out of Stock"}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-gray-300 dark:border-gray-600 py-2">
+                    <span className="font-semibold">Warranty</span>
+                    <span>{product.warranty || "1 Year Manufacturer Warranty"}</span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-gray-300 dark:border-gray-600 py-2">
+                    <span className="font-semibold">Discount</span>
+                    <span>{Math.round(product.discountPercentage)}%</span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-gray-300 dark:border-gray-600 py-2">
+                    <span className="font-semibold">Rating</span>
+                    <span>{product.rating} ★</span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-gray-300 dark:border-gray-600 py-2">
+                    <span className="font-semibold">Return Policy</span>
+                    <span>7 Days Replacement</span>
+                  </div>
+
+                  <div className="flex justify-between border-b border-gray-300 dark:border-gray-600 py-2">
+                    <span className="font-semibold">Seller</span>
+                    <span>{product.seller || "E-Shop Official"}</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* ===== Right: Product Details ===== */}
+            {/* ===== RIGHT COLUMN ===== */}
             <div className="flex flex-col justify-center space-y-6">
               {/* Title & Brand */}
               <div>
@@ -232,45 +285,6 @@ export default function SingleProduct() {
                 </p>
                 <p className="flex items-center gap-2">
                   <FaTag className="text-orange-500" /> Inclusive of all taxes
-                </p>
-              </div>
-
-              {/* ===== Dynamic UPI QR Section ===== */}
-              <div
-                className="mt-6 border-t border-gray-300 dark:border-gray-600 pt-4 text-sm text-gray-700 dark:text-gray-400 space-y-3 text-center"
-                data-aos="fade-up"
-              >
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2 flex justify-center items-center gap-2">
-                  <FaQrcode /> Pay via UPI
-                </h3>
-                <p className="text-sm text-gray-500">
-                  Scan this QR code or tap below to pay securely via UPI apps.
-                </p>
-
-                {upiQrCodeUrl && (
-                  <div>
-                    <a href={upiPaymentLink} target="_blank" rel="noreferrer">
-                      <img
-                        src={upiQrCodeUrl}
-                        alt="UPI QR Code"
-                        className="w-40 h-40 border border-gray-300 dark:border-gray-600 rounded-lg shadow-md mx-auto hover:scale-105 transition-transform"
-                      />
-                    </a>
-
-                    {/* 💰 Pay Now Button */}
-                    <a
-                      href={upiPaymentLink}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-block mt-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:scale-105 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all duration-300"
-                    >
-                      Pay Now
-                    </a>
-                  </div>
-                )}
-
-                <p className="text-xs text-gray-500 mt-2">
-                  UPI ID: <span className="font-medium">{UPI_ID}</span>
                 </p>
               </div>
             </div>

@@ -36,6 +36,17 @@ export default function Navbar({ location, onLocationChange }) {
       once: false,
     });
   }, []);
+useEffect(() => {
+  if (isMobileNavOpen) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "auto";
+  }
+
+  return () => {
+    document.body.style.overflow = "auto";
+  };
+}, [isMobileNavOpen]);
 
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
@@ -304,7 +315,7 @@ export default function Navbar({ location, onLocationChange }) {
 
       {/* ===== Mobile Offcanvas Menu ===== */}
       <aside
-        className={`sm:hidden fixed top-0 left-0 w-3/4 max-w-xs h-full 
+        className={`sm:hidden fixed min-h-screen top-0 left-0 w-3/4 max-w-xs h-full 
         bg-black/90 backdrop-blur-lg border-r border-red-500/40 rounded-r-2xl 
         transform transition-transform z-40 duration-300 ease-in-out 
         ${isMobileNavOpen ? "translate-x-0" : "-translate-x-full"}`}

@@ -125,7 +125,7 @@ return (
       {/* --- Background Particles Layer --- */}
       <div className="absolute inset-0 -z-10">
         <Particles
-          particleColors={['#ffffff', '#ffb347']}
+          particleColors={['#ffffff', 'red', '#f53347', '#ff6a00', '#ffff00']}
           particleCount={200}
           particleSpread={10}
           speed={0.1}
