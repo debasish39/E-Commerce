@@ -118,26 +118,25 @@ return (
         },
       }}
     />
-
+   {/* --- Scroll Progress Bar --- */}
+  <ScrollProgressBar />
     {/* ✅ Your app layout starts here */}
-    <div className="relative flex flex-col items-center overflow-x-hidden justify-center min-h-screen bg-gray-950 bg-opacity-70 backdrop-blur-sm text-gray-100">
+   <div className="relative min-h-screen w-full overflow-x-hidden bg-gray-950 bg-opacity-70 backdrop-blur-sm text-gray-100">
+  {/* --- Background Particles Layer --- */}
+  <div className="absolute inset-0 -z-10">
+    <Particles
+      particleColors={['#ffffff', 'red', '#f53347', '#ff6a00', '#ffff00']}
+      particleCount={200}
+      particleSpread={10}
+      speed={0.1}
+      particleBaseSize={90}
+      moveParticlesOnHover={true}
+      alphaParticles={false}
+      disableRotation={false}
+    />
+  </div>
 
-      {/* --- Background Particles Layer --- */}
-      <div className="absolute inset-0 -z-10">
-        <Particles
-          particleColors={['#ffffff', 'red', '#f53347', '#ff6a00', '#ffff00']}
-          particleCount={200}
-          particleSpread={10}
-          speed={0.1}
-          particleBaseSize={90}
-          moveParticlesOnHover={true}
-          alphaParticles={false}
-          disableRotation={false}
-        />
-      </div>
-
-      {/* --- End Background --- */}
-      <ScrollProgressBar />
+   
       <Navbar location={locationData} />
       <div className="pt-16" />
       <div className="w-full max-w-screen">
