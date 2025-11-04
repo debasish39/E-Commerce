@@ -98,7 +98,7 @@ export default function SingleProduct() {
   return (
     <>
       {product ? (
-        <div className="min-h-screen px-4 md:px-8 py-12">
+        <div className="min-h-screen px-4 md:px-8 py-3">
           <Breadcrums title={product.title} />
 
           <div
