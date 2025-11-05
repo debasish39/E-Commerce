@@ -8,7 +8,7 @@ body {
 }
 ::selection{
   background-color: rgb(5, 5, 5);
-  color:rgb(166, 15, 4);
+  color:rgb(223, 215, 215);
 }
 
 ::-webkit-scrollbar {

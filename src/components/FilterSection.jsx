@@ -117,7 +117,7 @@ const FilterSection = ({
       {/* Reset Button */}
       <div data-aos="flip-up" data-aos-delay="800">
         <button
-          className="bg-red-500 text-white rounded-md px-3 py-2 mt-6 w-full hover:bg-red-600 transition-all"
+          className="bg-red-500 text-white rounded-md px-3 py-2 mt-6 w-full hover:bg-red-600 transition-all cursor-pointer"
           onClick={() => {
             setSearch('');
             setCategory('All');

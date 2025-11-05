@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { useContext } from "react";
 
 export const WishlistContext = createContext();
 
@@ -41,3 +42,6 @@ export const WishlistProvider = ({ children }) => {
     </WishlistContext.Provider>
   );
 };
+
+
+export const useWishlist = () => useContext(WishlistContext);

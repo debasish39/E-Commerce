@@ -29,7 +29,7 @@ export default function ProductCard({ product }) {
                  p-3 sm:p-4 shadow-md hover:shadow-xl transition-all duration-500 cursor-pointer 
                  hover:scale-[1.03] active:scale-[0.99] overflow-hidden"
       data-aos="zoom-in-up"
-      data-aos-delay="100"
+      data-aos-delay="100" onClick={() => navigate(`/products/${product.id}`)}
     >
       {/* 🌈 Glow Animation */}
       <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition duration-700 bg-gradient-to-tr from-red-400/30 via-pink-300/20 to-red-400/30 pointer-events-none"></div>
@@ -60,7 +60,7 @@ export default function ProductCard({ product }) {
 
       {/* 📋 Product Info */}
       <div className="mt-3 sm:mt-4 text-center space-y-1">
-        <h1 className="text-sm xs:text-base sm:text-lg font-semibold text-gray-300 line-clamp-2 leading-snug">
+        <h1 className="text-sm xs:text-base sm:text-lg font-semibold text-gray-300 line-clamp-2 leading-snug" onClick={() => navigate(`/products/${product.id}`)}>
           {product.title}
         </h1>
         <p className="text-[12px] text-gray-400">by {product.brand}</p>
@@ -81,11 +81,10 @@ export default function ProductCard({ product }) {
       {/* 🛒 Add to Cart Button */}
       <div className="mt-3 sm:mt-4">
         <button
-          className={`w-full flex items-center justify-center gap-1.5 xs:gap-2 py-2 text-sm sm:text-base font-semibold rounded-lg shadow-md transition-all duration-300 active:scale-95 ${
-            isAlreadyInCart
+          className={`w-full flex items-center justify-center gap-1.5 xs:gap-2 py-2 text-sm sm:text-base font-semibold rounded-lg shadow-md transition-all duration-300 active:scale-95 ${isAlreadyInCart
               ? "bg-gray-400 text-white cursor-not-allowed"
               : "bg-gradient-to-r from-red-500 to-pink-500 text-white hover:shadow-lg hover:shadow-red-300"
-          }`}
+            }`}
           disabled={isAlreadyInCart}
           onClick={() => addToCart(product)}
           data-tooltip-id="product-tooltip"

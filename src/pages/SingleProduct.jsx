@@ -4,7 +4,7 @@ import axios from "axios";
 import Breadcrums from "../components/Breadcrums";
 import Loading from "../assets/Loading4.webm";
 import { useCart } from "../context/CartContext";
-import { useWishlist } from "../hooks/useWishlist";
+import { useWishlist } from "../context/wishlistContext";
 import {
   FaShoppingCart,
   FaHeart,
@@ -178,7 +178,7 @@ export default function SingleProduct() {
 
                   <div className="flex justify-between border-b border-gray-300 dark:border-gray-600 py-2">
                     <span className="font-semibold">Rating</span>
-                    <span>{product.rating} ★</span>
+                    <span className="text-yellow-500">{product.rating} ★</span>
                   </div>
 
                   <div className="flex justify-between border-b border-gray-300 dark:border-gray-600 py-2">

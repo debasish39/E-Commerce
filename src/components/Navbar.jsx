@@ -19,7 +19,7 @@ import {
   UserButton,
 } from "@clerk/clerk-react";
 import { useCart } from "../context/CartContext";
-import { useWishlist } from "../hooks/useWishlist";
+import { useWishlist } from "../context/wishlistContext";
 import AOS from "aos";
 import "aos/dist/aos.css";
 

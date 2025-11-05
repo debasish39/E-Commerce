@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useWishlist } from "../hooks/useWishlist";
+import { useWishlist } from "../context/wishlistContext";
 import { FaTrash, FaEye } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
@@ -126,7 +126,7 @@ export default function WishlistPage() {
 
       {/* Remove Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start py-69 justify-center z-50 px-4">
           <div className="bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-xl p-6 w-full max-w-sm text-center shadow-xl">
             <h2 className="text-lg font-semibold mb-2">Remove from Wishlist?</h2>
             <p className="text-gray-300 mb-5 text-sm">
