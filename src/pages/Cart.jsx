@@ -7,7 +7,6 @@ import { GiShoppingBag } from 'react-icons/gi';
 import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import emptyCart from "../assets/empty-cart.png";
-import { Tooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
 
 const Cart = ({ location, getLocation }) => {
@@ -16,17 +15,16 @@ const Cart = ({ location, getLocation }) => {
   const navigate = useNavigate();
 
   const totalPrice = cartItem.reduce(
-    (total, item) => total + item.price * item.quantity,
+    (total, item) => total + Number(item.price) * item.quantity,
     0
   );
+const totalAmount = (totalPrice + 5).toFixed(2); // ensures it's numeric with 2 decimals
 
   // ✅ Your UPI ID
   const UPI_ID = "6372031949-2@ybl";
 
-  // 🔄 Generate QR Code with amount and note
-  const upiPaymentLink = `upi://pay?pa=${UPI_ID}&pn=Your%20Store&am=${
-    totalPrice + 5
-  }&cu=INR&tn=Payment%20for%20Order`;
+ const upiPaymentLink = `upi://pay?pa=${UPI_ID}&pn=Your%20Store&am=${totalAmount}&cu=INR&tn=Payment%20for%20Order`;
+
 
   const upiQrCodeUrl =
     cartItem.length > 0 &&
