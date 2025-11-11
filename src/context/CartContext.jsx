@@ -16,6 +16,8 @@ export default function CartProvider({ children }) {
   }, [cartItem]);
 
   const addToCart = (product) => {
+      console.log("Added:", product);
+
     const itemInCart = cartItem.find((item) => item.id === product.id);
     if (itemInCart) {
       const updatedCart = cartItem.map((item) =>

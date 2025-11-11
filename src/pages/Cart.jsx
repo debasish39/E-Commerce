@@ -21,7 +21,7 @@ const Cart = ({ location, getLocation }) => {
 const totalAmount = (totalPrice + 5).toFixed(2); // ensures it's numeric with 2 decimals
 
   // ✅ Your UPI ID
-  const UPI_ID = "6372031949-2@ybl";
+  const UPI_ID = "sonupanda0999@okicici";
 
  const upiPaymentLink = `upi://pay?pa=${UPI_ID}&pn=Your%20Store&am=${totalAmount}&cu=INR&tn=Payment%20for%20Order`;
 
@@ -34,6 +34,7 @@ const totalAmount = (totalPrice + 5).toFixed(2); // ensures it's numeric with 2 
 
   const handleCheckout = () => {
     if (cartItem.length === 0) {
+      console.log("Cart items:", cartItem);
       alert("Your cart is empty!");
       return;
     }
@@ -43,7 +44,6 @@ const totalAmount = (totalPrice + 5).toFixed(2); // ensures it's numeric with 2 
       navigate('/order-success');
     }
   };
-
   return (
     <div className="min-h-screen px-4 py-10 flex justify-center items-start text-white">
       {cartItem.length > 0 ? (
@@ -55,6 +55,7 @@ const totalAmount = (totalPrice + 5).toFixed(2); // ensures it's numeric with 2 
 
           {/* Cart Items */}
           <div className="space-y-5">
+            console.log(cartItem)
             {cartItem.map((item, index) => (
               <div
                 key={index}
