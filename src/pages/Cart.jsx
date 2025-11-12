@@ -306,10 +306,10 @@ const generateInvoice = async (phone) => {
                   <input
                     type="text"
                     placeholder="Country"
-                    className="w-1/2 p-3 rounded-lg bg-white/20 border border-white/30 placeholder-white/60 text-white text-sm sm:text-base focus:outline-none focus:border-red-400"
+                    className="sm:w-1/2 p-3 rounded-lg bg-white/20 border border-white/30 placeholder-white/60 text-white text-sm sm:text-base focus:outline-none focus:border-red-400"
                     defaultValue={location?.country || ''}
                   />
-                  <div className="flex w-1/2 items-center bg-white/20 border border-white/30 rounded-lg overflow-hidden focus:outline-none focus:border-red-400">
+                  <div className="flex sm:w-1/2 items-center bg-white/20 border border-white/30 rounded-lg overflow-hidden focus:outline-none focus:border-red-400">
                     <span className="px-3 text-white/70 text-sm sm:text-base select-none">+91</span>
                     <input
                       type="tel"
