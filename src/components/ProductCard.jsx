@@ -29,7 +29,7 @@ export default function ProductCard({ product }) {
                  p-3 sm:p-4 shadow-md hover:shadow-xl transition-all duration-500 cursor-pointer 
                  hover:scale-[1.03] active:scale-[0.99] overflow-hidden"
       data-aos="zoom-in-up"
-      data-aos-delay="100" onClick={() => navigate(`/products/${product.id}`)}
+      data-aos-delay="100"
     >
       {/* 🌈 Glow Animation */}
       <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition duration-700 bg-gradient-to-tr from-red-400/30 via-pink-300/20 to-red-400/30 pointer-events-none"></div>
