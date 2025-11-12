@@ -5,19 +5,16 @@ export const CartContext = createContext(null);
 
 export default function CartProvider({ children }) {
   const [cartItem, setCartItem] = useState(() => {
-    // Get cart from localStorage on first load
     const storedCart = localStorage.getItem('cart');
     return storedCart ? JSON.parse(storedCart) : [];
   });
-  console.log(cartItem);
+
   // Save cart to localStorage whenever cartItem changes
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cartItem));
   }, [cartItem]);
 
   const addToCart = (product) => {
-      console.log("Added:", product);
-
     const itemInCart = cartItem.find((item) => item.id === product.id);
     if (itemInCart) {
       const updatedCart = cartItem.map((item) =>
@@ -55,8 +52,24 @@ export default function CartProvider({ children }) {
     toast.success('Decreased quantity');
   };
 
+  // ✅ NEW: Clear the entire cart
+  const clearCart = () => {
+    setCartItem([]); // clear React state
+    localStorage.removeItem('cart'); // clear persisted storage
+    toast.success('Cart cleared');
+  };
+
   return (
-    <CartContext.Provider value={{ cartItem, addToCart, removeFromCart, increaseQty, decreaseQty }}>
+    <CartContext.Provider
+      value={{
+        cartItem,
+        addToCart,
+        removeFromCart,
+        increaseQty,
+        decreaseQty,
+        clearCart, // make it available for Cart.jsx
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

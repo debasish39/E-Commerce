@@ -83,7 +83,7 @@ export default function ProductCard({ product }) {
         <button
           className={`w-full flex items-center justify-center gap-1.5 xs:gap-2 py-2 text-sm sm:text-base font-semibold rounded-lg shadow-md transition-all duration-300 active:scale-95 ${isAlreadyInCart
               ? "bg-gray-400 text-white cursor-not-allowed"
-              : "bg-gradient-to-r from-red-500 to-pink-500 text-white hover:shadow-lg hover:shadow-red-300"
+              : "bg-gradient-to-r from-red-500 to-pink-500 text-white hover:shadow-lg hover:shadow-red-300 cursor-pointer"
             }`}
           disabled={isAlreadyInCart}
           onClick={() => addToCart(product)}

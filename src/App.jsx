@@ -20,6 +20,8 @@ import Particles from "./components/Particles";
 import WishlistPage from "./pages/WishlistPage";
 import ScrollProgressBar from "./components/ScrollProgressBar";
 import OrderSuccess from "./pages/OrderSuccess";
+import OrderHistory from "./pages/OrderHistory";
+
 const AppWrapper = () => {
   const [locationData, setLocationData] = useState();
   const location = useLocation();
@@ -143,6 +145,7 @@ return (
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/order-history" element={<OrderHistory />} />
           <Route path="/products/:id" element={<SingleProduct />} />
           <Route
             path="/wishlist"
