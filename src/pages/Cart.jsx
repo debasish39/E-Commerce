@@ -7,7 +7,9 @@ import { GiShoppingBag } from 'react-icons/gi';
 import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import emptyCart from "../assets/empty-cart.png";
+import { jsPDF } from 'jspdf';
 import 'react-tooltip/dist/react-tooltip.css';
+import Logo from "../assets/logo.png"; 
 
 const Cart = ({ location, getLocation }) => {
   const { cartItem, removeFromCart, increaseQty, decreaseQty } = useCart();
@@ -18,13 +20,10 @@ const Cart = ({ location, getLocation }) => {
     (total, item) => total + Number(item.price) * item.quantity,
     0
   );
-const totalAmount = (totalPrice + 5).toFixed(2); // ensures it's numeric with 2 decimals
+  const totalAmount = (totalPrice + 5).toFixed(2);
 
-  // ✅ Your UPI ID
   const UPI_ID = "sonupanda0999@okicici";
-
- const upiPaymentLink = `upi://pay?pa=${UPI_ID}&pn=Your%20Store&am=${totalAmount}&cu=INR&tn=Payment%20for%20Order`;
-
+  const upiPaymentLink = `upi://pay?pa=${UPI_ID}&pn=Your%20Store&am=${totalAmount}&cu=INR&tn=Payment%20for%20Order`;
 
   const upiQrCodeUrl =
     cartItem.length > 0 &&
@@ -32,18 +31,176 @@ const totalAmount = (totalPrice + 5).toFixed(2); // ensures it's numeric with 2 
       upiPaymentLink
     )}`;
 
+// 🧾 Generate eShop invoice PDF (Premium Full-Page Layout)
+const generateInvoice = async (phone) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 15;
+  const centerX = pageWidth / 2;
+
+  const themeColor = [230, 57, 70]; // eShop red
+  const lightGray = [245, 245, 245];
+
+  // ===== HEADER =====
+  try {
+   doc.addImage(Logo, "PNG", centerX - 15, 10, 30, 30);
+  } catch (err) {
+    console.warn("Logo not found or invalid:", err);
+  }
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(22);
+  doc.text("EShop", centerX, 48, { align: "center" });
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
+  doc.text("https://eshop.debasish.xyz/ |  djproject963@gmail.com", centerX, 54, { align: "center" });
+
+  // Divider
+  doc.setDrawColor(...themeColor);
+  doc.setLineWidth(0.8);
+  doc.line(margin, 60, pageWidth - margin, 60);
+
+  // ===== INVOICE TITLE & META =====
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text("INVOICE", margin, 75);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
+  doc.text(`Invoice No: INV-${Date.now().toString().slice(-6)}`, margin, 83);
+  doc.text(`Date: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`, margin, 89);
+
+  // ===== CUSTOMER INFO =====
+  doc.setFont("helvetica", "bold");
+  doc.text("Bill To:", margin, 105);
+  doc.setFont("helvetica", "normal");
+  doc.text(`${user?.fullName || "Guest"}`, margin, 111);
+  doc.text(`Phone: +91 ${phone}`, margin, 117);
+
+  // ===== ORDER SUMMARY BOX =====
+  doc.setDrawColor(220);
+  doc.setFillColor(...lightGray);
+  doc.roundedRect(pageWidth - 75, 80, 60, 40, 3, 3, "F");
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Summary", pageWidth - 45, 88, { align: "center" });
+  doc.setFont("helvetica", "normal");
+  doc.text(`Items: ${cartItem.length}`, pageWidth - 45, 98, { align: "center" });
+  doc.text(`Total: ₹${totalAmount}`, pageWidth - 45, 108, { align: "center" });
+
+  // ===== TABLE HEADERS =====
+  let y = 130;
+  doc.setFillColor(...themeColor);
+  doc.setTextColor(255, 255, 255);
+  doc.rect(margin, y - 6, pageWidth - margin * 2, 10, "F");
+
+  const colX = {
+    item: margin + 3,
+    qty: pageWidth / 2 - 20,
+    price: pageWidth / 2 + 5,
+    total: pageWidth - margin - 25,
+  };
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Item", colX.item, y);
+  doc.text("Qty", colX.qty, y);
+  doc.text("Price", colX.price, y);
+  doc.text("Total", colX.total, y);
+
+  // ===== TABLE BODY =====
+  y += 10;
+  doc.setTextColor(0, 0, 0);
+  doc.setFont("helvetica", "normal");
+
+  cartItem.forEach((item, i) => {
+    if (y > pageHeight - 40) {
+      doc.addPage();
+      y = 30;
+    }
+
+    doc.text(`${i + 1}. ${item.title}`, colX.item, y);
+    doc.text(`${item.quantity}`, colX.qty, y);
+    doc.text(`₹${item.price}`, colX.price, y);
+    doc.text(`₹${(item.price * item.quantity).toFixed(2)}`, colX.total, y);
+    y += 8;
+  });
+
+  // ===== TOTAL SUMMARY SECTION =====
+  y += 5;
+  doc.setDrawColor(220);
+  doc.line(margin, y, pageWidth - margin, y);
+  y += 10;
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Subtotal:", pageWidth - 65, y);
+  doc.text(`₹${totalPrice.toFixed(2)}`, pageWidth - margin, y, { align: "right" });
+
+  y += 6;
+  doc.text("Handling:", pageWidth - 65, y);
+  doc.text("₹5", pageWidth - margin, y, { align: "right" });
+
+  y += 6;
+  doc.setDrawColor(...themeColor);
+  doc.line(pageWidth - 80, y + 2, pageWidth - margin, y + 2);
+  y += 8;
+
+  doc.setFontSize(13);
+  doc.setFont("helvetica", "bold");
+  doc.text("Grand Total:", pageWidth - 65, y);
+  doc.text(`₹${totalAmount}`, pageWidth - margin, y, { align: "right" });
+
+  // ===== PAYMENT QR (if available) =====
+  if (upiQrCodeUrl) {
+    y += 20;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("Payment QR:", margin, y);
+    try {
+      doc.addImage(upiQrCodeUrl, "PNG", margin, y + 4, 35, 35);
+    } catch (err) {
+      console.warn("Failed to load QR:", err);
+    }
+    doc.setFont("helvetica", "normal");
+    doc.text(`UPI ID: ${UPI_ID}`, margin + 40, y + 25);
+  }
+
+  // ===== FOOTER =====
+  doc.setFontSize(10);
+  doc.setTextColor(120, 120, 120);
+  doc.text("Thank you for shopping with EShop ❤️", centerX, pageHeight - 25, { align: "center" });
+  doc.text("For support, contact: djproject963@gmail.com", centerX, pageHeight - 19, { align: "center" });
+  doc.text("Generated automatically by EShop © 2025", centerX, pageHeight - 13, { align: "center" });
+
+  // ===== SAVE FILE =====
+  doc.save(`EShop-Invoice-${Date.now()}.pdf`);
+};
+
+
   const handleCheckout = () => {
     if (cartItem.length === 0) {
-      console.log("Cart items:", cartItem);
       alert("Your cart is empty!");
       return;
     }
 
+    const phone = document.querySelector('input[name="phone"]').value;
+    if (!/^\d{10}$/.test(phone)) {
+      alert("Please enter a valid 10-digit phone number!");
+      return;
+    }
+
     if (window.confirm("Have you completed the UPI payment?")) {
+      // Generate and download invoice before clearing cart
+      generateInvoice(phone);
+
+      // Clear cart
       cartItem.forEach(item => removeFromCart(item.id));
+
+      // Redirect
       navigate('/order-success');
     }
   };
+
   return (
     <div className="min-h-screen px-4 py-10 flex justify-center items-start text-white">
       {cartItem.length > 0 ? (
@@ -55,7 +212,6 @@ const totalAmount = (totalPrice + 5).toFixed(2); // ensures it's numeric with 2 
 
           {/* Cart Items */}
           <div className="space-y-5">
-            console.log(cartItem)
             {cartItem.map((item, index) => (
               <div
                 key={index}
@@ -150,14 +306,25 @@ const totalAmount = (totalPrice + 5).toFixed(2); // ensures it's numeric with 2 
                   <input
                     type="text"
                     placeholder="Country"
-                    className="w-full p-3 rounded-lg bg-white/20 border border-white/30 placeholder-white/60 text-white text-sm sm:text-base focus:outline-none focus:border-red-400"
+                    className="w-1/2 p-3 rounded-lg bg-white/20 border border-white/30 placeholder-white/60 text-white text-sm sm:text-base focus:outline-none focus:border-red-400"
                     defaultValue={location?.country || ''}
                   />
-                  <input
-                    type="text"
-                    placeholder="Phone Number"
-                    className="w-full p-3 rounded-lg bg-white/20 border border-white/30 placeholder-white/60 text-white text-sm sm:text-base focus:outline-none focus:border-red-400"
-                  />
+                  <div className="flex w-1/2 items-center bg-white/20 border border-white/30 rounded-lg overflow-hidden focus:outline-none focus:border-red-400">
+                    <span className="px-3 text-white/70 text-sm sm:text-base select-none">+91</span>
+                    <input
+                      type="tel"
+                      name="phone"
+                      required
+                      placeholder="Phone Number"
+                      maxLength="10"
+                      pattern="[0-9]{10}"
+                      inputMode="numeric"
+                      onInput={(e) => {
+                        e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+                      }}
+                      className="flex-1 p-3 bg-transparent text-white text-sm sm:text-base focus:outline-none focus:border-red-400"
+                    />
+                  </div>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3 mt-4">
@@ -220,7 +387,6 @@ const totalAmount = (totalPrice + 5).toFixed(2); // ensures it's numeric with 2 
                     Scan the QR below or tap to pay with your UPI app.
                   </p>
 
-                  {/* 🔗 QR Code + Pay Now Button */}
                   <div className="text-center">
                     <a href={upiPaymentLink} target="_blank" rel="noreferrer">
                       <img
@@ -230,14 +396,13 @@ const totalAmount = (totalPrice + 5).toFixed(2); // ensures it's numeric with 2 
                       />
                     </a>
 
-                    {/* 💰 Pay Now Button */}
                     <a
                       href={upiPaymentLink}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-block mt-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:scale-105 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all duration-300"
                     >
-                      Pay Now
+                      Buy Now
                     </a>
                   </div>
 
@@ -245,7 +410,6 @@ const totalAmount = (totalPrice + 5).toFixed(2); // ensures it's numeric with 2 
                     UPI ID: <span className="font-medium">{UPI_ID}</span>
                   </p>
 
-                  {/* ✅ Confirmation Button */}
                   <button
                     onClick={handleCheckout}
                     className="mt-4 bg-green-500/90 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold text-sm sm:text-base transition-all"
