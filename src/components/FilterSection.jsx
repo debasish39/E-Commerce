@@ -1,137 +1,117 @@
-import React, { useEffect } from 'react';
-import { getData } from '../context/DataContext';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import React, { useState } from "react";
+import { getData } from "../context/DataContext";
+import { FaSearch, FaFilter, FaTimes } from "react-icons/fa";
 
-const FilterSection = ({
-  search,
-  setSearch,
-  brand,
-  setBrand,
-  priceRange,
-  setPriceRange,
-  category,
-  setCategory,
-  handleBrandChange,
-  handleCategoryChange,
-}) => {
-  const { categoryOnlyData, brandOnlyData } = getData();
+export default function FilterSection() {
+  const {
+    search,
+    setSearch,
+    category,
+    setCategory,
+    brand,
+    setBrand,
+    priceRange,
+    setPriceRange,
+    categoryOnlyData,
+    brandOnlyData,
+  } = getData();
 
-  useEffect(() => {
-    AOS.init({
-      duration: 300,
-      easing: 'ease-out-cubic',
-      once: false,
-      offset: 50,
-    });
-  }, []);
+  // 👇 Local state for mobile filter visibility
+  const [showFilters, setShowFilters] = useState(false);
 
   return (
     <div
-      className="mt-10 p-4 rounded-md h-max w-full md:w-64 block shadow-md bg-transparent border border-gray-200"
-      data-aos="fade-right"
-      data-aos-duration="800"
+      className="w-full max-w-7xl mx-auto mb-8 px-4 py-6 rounded-2xl 
+                 border border-white/10 backdrop-blur-md 
+                 shadow-lg hover:shadow-red-500/10 transition-all duration-300"
     >
-      {/* Search */}
-      <div data-aos="zoom-in" data-aos-delay="100">
+      {/* Title & Toggle for Mobile */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2 sm:hidden">
+          <FaSearch className="text-[#dfd1d3] text-lg" />
+          <h2 className="text-lg sm:hidden sm:text-xl font-bold bg-gradient-to-r from-[#e79da5] to-pink-300 text-transparent bg-clip-text">
+            Filter Products
+          </h2>
+        </div>
+
+        {/* 🧭 Mobile Toggle Button */}
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className="sm:hidden flex items-center gap-2 text-[#f53347] border border-[#f53347]/40 px-3 py-1.5 rounded-lg text-sm hover:bg-[#f53347]/10 transition"
+        >
+          {showFilters ? <FaTimes /> : <FaFilter />}
+          {showFilters ? "Close" : "Filters"}
+        </button>
+      </div>
+
+      {/* Filter Controls */}
+      <div
+        className={`flex flex-wrap justify-center items-center gap-4 overflow-hidden transition-all duration-500 ${
+          showFilters
+            ? "max-h-[500px] opacity-100"
+            : "max-h-0 opacity-0 sm:max-h-none sm:opacity-100"
+        } sm:flex sm:flex-wrap sm:opacity-100 sm:max-h-none`}
+      >
+        {/* 🔎 Search */}
         <input
           type="text"
-          placeholder="🔍 Search..."
+          placeholder="Search products..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="bg-white/60 p-2 rounded-md border border-gray-300 w-full focus:outline-none focus:ring-2 focus:ring-red-400 text-black"
+          className="px-4 py-2 rounded-xl border border-gray-700 bg-[#0f0f10]/60 
+                     text-white placeholder-gray-400 focus:outline-none 
+                     focus:border-[#f53347] transition w-[220px] sm:w-[240px]"
         />
-      </div>
 
-      {/* Category Filter */}
-      <div data-aos="fade-left" data-aos-delay="200">
-        <h1 className="mt-6 font-semibold text-xl border-b pb-1 border-gray-200">Category</h1>
-        <div className="flex flex-col gap-2 mt-3">
-          {categoryOnlyData?.map(
-            (item, index) =>
-              item && (
-                <label
-                  key={index}
-                  className="flex items-center gap-2 hover:bg-red-50 transition rounded-md px-2 py-1 text-white hover:text-red-500"
-                  data-aos="fade-up"
-                  data-aos-delay={250 + index * 80}
-                >
-                  <input
-                    type="radio"
-                    name="category"
-                    checked={category === item}
-                    value={item}
-                    onChange={handleCategoryChange}
-                    className="accent-red-500"
-                  />
-                  <span className="uppercase cursor-pointer text-white hover:text-red-500">{item}</span>
-                </label>
-              )
-          )}
-        </div>
-      </div>
-
-      {/* Brand Filter */}
-      <div data-aos="fade-right" data-aos-delay="400">
-        <h1 className="mt-6 font-semibold text-xl border-b pb-1 border-gray-200">Brand</h1>
+        {/* 🏷️ Category */}
         <select
-          className="bg-gray-50 w-full p-2 border border-gray-300 rounded-md mt-3 focus:outline-none focus:ring-2 focus:ring-red-400 text-black"
-          value={brand}
-          onChange={handleBrandChange}
-          data-aos="zoom-in"
-          data-aos-delay="450"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="px-4 py-2 rounded-xl border border-gray-700 bg-[#0f0f10]/60 
+                     text-white focus:outline-none focus:border-[#f53347] 
+                     transition w-[180px]"
         >
-          {brandOnlyData?.map(
-            (item, index) =>
-              item && (
-                <option key={index} value={item}>
-                  {item.toUpperCase()}
-                </option>
-              )
-          )}
+          <option value="All">All Categories</option>
+          {categoryOnlyData.map((cat, i) => (
+            <option key={i} value={cat}>
+              {cat}
+            </option>
+          ))}
         </select>
-      </div>
 
-      {/* Price Range Filter */}
-      <div data-aos="fade-left" data-aos-delay="600">
-        <h1 className="mt-6 font-semibold text-xl border-b pb-1 border-gray-200">Price Range</h1>
-        <div className="flex flex-col gap-2 mt-3">
-          <label className="text-white font-medium">
-            ₹{priceRange[0]} - ₹{priceRange[1]}
-          </label>
+        {/* 🏭 Brand */}
+        <select
+          value={brand}
+          onChange={(e) => setBrand(e.target.value)}
+          className="px-4 py-2 rounded-xl border border-gray-700 bg-[#0f0f10]/60 
+                     text-white focus:outline-none focus:border-[#f53347] 
+                     transition w-[180px]"
+        >
+          <option value="All">All Brands</option>
+          {brandOnlyData.map((b, i) => (
+            <option key={i} value={b}>
+              {b}
+            </option>
+          ))}
+        </select>
+
+        {/* 💰 Price Range */}
+        <div className="flex items-center gap-2 text-gray-300 text-sm">
+          <span>₹{priceRange[0]}</span>
           <input
             type="range"
             min="0"
             max="5000"
-            className="accent-red-500 cursor-pointer"
+            step="100"
             value={priceRange[1]}
             onChange={(e) =>
               setPriceRange([priceRange[0], Number(e.target.value)])
             }
-            data-aos="zoom-in"
-            data-aos-delay="650"
+            className="w-48 accent-[#f53347]"
           />
+          <span>₹{priceRange[1]}</span>
         </div>
       </div>
-
-      {/* Reset Button */}
-      <div data-aos="flip-up" data-aos-delay="800">
-        <button
-          className="bg-red-500 text-white rounded-md px-3 py-2 mt-6 w-full hover:bg-red-600 transition-all cursor-pointer"
-          onClick={() => {
-            setSearch('');
-            setCategory('All');
-            setBrand('All');
-            setPriceRange([0, 5000]);
-          }}
-        >
-           Reset Filters
-        </button>
-      </div>
-
-      <hr className="border-gray-300 mt-6" data-aos="fade-in" data-aos-delay="900" />
     </div>
   );
-};
-
-export default FilterSection;
+}

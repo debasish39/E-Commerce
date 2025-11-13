@@ -65,17 +65,25 @@ const generateInvoice = async (phone) => {
   doc.text(`Date: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`, margin, 89);
 
   // ===== CUSTOMER INFO =====
-  doc.setFont("helvetica", "bold");
-  doc.text("Bill To:", margin, 105);
-  doc.setFont("helvetica", "normal");
+doc.setFont("helvetica", "bold");
+doc.text("Bill To:", margin, 105);
+doc.setFont("helvetica", "normal");
 
-  const customerInfo = [
-    user?.fullName || "Guest",
-    document.querySelector('input[placeholder="Address"]')?.value || "",
-    `${document.querySelector('input[placeholder="State"]')?.value || ""} - ${document.querySelector('input[placeholder="PostCode"]')?.value || ""}`,
-    document.querySelector('input[placeholder="Country"]')?.value || "",
-    `Phone: +91 ${phone}`
-  ];
+// Get data directly from input fields
+const customerName = document.querySelector('input[placeholder="Full Name"]')?.value || user?.fullName || "Guest";
+const customerAddress = document.querySelector('input[placeholder="Address"]')?.value || "";
+const customerState = document.querySelector('input[placeholder="State"]')?.value || "";
+const customerPostCode = document.querySelector('input[placeholder="PostCode"]')?.value || "";
+const customerCountry = document.querySelector('input[placeholder="Country"]')?.value || "";
+
+const customerInfo = [
+  customerName,
+  customerAddress,
+  `${customerState} - ${customerPostCode}`,
+  customerCountry,
+  `Phone: +91 ${phone}`,
+];
+
 
   let infoY = 111; // start Y for customer info
   const lineSpacing = 6;

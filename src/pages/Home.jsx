@@ -1,25 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import React, { useEffect, useState } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
-import Carousel from '../components/Carousel';
-import MidBanner from '../components/MidBanner';
-import Features from '../components/Features';
-import Category from '../components/Category';
-import Loading from '../assets/Loading4.webm'; 
+import ProductFilter from "../components/ProductFilter"; // ✅ New
+import Carousel from "../components/Carousel";
+import MidBanner from "../components/MidBanner";
+import Features from "../components/Features";
+import Category from "../components/Category";
+import Loading from "../assets/Loading4.webm";
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     AOS.init({
-      duration: 300,   
-      easing: 'ease-in-out',
-      once: false,      
-       
+      duration: 300,
+      easing: "ease-in-out",
+      once: false,
     });
 
-    
     AOS.refresh();
 
     const timeout = setTimeout(() => {
@@ -31,7 +30,7 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen ">
+      <div className="flex justify-center items-center min-h-screen">
         <video
           autoPlay
           loop
@@ -55,11 +54,9 @@ export default function Home() {
       <div data-aos="fade-right">
         <Category />
       </div>
-
       <div data-aos="zoom-in">
         <MidBanner />
       </div>
-
       <div data-aos="fade-left">
         <Features />
       </div>
