@@ -84,9 +84,9 @@ const Carousel = () => {
       </div>
 
       {/* Section Title + View All */}
-      <div className="max-w-full mx-auto rounded-2xl flex px-3 sm:flex-row justify-between items-center mb-6  sm:px-8 gap-4 sm:gap-0">
+      <div className="max-w-full mx-auto round flex px-3 sm:flex-row justify-between items-center mb-6  sm:px-8 gap-4 sm:gap-0">
         <h2
-          className="text-[24px] sm:text-4xl lg:text-5xl font-extrabold text-transparent bg-clip-text 
+          className="text-[24px] sm:text-3xl  font-extrabold text-transparent bg-clip-text 
           bg-gradient-to-r from-red-400 to-orange-300 drop-shadow-lg text-center sm:text-left"
           style={{ fontFamily: "'Pacifico', cursive" }}
         >
@@ -114,10 +114,7 @@ const Carousel = () => {
               <div key={item.id} className="px-2 sm:px-4 lg:px-10">
                 <div
                   className="flex flex-col lg:flex-row items-center gap-6 sm:gap-10 p-4 sm:p-8 lg:p-10
-                    rounded-3xl backdrop-blur-xl bg-gradient-to-r from-white/5 to-white/10 border border-white/20
-                    shadow-[0_8px_32px_0_rgba(255,255,255,0.1)]
-                    hover:shadow-[0_8px_40px_rgba(245,51,71,0.3)]
-                    transition-all duration-700 hover:scale-[1.04]"
+                    rounded-3xl backdrop-blur-xl bg-gradient-to-r from-white/5 to-white/10 border border-white/20 transition-all duration-700 "
                 >
                   {/* Image */}
                   <div className="w-full lg:w-1/2 relative flex justify-center">
