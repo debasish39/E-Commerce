@@ -257,7 +257,7 @@ export default function Navbar({ location, onLocationChange }) {
 
               <div className="space-y-4">
                 <button
-                  onClick={handleUseMyLocation}
+                  onClick={() => {handleUseMyLocation(),setIsLocationModalOpen(false)}}
                   className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg
                   bg-gradient-to-r from-red-500 to-orange-400 hover:from-red-600 hover:to-orange-500
                   text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-red-500/30 cursor-pointer"
