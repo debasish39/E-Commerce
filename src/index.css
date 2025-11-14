@@ -8,7 +8,7 @@ body {
 }
 ::selection{
   background-color: rgb(5, 5, 5);
-  color:rgb(223, 215, 215);
+  color:rgb(141, 10, 10);
 }
 
 ::-webkit-scrollbar {
@@ -17,14 +17,14 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #010101;
+  background: #774f4f;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #E9E1DA; 
+  background-color: #311515; 
   border-radius: 10px;
-  border: 2px solid rgb(246, 246, 246); 
+  border: 2px solid rgb(245, 233, 233); 
 }
 /* Remove dots below slick carousel completely */
 .slick-dots {
