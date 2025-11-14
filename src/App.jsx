@@ -128,19 +128,19 @@ return (
   <div className="absolute inset-0 -z-10">
     <Particles
       particleColors={['#ffffff', 'red', '#f53347', '#ff6a00', '#ffff00']}
-      particleCount={200}
-      particleSpread={10}
-      speed={0.1}
-      particleBaseSize={90}
+      particleCount={300}
+      particleSpread={18}
+      speed={1}
+      particleBaseSize={300}
       moveParticlesOnHover={true}
-      alphaParticles={false}
-      disableRotation={false}
+      alphaParticles={true}
+      disableRotation={true}
     />
   </div>
 
    
       <Navbar location={locationData} />
-      <div className="pt-16" />
+      <div className="pt-9" />
       <div className="w-full max-w-screen">
         <Routes>
           <Route path="/" element={<Home />} />

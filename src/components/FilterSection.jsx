@@ -21,15 +21,13 @@ export default function FilterSection() {
 
   return (
     <div
-      className="w-full max-w-7xl mx-auto mb-8 px-4 py-6 rounded-2xl 
-                 border border-white/10 backdrop-blur-md 
-                 shadow-lg hover:shadow-red-500/10 transition-all duration-300"
+      className="w-full max-w-7xl mx-auto mb-3 px-4 py-6 rounded-2xl 
+                  transition-all duration-300"
     >
       {/* Title & Toggle for Mobile */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between ">
         <div className="flex items-center gap-2 sm:hidden">
-          <FaSearch className="text-[#dfd1d3] text-lg" />
-          <h2 className="text-lg sm:hidden sm:text-xl font-bold bg-gradient-to-r from-[#e79da5] to-pink-300 text-transparent bg-clip-text">
+          <h2 className="text-lg sm:hidden sm:text-xl font-bold bg-gradient-to-r from-red-500 to-red-100 text-transparent bg-clip-text">
             Filter Products
           </h2>
         </div>

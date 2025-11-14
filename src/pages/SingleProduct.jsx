@@ -29,6 +29,7 @@ export default function SingleProduct() {
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [quantity, setQuantity] = useState(1); // Quantity state
 
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist } = useWishlist();
@@ -70,10 +71,8 @@ export default function SingleProduct() {
     const stars = [];
     const rating = product?.rating || 0;
     for (let i = 1; i <= 5; i++) {
-      if (rating >= i)
-        stars.push(<FaStar key={i} className="text-yellow-400" />);
-      else if (rating >= i - 0.5)
-        stars.push(<FaStarHalfAlt key={i} className="text-yellow-400" />);
+      if (rating >= i) stars.push(<FaStar key={i} className="text-yellow-400" />);
+      else if (rating >= i - 0.5) stars.push(<FaStarHalfAlt key={i} className="text-yellow-400" />);
       else stars.push(<FaRegStar key={i} className="text-yellow-400" />);
     }
     return stars;
@@ -82,22 +81,34 @@ export default function SingleProduct() {
   return (
     <>
       {product ? (
-        <div className="min-h-screen px-4 md:px-8 py-3">
+          <div className="relative min-h-screen py-12 px-4 sm:px-6 lg:px-10 text-white overflow-hidden">
+      {/* Floating gradients */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[400px] h-[400px] bg-red-500/20 blur-[150px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-pink-500/20 blur-[150px] rounded-full animate-[float_8s_infinite_linear]" />
+        <style>{`
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-25px); }
+          }
+        `}</style>
+      </div>
           <Breadcrums title={product.title} />
 
+          {/* ================= 2-COLUMN SECTION ================= */}
           <div
-            className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 border border-white/30 shadow-2xl rounded-2xl p-6 md:p-10"
+            className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 p-6"
             data-aos="fade-up"
           >
-            {/* ===== LEFT COLUMN ===== */}
+            {/* ---------------- LEFT COLUMN ---------------- */}
             <div className="flex flex-col items-center">
-              {/* --- Main Image --- */}
               <div className="relative group w-full rounded-2xl overflow-hidden shadow-lg">
                 <img
                   src={selectedImage}
                   alt={product.title}
                   className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
                 />
+
                 <div
                   className="absolute top-3 left-3 bg-gradient-to-r from-red-600 to-pink-500 text-white px-3 py-1 text-xs rounded-full flex items-center gap-1 shadow-md"
                   data-tooltip-id="discount-tooltip"
@@ -108,7 +119,7 @@ export default function SingleProduct() {
                 <Tooltip id="discount-tooltip" place="top" />
               </div>
 
-              {/* --- Thumbnails --- */}
+              {/* Thumbnails */}
               <div className="flex gap-3 mt-4 overflow-x-auto justify-center w-full px-2 scrollbar-hide">
                 {product.images?.map((img, idx) => (
                   <img
@@ -117,98 +128,25 @@ export default function SingleProduct() {
                     alt="thumbnail"
                     onClick={() => setSelectedImage(img)}
                     className={`w-20 h-20 md:w-24 md:h-24 rounded-xl object-cover border-2 cursor-pointer transition-all duration-300 hover:scale-105 ${
-                      selectedImage === img
-                        ? "border-red-500 shadow-lg"
-                        : "border-gray-200"
+                      selectedImage === img ? "border-red-500 shadow-lg" : "border-gray-200"
                     }`}
                   />
                 ))}
               </div>
-
-              {/* --- Highlights Section --- */}
-              <div className="mt-8 w-full" data-aos="fade-up">
-                <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-3">
-                  Highlights
-                </h3>
-                <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1 text-sm">
-                  <li>Discount: {Math.round(product.discountPercentage)}% OFF</li>
-                  <li>High-quality build by {product.brand}</li>
-                  <li>Category: {product.category}</li>
-                  <li>Free Delivery above ₹500</li>
-                  <li>7-Day Replacement Guarantee</li>
-                </ul>
-              </div>
-
-              {/* --- Product Specifications Below Highlights --- */}
-              <div
-                className="mt-8 border-t border-gray-300 dark:border-gray-600 pt-6 w-full"
-                data-aos="fade-up"
-              >
-                <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-                  <FaListAlt className="text-red-500" /> Product Specifications
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700 dark:text-gray-300">
-                  <div className="flex justify-between border-b border-gray-300 dark:border-gray-600 py-2">
-                    <span className="font-semibold">Brand</span>
-                    <span>{product.brand || "Not specified"}</span>
-                  </div>
-
-                  <div className="flex justify-between border-b border-gray-300 dark:border-gray-600 py-2">
-                    <span className="font-semibold">Category</span>
-                    <span>{product.category || "N/A"}</span>
-                  </div>
-
-                  <div className="flex justify-between border-b border-gray-300 dark:border-gray-600 py-2">
-                    <span className="font-semibold">Stock</span>
-                    <span>
-                      {product.stock > 0 ? `${product.stock} Units` : "Out of Stock"}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between border-b border-gray-300 dark:border-gray-600 py-2">
-                    <span className="font-semibold">Warranty</span>
-                    <span>{product.warranty || "1 Year Manufacturer Warranty"}</span>
-                  </div>
-
-                  <div className="flex justify-between border-b border-gray-300 dark:border-gray-600 py-2">
-                    <span className="font-semibold">Discount</span>
-                    <span>{Math.round(product.discountPercentage)}%</span>
-                  </div>
-
-                  <div className="flex justify-between border-b border-gray-300 dark:border-gray-600 py-2">
-                    <span className="font-semibold">Rating</span>
-                    <span className="text-yellow-500">{product.rating} ★</span>
-                  </div>
-
-                  <div className="flex justify-between border-b border-gray-300 dark:border-gray-600 py-2">
-                    <span className="font-semibold">Return Policy</span>
-                    <span>7 Days Replacement</span>
-                  </div>
-
-                  <div className="flex justify-between border-b border-gray-300 dark:border-gray-600 py-2">
-                    <span className="font-semibold">Seller</span>
-                    <span>{product.seller || "E-Shop Official"}</span>
-                  </div>
-                </div>
-              </div>
             </div>
 
-            {/* ===== RIGHT COLUMN ===== */}
+            {/* ---------------- RIGHT COLUMN ---------------- */}
             <div className="flex flex-col justify-center space-y-6">
-              {/* Title & Brand */}
-              <div>
-                <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800 dark:text-white flex flex-wrap items-center gap-2">
-                  {product.title}
-                </h1>
-                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  <FaIndustry /> {product.brand}
-                  <span>/</span>
-                  <FaListAlt /> {product.category}
-                </div>
+              <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800 dark:text-white">
+                {product.title}
+              </h1>
+
+              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                <FaIndustry /> {product.brand}
+                <span>/</span>
+                <FaListAlt /> {product.category}
               </div>
 
-              {/* Description */}
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                 {product.description}
               </p>
@@ -218,6 +156,7 @@ export default function SingleProduct() {
                 <h2 className="text-3xl font-bold text-red-600 flex items-center gap-1">
                   <FaRupeeSign /> {product.price}
                 </h2>
+
                 <span className="text-gray-400 line-through">
                   ₹
                   {Math.round(
@@ -242,7 +181,8 @@ export default function SingleProduct() {
                 <input
                   type="number"
                   min={1}
-                  defaultValue={1}
+                  value={quantity}
+                  onChange={(e) => setQuantity(Number(e.target.value))}
                   className="w-20 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-center bg-white/30 dark:bg-gray-800/40 focus:outline-none focus:ring-2 focus:ring-red-400"
                 />
               </div>
@@ -250,8 +190,8 @@ export default function SingleProduct() {
               {/* Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 mt-4">
                 <button
+                  onClick={() => addToCart(product, quantity)}
                   className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-pink-500 hover:from-red-700 hover:to-pink-600 text-white text-base font-semibold rounded-xl shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
-                  onClick={() => addToCart(product)}
                 >
                   <FaShoppingCart /> Add to Cart
                 </button>
@@ -273,19 +213,82 @@ export default function SingleProduct() {
                 </button>
               </div>
 
-              {/* Delivery Info */}
+              {/* Delivery */}
               <div className="mt-6 text-sm text-gray-700 dark:text-gray-400 space-y-2 border-t border-gray-300 dark:border-gray-600 pt-4">
                 <p className="flex items-center gap-2">
-                  <FaTruck className="text-green-500" /> Free Delivery on orders
-                  above ₹500
+                  <FaTruck className="text-green-500" /> Free Delivery above ₹500
                 </p>
                 <p className="flex items-center gap-2">
                   <FaUndoAlt className="text-blue-500" /> 7-Day Replacement
-                  Guarantee
                 </p>
                 <p className="flex items-center gap-2">
                   <FaTag className="text-orange-500" /> Inclusive of all taxes
                 </p>
+              </div>
+            </div>
+          </div>
+
+          {/* ================= HIGHLIGHTS + SPECIFICATIONS BOX ================= */}
+          <div
+            className="mt-10 max-w-6xl rounded-2xl p-6 shadow-xl"
+            data-aos="fade-up"
+          >
+            {/* Highlights */}
+            <h3 className="text-2xl font-bold text-white mb-4">
+              Highlights
+            </h3>
+
+            <ul className="list-disc text-gray-300 text-lg space-y-2 pl-5 max-w-xl">
+              <li>{Math.round(product.discountPercentage)}% Discount</li>
+              <li>Brand: {product.brand}</li>
+              <li>Category: {product.category}</li>
+              <li>Premium Quality Build</li>
+              <li>Fast Delivery</li>
+              <li>7-Day Replacement Guarantee</li>
+            </ul>
+
+            {/* Divider */}
+            <div className="my-6 border-t border-gray-300 dark:border-gray-600"></div>
+
+            {/* Product Specifications */}
+            <h3 className="text-2xl font-bold text-center text-gray-800 dark:text-white mb-4">
+              Product Specifications
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-gray-700 dark:text-gray-300 text-sm">
+              <div className="flex justify-between border-b py-2">
+                <span className="font-semibold">Brand</span>
+                <span>{product.brand}</span>
+              </div>
+              <div className="flex justify-between border-b py-2">
+                <span className="font-semibold">Category</span>
+                <span>{product.category}</span>
+              </div>
+              <div className="flex justify-between border-b py-2">
+                <span className="font-semibold">Stock</span>
+                <span>
+                  {product.stock > 0 ? `${product.stock} Units` : "Out of Stock"}
+                </span>
+              </div>
+              <div className="flex justify-between border-b py-2">
+                <span className="font-semibold">Discount</span>
+                <span>{Math.round(product.discountPercentage)}%</span>
+              </div>
+              <div className="flex justify-between border-b py-2">
+                <span className="font-semibold">Rating</span>
+                <span className="text-yellow-500">{product.rating} ★</span>
+              </div>
+              <div className="flex justify-between border-b py-2">
+                <span className="font-semibold">Return Policy</span>
+                <span>7 Days Replacement</span>
+              </div>
+              <div className="flex justify-between border-b py-2">
+                <span className="font-semibold">Warranty</span>
+                <span>{product.warranty || "1 Year Manufacturer Warranty"}</span>
+              </div>
+              <div className="flex justify-between border-b py-2">
+                <span className="font-semibold">Seller</span>
+                <span>{product.seller || "E-Shop Official"}</span>
               </div>
             </div>
           </div>

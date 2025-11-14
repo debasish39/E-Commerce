@@ -54,7 +54,7 @@ export default function ProductCard({ product }) {
 
         {/* 🔖 Tag */}
         <span className="absolute top-2 left-2 text-[10px] xs:text-xs sm:text-sm bg-gradient-to-r from-red-500 to-pink-500 text-white font-semibold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-md backdrop-blur-sm">
-          Featured
+         ✨ Featured
         </span>
       </div>
 
@@ -68,14 +68,14 @@ export default function ProductCard({ product }) {
         <p className="text-lg xs:text-xl sm:text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-500 text-transparent bg-clip-text">
           ₹{product.price}
         </p>
-        <p>
+        {/* <p>
           <span className="font-semibold text-gray-200">Stock:</span>{" "}
           {product.stock > 0 ? (
             <span className="text-green-400">In Stock ({product.stock})</span>
           ) : (
             <span className="text-red-400">Out of Stock</span>
           )}
-        </p>
+        </p> */}
       </div>
 
       {/* 🛒 Add to Cart Button */}

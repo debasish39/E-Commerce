@@ -45,10 +45,11 @@ export default function WishlistPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-[#140202] to-black text-white py-10 px-6">
+    <div className="min-h-screen text-white py-10 px-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-10 gap-4">
-        <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">
+        <h2 className="text-3xl sm:text-4xl font-boldtext-transparent bg-clip-text 
+          bg-gradient-to-r from-red-400 to-orange-300">
           ❤️ My Wishlist
         </h2>
         <button

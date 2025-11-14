@@ -63,8 +63,48 @@ export default function Products() {
     startIndex + itemsPerPage
   );
 
+  // Function to generate pagination buttons with ellipses
+  const renderPagination = () => {
+    const pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+      // Show first, last, current, and current ±1
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= page - 1 && i <= page + 1)
+      ) {
+        pages.push(i);
+      }
+    }
+
+    const paginationButtons = [];
+    pages.forEach((p, idx) => {
+      if (idx > 0 && p - pages[idx - 1] > 1) {
+        paginationButtons.push(
+          <span key={`dots-${p}`} className="px-2">
+            ...
+          </span>
+        );
+      }
+      paginationButtons.push(
+        <button
+          key={p}
+          onClick={() => setPage(p)}
+          className={`px-4 py-2 rounded-full border transition-all duration-300 ${
+            page === p
+              ? "bg-red-500/80 border-red-500 text-white shadow-md shadow-red-500/40"
+              : "border-white/20 hover:bg-white/10 hover:border-red-400 hover:text-red-400"
+          }`}
+        >
+          {p}
+        </button>
+      );
+    });
+    return paginationButtons;
+  };
+
   return (
-    <div className="relative bg-gradient-to-b from-[#0f0f10] via-[#161618] to-[#0f0f10] min-h-screen py-12 px-4 sm:px-6 lg:px-10 text-white overflow-hidden">
+    <div className="relative min-h-screen py-12 px-4 sm:px-6 lg:px-10 text-white overflow-hidden">
       {/* Floating gradients */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[400px] h-[400px] bg-red-500/20 blur-[150px] rounded-full animate-pulse" />
@@ -82,12 +122,12 @@ export default function Products() {
         className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4"
         data-aos="fade-down"
       >
-        <h2 className="text-xl sm:text-3xl font-extrabold tracking-wide bg-gradient-to-r from-[#f53347] to-pink-500 text-transparent bg-clip-text drop-shadow-md">
+        <h2 className="text-xl sm:text-3xl font-extrabold tracking-wide bg-gradient-to-r from-red-500 to-red-200 text-transparent bg-clip-text drop-shadow-md">
           <span className="text-white">🛍️</span> Explore Our Collection
         </h2>
       </div>
 
-      {/* 🧩 Filter Section (Top, Full Width) */}
+      {/* Filter Section */}
       <div className="mb-10" data-aos="fade-up">
         <FilterSection
           data={data}
@@ -104,7 +144,7 @@ export default function Products() {
         />
       </div>
 
-      {/* 🛒 Product Grid */}
+      {/* Product Grid */}
       {data?.length > 0 ? (
         <>
           {filteredProducts.length === 0 ? (
@@ -147,20 +187,8 @@ export default function Products() {
                 <FaAngleLeft /> Prev
               </button>
 
-              {/* Page Numbers */}
-              {Array.from({ length: totalPages }, (_, index) => (
-                <button
-                  key={index + 1}
-                  onClick={() => setPage(index + 1)}
-                  className={`px-4 py-2 rounded-full border transition-all duration-300 ${
-                    page === index + 1
-                      ? "bg-red-500/80 border-red-500 text-white shadow-md shadow-red-500/40"
-                      : "border-white/20 hover:bg-white/10 hover:border-red-400 hover:text-red-400"
-                  }`}
-                >
-                  {index + 1}
-                </button>
-              ))}
+              {/* Page Buttons with Ellipses */}
+              {renderPagination()}
 
               {/* Next Button */}
               <button

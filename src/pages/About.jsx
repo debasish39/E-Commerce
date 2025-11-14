@@ -9,18 +9,20 @@ export default function About() {
 
   return (
     <section
-      className="relative min-h-screen text-gray-800 py-20 px-6 md:px-12 overflow-hidden 
-                 bg-gradient-to-br from-white/60 via-red-50/60 to-transparent 
-                 dark:from-[#0f0f0f]/60 dark:via-[#1a1a1a]/70 dark:to-transparent
-                 backdrop-blur-md"
+      className="relative min-h-screen text-gray-800 py-20 px-6 md:px-12 overflow-hidden"
     >
-      {/* Background Glow / Particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -left-20 w-80 h-80 bg-red-400/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-red-300/10 rounded-full blur-3xl animate-pulse delay-1000" />
+       
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[400px] h-[400px] bg-red-500/20 blur-[150px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-pink-500/20 blur-[150px] rounded-full animate-[float_8s_infinite_linear]" />
+        <style>{`
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-25px); }
+          }
+        `}</style>
       </div>
-
-      <div className="relative z-10 max-w-5xl mx-auto text-center">
+      <div className="relative z-10   text-center">
         {/* Header */}
         <h1
           data-aos="fade-up"
@@ -34,7 +36,7 @@ export default function About() {
         <div
           data-aos="fade-up"
           data-aos-delay="100"
-          className="bg-white/70 dark:bg-[#1a1a1a]/70 backdrop-blur-xl border border-red-200/20 rounded-3xl p-8 md:p-12 shadow-lg hover:shadow-2xl transition-all"
+          className=" md:p-12 shadow-lg hover:shadow-2xl transition-all"
         >
           <p className="text-lg md:text-xl leading-relaxed mb-6 text-gray-700 dark:text-gray-300">
             Welcome to <span className="font-bold text-red-600">E-Shop</span>, your one-stop
@@ -54,30 +56,8 @@ export default function About() {
             secure authentication, cart persistence, and payment integration!
           </p>
 
-          {/* Technologies */}
-          <div
-            data-aos="fade-up"
-            data-aos-delay="200"
-            className="mt-10 text-left md:text-center"
-          >
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
-              🧠 Technologies Used
-            </h2>
-            <div className="flex flex-wrap justify-center gap-3 text-base font-medium">
-              <span className="bg-red-100 text-red-600 px-4 py-2 rounded-full border border-red-200">
-                React.js
-              </span>
-              <span className="bg-red-100 text-red-600 px-4 py-2 rounded-full border border-red-200">
-                Tailwind CSS
-              </span>
-              <span className="bg-red-100 text-red-600 px-4 py-2 rounded-full border border-red-200">
-                Context API
-              </span>
-              <span className="bg-red-100 text-red-600 px-4 py-2 rounded-full border border-red-200">
-                AOS Animations
-              </span>
-            </div>
-          </div>
+        
+         
         </div>
 
         {/* Footer Text */}

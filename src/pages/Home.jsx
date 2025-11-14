@@ -46,7 +46,17 @@ export default function Home() {
   }
 
   return (
-    <div>
+    <div  className="relative min-h-screen text-gray-800  overflow-hidden">
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[400px] h-[400px] bg-red-500/20 blur-[150px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-pink-500/20 blur-[150px] rounded-full animate-[float_8s_infinite_linear]" />
+        <style>{`
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-25px); }
+          }
+        `}</style>
+      </div>
       <div data-aos="fade-up">
         <Carousel />
       </div>
