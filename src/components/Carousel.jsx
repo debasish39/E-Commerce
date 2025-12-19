@@ -113,67 +113,89 @@ const Carousel = () => {
             {orderedData.map((item) => (
               <div key={item.id} className="px-2 sm:px-4 lg:px-10">
                 <div
-                  className="flex flex-col lg:flex-row items-center gap-6 sm:gap-10 p-4 sm:p-8 lg:p-10
-                    rounded-3xl backdrop-blur-xl bg-gradient-to-r from-white/5 to-white/10 border border-white/20 transition-all duration-700 "
+                  className="grid lg:grid-cols-2 items-center gap-10 p-6 sm:p-10 lg:p-14
+        rounded-3xl backdrop-blur-xl bg-gradient-to-r from-white/5 to-white/10 
+        border border-white/20 transition-all duration-700"
                 >
-                  {/* Image */}
-                  <div className="w-full lg:w-1/2 relative flex justify-center">
+
+
+                  {/* RIGHT : IMAGE (Hero Focus) */}
+                  <div className="relative flex justify-center order-1 lg:order-2">
                     <img
                       src={item.thumbnail}
                       alt={item.title}
-                      className="h-56 sm:h-64 md:h-72 lg:h-80 w-full object-contain rounded-xl drop-shadow-2xl cursor-pointer transition-transform hover:scale-[1.08] hover:rotate-1"
-                      onClick={() => navigate(`/products/${item.id}`)}
+                      className="h-64 sm:h-72 md:h-80 lg:h-[380px]
+            w-full object-contain rounded-xl drop-shadow-2xl
+            transition-transform hover:scale-110"
                     />
-                    <div className="absolute top-4 left-4 bg-gradient-to-r from-[#f53347] to-[#ff6f61] text-white text-xs sm:text-sm md:text-base font-semibold px-3 py-1 rounded-full shadow-lg">
-                     ✨Featured
+
+                    <div className="absolute top-4 left-4 bg-gradient-to-r
+            from-[#f53347] to-[#ff6f61] text-white text-xs
+            font-semibold px-3 py-1 rounded-full shadow-lg">
+                      ✨ Featured
                     </div>
                   </div>
+                  {/* LEFT : TEXT (Hero Style) */}
+                  <div className="text-center lg:text-left space-y-4 text-white order-2 lg:order-1">
+                    <p className=" lg:block text-sm font-semibold text-red-300">
+                      Welcome to E-shop
+                    </p>
 
-                  {/* Info */}
-                  <div className="w-full lg:w-1/2 text-center lg:text-left space-y-2 sm:space-y-3 text-white mt-4 lg:mt-0">
+
                     <h1
-                      className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight line-clamp-1 drop-shadow-md cursor-pointer hover:text-[#ff6f61] transition-colors"
+                      className="text-2xl sm:text-4xl lg:text-5xl font-extrabold leading-tight
+            drop-shadow-lg cursor-pointer hover:text-[#ff6f61] transition-colors"
                       onClick={() => navigate(`/products/${item.id}`)}
                     >
                       {item.title}
                     </h1>
 
-                    <div className="flex items-center justify-center lg:justify-start gap-1 text-yellow-400">
-                      {[...Array(5)].map((_, i) => (
-                        <FaStar key={i} className="text-sm sm:text-base drop-shadow-sm" />
-                      ))}
-                    </div>
-
-                    <p className="text-gray-100/90 text-sm sm:text-base md:text-lg leading-relaxed line-clamp-2 opacity-90">
+                    <p className="text-gray-100/90 text-sm sm:text-base md:text-lg max-w-xl mx-auto lg:mx-0">
                       {item.description}
                     </p>
 
-                    <p className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-[#ff5c6e] to-[#ff9a8b] drop-shadow-lg">
+                    {/* Rating (kept but subtle) */}
+                    <div className="flex justify-center lg:justify-start gap-1 text-yellow-400">
+                      {[...Array(5)].map((_, i) => (
+                        <FaStar key={i} className="text-sm drop-shadow-sm" />
+                      ))}
+                    </div>
+
+                    <p className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r 
+            from-[#ff5c6e] to-[#ff9a8b] bg-clip-text text-transparent">
                       ₹{item.price}
                     </p>
 
                     {/* Buttons */}
-                    <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-3 mt-3 sm:mt-4">
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
                       <button
-                        className="bg-gradient-to-r from-[#f53347] to-[#ff6f61] hover:from-[#d02b3b] hover:to-[#ff3a4c] text-white font-semibold px-4 sm:px-6 py-2 sm:py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center justify-center gap-2 cursor-pointer text-center"
                         onClick={() => addToCart(item)}
+                        className="bg-gradient-to-r from-[#f53347] to-[#ff6f61]
+              hover:from-[#d02b3b] hover:to-[#ff3a4c]
+              text-white font-semibold px-6 py-2.5 rounded-full
+              shadow-lg hover:shadow-xl transition-all transform hover:scale-105
+              flex items-center justify-center gap-2 cursor-pointer"
                       >
-                        <FaShoppingCart className="text-lg" /> Add to Cart
+                        <FaShoppingCart /> Add to Cart
                       </button>
 
-
                       <button
-                        className="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 sm:px-6 py-2 sm:py-2.5 rounded-full shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center gap-2 cursor-pointer justify-center"
                         onClick={() => navigate(`/products/${item.id}`)}
+                        className="bg-white/10 hover:bg-white/20 text-white
+              font-semibold px-6 py-2.5 rounded-full shadow-md
+              hover:shadow-lg transition-all transform hover:scale-105
+              flex items-center justify-center gap-2 cursor-pointer"
                       >
-                        <AiOutlineEye className="text-lg" /> View Product
+                        <AiOutlineEye /> View Product
                       </button>
                     </div>
                   </div>
+
                 </div>
               </div>
             ))}
           </Slider>
+
         )}
       </div>
     </div>
