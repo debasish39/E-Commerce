@@ -24,7 +24,6 @@ const Carousel = () => {
     }
   }, []);
 
-  // Custom arrows
   const SamplePrevArrow = ({ onClick }) => (
     <div
       onClick={onClick}
@@ -69,7 +68,6 @@ const Carousel = () => {
 
   return (
     <div className="relative w-full py-12 sm:py-16 overflow-hidden bg-transparent">
-      {/* Particle Background */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute w-[120%] h-[120%] bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.08)_0%,_transparent_70%)] animate-pulse" />
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20" />
@@ -83,18 +81,16 @@ const Carousel = () => {
         `}</style>
       </div>
 
-      {/* Section Title + View All */}
-      <div className="max-w-7xl mx-auto round flex px-9 sm:flex-row justify-between items-center mb-6  sm:px-8 gap-4 sm:gap-0">
+      <div className="max-w-7xl mx-auto round flex px-9 sm:flex-row justify-between items-center mb-6 sm:px-8 gap-4 sm:gap-0">
         <h2
-          className="text-[24px] sm:text-3xl  font-extrabold text-transparent bg-clip-text 
-          bg-gradient-to-r from-red-400 to-orange-300 drop-shadow-lg text-center sm:text-left"
+          className="text-[24px] sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-300 drop-shadow-lg text-center sm:text-left"
           style={{ fontFamily: "'Pacifico', cursive" }}
         >
           <span className="text-white">✨</span> Featured Products
         </h2>
 
         <span
-          onClick={() => navigate('/products')}
+          onClick={() => navigate("/products")}
           className="text-red-100 font-semibold text-base sm:text-lg cursor-pointer transition-transform duration-300 underline hover:scale-105 hover:text-[#ff6f61] active:scale-95 active:text-[#f53347]"
         >
           View All
@@ -112,39 +108,25 @@ const Carousel = () => {
           <Slider {...settings}>
             {orderedData.map((item) => (
               <div key={item.id} className="px-2 sm:px-4 lg:px-10">
-                <div
-                  className="grid lg:grid-cols-2 items-center gap-10 p-6 sm:p-10 lg:p-14
-        rounded-3xl backdrop-blur-xl bg-gradient-to-r from-white/5 to-white/10 
-        border border-white/20 transition-all duration-700"
-                >
-
-
-                  {/* RIGHT : IMAGE (Hero Focus) */}
+                <div className="grid lg:grid-cols-2 items-center gap-10 p-6 sm:p-10 lg:p-18 rounded-3xl backdrop-blur-xl bg-gradient-to-r from-white/5 to-white/10 border border-white/20 transition-all duration-700">
                   <div className="relative flex justify-center order-1 lg:order-2">
                     <img
                       src={item.thumbnail}
                       alt={item.title}
-                      className="h-64 sm:h-72 md:h-80 lg:h-[380px]
-            w-full object-contain rounded-xl drop-shadow-2xl
-            transition-transform hover:scale-110"
+                      className="h-64 sm:h-72 md:h-80 lg:h-[380px] w-full object-contain rounded-xl drop-shadow-2xl transition-transform hover:scale-110"
                     />
-
-                    <div className="absolute top-4 left-4 bg-gradient-to-r
-            from-[#f53347] to-[#ff6f61] text-white text-xs
-            font-semibold px-3 py-1 rounded-full shadow-lg">
+                    <div className="absolute top-4 left-4 bg-gradient-to-r from-[#f53347] to-[#ff6f61] text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
                       ✨ Featured
                     </div>
                   </div>
-                  {/* LEFT : TEXT (Hero Style) */}
+
                   <div className="text-center lg:text-left space-y-4 text-white order-2 lg:order-1">
-                    <p className=" lg:block text-sm font-semibold text-red-300">
+                    <p className="lg:block text-sm font-semibold text-red-300">
                       Welcome to E-shop
                     </p>
 
-
                     <h1
-                      className="text-2xl sm:text-4xl lg:text-5xl font-extrabold leading-tight
-            drop-shadow-lg cursor-pointer hover:text-[#ff6f61] transition-colors"
+                      className="text-2xl sm:text-4xl lg:text-5xl font-extrabold leading-tight drop-shadow-lg cursor-pointer hover:text-[#ff6f61] transition-colors"
                       onClick={() => navigate(`/products/${item.id}`)}
                     >
                       {item.title}
@@ -154,48 +136,36 @@ const Carousel = () => {
                       {item.description}
                     </p>
 
-                    {/* Rating (kept but subtle) */}
                     <div className="flex justify-center lg:justify-start gap-1 text-yellow-400">
                       {[...Array(5)].map((_, i) => (
                         <FaStar key={i} className="text-sm drop-shadow-sm" />
                       ))}
                     </div>
 
-                    <p className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r 
-            from-[#ff5c6e] to-[#ff9a8b] bg-clip-text text-transparent">
+                    <p className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-[#ff5c6e] to-[#ff9a8b] bg-clip-text text-transparent">
                       ₹{item.price}
                     </p>
 
-                    {/* Buttons */}
                     <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
                       <button
                         onClick={() => addToCart(item)}
-                        className="bg-gradient-to-r from-[#f53347] to-[#ff6f61]
-              hover:from-[#d02b3b] hover:to-[#ff3a4c]
-              text-white font-semibold px-6 py-2.5 rounded-full
-              shadow-lg hover:shadow-xl transition-all transform hover:scale-105
-              flex items-center justify-center gap-2 cursor-pointer"
+                        className="bg-gradient-to-r from-[#f53347] to-[#ff6f61] hover:from-[#d02b3b] hover:to-[#ff3a4c] text-white font-semibold px-6 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center justify-center gap-2 cursor-pointer"
                       >
                         <FaShoppingCart /> Add to Cart
                       </button>
 
                       <button
                         onClick={() => navigate(`/products/${item.id}`)}
-                        className="bg-white/10 hover:bg-white/20 text-white
-              font-semibold px-6 py-2.5 rounded-full shadow-md
-              hover:shadow-lg transition-all transform hover:scale-105
-              flex items-center justify-center gap-2 cursor-pointer"
+                        className="bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 cursor-pointer"
                       >
                         <AiOutlineEye /> View Product
                       </button>
                     </div>
                   </div>
-
                 </div>
               </div>
             ))}
           </Slider>
-
         )}
       </div>
     </div>

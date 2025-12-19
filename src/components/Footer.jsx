@@ -116,7 +116,7 @@ const Footer = () => {
       <div className="mt-10 border-t border-gray-600 pt-5 text-center text-sm pb-3 text-gray-400">
         <p>
           &copy; {new Date().getFullYear()}{' '}
-          <span className="text-red-500 font-semibold"><Link to='/'>E-Shop</Link></span>. All rights reserved.
+          <span className="text-red-500 font-semibold">E-Shop</span>. All rights reserved.
         </p>
       </div>
 
