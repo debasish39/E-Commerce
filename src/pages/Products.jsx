@@ -14,15 +14,9 @@ export default function Products() {
     data,
     fetchAllProducts,
     search,
-    setSearch,
     brand,
-    setBrand,
     category,
-    setCategory,
     priceRange,
-    setPriceRange,
-    handleBrandChange,
-    handleCategoryChange,
   } = getData();
 
   const [page, setPage] = useState(1);
@@ -49,7 +43,8 @@ export default function Products() {
         category === "ALL" || category === "All" || product.category === category
     )
     .filter(
-      (product) => brand === "ALL" || brand === "All" || product.brand === brand
+      (product) =>
+        brand === "ALL" || brand === "All" || product.brand === brand
     )
     .filter(
       (product) =>
@@ -63,11 +58,10 @@ export default function Products() {
     startIndex + itemsPerPage
   );
 
-  // Function to generate pagination buttons with ellipses
   const renderPagination = () => {
     const pages = [];
+
     for (let i = 1; i <= totalPages; i++) {
-      // Show first, last, current, and current ±1
       if (
         i === 1 ||
         i === totalPages ||
@@ -77,20 +71,22 @@ export default function Products() {
       }
     }
 
-    const paginationButtons = [];
+    const buttons = [];
+
     pages.forEach((p, idx) => {
       if (idx > 0 && p - pages[idx - 1] > 1) {
-        paginationButtons.push(
-          <span key={`dots-${p}`} className="px-2">
+        buttons.push(
+          <span key={`dots-${p}`} className="px-1 text-gray-400">
             ...
           </span>
         );
       }
-      paginationButtons.push(
+
+      buttons.push(
         <button
           key={p}
           onClick={() => setPage(p)}
-          className={`px-4 py-2 rounded-full border transition-all duration-300 ${
+          className={`px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base rounded-full border transition-all duration-300 ${
             page === p
               ? "bg-red-500/80 border-red-500 text-white shadow-md shadow-red-500/40"
               : "border-white/20 hover:bg-white/10 hover:border-red-400 hover:text-red-400"
@@ -100,15 +96,17 @@ export default function Products() {
         </button>
       );
     });
-    return paginationButtons;
+
+    return buttons;
   };
 
   return (
-    <div className="relative min-h-screen py-12 px-4 sm:px-6 lg:px-10 text-white overflow-hidden">
-      {/* Floating gradients */}
+    <div className="relative min-h-screen py-8 sm:py-12 px-3 sm:px-6 lg:px-10 text-white overflow-x-hidden">
+
+      {/* Background Gradients */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[400px] h-[400px] bg-red-500/20 blur-[150px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-pink-500/20 blur-[150px] rounded-full animate-[float_8s_infinite_linear]" />
+        <div className="absolute top-[-10%] left-[-10%] w-[300px] sm:w-[400px] h-[300px] sm:h-[400px] bg-red-500/20 blur-[150px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[300px] sm:w-[400px] h-[300px] sm:h-[400px] bg-pink-500/20 blur-[150px] rounded-full animate-[float_8s_infinite_linear]" />
         <style>{`
           @keyframes float {
             0%, 100% { transform: translateY(0px); }
@@ -119,47 +117,35 @@ export default function Products() {
 
       {/* Header */}
       <div
-        className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4"
+        className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8 gap-3 sm:gap-4"
         data-aos="fade-down"
       >
-        <h2 className="text-xl sm:text-3xl font-extrabold tracking-wide bg-gradient-to-r from-red-500 to-red-200 text-transparent bg-clip-text drop-shadow-md">
+        <h2 className="text-lg sm:text-2xl lg:text-3xl font-extrabold tracking-wide text-center sm:text-left bg-gradient-to-r from-red-500 to-red-200 text-transparent bg-clip-text drop-shadow-md">
           <span className="text-white">🛍️</span> Explore Our Collection
         </h2>
       </div>
 
-      {/* Filter Section */}
-      <div className="mb-10" data-aos="fade-up">
-        <FilterSection
-          data={data}
-          search={search}
-          setSearch={setSearch}
-          brand={brand}
-          setBrand={setBrand}
-          priceRange={priceRange}
-          setPriceRange={setPriceRange}
-          category={category}
-          setCategory={setCategory}
-          handleCategoryChange={handleCategoryChange}
-          handleBrandChange={handleBrandChange}
-        />
+      {/* Filters */}
+      <div className="mb-8 sm:mb-10" data-aos="fade-up">
+        <FilterSection />
       </div>
 
-      {/* Product Grid */}
+      {/* Products */}
       {data?.length > 0 ? (
         <>
           {filteredProducts.length === 0 ? (
-            <div className="flex justify-center items-center min-h-[400px]" data-aos="fade-in">
-              <Lottie animationData={notfound} className="w-3/4 max-w-md" />
+            <div className="flex justify-center items-center min-h-[350px]" data-aos="fade-in">
+              <Lottie animationData={notfound} className="w-3/4 max-w-sm" />
             </div>
           ) : (
             <div
-              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6"
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 lg:gap-6 w-full"
               data-aos="fade-up"
             >
               {paginatedProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_0_20px_rgba(255,0,80,0.3)] rounded-xl"
+                  className="transition-all duration-300 sm:hover:scale-[1.05] sm:hover:shadow-[0_0_20px_rgba(255,0,80,0.3)] rounded-xl"
                   data-aos="zoom-in"
                 >
                   <ProductCard product={product} />
@@ -171,14 +157,14 @@ export default function Products() {
           {/* Pagination */}
           {filteredProducts.length > 0 && (
             <div
-              className="mt-12 flex justify-center items-center flex-wrap gap-3"
+              className="mt-10 sm:mt-12 flex justify-center items-center flex-wrap gap-2 sm:gap-3 px-2"
               data-aos="fade-up"
             >
-              {/* Prev Button */}
+              {/* Prev */}
               <button
                 onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
                 disabled={page === 1}
-                className={`flex items-center gap-1 px-4 py-2 rounded-full border border-white/20 transition-all duration-300 ${
+                className={`flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base rounded-full border transition-all duration-300 ${
                   page === 1
                     ? "text-gray-500 cursor-not-allowed border-gray-700"
                     : "hover:bg-red-500/20 hover:border-red-400 hover:text-red-400"
@@ -187,14 +173,15 @@ export default function Products() {
                 <FaAngleLeft /> Prev
               </button>
 
-              {/* Page Buttons with Ellipses */}
               {renderPagination()}
 
-              {/* Next Button */}
+              {/* Next */}
               <button
-                onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+                onClick={() =>
+                  setPage((prev) => Math.min(prev + 1, totalPages))
+                }
                 disabled={page === totalPages}
-                className={`flex items-center gap-1 px-4 py-2 rounded-full border border-white/20 transition-all duration-300 ${
+                className={`flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base rounded-full border transition-all duration-300 ${
                   page === totalPages
                     ? "text-gray-500 cursor-not-allowed border-gray-700"
                     : "hover:bg-red-500/20 hover:border-red-400 hover:text-red-400"
@@ -207,7 +194,7 @@ export default function Products() {
         </>
       ) : (
         <div
-          className="flex items-center justify-center h-[400px]"
+          className="flex items-center justify-center h-[350px]"
           data-aos="fade-in"
         >
           <video
@@ -215,7 +202,7 @@ export default function Products() {
             autoPlay
             loop
             aria-hidden="true"
-            className="rounded-3xl shadow-lg border border-white/10"
+            className="w-40 sm:w-56 md:w-64 rounded-3xl shadow-lg border border-white/10"
           >
             <source src={Loading} type="video/webm" />
           </video>

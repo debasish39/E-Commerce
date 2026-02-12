@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import axios from "axios";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "sonner";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import Spinner from "./components/Spinner";
@@ -86,10 +86,11 @@ const AppWrapper = () => {
     <>
       {/* ===== Toast Notifications ===== */}
       <Toaster
-        position="top-right"
-        containerStyle={{ zIndex: 9999 }}
-        toastOptions={{ duration: 900 }}
-      />
+  position="top-right"
+  expand
+  richColors
+  closeButton
+/>
 
      <Suspense fallback={<Spinner />}>
         <ScrollProgressBar />

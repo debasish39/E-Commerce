@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink,useNavigate } from "react-router-dom";
 import {
   ShoppingCart,
   MapPin,
@@ -7,7 +7,7 @@ import {
   Home,
   Info,
   Package,
-  Phone,
+  Phone,Search
 } from "lucide-react";
 import { FaSignInAlt } from "react-icons/fa";
 import { HiMenuAlt1, HiMenuAlt3 } from "react-icons/hi";
@@ -17,12 +17,23 @@ import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/wishlistContext";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import { getData } from "../context/DataContext";
 
 export default function Navbar({ location, onLocationChange }) {
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const { cartItem } = useCart();
   const { wishlist } = useWishlist();
+const navigate = useNavigate();
+const { search, setSearch } = getData();
+const handleSearchChange = (e) => {
+  setSearch(e.target.value);
+};
+
+const handleFocus = () => {
+  navigate("/products");
+};
+
 
   useEffect(() => {
     AOS.init({ duration: 700, easing: "ease-out", once: false });
@@ -122,6 +133,28 @@ export default function Navbar({ location, onLocationChange }) {
 
           {/* Desktop Navigation */}
           <nav className="hidden sm:flex items-center gap-6" data-aos="fade-left">
+            {/* Desktop Search */}
+{/* Desktop Search */}
+<div className="relative hidden lg:flex items-center">
+  <input
+    type="text"
+    value={search}
+    onChange={handleSearchChange}
+    onFocus={() => navigate("/products")}
+    placeholder="Search products..."
+    className="bg-gradient-to-br from-black/40 to-black/20
+    border border-red-500/30
+    text-white placeholder-gray-400
+    text-sm rounded-full
+    pl-5 pr-12 py-2
+    w-56 focus:w-72
+    focus:outline-none focus:ring-2 focus:ring-red-500
+    transition-all duration-300 ease-in-out backdrop-blur-md"
+  />
+
+  <Search className="absolute right-4 h-4 w-4 text-gray-400" />
+</div>
+
             <ul className="flex gap-6 font-medium">
               {navLinks.map(({ name, path, icon }) => (
                 <li key={name} className="relative group">
@@ -297,6 +330,23 @@ export default function Navbar({ location, onLocationChange }) {
 
         <div className="flex flex-col justify-between h-full">
           <div className="p-4 space-y-4 overflow-y-auto">
+            {/* Mobile Search */}
+{/* Mobile Search */}
+<div className="relative mt-3">
+  <input
+    type="text"
+    value={search}
+    onChange={handleSearchChange}
+    onFocus={() => navigate("/products")}
+    placeholder="Search products..."
+    className="w-full bg-black/40 border border-red-500/30 
+    text-white rounded-full pl-5 pr-12 py-2.5 text-sm
+    focus:outline-none focus:ring-2 focus:ring-red-500
+    backdrop-blur-md transition"
+  />
+  <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+</div>
+
             {renderLocation()}
 
             {navLinks.map(({ name, path, icon }) => (

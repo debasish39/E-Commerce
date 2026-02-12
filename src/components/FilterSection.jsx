@@ -56,42 +56,48 @@ export default function FilterSection() {
           placeholder="Search products..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="px-4 py-2 rounded-xl border border-gray-700 bg-[#0f0f10]/60 
+          className="px-4 py-2 w-full mt-3 rounded-xl border border-gray-700 bg-[#0f0f10]/60 
                      text-white placeholder-gray-400 focus:outline-none 
                      focus:border-[#f53347] transition w-[220px] sm:w-[240px]"
         />
 
-        {/* 🏷️ Category */}
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="px-4 py-2 rounded-xl border border-gray-700 bg-[#0f0f10]/60 
-                     text-white focus:outline-none focus:border-[#f53347] 
-                     transition w-[180px]"
-        >
-          <option value="All">All Categories</option>
-          {categoryOnlyData.map((cat, i) => (
-            <option key={i} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
+     {/* Category & Brand Row */}
+<div className="flex gap-3 flex-col sm:flext-row w-full">
 
-        {/* 🏭 Brand */}
-        <select
-          value={brand}
-          onChange={(e) => setBrand(e.target.value)}
-          className="px-4 py-2 rounded-xl border border-gray-700 bg-[#0f0f10]/60 
-                     text-white focus:outline-none focus:border-[#f53347] 
-                     transition w-[180px]"
-        >
-          <option value="All">All Brands</option>
-          {brandOnlyData.map((b, i) => (
-            <option key={i} value={b}>
-              {b}
-            </option>
-          ))}
-        </select>
+  {/* Category */}
+  <select
+    value={category}
+    onChange={(e) => setCategory(e.target.value)}
+    className="flex-1 px-4 py-2 rounded-xl border border-gray-700 
+               bg-[#0f0f10]/60 text-white focus:outline-none 
+               focus:border-[#f53347] transition"
+  >
+    <option value="All">All Categories</option>
+    {categoryOnlyData.map((cat, i) => (
+      <option key={i} value={cat}>
+        {cat}
+      </option>
+    ))}
+  </select>
+
+  {/* Brand */}
+  <select
+    value={brand}
+    onChange={(e) => setBrand(e.target.value)}
+    className="flex-1 px-4 py-2 rounded-xl border border-gray-700 
+               bg-[#0f0f10]/60 text-white focus:outline-none 
+               focus:border-[#f53347] transition"
+  >
+    <option value="All">All Brands</option>
+    {brandOnlyData.map((b, i) => (
+      <option key={i} value={b}>
+        {b}
+      </option>
+    ))}
+  </select>
+
+</div>
+
 
         {/* 💰 Price Range */}
         <div className="flex items-center gap-2 text-gray-300 text-sm">
