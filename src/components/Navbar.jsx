@@ -27,7 +27,6 @@ export default function Navbar({ location, onLocationChange }) {
   const navigate = useNavigate();
   const { search, setSearch } = getData();
   const [showNavbar, setShowNavbar] = useState(true);
-const [lastScrollY, setLastScrollY] = useState(0);
 const [showBottomNav, setShowBottomNav] = useState(true);
 useEffect(() => {
   let lastScrollY = window.scrollY;
@@ -382,55 +381,119 @@ useEffect(() => {
         </div>
       </aside>
       {/* ================= MOBILE BOTTOM NAVBAR ================= */}
-   <div
-  className={`sm:hidden fixed bottom-0 left-0 right-0 z-50
-  bg-black/80 backdrop-blur-md border-t border-red-500/30
+<div
+  className={`sm:hidden fixed bottom-4 left-1/2 -translate-x-1/2 
+  w-[95%] max-w-md z-50
+  bg-black/80 backdrop-blur-2xl
+  rounded-2xl border border-red-500/20
+  shadow-[0_10px_40px_rgba(255,80,80,0.25)]
   transition-transform duration-300 ease-in-out
-  ${showBottomNav ? "translate-y-0" : "translate-y-full"}`}
+  ${showBottomNav ? "translate-y-0" : "translate-y-24"}`}
 >
+  <div className="flex justify-between items-center px-4 py-3">
 
-        <div className="flex justify-around items-center py-3">
+    {/* Home */}
+    <NavLink
+      to="/"
+      className={({ isActive }) =>
+        `flex flex-col items-center text-xs transition-all duration-300
+        ${isActive ? "text-red-400 scale-110" : "text-gray-400 hover:text-red-400"}`
+      }
+    >
+      <Home className="h-5 w-5 mb-1" />
+      Home
+    </NavLink>
 
-          <Link to="/" className="flex flex-col items-center text-gray-300 hover:text-red-400 text-xs">
-            <Home className="h-5 w-5" />
-            Home
-          </Link>
+    {/* Products */}
+    <NavLink
+      to="/products"
+      className={({ isActive }) =>
+        `flex flex-col items-center text-xs transition-all duration-300
+        ${isActive ? "text-red-400 scale-110" : "text-gray-400 hover:text-red-400"}`
+      }
+    >
+      <Package className="h-5 w-5 mb-1" />
+      Products
+    </NavLink>
 
-          <Link to="/products" className="flex flex-col items-center text-gray-300 hover:text-red-400 text-xs">
-            <Package className="h-5 w-5" />
-            Products
-          </Link>
+    {/* Floating Cart Button */}
+    <NavLink
+      to="/cart"
+      className={({ isActive }) =>
+        `relative -mt-8 flex flex-col items-center justify-center
+        h-14 w-14 rounded-full
+        bg-gradient-to-r from-red-500 to-red-800
+        shadow-[0_8px_25px_rgba(255,80,80,0.5)]
+        transition-all duration-300
+        ${isActive ? "scale-110" : "hover:scale-105"}`
+      }
+    >
+      <ShoppingCart className="h-6 w-6 text-white" />
 
-          <Link to="/cart" className="relative">
-            <ShoppingCart className="h-6 w-6 text-gray-300 hover:text-red-400 transition" />
-            <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
-              {cartItem.length}
-            </span>
-          </Link>
+      {cartItem.length > 0 && (
+        <span className="absolute -top-1 -right-1
+        min-w-[18px] h-5 px-1 text-[10px]
+        bg-red-500 text-white rounded-full
+        flex items-center justify-center
+        shadow-md">
+          {cartItem.length}
+        </span>
+      )}
+    </NavLink>
 
-          <Link to="/wishlist" className="relative">
-            <AiOutlineHeart className="h-6 w-6 text-gray-300 hover:text-red-400 transition" />
-            <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
-              {wishlist.length}
-            </span>
-          </Link>
+    {/* Wishlist */}
+    {/* Wishlist */}
+<NavLink
+  to="/wishlist"
+  className={({ isActive }) =>
+    `relative flex flex-col items-center text-xs transition-all duration-300
+    ${isActive ? "text-red-400 scale-110" : "text-gray-400 hover:text-red-400"}`
+  }
+>
+  <div className="relative">
+    <AiOutlineHeart className="h-5 w-5 mb-1" />
 
+    {wishlist.length > 0 && (
+      <span
+        className="absolute -top-2 -right-3
+        min-w-[18px] h-5 px-1
+        text-[10px] font-semibold
+        bg-red-500 text-white
+        rounded-full
+        flex items-center justify-center
+        shadow-[0_4px_12px_rgba(255,80,80,0.6)]
+        border border-black"
+      >
+        {wishlist.length}
+      </span>
+    )}
+  </div>
 
-          <div className="flex flex-col items-center text-gray-300 text-xs">
-            <SignedOut>
-              <SignInButton>
-                <FaSignInAlt className="h-5 w-5 cursor-pointer hover:text-red-400" />
-              </SignInButton>
-            </SignedOut>
+  Wishlist
+</NavLink>
 
-            <SignedIn>
-              <UserButton afterSignOutUrl="/" />
-            </SignedIn>
+    {/* Account */}
+    <div className="flex flex-col items-center text-xs text-gray-400">
+      <SignedOut>
+        <SignInButton>
+          <div className="flex flex-col items-center hover:text-red-400 transition cursor-pointer">
+            <User className="h-5 w-5 mb-1" />
             Account
           </div>
+        </SignInButton>
+      </SignedOut>
 
+      <SignedIn>
+        <div className="flex flex-col items-center">
+          <UserButton afterSignOutUrl="/" />
+          <span className="text-[11px] mt-1">Profile</span>
         </div>
-      </div>
+      </SignedIn>
+    </div>
+
+  </div>
+</div>
+
 
     </>
   );
