@@ -101,7 +101,7 @@ export default function Products() {
   };
 
   return (
-    <div className="relative min-h-screen py-8 sm:py-12 px-3 sm:px-6 lg:px-10 text-white overflow-x-hidden">
+    <div className="relative min-h-screen py-8 sm:py-12 px-3 sm:px-6 lg:px-10 text-white overflow-hidden">
 
       {/* Background Gradients */}
       <div className="absolute inset-0 -z-10 overflow-hidden">

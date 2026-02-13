@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, NavLink,useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
   ShoppingCart,
   MapPin,
@@ -7,7 +7,7 @@ import {
   Home,
   Info,
   Package,
-  Phone,Search
+  Phone, Search, User
 } from "lucide-react";
 import { FaSignInAlt } from "react-icons/fa";
 import { HiMenuAlt1, HiMenuAlt3 } from "react-icons/hi";
@@ -24,23 +24,48 @@ export default function Navbar({ location, onLocationChange }) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const { cartItem } = useCart();
   const { wishlist } = useWishlist();
-const navigate = useNavigate();
-const { search, setSearch } = getData();
-const handleSearchChange = (e) => {
-  setSearch(e.target.value);
-};
+  const navigate = useNavigate();
+  const { search, setSearch } = getData();
+  const [showNavbar, setShowNavbar] = useState(true);
+const [lastScrollY, setLastScrollY] = useState(0);
+const [showBottomNav, setShowBottomNav] = useState(true);
+useEffect(() => {
+  let lastScrollY = window.scrollY;
 
-const handleKeyDown = (e) => {
-  if (e.key === "Enter") {
-    navigate("/products");
-    setIsMobileNavOpen(false);
-  }
-};
+  const handleScroll = () => {
+    const currentScrollY = window.scrollY;
+
+    if (currentScrollY > lastScrollY && currentScrollY > 80) {
+      // Scroll Down
+      setShowNavbar(false);
+      setShowBottomNav(false);
+    } else {
+      // Scroll Up
+      setShowNavbar(true);
+      setShowBottomNav(true);
+    }
+
+    lastScrollY = currentScrollY;
+  };
+
+  window.addEventListener("scroll", handleScroll);
+  return () => window.removeEventListener("scroll", handleScroll);
+}, []);
+  const handleSearchChange = (e) => {
+    setSearch(e.target.value);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      navigate("/products");
+      setIsMobileNavOpen(false);
+    }
+  };
 
 
-//   useEffect(() => {
-//     AOS.init({ duration: 700, easing: "ease-out", once: false });
-//   }, []);
+  //   useEffect(() => {
+  //     AOS.init({ duration: 700, easing: "ease-out", once: false });
+  //   }, []);
 
   // Disable body scroll when mobile nav is open
   useEffect(() => {
@@ -115,12 +140,15 @@ const handleKeyDown = (e) => {
 
       {/* Navbar */}
       <header
-        className="fixed top-0 left-0 right-0 z-40 
-        bg-black/40 backdrop-blur-md border-b border-red-600/50 
-        py-3 shadow-[0_2px_20px_rgba(255,80,80,0.25)]"
-        data-aos="fade-down"
-        onClick={() => setIsLocationModalOpen(false)}
-      >
+  className={`fixed top-0 left-0 right-0 z-40 
+  bg-black/40 backdrop-blur-md border-b border-red-600/50 
+  py-3 shadow-[0_2px_20px_rgba(255,80,80,0.25)]
+  transition-transform duration-300 ease-in-out
+  ${showNavbar ? "translate-y-0" : "-translate-y-full"}`}
+  data-aos="fade-down"
+  onClick={() => setIsLocationModalOpen(false)}
+>
+
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
           {/* Logo + Location */}
           <div className="flex items-center gap-4" data-aos="zoom-in">
@@ -137,26 +165,26 @@ const handleKeyDown = (e) => {
           {/* Desktop Navigation */}
           <nav className="hidden sm:flex items-center justify-center gap-6" data-aos="fade-left">
             {/* Desktop Search */}
-{/* Desktop Search */}
-<div className="relative flex items-center">
-  <input
-    type="text"
-    value={search}
-    onChange={handleSearchChange}
-    onKeyDown={handleKeyDown}
-    placeholder="Search products..."
-    className="bg-gradient-to-br from-black/40 to-black/20
-    border border-red-500/30
-    text-white placeholder-gray-400
+            {/* Desktop Search */}
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                value={search}
+                onChange={handleSearchChange}
+                onKeyDown={handleKeyDown}
+                placeholder="Search products..."
+                className="bg-gradient-to-br from-black/40 to-black/20
+    border border-red-500/60
+    text-white placeholder-gray-300
     text-sm rounded-full
     pl-5 pr-12 py-2
     w-56 focus:w-72
     focus:outline-none focus:ring-2 focus:ring-red-500
     transition-all duration-300 ease-in-out backdrop-blur-md"
-  />
+              />
 
-  <Search className="absolute right-4 h-4 w-4 text-gray-400" />
-</div>
+              <Search className="absolute right-4 h-4 w-4 text-gray-400" />
+            </div>
 
             <ul className="flex gap-6 font-medium">
               {navLinks.map(({ name, path, icon }) => (
@@ -164,19 +192,17 @@ const handleKeyDown = (e) => {
                   <NavLink
                     to={path}
                     className={({ isActive }) =>
-                      `flex items-center gap-1 pb-1 transition-all duration-300 ${
-                        isActive
-                          ? "text-red-400 font-bold"
-                          : "text-gray-300 hover:text-red-400 font-medium"
+                      `flex items-center gap-1 pb-1 transition-all duration-300 ${isActive
+                        ? "text-red-400 font-bold"
+                        : "text-gray-300 hover:text-red-400 font-medium"
                       }`
                     }
                   >
                     {icon} {name}
                   </NavLink>
                   <span
-                    className={`absolute bottom-0 left-0 w-0 h-[2px] bg-red-400 transition-all duration-300 group-hover:w-full ${
-                      window.location.pathname === path ? "w-full" : "w-0"
-                    }`}
+                    className={`absolute bottom-0 left-0 w-0 h-[2px] bg-red-400 transition-all duration-300 group-hover:w-full ${window.location.pathname === path ? "w-full" : "w-0"
+                      }`}
                   ></span>
                 </li>
               ))}
@@ -219,22 +245,22 @@ const handleKeyDown = (e) => {
           {/* Mobile Nav + Cart + Auth */}
           <div className="sm:hidden flex items-center justify-center gap-4" data-aos="fade-right">
             {/* Mobile Search */}
-<div className="relative flex items-center w-full" data-aos="fade-right">
-  <input
-    type="text"
-    value={search}
-    onChange={handleSearchChange}
-     onKeyDown={handleKeyDown}
-    placeholder="Search products..."
-    className="w-full bg-black/40 border border-red-500/30 
+            <div className="relative flex items-center w-full" data-aos="fade-right">
+              <input
+                type="text"
+                value={search}
+                onChange={handleSearchChange}
+                onKeyDown={handleKeyDown}
+                placeholder="Search products..."
+                className="w-full bg-black/40 border border-red-500/90 placeholder-gray-300 
     text-white rounded-full pl-5 pr-12 py-2.5 text-sm
     focus:outline-none focus:ring-2 focus:ring-red-500
     backdrop-blur-md transition"
-  />
-  <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-</div>
+              />
+              <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            </div>
 
-           
+
 
             {/* Toggle */}
             {isMobileNavOpen ? (
@@ -281,7 +307,7 @@ const handleKeyDown = (e) => {
 
               <div className="space-y-4">
                 <button
-                  onClick={() => {handleUseMyLocation(),setIsLocationModalOpen(false)}}
+                  onClick={() => { handleUseMyLocation(), setIsLocationModalOpen(false) }}
                   className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg
                   bg-gradient-to-r from-red-500 to-orange-400 hover:from-red-600 hover:to-orange-500
                   text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-red-500/30 cursor-pointer"
@@ -323,84 +349,88 @@ const handleKeyDown = (e) => {
           <div className="p-4 space-y-4 overflow-y-auto">
             {renderLocation()}
 
-        <NavLink
-        to="/order-history"
-        onClick={() => setIsMobileNavOpen(false)}
-        className={({ isActive }) =>
-          `flex items-center gap-2 w-full px-3 py-2 rounded-md border-l-4 transition ${
-            isActive
-              ? "text-red-400 border-red-500 bg-red-500/10 font-semibold"
-              : "text-gray-300 hover:text-red-400 hover:bg-white/10 border-transparent"
-          }`
-        }
-      >
-        📦
-        <span>Order History</span>
-      </NavLink>
+            <NavLink
+              to="/order-history"
+              onClick={() => setIsMobileNavOpen(false)}
+              className={({ isActive }) =>
+                `group flex items-center gap-2 w-full px-3 py-2 rounded-md border-l-4 transition ${isActive
+                  ? "text-red-400 border-red-500 bg-red-500/10 font-semibold"
+                  : "text-gray-300 hover:text-red-400 hover:bg-white/10 border-transparent"
+                }`
+              }
+            >
+              <Package size={18} className="transition-transform duration-200 group-hover:translate-x-1" />
+              <span>Order History</span>
+            </NavLink>
+            {/* 
+<NavLink
+  to="/profile"
+  onClick={() => setIsMobileNavOpen(false)}
+  className={({ isActive }) =>
+    `group flex items-center gap-2 w-full px-3 py-2 rounded-md border-l-4 transition ${
+      isActive
+        ? "text-red-400 border-red-500 bg-red-500/10 font-semibold"
+        : "text-gray-300 hover:text-red-400 hover:bg-white/10 border-transparent"
+    }`
+  }
+>
+  <User size={18} className="transition-transform duration-200 group-hover:translate-x-1" />
+  <span>My Profile</span>
+</NavLink> */}
 
-      <NavLink
-        to="/profile"
-        onClick={() => setIsMobileNavOpen(false)}
-        className={({ isActive }) =>
-          `flex items-center gap-2 w-full px-3 py-2 rounded-md border-l-4 transition ${
-            isActive
-              ? "text-red-400 border-red-500 bg-red-500/10 font-semibold"
-              : "text-gray-300 hover:text-red-400 hover:bg-white/10 border-transparent"
-          }`
-        }
-      >
-        👤
-        <span>My Profile</span>
-      </NavLink>
           </div>
         </div>
       </aside>
       {/* ================= MOBILE BOTTOM NAVBAR ================= */}
-<div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 
-bg-black/80 backdrop-blur-md border-t border-red-500/30">
+   <div
+  className={`sm:hidden fixed bottom-0 left-0 right-0 z-50
+  bg-black/80 backdrop-blur-md border-t border-red-500/30
+  transition-transform duration-300 ease-in-out
+  ${showBottomNav ? "translate-y-0" : "translate-y-full"}`}
+>
 
-  <div className="flex justify-around items-center py-3">
+        <div className="flex justify-around items-center py-3">
 
-    <Link to="/" className="flex flex-col items-center text-gray-300 hover:text-red-400 text-xs">
-      <Home className="h-5 w-5" />
-      Home
-    </Link>
+          <Link to="/" className="flex flex-col items-center text-gray-300 hover:text-red-400 text-xs">
+            <Home className="h-5 w-5" />
+            Home
+          </Link>
 
-    <Link to="/products" className="flex flex-col items-center text-gray-300 hover:text-red-400 text-xs">
-      <Package className="h-5 w-5" />
-      Products
-    </Link>
+          <Link to="/products" className="flex flex-col items-center text-gray-300 hover:text-red-400 text-xs">
+            <Package className="h-5 w-5" />
+            Products
+          </Link>
 
-   <Link to="/cart" className="relative">
-              <ShoppingCart className="h-6 w-6 text-gray-300 hover:text-red-400 transition" />
-              <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
-                {cartItem.length}
-              </span>
-            </Link>
+          <Link to="/cart" className="relative">
+            <ShoppingCart className="h-6 w-6 text-gray-300 hover:text-red-400 transition" />
+            <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
+              {cartItem.length}
+            </span>
+          </Link>
 
-            <Link to="/wishlist" className="relative">
-              <AiOutlineHeart className="h-6 w-6 text-gray-300 hover:text-red-400 transition" />
-              <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
-                {wishlist.length}
-              </span>
-            </Link>
+          <Link to="/wishlist" className="relative">
+            <AiOutlineHeart className="h-6 w-6 text-gray-300 hover:text-red-400 transition" />
+            <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
+              {wishlist.length}
+            </span>
+          </Link>
 
 
-    <div className="flex flex-col items-center text-gray-300 text-xs">
-      <SignedOut>
-        <SignInButton>
-          <FaSignInAlt className="h-5 w-5 cursor-pointer hover:text-red-400" />
-        </SignInButton>
-      </SignedOut>
+          <div className="flex flex-col items-center text-gray-300 text-xs">
+            <SignedOut>
+              <SignInButton>
+                <FaSignInAlt className="h-5 w-5 cursor-pointer hover:text-red-400" />
+              </SignInButton>
+            </SignedOut>
 
-      <SignedIn>
-        <UserButton afterSignOutUrl="/" />
-      </SignedIn>
-      Account
-    </div>
+            <SignedIn>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
+            Account
+          </div>
 
-  </div>
-</div>
+        </div>
+      </div>
 
     </>
   );

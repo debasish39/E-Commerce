@@ -48,9 +48,11 @@ const PageLoader = () => (
 const AppWrapper = () => {
   const [locationData, setLocationData] = useState(null);
   const location = useLocation();
-/* ---- Load Tawk.to Chat ---- */
 useEffect(() => {
-  if (window.Tawk_API) return; // Prevent duplicate load
+  if (window.Tawk_API) return;
+
+  window.Tawk_API = window.Tawk_API || {};
+  window.Tawk_LoadStart = new Date();
 
   const script = document.createElement("script");
   script.async = true;
@@ -111,7 +113,7 @@ useEffect(() => {
      <Suspense fallback={<Spinner />}>
         <ScrollProgressBar />
 
-        <div className="relative min-h-screen w-full overflow-x-hidden bg-gray-950 bg-opacity-70 text-gray-100">
+        <div className="relative min-h-screen w-full overflow-hidden bg-gray-950 bg-opacity-70 text-gray-100">
           {/* ===== Background Particles ===== */}
           <div className="absolute inset-0 -z-10">
             <Particles

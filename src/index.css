@@ -17,14 +17,14 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #774f4f;
+  background: #000000;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #311515; 
+  background-color: #ef0303; 
   border-radius: 10px;
-  border: 2px solid rgb(245, 233, 233); 
+  border: 2px solid rgb(0, 0, 0); 
 }
 /* Remove dots below slick carousel completely */
 .slick-dots {

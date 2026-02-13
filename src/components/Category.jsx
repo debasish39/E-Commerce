@@ -50,9 +50,7 @@ export default function Category() {
                   bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f]
                   border border-[#f53347]/40
                   hover:border-[#f53347]
-                  shadow-lg hover:shadow-[#f53347]/30
-                  hover:-translate-y-2
-                  transition-all duration-300
+                  shadow-lg hover:shadow-[#f53347]/30       transition-all duration-300
                   flex flex-col items-center
                   p-4
                 "
@@ -66,7 +64,7 @@ export default function Category() {
                       h-full object-contain
                       transform group-hover:scale-110
                       transition-transform duration-500
-                      drop-shadow-[0_10px_25px_rgba(245,51,71,0.25)]
+                      drop-shadow-[0_10px_25px_rgba(245,51,71,0.25)] border-red-900 border-3 rounded-lg shadow-red-900/20
                     "
                   />
 
