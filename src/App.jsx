@@ -48,6 +48,22 @@ const PageLoader = () => (
 const AppWrapper = () => {
   const [locationData, setLocationData] = useState(null);
   const location = useLocation();
+/* ---- Load Tawk.to Chat ---- */
+useEffect(() => {
+  if (window.Tawk_API) return; // Prevent duplicate load
+
+  const script = document.createElement("script");
+  script.async = true;
+  script.src = "https://embed.tawk.to/698ef4a1b449001c39035ca4/1jhb6n6eu";
+  script.charset = "UTF-8";
+  script.setAttribute("crossorigin", "*");
+
+  document.body.appendChild(script);
+
+  return () => {
+    document.body.removeChild(script);
+  };
+}, []);
 
   /* ---- Get User Location ---- */
   const getLocation = async () => {
@@ -72,7 +88,7 @@ const AppWrapper = () => {
     getLocation();
     AOS.init({
       duration: 200,
-      once: false,
+      once: true,
     });
   }, []);
 
@@ -118,7 +134,7 @@ const AppWrapper = () => {
 
           {/* ===== Navbar ===== */}
           <Navbar location={locationData} />
-          <div className="pt-9" />
+          <div className="pt-9 mt-3 sm:mt-0" />
 
           {/* ===== Routes ===== */}
           <Routes>

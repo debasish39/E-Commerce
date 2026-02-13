@@ -30,14 +30,17 @@ const handleSearchChange = (e) => {
   setSearch(e.target.value);
 };
 
-const handleFocus = () => {
-  navigate("/products");
+const handleKeyDown = (e) => {
+  if (e.key === "Enter") {
+    navigate("/products");
+    setIsMobileNavOpen(false);
+  }
 };
 
 
-  useEffect(() => {
-    AOS.init({ duration: 700, easing: "ease-out", once: false });
-  }, []);
+//   useEffect(() => {
+//     AOS.init({ duration: 700, easing: "ease-out", once: false });
+//   }, []);
 
   // Disable body scroll when mobile nav is open
   useEffect(() => {
@@ -123,7 +126,7 @@ const handleFocus = () => {
           <div className="flex items-center gap-4" data-aos="zoom-in">
             <Link
               to="/"
-              className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-red-400 to-orange-300 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(255,99,71,0.6)]"
+              className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-red-400 to-orange-300 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(255,99,71,0.6)]"
               style={{ fontFamily: "'Pacifico', cursive" }}
             >
               E-Shop
@@ -132,15 +135,15 @@ const handleFocus = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden sm:flex items-center gap-6" data-aos="fade-left">
+          <nav className="hidden sm:flex items-center justify-center gap-6" data-aos="fade-left">
             {/* Desktop Search */}
 {/* Desktop Search */}
-<div className="relative hidden lg:flex items-center">
+<div className="relative flex items-center">
   <input
     type="text"
     value={search}
     onChange={handleSearchChange}
-    onFocus={() => navigate("/products")}
+    onKeyDown={handleKeyDown}
     placeholder="Search products..."
     className="bg-gradient-to-br from-black/40 to-black/20
     border border-red-500/30
@@ -214,36 +217,24 @@ const handleFocus = () => {
           </nav>
 
           {/* Mobile Nav + Cart + Auth */}
-          <div className="sm:hidden flex items-center gap-4" data-aos="fade-right">
-            <Link to="/cart" className="relative">
-              <ShoppingCart className="h-6 w-6 text-gray-300 hover:text-red-400 transition" />
-              <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
-                {cartItem.length}
-              </span>
-            </Link>
+          <div className="sm:hidden flex items-center justify-center gap-4" data-aos="fade-right">
+            {/* Mobile Search */}
+<div className="relative flex items-center w-full" data-aos="fade-right">
+  <input
+    type="text"
+    value={search}
+    onChange={handleSearchChange}
+     onKeyDown={handleKeyDown}
+    placeholder="Search products..."
+    className="w-full bg-black/40 border border-red-500/30 
+    text-white rounded-full pl-5 pr-12 py-2.5 text-sm
+    focus:outline-none focus:ring-2 focus:ring-red-500
+    backdrop-blur-md transition"
+  />
+  <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+</div>
 
-            <Link to="/wishlist" className="relative">
-              <AiOutlineHeart className="h-6 w-6 text-gray-300 hover:text-red-400 transition" />
-              <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
-                {wishlist.length}
-              </span>
-            </Link>
-
-            <div className="flex items-center gap-2">
-              <SignedOut>
-                <SignInButton>
-                  <button className="bg-gradient-to-r from-red-500 to-orange-400 hover:from-red-600 hover:to-orange-500 text-white font-medium px-3 py-1.5 rounded-md transition flex items-center gap-1 justify-center flex-row shadow-md hover:shadow-red-500/40 text-sm">
-                    <FaSignInAlt /> Sign In
-                  </button>
-                </SignInButton>
-              </SignedOut>
-              <SignedIn>
-                <UserButton
-                  afterSignOutUrl="/"
-                  appearance={{ elements: { avatarBox: "h-8 w-8 ring-2 ring-red-500" } }}
-                />
-              </SignedIn>
-            </div>
+           
 
             {/* Toggle */}
             {isMobileNavOpen ? (
@@ -330,46 +321,87 @@ const handleFocus = () => {
 
         <div className="flex flex-col justify-between h-full">
           <div className="p-4 space-y-4 overflow-y-auto">
-            {/* Mobile Search */}
-{/* Mobile Search */}
-<div className="relative mt-3">
-  <input
-    type="text"
-    value={search}
-    onChange={handleSearchChange}
-    onFocus={() => navigate("/products")}
-    placeholder="Search products..."
-    className="w-full bg-black/40 border border-red-500/30 
-    text-white rounded-full pl-5 pr-12 py-2.5 text-sm
-    focus:outline-none focus:ring-2 focus:ring-red-500
-    backdrop-blur-md transition"
-  />
-  <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-</div>
-
             {renderLocation()}
 
-            {navLinks.map(({ name, path, icon }) => (
-              <NavLink
-                key={name}
-                to={path}
-                onClick={() => setIsMobileNavOpen(false)}
-                className={({ isActive }) =>
-                  `flex items-center gap-2 w-full px-3 py-2 rounded-md border-l-4 transition ${
-                    isActive
-                      ? "text-red-400 border-red-500 bg-red-500/10 font-semibold"
-                      : "text-gray-300 hover:text-red-400 hover:bg-white/10 border-transparent"
-                  }`
-                }
-                data-aos="fade-up"
-              >
-                {icon}
-                <span>{name}</span>
-              </NavLink>
-            ))}
+        <NavLink
+        to="/order-history"
+        onClick={() => setIsMobileNavOpen(false)}
+        className={({ isActive }) =>
+          `flex items-center gap-2 w-full px-3 py-2 rounded-md border-l-4 transition ${
+            isActive
+              ? "text-red-400 border-red-500 bg-red-500/10 font-semibold"
+              : "text-gray-300 hover:text-red-400 hover:bg-white/10 border-transparent"
+          }`
+        }
+      >
+        📦
+        <span>Order History</span>
+      </NavLink>
+
+      <NavLink
+        to="/profile"
+        onClick={() => setIsMobileNavOpen(false)}
+        className={({ isActive }) =>
+          `flex items-center gap-2 w-full px-3 py-2 rounded-md border-l-4 transition ${
+            isActive
+              ? "text-red-400 border-red-500 bg-red-500/10 font-semibold"
+              : "text-gray-300 hover:text-red-400 hover:bg-white/10 border-transparent"
+          }`
+        }
+      >
+        👤
+        <span>My Profile</span>
+      </NavLink>
           </div>
         </div>
       </aside>
+      {/* ================= MOBILE BOTTOM NAVBAR ================= */}
+<div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 
+bg-black/80 backdrop-blur-md border-t border-red-500/30">
+
+  <div className="flex justify-around items-center py-3">
+
+    <Link to="/" className="flex flex-col items-center text-gray-300 hover:text-red-400 text-xs">
+      <Home className="h-5 w-5" />
+      Home
+    </Link>
+
+    <Link to="/products" className="flex flex-col items-center text-gray-300 hover:text-red-400 text-xs">
+      <Package className="h-5 w-5" />
+      Products
+    </Link>
+
+   <Link to="/cart" className="relative">
+              <ShoppingCart className="h-6 w-6 text-gray-300 hover:text-red-400 transition" />
+              <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
+                {cartItem.length}
+              </span>
+            </Link>
+
+            <Link to="/wishlist" className="relative">
+              <AiOutlineHeart className="h-6 w-6 text-gray-300 hover:text-red-400 transition" />
+              <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
+                {wishlist.length}
+              </span>
+            </Link>
+
+
+    <div className="flex flex-col items-center text-gray-300 text-xs">
+      <SignedOut>
+        <SignInButton>
+          <FaSignInAlt className="h-5 w-5 cursor-pointer hover:text-red-400" />
+        </SignInButton>
+      </SignedOut>
+
+      <SignedIn>
+        <UserButton afterSignOutUrl="/" />
+      </SignedIn>
+      Account
+    </div>
+
+  </div>
+</div>
+
     </>
   );
 }

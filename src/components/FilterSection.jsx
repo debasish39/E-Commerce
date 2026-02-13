@@ -50,19 +50,10 @@ export default function FilterSection() {
             : "max-h-0 opacity-0 sm:max-h-none sm:opacity-100"
         } sm:flex sm:flex-wrap sm:opacity-100 sm:max-h-none`}
       >
-        {/* 🔎 Search */}
-        <input
-          type="text"
-          placeholder="Search products..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="px-4 py-2 w-full mt-3 rounded-xl border border-gray-700 bg-[#0f0f10]/60 
-                     text-white placeholder-gray-400 focus:outline-none 
-                     focus:border-[#f53347] transition w-[220px] sm:w-[240px]"
-        />
+       
 
      {/* Category & Brand Row */}
-<div className="flex gap-3 flex-col sm:flext-row w-full">
+<div className="flex gap-3 flex-col sm:flex-row w-full">
 
   {/* Category */}
   <select
