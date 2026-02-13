@@ -138,54 +138,114 @@ const OrderHistory = () => {
       {orders.length === 0 ? (
         <p className="text-gray-300">No previous orders found.</p>
       ) : (
-        <div className="w-full max-w-3xl space-y-6">
+        <div className="w-full max-w-6xl space-y-6">
           {orders.map((order) => {
-            const subtotal = order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            const grandTotal = subtotal + 5; // Handling ₹5
+            const subtotal = order.items.reduce(
+              (sum, item) => sum + item.price * item.quantity,
+              0
+            );
+            const grandTotal = subtotal + 5;
+
+            const statusColor =
+              order.status === "Placed"
+                ? "bg-yellow-500/20 text-yellow-400 border-yellow-400/30"
+                : order.status === "Confirmed"
+                  ? "bg-blue-500/20 text-blue-400 border-blue-400/30"
+                  : order.status === "Shipped"
+                    ? "bg-purple-500/20 text-purple-400 border-purple-400/30"
+                    : order.status === "Delivered"
+                      ? "bg-green-500/20 text-green-400 border-green-400/30"
+                      : "bg-red-500/20 text-red-400 border-red-400/30";
+
             return (
               <div
                 key={order.id}
-                className="bg-white/10 border border-white/20 rounded-2xl p-6 shadow-lg hover:scale-[1.01] hover:shadow-2xl transition-transform"
+                className="relative bg-white/10 backdrop-blur-xl
+      border border-white/20 rounded-3xl p-6 shadow-xl
+      hover:shadow-red-500/20 hover:scale-[1.01]
+      transition-all duration-300"
               >
-                <div className="flex justify-between flex-wrap">
-                  <p className="font-semibold text-lg">{order.user}</p>
-                  <p className="text-sm text-gray-400">{order.date}</p>
-                </div>
-                <p className="text-sm text-gray-300 mt-1">Phone: {order.phone}</p>
+                {/* Top Header */}
+                <div className="flex justify-between items-center flex-wrap gap-3">
+                  <div>
+                    <h2 className="text-lg font-semibold text-white">
+                      {order.user}
+                    </h2>
+                    <p className="text-xs text-gray-400">
+                      Order ID: #{order.id.toString().slice(-6)}
+                    </p>
+                  </div>
 
-                <div className="mt-4 space-y-2">
+                  <div className="flex flex-col items-end gap-1">
+                    <span
+                      className={`px-3 py-1 text-xs font-semibold rounded-full border ${statusColor}`}
+                    >
+                      {order.status || "Placed"}
+                    </span>
+                    <p className="text-xs text-gray-400">{order.date}</p>
+                  </div>
+                </div>
+
+                <p className="text-sm text-gray-300 mt-3">
+                  Phone: {order.phone}
+                </p>
+
+                {/* Items */}
+                <div className="mt-5 space-y-3">
                   {order.items.map((item, idx) => (
-                    <div key={idx} className="flex justify-between text-sm">
-                      <span>
+                    <div
+                      key={idx}
+                      className="flex justify-between items-center text-sm
+            border-b border-white/10 pb-2"
+                    >
+                      <span className="text-white/80">
                         {item.title} × {item.quantity}
                       </span>
-                      <span>₹{(item.price * item.quantity).toFixed(2)}</span>
+                      <span className="text-red-400 font-semibold">
+                        ₹{(item.price * item.quantity).toFixed(2)}
+                      </span>
                     </div>
                   ))}
                 </div>
 
-                <div className="flex justify-between mt-2 text-sm text-gray-300">
-                  <span>Handling Fee:</span>
-                  <span>₹5.00</span>
+                {/* Totals */}
+                <div className="mt-4 text-sm space-y-1">
+                  <div className="flex justify-between text-gray-300">
+                    <span>Subtotal</span>
+                    <span>₹{subtotal.toFixed(2)}</span>
+                  </div>
+
+                  <div className="flex justify-between text-gray-300">
+                    <span>Handling Fee</span>
+                    <span>₹5.00</span>
+                  </div>
+
+                  <div className="border-t border-white/20 mt-2 pt-2 flex justify-between font-bold text-lg">
+                    <span>Grand Total</span>
+                    <span className="text-red-400">
+                      ₹{grandTotal.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
 
-                <hr className="border-white/30 my-3" />
-
-                <p className="font-bold text-right text-lg">
-                  Total: ₹{grandTotal.toFixed(2)}
-                </p>
-
-                <div className="mt-3 text-right">
+                {/* Invoice Button */}
+                <div className="mt-6 flex justify-end">
                   <button
                     onClick={() => generateInvoice(order)}
-                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 justify-center ml-auto cursor-pointer"
+                    className="flex items-center gap-2
+          bg-gradient-to-r from-red-500 to-pink-600
+          hover:scale-105 transition-all duration-300
+          text-white px-5 py-2 rounded-xl text-sm
+          shadow-lg hover:shadow-red-500/40 cursor-pointer"
                   >
-                    <FaDownload /> Download Invoice
+                    <FaDownload />
+                    Download Invoice
                   </button>
                 </div>
               </div>
             );
           })}
+
         </div>
       )}
     </div>

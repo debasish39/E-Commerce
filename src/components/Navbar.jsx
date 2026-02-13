@@ -5,7 +5,7 @@ import {
   MapPin,
   ChevronDown,
   Home,
-  Info,
+  ShoppingBag,
   Package,
   Phone, Search, User
 } from "lucide-react";
@@ -18,6 +18,7 @@ import { useWishlist } from "../context/wishlistContext";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { getData } from "../context/DataContext";
+import OrderHistory from "../pages/OrderHistory";
 
 export default function Navbar({ location, onLocationChange }) {
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
@@ -27,29 +28,29 @@ export default function Navbar({ location, onLocationChange }) {
   const navigate = useNavigate();
   const { search, setSearch } = getData();
   const [showNavbar, setShowNavbar] = useState(true);
-const [showBottomNav, setShowBottomNav] = useState(true);
-useEffect(() => {
-  let lastScrollY = window.scrollY;
+  const [showBottomNav, setShowBottomNav] = useState(true);
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
 
-  const handleScroll = () => {
-    const currentScrollY = window.scrollY;
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
 
-    if (currentScrollY > lastScrollY && currentScrollY > 80) {
-      // Scroll Down
-      setShowNavbar(false);
-      setShowBottomNav(false);
-    } else {
-      // Scroll Up
-      setShowNavbar(true);
-      setShowBottomNav(true);
-    }
+      if (currentScrollY > lastScrollY && currentScrollY > 80) {
+        // Scroll Down
+        setShowNavbar(false);
+        setShowBottomNav(false);
+      } else {
+        // Scroll Up
+        setShowNavbar(true);
+        setShowBottomNav(true);
+      }
 
-    lastScrollY = currentScrollY;
-  };
+      lastScrollY = currentScrollY;
+    };
 
-  window.addEventListener("scroll", handleScroll);
-  return () => window.removeEventListener("scroll", handleScroll);
-}, []);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
   };
@@ -92,9 +93,9 @@ useEffect(() => {
 
   const navLinks = [
     { name: "Home", path: "/", icon: <Home className="h-4 w-4 text-red-500" /> },
-    { name: "About", path: "/about", icon: <Info className="h-4 w-4 text-red-500" /> },
     { name: "Products", path: "/products", icon: <Package className="h-4 w-4 text-red-500" /> },
     { name: "Contact", path: "/contact", icon: <Phone className="h-4 w-4 text-red-500" /> },
+     { name: "Orders", path: "/order-history", icon: <ShoppingBag className="h-4 w-4 text-red-500" /> },
   ];
 
   const renderLocation = () => (
@@ -139,14 +140,14 @@ useEffect(() => {
 
       {/* Navbar */}
       <header
-  className={`fixed top-0 left-0 right-0 z-40 
+        className={`fixed top-0 left-0 right-0 z-40 
   bg-black/40 backdrop-blur-md border-b border-red-600/50 
   py-3 shadow-[0_2px_20px_rgba(255,80,80,0.25)]
   transition-transform duration-300 ease-in-out
   ${showNavbar ? "translate-y-0" : "-translate-y-full"}`}
-  data-aos="fade-down"
-  onClick={() => setIsLocationModalOpen(false)}
->
+        data-aos="fade-down"
+        onClick={() => setIsLocationModalOpen(false)}
+      >
 
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
           {/* Logo + Location */}
@@ -172,9 +173,9 @@ useEffect(() => {
                 onChange={handleSearchChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Search products..."
-                className="bg-gradient-to-br from-black/40 to-black/20
+                className="bg-gradient-to-br bg-black/10 
     border border-red-500/60
-    text-white placeholder-gray-300
+    text-white placeholder-gray-500
     text-sm rounded-full
     pl-5 pr-12 py-2
     w-56 focus:w-72
@@ -251,7 +252,7 @@ useEffect(() => {
                 onChange={handleSearchChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Search products..."
-                className="w-full bg-black/40 border border-red-500/90 placeholder-gray-300 
+                className="w-full bg-black/10 border border-red-500/90 placeholder-gray-500 
     text-white rounded-full pl-5 pr-12 py-2.5 text-sm
     focus:outline-none focus:ring-2 focus:ring-red-500
     backdrop-blur-md transition"
@@ -331,7 +332,7 @@ useEffect(() => {
       <aside
         className={`sm:hidden fixed min-h-screen top-0 left-0 w-3/4 max-w-xs h-full 
         bg-black/90 backdrop-blur-lg border-r border-red-500/40 rounded-r-2xl 
-        transform transition-transform z-40 duration-300 ease-in-out 
+        transform transition-transform z-60 duration-300 ease-in-out 
         ${isMobileNavOpen ? "translate-x-0" : "-translate-x-full"}`}
         data-aos="fade-right"
       >
@@ -361,6 +362,20 @@ useEffect(() => {
               <Package size={18} className="transition-transform duration-200 group-hover:translate-x-1" />
               <span>Order History</span>
             </NavLink>
+            
+            <NavLink
+              to="/contact"
+              onClick={() => setIsMobileNavOpen(false)}
+              className={({ isActive }) =>
+                `group flex items-center gap-2 w-full px-3 py-2 rounded-md border-l-4 transition ${isActive
+                  ? "text-red-400 border-red-500 bg-red-500/10 font-semibold"
+                  : "text-gray-300 hover:text-red-400 hover:bg-white/10 border-transparent"
+                }`
+              }
+            >
+              <Phone size={18} className="transition-transform duration-200 group-hover:translate-x-1" />
+              <span>Contact</span>
+            </NavLink>
             {/* 
 <NavLink
   to="/profile"
@@ -381,118 +396,119 @@ useEffect(() => {
         </div>
       </aside>
       {/* ================= MOBILE BOTTOM NAVBAR ================= */}
-<div
-  className={`sm:hidden fixed bottom-4 left-1/2 -translate-x-1/2 
+      <div
+        className={`sm:hidden fixed bottom-3 left-1/2 -translate-x-1/2 
   w-[95%] max-w-md z-50
-  bg-black/80 backdrop-blur-2xl
-  rounded-2xl border border-red-500/20
-  shadow-[0_10px_40px_rgba(255,80,80,0.25)]
+  bg-black/90 backdrop-blur-2xl
+  rounded-2xl border border-red-400
+  shadow-[0_0_30px_red]
   transition-transform duration-300 ease-in-out
   ${showBottomNav ? "translate-y-0" : "translate-y-24"}`}
->
-  <div className="flex justify-between items-center px-4 py-3">
-
-    {/* Home */}
-    <NavLink
-      to="/"
-      className={({ isActive }) =>
-        `flex flex-col items-center text-xs transition-all duration-300
-        ${isActive ? "text-red-400 scale-110" : "text-gray-400 hover:text-red-400"}`
-      }
-    >
-      <Home className="h-5 w-5 mb-1" />
-      Home
-    </NavLink>
-
-    {/* Products */}
-    <NavLink
-      to="/products"
-      className={({ isActive }) =>
-        `flex flex-col items-center text-xs transition-all duration-300
-        ${isActive ? "text-red-400 scale-110" : "text-gray-400 hover:text-red-400"}`
-      }
-    >
-      <Package className="h-5 w-5 mb-1" />
-      Products
-    </NavLink>
-
-    {/* Floating Cart Button */}
-    <NavLink
-      to="/cart"
-      className={({ isActive }) =>
-        `relative -mt-8 flex flex-col items-center justify-center
-        h-14 w-14 rounded-full
-        bg-gradient-to-r from-red-500 to-red-800
-        shadow-[0_8px_25px_rgba(255,80,80,0.5)]
-        transition-all duration-300
-        ${isActive ? "scale-110" : "hover:scale-105"}`
-      }
-    >
-      <ShoppingCart className="h-6 w-6 text-white" />
-
-      {cartItem.length > 0 && (
-        <span className="absolute -top-1 -right-1
-        min-w-[18px] h-5 px-1 text-[10px]
-        bg-red-500 text-white rounded-full
-        flex items-center justify-center
-        shadow-md">
-          {cartItem.length}
-        </span>
-      )}
-    </NavLink>
-
-    {/* Wishlist */}
-    {/* Wishlist */}
-<NavLink
-  to="/wishlist"
-  className={({ isActive }) =>
-    `relative flex flex-col items-center text-xs transition-all duration-300
-    ${isActive ? "text-red-400 scale-110" : "text-gray-400 hover:text-red-400"}`
-  }
->
-  <div className="relative">
-    <AiOutlineHeart className="h-5 w-5 mb-1" />
-
-    {wishlist.length > 0 && (
-      <span
-        className="absolute -top-2 -right-3
-        min-w-[18px] h-5 px-1
-        text-[10px] font-semibold
-        bg-red-500 text-white
-        rounded-full
-        flex items-center justify-center
-        shadow-[0_4px_12px_rgba(255,80,80,0.6)]
-        border border-black"
       >
-        {wishlist.length}
-      </span>
-    )}
-  </div>
+        <div className="flex justify-between items-center px-4 py-3">
 
-  Wishlist
-</NavLink>
+          {/* Home */}
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              `flex flex-col items-center text-xs transition-all duration-300
+        ${isActive ? "text-red-400 scale-110" : "text-gray-400 hover:text-red-400"}`
+            }
+          >
+            <Home className="h-5 w-5 mb-1" />
+            Home
+          </NavLink>
 
-    {/* Account */}
-    <div className="flex flex-col items-center text-xs text-gray-400">
-      <SignedOut>
-        <SignInButton>
-          <div className="flex flex-col items-center hover:text-red-400 transition cursor-pointer">
-            <User className="h-5 w-5 mb-1" />
-            Account
+          {/* Products */}
+          <NavLink
+            to="/products"
+            className={({ isActive }) =>
+              `flex flex-col items-center text-xs transition-all duration-300
+        ${isActive ? "text-red-400 scale-110" : "text-gray-400 hover:text-red-400"}`
+            }
+          >
+            <Package className="h-5 w-5 mb-1" />
+            Products
+          </NavLink>
+
+          {/* Floating Cart Button */}
+          <NavLink
+            to="/cart"
+            className={({ isActive }) =>
+              `relative -mt-8 flex flex-col items-center justify-center
+    h-14 w-14 rounded-full
+    bg-gradient-to-r from-red-500 to-red-800
+    shadow-[0_8px_25px_rgba(255,80,80,0.5)]
+    transition-all duration-300
+    ${isActive ? "scale-110" : "hover:scale-105"}`
+            }
+          >
+            <ShoppingCart className="h-6 w-6 text-white" />
+
+            <span
+              className={`absolute -top-1 -right-1
+    min-w-[18px] h-5 px-1 text-[10px]
+    rounded-full flex items-center justify-center
+    shadow-md
+    ${cartItem.length > 0
+                  ? "bg-red-500 text-white"
+                  : "bg-gray-600 text-gray-300"
+                }`}
+            >
+              {cartItem.length}
+            </span>
+          </NavLink>
+
+          <NavLink
+            to="/wishlist"
+            className={({ isActive }) =>
+              `relative flex flex-col items-center text-xs transition-all duration-300
+    ${isActive ? "text-red-400 scale-110" : "text-gray-400 hover:text-red-400"}`
+            }
+          >
+            <div className="relative">
+              <AiOutlineHeart className="h-5 w-5 mb-1" />
+
+              <span
+                className={`absolute -top-2 -right-3
+      min-w-[18px] h-5 px-1
+      text-[10px] font-semibold
+      rounded-full flex items-center justify-center
+      shadow-md border border-black
+      ${wishlist.length > 0
+                    ? "bg-red-500 text-white"
+                    : "bg-gray-600 text-gray-300"
+                  }`}
+              >
+                {wishlist.length}
+              </span>
+            </div>
+
+            Wishlist
+          </NavLink>
+
+
+          {/* Account */}
+          <div className="flex flex-col items-center text-xs text-gray-400">
+            <SignedOut>
+              <SignInButton>
+                <div className="flex flex-col items-center hover:text-red-400 transition cursor-pointer">
+                  <User className="h-5 w-5 mb-1" />
+                  Account
+                </div>
+              </SignInButton>
+            </SignedOut>
+
+            <SignedIn>
+              <div className="flex flex-col items-center">
+                <UserButton afterSignOutUrl="/" />
+                <span className="text-[11px] mt-1">Profile</span>
+              </div>
+            </SignedIn>
           </div>
-        </SignInButton>
-      </SignedOut>
 
-      <SignedIn>
-        <div className="flex flex-col items-center">
-          <UserButton afterSignOutUrl="/" />
-          <span className="text-[11px] mt-1">Profile</span>
         </div>
-      </SignedIn>
-    </div>
-
-  </div>
-</div>
+      </div>
 
 
     </>

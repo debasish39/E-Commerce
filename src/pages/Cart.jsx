@@ -244,48 +244,88 @@ const customerInfo = [
 
           {/* Cart Items */}
           <div className="space-y-5">
-            {cartItem.map((item, index) => (
-              <div
-                key={index}
-                className="bg-white/10 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4 w-full sm:w-auto">
-                  <img
-                    src={item.images[0]}
-                    alt={item.title}
-                    className="w-24 h-24 rounded-xl border border-white/20 object-cover mx-auto sm:mx-0"
-                  />
-                  <div className="text-center sm:text-left">
-                    <h1 className="text-base sm:text-lg font-semibold text-white/90 line-clamp-2">
-                      {item.title}
-                    </h1>
-                    <p className="text-red-400 font-bold text-lg mt-1">
-                      ₹{item.price}
-                    </p>
-                  </div>
-                </div>
+         {cartItem.map((item, index) => (
+  <div
+    key={index}
+    className="bg-white/10 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl p-4 sm:p-5
+    flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6
+    transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl"
+  >
+    {/* ===== Clickable Product Section ===== */}
+    <div
+      onClick={() => navigate(`/products/${item.id}`)}
+      className="flex flex-col sm:flex-row sm:items-center gap-4 w-full sm:w-auto
+      cursor-pointer group"
+    >
+      <img
+        src={item.images[0]}
+        alt={item.title}
+        className="w-24 h-24 rounded-xl border border-white/20 object-cover
+        mx-auto sm:mx-0 group-hover:scale-105 transition-transform duration-300"
+      />
 
-                {/* Quantity + Delete Controls */}
-                <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-4">
-                  <div className="bg-red-500/90 text-white flex items-center gap-4 p-2 rounded-full font-bold text-lg sm:text-xl shadow-md mx-auto sm:mx-0">
-                    <button onClick={() => decreaseQty(item.id)} className="cursor-pointer hover:scale-125 transition-transform">
-                      <AiOutlineMinus />
-                    </button>
-                    <span>{item.quantity}</span>
-                    <button onClick={() => increaseQty(item.id)} className="cursor-pointer hover:scale-125 transition-transform">
-                      <AiOutlinePlus />
-                    </button>
-                  </div>
+      <div className="text-center sm:text-left">
+        <h1 className="text-base sm:text-lg font-semibold text-white/90 line-clamp-2
+        group-hover:text-red-400 transition-colors duration-300">
+          {item.title}
+        </h1>
 
-                  <button
-                    onClick={() => { if (window.confirm("Remove this item from cart?")) removeFromCart(item.id); }}
-                    className="bg-white/10 hover:bg-red-500/90 transition-all rounded-full p-3 hover:text-white shadow-md mx-auto sm:mx-0"
-                  >
-                    <FaRegTrashAlt className="text-red-400 text-lg sm:text-xl" />
-                  </button>
-                </div>
-              </div>
-            ))}
+        <p className="text-red-400 font-bold text-lg mt-1">
+          ₹{item.price}
+        </p>
+      </div>
+    </div>
+
+    {/* ===== Quantity + Delete Controls ===== */}
+    <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-4">
+      
+      {/* Quantity Box */}
+      <div
+        className="bg-red-500/90 text-white flex items-center gap-4
+        p-2 rounded-full font-bold text-lg sm:text-xl shadow-md
+        mx-auto sm:mx-0"
+      >
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            decreaseQty(item.id);
+          }}
+          className="cursor-pointer hover:scale-125 transition-transform"
+        >
+          <AiOutlineMinus />
+        </button>
+
+        <span>{item.quantity}</span>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            increaseQty(item.id);
+          }}
+          className="cursor-pointer hover:scale-125 transition-transform"
+        >
+          <AiOutlinePlus />
+        </button>
+      </div>
+
+      {/* Delete Button */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          if (window.confirm("Remove this item from cart?")) {
+            removeFromCart(item.id);
+          }
+        }}
+        className="bg-white/10 hover:bg-red-500/90 transition-all
+        rounded-full p-3 hover:text-white shadow-md
+        mx-auto sm:mx-0 cursor-pointer"
+      >
+        <FaRegTrashAlt className="text-red-400 text-lg sm:text-xl" />
+      </button>
+    </div>
+  </div>
+))}
+
           </div>
 
           {/* Delivery & Bill Details */}

@@ -10,7 +10,6 @@ import Spinner from "./components/Spinner";
    Lazy Loaded Pages
 =========================== */
 const Home = lazy(() => import("./pages/Home"));
-const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Cart = lazy(() => import("./pages/Cart"));
 const Products = lazy(() => import("./pages/Products"));
@@ -102,13 +101,18 @@ useEffect(() => {
 
   return (
     <>
-      {/* ===== Toast Notifications ===== */}
-      <Toaster
+    <Toaster theme="dark"
   position="top-right"
-  expand
   richColors
   closeButton
+  toastOptions={{
+    className:
+      "bg-black/95 text-white border border-red-500/30 backdrop-blur-xl shadow-[0_8px_30px_rgba(255,0,0,0.35)] rounded-xl",
+    descriptionClassName: "text-gray-300",
+    duration: 2500,
+  }}
 />
+
 
      <Suspense fallback={<Spinner />}>
         <ScrollProgressBar />
@@ -144,7 +148,6 @@ useEffect(() => {
             <Route path="/products" element={<Products />} />
             <Route path="/products/:id" element={<SingleProduct />} />
             <Route path="/category/:category" element={<CategoryProduct />} />
-            <Route path="/about" element={<About />} />
             <Route path="/order-success" element={<OrderSuccess />} />
             <Route path="/order-history" element={<OrderHistory />} />
 
