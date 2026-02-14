@@ -148,7 +148,7 @@ const OrderHistory = () => {
 
             const statusColor =
               order.status === "Placed"
-                ? "bg-yellow-500/20 text-yellow-400 border-yellow-400/30"
+                ? "bg-red-500 text-yellow-400 border-yellow-400/30"
                 : order.status === "Confirmed"
                   ? "bg-blue-500/20 text-blue-400 border-blue-400/30"
                   : order.status === "Shipped"

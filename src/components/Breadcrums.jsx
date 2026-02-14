@@ -6,7 +6,7 @@ const Breadcrums = ({ title }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="w-full flex justify-center sm:justify-start sm:px-6 md:px-10 py-6 sm:py-10">
+    <div className="w-full flex justify-start sm:justify-start sm:px-6 md:px-10  sm:py-10">
       <div
         className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2 md:gap-3 
         bg-white/10 backdrop-blur-lg border border-white/20 

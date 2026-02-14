@@ -165,7 +165,6 @@ export default function Navbar({ location, onLocationChange }) {
           {/* Desktop Navigation */}
           <nav className="hidden sm:flex items-center justify-center gap-6" data-aos="fade-left">
             {/* Desktop Search */}
-            {/* Desktop Search */}
             <div className="relative flex items-center">
               <input
                 type="text"
@@ -173,14 +172,10 @@ export default function Navbar({ location, onLocationChange }) {
                 onChange={handleSearchChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Search products..."
-                className="bg-gradient-to-br bg-black/10 
-    border border-red-500/60
-    text-white placeholder-gray-500
-    text-sm rounded-full
-    pl-5 pr-12 py-2
-    w-56 focus:w-72
-    focus:outline-none focus:ring-2 focus:ring-red-500
-    transition-all duration-300 ease-in-out backdrop-blur-md"
+                className="w-full bg-black/10 border border-orange-700/60 placeholder-gray-500 
+    text-white rounded-xl pl-5 pr-12 py-2.5 text-sm
+    focus:outline-none focus:ring-1 focus:ring-red-900
+    backdrop-blur-md transition w-56 focus:w-72"
               />
 
               <Search className="absolute right-4 h-4 w-4 text-gray-400" />
@@ -252,9 +247,9 @@ export default function Navbar({ location, onLocationChange }) {
                 onChange={handleSearchChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Search products..."
-                className="w-full bg-black/10 border border-red-500/90 placeholder-gray-500 
-    text-white rounded-full pl-5 pr-12 py-2.5 text-sm
-    focus:outline-none focus:ring-2 focus:ring-red-500
+                className="w-full bg-black/10 border border-orange-700/60 placeholder-gray-500 
+    text-white rounded-xl pl-5 pr-12 py-2.5 text-sm
+    focus:outline-none focus:ring-1 focus:ring-red-900
     backdrop-blur-md transition"
               />
               <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -280,7 +275,7 @@ export default function Navbar({ location, onLocationChange }) {
 
       {/* Location Modal */}
       {isLocationModalOpen && (
-        <>
+        <div className="z-[100]">
           <div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-fadeIn"
             onClick={() => setIsLocationModalOpen(false)}
@@ -325,14 +320,14 @@ export default function Navbar({ location, onLocationChange }) {
               </div>
             </div>
           </div>
-        </>
+        </div>
       )}
 
       {/* Mobile Offcanvas Menu */}
       <aside
         className={`sm:hidden fixed min-h-screen top-0 left-0 w-3/4 max-w-xs h-full 
         bg-black/90 backdrop-blur-lg border-r border-red-500/40 rounded-r-2xl 
-        transform transition-transform z-60 duration-300 ease-in-out 
+        transform transition-transform z-49 duration-300 ease-in-out 
         ${isMobileNavOpen ? "translate-x-0" : "-translate-x-full"}`}
         data-aos="fade-right"
       >
@@ -398,7 +393,7 @@ export default function Navbar({ location, onLocationChange }) {
       {/* ================= MOBILE BOTTOM NAVBAR ================= */}
       <div
         className={`sm:hidden fixed bottom-3 left-1/2 -translate-x-1/2 
-  w-[95%] max-w-md z-50
+  w-[95%] max-w-md z-48
   bg-black/90 backdrop-blur-2xl
   rounded-2xl border border-red-400
   shadow-[0_0_30px_red]
