@@ -26,7 +26,7 @@ const Navbar = lazy(() => import("./components/Navbar"));
 const Footer = lazy(() => import("./components/Footer"));
 const ProtectedRoute = lazy(() => import("./components/ProtectedRoute"));
 const NotFound = lazy(() => import("./components/NotFound"));
-const ScrollToTop = lazy(() => import("./components/ScrollToTop"));
+const ScrollToTop = lazy(() => import("./components/scrollToTop"));
 const Particles = lazy(() => import("./components/Particles"));
 const ScrollProgressBar = lazy(() =>
   import("./components/ScrollProgressBar")
