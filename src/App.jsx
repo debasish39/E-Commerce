@@ -105,11 +105,15 @@ useEffect(() => {
   position="top-right"
   richColors
   closeButton
-  toastOptions={{
-    className:
-      "bg-black/95 text-white border border-red-500/30 backdrop-blur-xl shadow-[0_8px_30px_rgba(255,0,0,0.35)] rounded-xl",
-    descriptionClassName: "text-gray-300",
-    duration: 2500,
+ toastOptions={{
+    style: {
+      background: "rgba(0,0,0,0.85)",
+      backdropFilter: "blur(10px)",
+      color: "#fff",
+      border: "1px solid rgba(255,0,0,0.4)",
+      borderRadius: "14px",
+      shadow: "3px 3px 39px red",
+    },
   }}
 />
 

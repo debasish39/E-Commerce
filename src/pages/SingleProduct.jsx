@@ -5,6 +5,7 @@ import Breadcrums from "../components/Breadcrums";
 import Loading from "../assets/Loading4.webm";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/wishlistContext";
+import { toast } from "sonner";
 import {
   FaShoppingCart,
   FaHeart,
@@ -43,7 +44,26 @@ export default function SingleProduct() {
       console.error(error);
     }
   };
+const handleAddToCart=()=>{
+  if(product.stock<=0){
+    toast.error("Out of Stock ", {
+      description: "This product is currently unavailable.",
+    });
+    return;
+  }
+if (quantity < 1) {
+    toast.warning("Invalid Quantity ⚠", {
+      description: "Please select at least 1 item.",
+    });
+    return;
+  }
 
+  addToCart(product, quantity);
+
+  toast.success("Added to Cart 🛒", {
+    description: `${product.title} × ${quantity}`,
+  });
+}
   useEffect(() => {
     getSingleProduct();
   }, [id]);
@@ -57,15 +77,7 @@ export default function SingleProduct() {
     });
   }, []);
 
-  const handleWishlist = () => {
-    if (isWishlisted) {
-      removeFromWishlist(product);
-      setIsWishlisted(false);
-    } else {
-      addToWishlist(product);
-      setIsWishlisted(true);
-    }
-  };
+  
 
   const renderRatingStars = () => {
     const stars = [];
@@ -77,6 +89,23 @@ export default function SingleProduct() {
     }
     return stars;
   };
+const handleWishlist = () => {
+  if (isWishlisted) {
+    removeFromWishlist(product);
+    setIsWishlisted(false);
+
+    toast("Removed from Wishlist 💔", {
+      description: product.title,
+    });
+  } else {
+    addToWishlist(product);
+    setIsWishlisted(true);
+
+    toast.success("Added to Wishlist ❤️", {
+      description: product.title,
+    });
+  }
+};
 
   return (
     <>
@@ -84,8 +113,8 @@ export default function SingleProduct() {
           <div className="relative min-h-screen py-12 px-4 sm:px-6 lg:px-10 text-white overflow-hidden">
       {/* Floating gradients */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[400px] h-[400px] bg-red-500/20 blur-[150px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-pink-500/20 blur-[150px] rounded-full animate-[float_8s_infinite_linear]" />
+        <div className="absolute top-[-10%] left-[-10%] w-[400px] h-[400px]  rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] rounded-full animate-[float_8s_infinite_linear]" />
         <style>{`
           @keyframes float {
             0%, 100% { transform: translateY(0px); }
@@ -190,7 +219,7 @@ export default function SingleProduct() {
               {/* Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 mt-4">
                 <button
-                  onClick={() => addToCart(product, quantity)}
+                  onClick={handleAddToCart}
                   className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-pink-500 hover:from-red-700 hover:to-pink-600 text-white text-base font-semibold rounded-xl shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
                 >
                   <FaShoppingCart /> Add to Cart

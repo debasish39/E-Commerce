@@ -11,7 +11,7 @@ import emptyCart from "../assets/empty-cart.png";
 import { jsPDF } from 'jspdf';
 import 'react-tooltip/dist/react-tooltip.css';
 import Logo from "../assets/logo.png";
-
+import {toast} from 'sonner';
 const Cart = ({ location, getLocation }) => {
   const { cartItem, removeFromCart, increaseQty, decreaseQty, clearCart } = useCart();
   const { user } = useUser();
@@ -185,52 +185,79 @@ const customerInfo = [
 };
 
   const handleCheckout = async () => {
-    if (cartItem.length === 0) { alert("Your cart is empty!"); return; }
-
-    const phone = document.querySelector('input[name="phone"]').value;
-    if (!/^\d{10}$/.test(phone)) { alert("Please enter a valid 10-digit phone number!"); return; }
-
-    if (window.confirm("Have you completed the UPI payment?")) {
-      const newOrder = {
-        id: Date.now(),
-        user: user?.fullName || "Guest",
-        phone: `+91 ${phone}`,
-        total: totalAmount,
-        date: new Date().toLocaleString(),
-        items: cartItem.map(item => ({
-          title: item.title,
-          price: item.price,
-          quantity: item.quantity,
-        })),
-      };
-
-      try {
-        const existingOrders = JSON.parse(localStorage.getItem("orderHistory")) || [];
-        existingOrders.push(newOrder);
-        localStorage.setItem("orderHistory", JSON.stringify(existingOrders));
-      } catch (err) { console.error("Failed to save order history:", err); }
-
-      try {
-        const downloadInvoice = window.confirm("Do you want to download your invoice now?");
-        if (downloadInvoice) await generateInvoice(phone);
-      } catch (err) { console.error("Invoice generation failed:", err); }
-
-      try {
-        if (typeof clearCart === "function") clearCart();
-        else localStorage.removeItem("cartItems");
-      } catch (err) { localStorage.removeItem("cartItems"); }
-
-      navigate('/order-success');
-    }
+  if (cartItem.length === 0) {
+    toast.error("Your cart is empty 🛒", {
+      description: "Add some products before checkout.",
+    });
+    return;
+  }
+const completeOrder = async (phone) => {
+  const newOrder = {
+    id: Date.now(),
+    user: user?.fullName || "Guest",
+    phone: `+91 ${phone}`,
+    total: totalAmount,
+    date: new Date().toLocaleString(),
+    status: "Processing",
+    items: cartItem.map(item => ({
+      title: item.title,
+      price: item.price,
+      quantity: item.quantity,
+    })),
   };
+
+  try {
+    const existingOrders =
+      JSON.parse(localStorage.getItem("orderHistory")) || [];
+
+    existingOrders.push(newOrder);
+
+    localStorage.setItem("orderHistory", JSON.stringify(existingOrders));
+  } catch (err) {
+    console.error("Failed to save order history:", err);
+  }
+
+  toast.success("Order placed successfully 🎉");
+
+  toast("Download invoice?", {
+    action: {
+      label: "Download",
+      onClick: async () => await generateInvoice(phone),
+    },
+  });
+
+  clearCart?.();
+  navigate("/order-success");
+};
+
+  const phone = document.querySelector('input[name="phone"]')?.value;
+
+  if (!/^\d{10}$/.test(phone)) {
+    toast.warning("Invalid phone number", {
+      description: "Please enter a valid 10-digit mobile number.",
+    });
+    return;
+  }
+
+  toast("Confirm Payment", {
+    description: "Have you completed the UPI payment?",
+    action: {
+      label: "Yes, Completed",
+      onClick: () => completeOrder(phone),
+    },
+  });
+};
+
+
+ 
 
   return (
     <div className="min-h-screen px-4 py-10 flex justify-center items-start text-white">
       {cartItem.length > 0 ? (
         <div className="max-w-6xl w-full space-y-8">
           {/* Title */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <h1 className="text-3xl md:text-4xl font-extrabold text-center md:text-left drop-shadow-lg">
+          <div className="flex flex-row items-center justify-between gap-4">
+            <h1 className="text-xl md:text-4xl font-extrabold text-center md:text-left drop-shadow-lg">
               🛒 My Cart <span className="text-red-400">({cartItem.length})</span>
             </h1>
 
@@ -238,7 +265,7 @@ const customerInfo = [
               onClick={() => navigate('/order-history')}
               className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-5 py-2 rounded-lg font-semibold text-sm sm:text-base hover:scale-105 transition-all shadow-md flex items-center gap-2 cursor-pointer"
             >
-              <FaHistory /> View Order History
+              <FaHistory /> Orders
             </button>
           </div>
 
@@ -248,7 +275,7 @@ const customerInfo = [
   <div
     key={index}
     className="bg-white/10 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl p-4 sm:p-5
-    flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6
+    flex flex-row sm:items-center sm:justify-between gap-4 sm:gap-6
     transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl"
   >
     {/* ===== Clickable Product Section ===== */}
@@ -309,19 +336,31 @@ const customerInfo = [
       </div>
 
       {/* Delete Button */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          if (window.confirm("Remove this item from cart?")) {
-            removeFromCart(item.id);
-          }
-        }}
-        className="bg-white/10 hover:bg-red-500/90 transition-all
-        rounded-full p-3 hover:text-white shadow-md
-        mx-auto sm:mx-0 cursor-pointer"
-      >
-        <FaRegTrashAlt className="text-red-400 text-lg sm:text-xl" />
-      </button>
+     <button
+  onClick={(e) => {
+    e.stopPropagation();
+
+    toast("Remove item?", {
+      description: "This product will be removed from your cart.",
+      action: {
+        label: "Remove",
+        onClick: () => {
+          removeFromCart(item.id);
+          toast.success("Item removed successfully");
+        },
+      },
+      cancel: {
+        label: "Cancel",
+      },
+    });
+  }}
+  className="bg-white/10 hover:bg-red-500/90 transition-all
+  rounded-full p-3 hover:text-white shadow-md
+  mx-auto sm:mx-0 cursor-pointer"
+>
+  <FaRegTrashAlt className="text-red-400 text-lg sm:text-xl" />
+</button>
+
     </div>
   </div>
 ))}
