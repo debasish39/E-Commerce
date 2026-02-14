@@ -19,8 +19,8 @@ import {
   FaIndustry,
   FaListAlt,
   FaRupeeSign,
-  FaShareAlt,
 } from "react-icons/fa";
+import { SlActionRedo } from "react-icons/sl";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { Tooltip } from "react-tooltip";
@@ -178,49 +178,43 @@ export default function SingleProduct() {
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 py-6">
 
-        {/* LEFT COLUMN */}
-        <div className="flex flex-col items-center">
-          <div className="relative w-full shadow-2xl">
+       {/* LEFT COLUMN */}
+        <div data-aos="fade-right" className="flex flex-col items-center">
+          <div className="relative w-full max-w-xl bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
 
-            {/* Action Bar */}
-            <div className="absolute top-6 right-0 flex flex-col gap-3 z-20">
-
-              {/* Wishlist */}
+            {/* Action Buttons */}
+            <div className="absolute top-6 right-6 flex flex-col gap-3">
               <button
                 onClick={handleWishlist}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 cursor-pointer text-xl ${
-                  isWishlisted
-                    ? "bg-white/20 text-red-500"
-                    : "bg-white/20 text-white hover:bg-white/30"
-                }`}
+                className={`w-12 h-12 rounded-full backdrop-blur-xl bg-white/10 border border-white/20 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 hover:bg-white/20 text-xl ${isWishlisted ? "text-red-500" : "text-white"}`}
               >
                 {isWishlisted ? <FaHeart /> : <FaRegHeart />}
               </button>
 
-              {/* Share */}
               <button
                 onClick={handleShare}
-                className="w-10 h-10 rounded-full flex items-center justify-center bg-white/20 cursor-pointertext-white text-xl hover:bg-white/30 transition cursor-pointer hover:scale-110"
+                className="w-12 h-12 rounded-full backdrop-blur-xl bg-white/10 border border-white/20 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 hover:bg-white/20 text-xl"
               >
-                <FaShareAlt />
+<SlActionRedo />
               </button>
+            </div>
+
+            {/* Discount */}
+            <div className="absolute top-6 left-6 bg-red-600 text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1">
+              <FaTag />
+              {Math.round(product.discountPercentage)}% OFF
             </div>
 
             {/* Main Image */}
             <img
               src={selectedImage}
               alt={product.title}
-              className="w-full object-cover transition-transform duration-500 hover:scale-105"
+              className="w-full max-h-[420px] object-contain mx-auto transition-all duration-700 hover:scale-110"
             />
-
-            {/* Discount Badge */}
-            <div className="absolute top-3 left-3 bg-gradient-to-r from-red-600 to-pink-500 text-white px-3 py-1 text-xs rounded-full flex items-center gap-1 shadow-md">
-              <FaTag /> {Math.round(product.discountPercentage)}% OFF
-            </div>
           </div>
 
           {/* Thumbnails */}
-          <div className="flex gap-3 mt-4 overflow-x-auto justify-center w-full px-2">
+          <div className="flex gap-4 mt-8 overflow-x-auto">
             {product.images?.map((img, idx) => (
               <img
                 key={idx}
@@ -233,10 +227,10 @@ export default function SingleProduct() {
                     img
                   );
                 }}
-                className={`w-20 h-20 md:w-24 md:h-24 rounded-xl object-cover border-2 cursor-pointer transition ${
+                className={`w-20 h-20 rounded-2xl object-cover cursor-pointer transition-all duration-300 flex-shrink-0 ${
                   selectedImage === img
-                    ? "border-red-500 shadow-lg "
-                    : "border-gray-300"
+                    ? "border border-red-500  shadow-xl"
+                    : "opacity-70 hover:opacity-100"
                 }`}
               />
             ))}

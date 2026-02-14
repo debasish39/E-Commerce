@@ -395,8 +395,8 @@ export default function Navbar({ location, onLocationChange }) {
         className={`sm:hidden fixed bottom-3 left-1/2 -translate-x-1/2 
   w-[95%] max-w-md z-48
   bg-black/90 backdrop-blur-2xl
-  rounded-2xl border border-red-400
-  shadow-[0_0_30px_red]
+  rounded-2xl 
+  shadow-[0_0_12px_red]
   transition-transform duration-300 ease-in-out
   ${showBottomNav ? "translate-y-0" : "translate-y-24"}`}
       >
