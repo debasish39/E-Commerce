@@ -7,7 +7,11 @@ import {
   Home,
   ShoppingBag,
   Package,
-  Phone, Search, User
+  Phone,
+  Search,
+  User,
+  Mic,
+  MicOff
 } from "lucide-react";
 import { FaSignInAlt } from "react-icons/fa";
 import { HiMenuAlt1, HiMenuAlt3 } from "react-icons/hi";
@@ -29,6 +33,38 @@ export default function Navbar({ location, onLocationChange }) {
   const { search, setSearch } = getData();
   const [showNavbar, setShowNavbar] = useState(true);
   const [showBottomNav, setShowBottomNav] = useState(true);
+  const [isListening, setIsListening] = useState(false);
+  const handleVoiceSearch = () => {
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("Speech recognition not supported in this browser");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.lang = "en-US"; // Change to hi-IN if needed
+  recognition.interimResults = false;
+
+  setIsListening(true);
+  recognition.start();
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    setSearch(transcript);
+    navigate("/products");
+  };
+
+  recognition.onend = () => {
+    setIsListening(false);
+  };
+
+  recognition.onerror = () => {
+    setIsListening(false);
+  };
+};
   useEffect(() => {
     let lastScrollY = window.scrollY;
 
@@ -164,22 +200,33 @@ export default function Navbar({ location, onLocationChange }) {
 
           {/* Desktop Navigation */}
           <nav className="hidden sm:flex items-center justify-center gap-6" data-aos="fade-left">
-            {/* Desktop Search */}
-            <div className="relative flex items-center">
-              <input
-                type="text"
-                value={search}
-                onChange={handleSearchChange}
-                onKeyDown={handleKeyDown}
-                placeholder="Search products..."
-                className="w-full bg-black/10 border border-orange-700/60 placeholder-gray-500 
-    text-white rounded-xl pl-5 pr-12 py-2.5 text-sm
+         <div className="relative flex items-center">
+  <input
+    type="text"
+    value={search}
+    onChange={handleSearchChange}
+    onKeyDown={handleKeyDown}
+    placeholder="Search products..."
+    className="bg-black/10 border border-orange-700/60 
+    text-white rounded-xl pl-5 pr-20 py-2.5 text-sm
     focus:outline-none focus:ring-1 focus:ring-red-900
     backdrop-blur-md transition w-56 focus:w-72"
-              />
+  />
 
-              <Search className="absolute right-4 h-4 w-4 text-gray-400" />
-            </div>
+
+
+  {/* 🎙 Mic Button */}
+  <button
+    onClick={handleVoiceSearch}
+    className={`absolute right-4 transition-all duration-300 cursor-pointer ${
+      isListening
+        ? "text-red-500 animate-pulse scale-110"
+        : "text-gray-400 hover:text-red-400"
+    }`}
+  >
+    {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+  </button>
+</div>
 
             <ul className="flex gap-6 font-medium">
               {navLinks.map(({ name, path, icon }) => (
@@ -239,21 +286,31 @@ export default function Navbar({ location, onLocationChange }) {
 
           {/* Mobile Nav + Cart + Auth */}
           <div className="sm:hidden flex items-center justify-center gap-4" data-aos="fade-right">
-            {/* Mobile Search */}
-            <div className="relative flex items-center w-full" data-aos="fade-right">
-              <input
-                type="text"
-                value={search}
-                onChange={handleSearchChange}
-                onKeyDown={handleKeyDown}
-                placeholder="Search products..."
-                className="w-full bg-black/10 border border-orange-700/60 placeholder-gray-500 
-    text-white rounded-xl pl-5 pr-12 py-2.5 text-sm
+          <div className="relative flex items-center w-full">
+  <input
+    type="text"
+    value={search}
+    onChange={handleSearchChange}
+    onKeyDown={handleKeyDown}
+    placeholder="Search products..."
+    className="w-full bg-black/10 border border-orange-700/60 
+    text-white rounded-xl pl-5 pr-20 py-2.5 text-sm
     focus:outline-none focus:ring-1 focus:ring-red-900
     backdrop-blur-md transition"
-              />
-              <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            </div>
+  />
+
+
+  <button
+    onClick={handleVoiceSearch}
+    className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-300 cursor-pointer ${
+      isListening
+        ? "text-red-500 animate-pulse scale-110"
+        : "text-gray-400 hover:text-red-400"
+    }`}
+  >
+    {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+  </button>
+</div>
 
 
 
