@@ -62,13 +62,13 @@ export default function ProductCard({ product }) {
           }
         />
 
-        <span className="absolute top-2 left-2 text-xs sm:text-sm bg-gradient-to-r from-red-500 to-pink-500 text-white font-semibold px-2 sm:px-3 py-1 rounded-full shadow-md">
+        <span className="absolute top-2 left-2 text-xs sm:text-sm bg-gradient-to-r from-red-600 to-red-900 text-white font-semibold px-2 sm:px-3 py-1 rounded-full shadow-md">
           ✨ Featured
         </span>
       </div>
 
       {/* Info */}
-      <div className="mt-3 sm:mt-4 text-center space-y-1">
+      <div className="mt-1 sm:mt-4 text-center space-y-0">
         <h1
           className="text-sm sm:text-lg font-semibold text-gray-300 line-clamp-2"
           onClick={() => navigate(`/products/${product.id}`)}

@@ -1,17 +1,27 @@
-import React from 'react';
-import { useUser } from '@clerk/clerk-react';
+import React from "react";
+import { useUser } from "@clerk/clerk-react";
+import { Navigate, useLocation } from "react-router-dom";
 
 export default function ProtectedRoute({ children }) {
   const { user, isLoaded } = useUser();
+  const location = useLocation();
 
-  if (!isLoaded) return null; // wait until Clerk loads
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        Loading...
+      </div>
+    );
+  }
 
   if (!user) {
-    // Redirect to Clerk's hosted sign-in with current page as redirect_url
-    const redirectURL = encodeURIComponent(window.location.href);
-    console.log(window.location.href);
-    window.location.href = `https://big-badger-99.accounts.dev/sign-in?redirect_url=${redirectURL}`;
-    return null;
+    return (
+      <Navigate
+        to="/sign-in"
+        state={{ from: location }}
+        replace
+      />
+    );
   }
 
   return <>{children}</>;

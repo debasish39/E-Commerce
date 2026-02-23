@@ -5,6 +5,11 @@ import { Toaster } from "sonner";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import Spinner from "./components/Spinner";
+import SignInPage from "./pages/SignIn";
+import SignUpPage from "./pages/SignUp";
+import SsoCallback from "./pages/SsoCallback";
+import VerifySignIn from "./pages/VerifySignIn";
+import ProfilePage from "./pages/ProfilePage";
 
 /* ===========================
    Lazy Loaded Pages
@@ -18,7 +23,7 @@ const CategoryProduct = lazy(() => import("./pages/CategoryProduct"));
 const WishlistPage = lazy(() => import("./pages/WishlistPage"));
 const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
 const OrderHistory = lazy(() => import("./pages/OrderHistory"));
-
+const Verify = lazy(() => import("./pages/verify"));
 /* ===========================
    Lazy Loaded Components
 =========================== */
@@ -161,11 +166,17 @@ const AppWrapper = () => {
             <div className="pt-12" />
 
             <Routes>
+              <Route path="/verify" element={<Verify />} />
+              <Route path="/sign-in/*" element={<SignInPage />} />
+              <Route path="/verify-signin" element={<VerifySignIn />} />
+<Route path="/sign-up/*" element={<SignUpPage />} />
+<Route path="/sso-callback" element={<SsoCallback />} />
               <Route path="/" element={<Home />} />
               <Route path="/products" element={<Products />} />
               <Route path="/products/:id" element={<SingleProduct />} />
               <Route path="/category/:category" element={<CategoryProduct />} />
               <Route path="/order-success" element={<OrderSuccess />} />
+              <Route path="/profile" element={<ProfilePage />} />
               <Route path="/order-history" element={<OrderHistory />} />
 
               <Route

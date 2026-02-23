@@ -9,11 +9,10 @@ import {
   Package,
   Phone,
   Search,
-  User,
   Mic,
   MicOff
 } from "lucide-react";
-import { FaSignInAlt } from "react-icons/fa";
+import { FaSignInAlt,FaUser } from "react-icons/fa";
 import { HiMenuAlt1, HiMenuAlt3 } from "react-icons/hi";
 import { AiOutlineHeart } from "react-icons/ai";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
@@ -23,8 +22,10 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import { getData } from "../context/DataContext";
 import OrderHistory from "../pages/OrderHistory";
+import { useUser } from "@clerk/clerk-react";
 
 export default function Navbar({ location, onLocationChange }) {
+  const { user } = useUser();
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const { cartItem } = useCart();
@@ -268,19 +269,30 @@ export default function Navbar({ location, onLocationChange }) {
 
             {/* Auth */}
             <div className="ml-4" data-aos="fade-left">
-              <SignedOut>
-                <SignInButton>
-                  <button className="bg-gradient-to-r from-red-500 to-orange-400 hover:from-red-600 hover:to-orange-500 text-white font-medium px-4 py-1.5 rounded-md transition flex items-center gap-1 justify-center flex-row shadow-md hover:shadow-red-500/40">
-                    <FaSignInAlt /> <span>Sign In</span>
-                  </button>
-                </SignInButton>
-              </SignedOut>
-              <SignedIn>
-                <UserButton
-                  afterSignOutUrl="/"
-                  appearance={{ elements: { avatarBox: "h-8 w-8 ring-2 ring-red-500" } }}
-                />
-              </SignedIn>
+              
+  <SignedOut>
+    <button
+      onClick={() => navigate("/sign-in")}
+      className="flex flex-col items-center gap-1 text-white"
+    >
+      <FaUser className="h-5 w-5 mb-1" />
+      Account
+    </button>
+  </SignedOut>
+
+  <SignedIn>
+    <div className="flex flex-col items-center">
+      {user && (
+  <img
+    src={user.imageUrl}
+    alt="profile"
+    onClick={() => navigate("/profile")}
+    className="h-8 w-8 rounded-full ring-2 ring-red-500 cursor-pointer"
+  />
+)}
+      <span className="text-[11px] mt-1">Profile</span>
+    </div>
+  </SignedIn>
             </div>
           </nav>
 
@@ -293,7 +305,7 @@ export default function Navbar({ location, onLocationChange }) {
     onChange={handleSearchChange}
     onKeyDown={handleKeyDown}
     placeholder="Search products..."
-    className="w-full bg-black/10 border border-orange-700/60 
+    className="w-60 bg-black/10 border border-orange-700/60 
     text-white rounded-xl pl-5 pr-20 py-2.5 text-sm
     focus:outline-none focus:ring-1 focus:ring-red-900
     backdrop-blur-md transition"
@@ -538,26 +550,34 @@ export default function Navbar({ location, onLocationChange }) {
 
             Wishlist
           </NavLink>
+{/* Account */}
+<div className="flex flex-col items-center text-xs text-gray-400">
 
+  <SignedOut>
+    <button
+      onClick={() => navigate("/sign-in")}
+      className="flex flex-col items-center gap-1 text-white"
+    >
+      <FaUser className="h-5 w-5 mb-1" />
+      Account
+    </button>
+  </SignedOut>
 
-          {/* Account */}
-          <div className="flex flex-col items-center text-xs text-gray-400">
-            <SignedOut>
-              <SignInButton>
-                <div className="flex flex-col items-center hover:text-red-400 transition cursor-pointer">
-                  <User className="h-5 w-5 mb-1" />
-                  Account
-                </div>
-              </SignInButton>
-            </SignedOut>
+  <SignedIn>
+    <div className="flex flex-col items-center">
+      {user && (
+  <img
+    src={user.imageUrl}
+    alt="profile"
+    onClick={() => navigate("/profile")}
+    className="h-8 w-8 rounded-full ring-2 ring-red-500 cursor-pointer"
+  />
+)}
+      <span className="text-[11px] mt-1">Profile</span>
+    </div>
+  </SignedIn>
 
-            <SignedIn>
-              <div className="flex flex-col items-center">
-                <UserButton afterSignOutUrl="/" />
-                <span className="text-[11px] mt-1">Profile</span>
-              </div>
-            </SignedIn>
-          </div>
+</div>
 
         </div>
       </div>

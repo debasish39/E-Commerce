@@ -186,14 +186,14 @@ export default function SingleProduct() {
             <div className="absolute top-6 right-6 flex flex-col gap-3">
               <button
                 onClick={handleWishlist}
-                className={`w-12 h-12 rounded-full backdrop-blur-xl bg-white/10 border border-white/20 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 hover:bg-white/20 text-xl ${isWishlisted ? "text-red-500" : "text-white"}`}
+                className={`w-12 h-12 rounded-full backdrop-blur-xl bg-white/10 border border-white/20 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 hover:bg-white/20 text-xl cursor-pointer ${isWishlisted ? "text-red-500" : "text-white"}`}
               >
                 {isWishlisted ? <FaHeart /> : <FaRegHeart />}
               </button>
 
               <button
                 onClick={handleShare}
-                className="w-12 h-12 rounded-full backdrop-blur-xl bg-white/10 border border-white/20 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 hover:bg-white/20 text-xl"
+                className="w-12 h-12 rounded-full backdrop-blur-xl bg-white/10 border border-white/20 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 hover:bg-white/20 text-xl cursor-pointer"
               >
 <SlActionRedo />
               </button>
@@ -230,7 +230,7 @@ export default function SingleProduct() {
                 className={`w-20 h-20 rounded-2xl object-cover cursor-pointer transition-all duration-300 flex-shrink-0 ${
                   selectedImage === img
                     ? "border border-red-500  shadow-xl"
-                    : "opacity-70 hover:opacity-100"
+                    : "opacity-70 border hover:opacity-100"
                 }`}
               />
             ))}
