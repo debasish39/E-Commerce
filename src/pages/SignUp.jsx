@@ -96,109 +96,200 @@ export default function SignUp() {
     });
   };
 
-  return (
-    <AuthLayout title="Create Account">
+return (
+  <AuthLayout title="Create Account">
 
-      {/* ============== SOCIAL LOGIN ============== */}
-      <div className="space-y-3 mb-6">
+    <div className="relative w-full max-w-6xl ">
 
-        <button
-          type="button"
-          onClick={handleGoogle}
-          className="w-full flex items-center justify-center gap-3 
-          bg-white text-black py-3 rounded-xl hover:scale-105 transition"
-        >
-          <FcGoogle size={20} />
-          Continue with Google
-        </button>
+      {/* Background Glow */}
+      {/* <div className="absolute -top-20 -left-20 w-60 h-60 bg-red-500/30 blur-3xl rounded-full" />
+      <div className="absolute -bottom-20 -right-20 w-60 h-60 bg-red-500/30 blur-3xl rounded-full" /> */}
 
-        <button
-          type="button"
-          onClick={handleGithub}
-          className="w-full flex items-center justify-center gap-3 
-          bg-black border border-gray-700 py-3 rounded-xl 
-          hover:bg-gray-900 transition"
-        >
-          <FaGithub size={20} />
-          Continue with GitHub
-        </button>
-      </div>
+      <div className="
+        relative
+        bg-black/60
+        backdrop-blur-2xl
+        border border-white/10
+        rounded-3xl
+        shadow-[0_0_40px_rgba(255,80,80,0.2)]
+        p-6 sm:p-8
+        space-y-6
+      ">
 
-      <div className="relative my-6">
-        <div className="border-t border-gray-700"></div>
-        <span className="absolute left-1/2 -translate-x-1/2 -top-3 bg-black px-3 text-sm text-gray-400">
-          OR
-        </span>
-      </div>
+        {/* ================= SOCIAL LOGIN ================= */}
+        <div className="space-y-3">
 
-      {/* ============== FORM ============== */}
-      <form onSubmit={handleSubmit} className="space-y-4">
+          <button
+            type="button"
+            onClick={handleGoogle}
+            className="
+              w-full
+              flex items-center justify-center gap-3
+              py-3 sm:py-4
+              rounded-xl
+              bg-white
+              text-black
+              font-medium
+              active:scale-95
+              transition cursor-pointer border
+            "
+          >
+            <FcGoogle size={20} />
+            Continue with Google
+          </button>
 
-        <div className="grid grid-cols-2 gap-3">
-          <input
-            placeholder="First Name"
-            className="p-3 rounded-xl bg-black/40 border border-gray-700"
-            onChange={(e) =>
-              setForm({ ...form, firstName: e.target.value })
-            }
-          />
+          <button
+            type="button"
+            onClick={handleGithub}
+            className="
+              w-full
+              flex items-center justify-center gap-3
+              py-3 sm:py-4
+              rounded-xl
+              bg-black/70
+            border-white/10
+              hover:bg-black
+              font-medium
+              active:scale-95
+              transition cursor-pointer border-2
 
-          <input
-            placeholder="Last Name"
-            className="p-3 rounded-xl bg-black/40 border border-gray-700"
-            onChange={(e) =>
-              setForm({ ...form, lastName: e.target.value })
-            }
-          />
+            "
+          >
+            <FaGithub size={20} />
+            Continue with GitHub
+          </button>
+
         </div>
 
-        <input
-          type="email"
-          required
-          placeholder="Email"
-          className="w-full p-3 rounded-xl bg-black/40 border border-gray-700"
-          onChange={(e) =>
-            setForm({ ...form, email: e.target.value })
-          }
-        />
+        {/* Divider */}
+        <div className="flex items-center gap-3 text-gray-500 text-xs">
+          <div className="flex-1 h-px bg-white/10" />
+          OR
+          <div className="flex-1 h-px bg-white/10" />
+        </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full p-3 rounded-xl bg-black/40 border border-gray-700"
-          onChange={(e) =>
-            setForm({ ...form, password: e.target.value })
-          }
-        />
+        {/* ================= FORM ================= */}
+        <form onSubmit={handleSubmit} className="space-y-4">
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-3 rounded-xl
-          bg-gradient-to-r from-orange-500 to-red-600"
-        >
-          {loading ? "Creating..." : "Sign Up with Password"}
-        </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
-        {/* Magic Link Button */}
-        <button
-          type="button"
-          onClick={handleMagicLink}
-          className="w-full py-3 rounded-xl
-          border border-orange-500 text-orange-400
-          hover:bg-orange-500 hover:text-white transition"
-        >
-          Send Signup Link Instead
-        </button>
+            <input
+              placeholder="First Name"
+              className="
+                w-full
+                px-4 py-3
+                rounded-xl
+                text-sm
+                bg-white/5
+                border border-white/10
+                focus:border-red-500
+                focus:ring-2 focus:ring-red-500/30
+                outline-none
+                transition
+              "
+              onChange={(e) =>
+                setForm({ ...form, firstName: e.target.value })
+              }
+            />
 
-        <p className="text-sm text-center text-gray-400 mt-4">
-          Already have an account?{" "}
-          <Link to="/sign-in" className="text-orange-400 hover:underline">
-            Sign In
-          </Link>
-        </p>
+            <input
+              placeholder="Last Name"
+              className="
+                w-full
+                px-4 py-3
+                rounded-xl
+                text-sm
+                bg-white/5
+                border border-white/10
+                focus:border-red-500
+                focus:ring-2 focus:ring-red-500/30
+                outline-none
+                transition
+              "
+              onChange={(e) =>
+                setForm({ ...form, lastName: e.target.value })
+              }
+            />
 
-      </form>
-    </AuthLayout>
-  );
+          </div>
+
+          <input
+            type="email"
+            required
+            placeholder="Email address"
+            className="
+              w-full
+              px-4 py-3
+              rounded-xl
+              text-sm
+              bg-white/5
+              border border-white/10
+              focus:border-red-500
+              focus:ring-2 focus:ring-red-500/30
+              outline-none
+              transition
+            "
+            onChange={(e) =>
+              setForm({ ...form, email: e.target.value })
+            }
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            className="
+              w-full
+              px-4 py-3
+              rounded-xl
+              text-sm
+              bg-white/5
+              border border-white/10
+              focus:border-red-500
+              focus:ring-2 focus:ring-red-500/30
+              outline-none
+              transition
+            "
+            onChange={(e) =>
+              setForm({ ...form, password: e.target.value })
+            }
+          />
+
+          {/* Primary Submit */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="
+              w-full
+              py-3 sm:py-4
+              rounded-xl
+              bg-gradient-to-r from-red-500 to-red-600
+              text-white
+              font-medium
+              shadow-lg shadow-red-600/30
+              active:scale-95
+              transition-all
+            "
+          >
+            {loading ? "Creating Account..." : "Create Account"}
+          </button>
+          {/* Sign In Link */}
+          <div className="pt-4 border-t border-white/10 text-center text-sm">
+            <span className="text-gray-400">
+              Already have an account?{" "}
+            </span>
+            <Link
+              to="/sign-in"
+              className="text-red-400 font-medium hover:text-red-300 transition"
+            >
+              Sign In
+            </Link>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+
+  </AuthLayout>
+);
 }

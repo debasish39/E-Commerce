@@ -12,7 +12,7 @@ import {
   Mic,
   MicOff
 } from "lucide-react";
-import { FaSignInAlt,FaUser } from "react-icons/fa";
+import { FaRegUserCircle,FaUser } from "react-icons/fa";
 import { HiMenuAlt1, HiMenuAlt3 } from "react-icons/hi";
 import { AiOutlineHeart } from "react-icons/ai";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
@@ -273,10 +273,10 @@ export default function Navbar({ location, onLocationChange }) {
   <SignedOut>
     <button
       onClick={() => navigate("/sign-in")}
-      className="flex flex-col items-center gap-1 text-white"
+      className="flex flex-col sm:flex-row items-center gap-1 text-white hover:text-red-500 transition cursor-pointer"
     >
-      <FaUser className="h-5 w-5 mb-1" />
-      Account
+      <FaRegUserCircle className="h-5 sm:h-6 w-5 mb-1 sm:w-6" />
+    <span className="text-[11px] sm:hidden"> Account</span>
     </button>
   </SignedOut>
 
@@ -556,9 +556,9 @@ export default function Navbar({ location, onLocationChange }) {
   <SignedOut>
     <button
       onClick={() => navigate("/sign-in")}
-      className="flex flex-col items-center gap-1 text-white"
+      className="flex flex-col items-center gap-1 text-gray-450 "
     >
-      <FaUser className="h-5 w-5 mb-1" />
+      <FaRegUserCircle className="h-5 w-5 mb-1" />
       Account
     </button>
   </SignedOut>
