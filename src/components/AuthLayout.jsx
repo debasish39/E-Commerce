@@ -7,14 +7,12 @@ export default function AuthLayout({ title, children }) {
       items-center
       justify-center
       overflow-hidden
-      bg-black
       text-white
     ">
 
-      {/* ===== Animated Gradient Background ===== */}
 
       {/* Large Glow Top Left */}
-      <div className="
+      {/* <div className="
         absolute
         -top-40
         -left-40
@@ -24,10 +22,10 @@ export default function AuthLayout({ title, children }) {
         blur-[140px]
         rounded-full
         animate-pulse
-      " />
+      " /> */}
 
       {/* Large Glow Bottom Right */}
-      <div className="
+      {/* <div className="
         absolute
         -bottom-40
         -right-40
@@ -37,17 +35,17 @@ export default function AuthLayout({ title, children }) {
         blur-[140px]
         rounded-full
         animate-pulse
-      " />
+      " /> */}
 
       {/* Subtle Grid Overlay */}
-      <div
+      {/* <div
         className="absolute inset-0 opacity-[0.04]"
         style={{
           backgroundImage:
             "linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)",
           backgroundSize: "40px 40px",
         }}
-      />
+      /> */}
 
       {/* ===== Card Container ===== */}
       <div className="

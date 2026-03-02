@@ -16,13 +16,162 @@ const Cart = ({ location, getLocation }) => {
   const { cartItem, removeFromCart, increaseQty, decreaseQty, clearCart } = useCart();
   const { user } = useUser();
   const navigate = useNavigate();
+  const BACKEND_URL = "https://eshop-backend-y0e7.onrender.com";
 
   const totalPrice = cartItem.reduce(
     (total, item) => total + Number(item.price) * item.quantity,
     0
   );
   const totalAmount = (totalPrice + 5).toFixed(2);
+  
+const completeOrder = async (phone, paymentMethod = "Razorpay") => {
+  const newOrder = {
+    id: Date.now(),
+    user: user?.fullName || "Guest",
+    phone: `+91 ${phone}`,
+    total: totalAmount,
+    paymentMethod,
+    paymentStatus: paymentMethod === "COD" ? "Pending" : "Paid",
+    date: new Date().toLocaleString(),
+    status: "Processing",
+    items: cartItem.map(item => ({
+      title: item.title,
+      price: item.price,
+      quantity: item.quantity,
+    })),
+  };
 
+  try {
+    const existingOrders =
+      JSON.parse(localStorage.getItem("orderHistory")) || [];
+
+    existingOrders.push(newOrder);
+    localStorage.setItem("orderHistory", JSON.stringify(existingOrders));
+  } catch (err) {
+    console.error("Failed to save order history:", err);
+  }
+
+  if (paymentMethod === "Razorpay") {
+    toast.success("Payment Successful 🎉");
+
+    toast("Download Invoice?", {
+      description: "Click below to download your invoice.",
+      action: {
+        label: "Download",
+        onClick: () => generateInvoice(phone),
+      },
+    });
+  } else {
+    toast.success("Order placed (Cash on Delivery)");
+  }
+
+  clearCart?.();
+  navigate("/order-success");
+};
+
+/* ================================
+     RAZORPAY PAYMENT
+  ================================= */
+  const handleRazorpayPayment = async () => {
+    try {
+      if (cartItem.length === 0) {
+        toast.error("Cart is empty 🛒");
+        return;
+      }
+
+      const phone = document.querySelector('input[name="phone"]')?.value;
+
+      if (!/^\d{10}$/.test(phone)) {
+        toast.warning("Enter valid 10-digit mobile number");
+        return;
+      }
+
+      const orderRes = await fetch(`${BACKEND_URL}/api/create-order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: totalAmount }),
+      });
+
+      const orderData = await orderRes.json();
+
+      if (!orderRes.ok) {
+        toast.error("Order creation failed ❌");
+        return;
+      }
+
+      if (!window.Razorpay) {
+        toast.error("Razorpay not loaded");
+        return;
+      }
+
+      const razor = new window.Razorpay({
+        key: "rzp_test_SMNdX5YBGk1ooX",
+        amount: orderData.amount,
+        currency: "INR",
+        name: "EShop",
+        description: "Order Payment",
+        order_id: orderData.id,
+
+      handler: async function (response) {
+  try {
+    const verifyRes = await fetch(
+      `${BACKEND_URL}/api/verify-payment`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(response),
+      }
+    );
+
+    const verifyData = await verifyRes.json();
+
+    if (verifyData.success) {
+     completeOrder(phone, "Razorpay");// cart clears here
+    } else {
+      toast.error("Payment verification failed ❌");
+    }
+
+  } catch (err) {
+    toast.error("Verification server error ❌");
+  }
+},
+
+        prefill: {
+          name: user?.fullName || "Guest",
+          contact: phone,
+        },
+
+        theme: {
+          color: "#E63946",
+        },
+      });
+
+      razor.open();
+    } catch (error) {
+      console.error(error);
+      toast.error("Payment failed ❌");
+    }
+  };
+const handleCOD = () => {
+  if (cartItem.length === 0) {
+    toast.error("Cart is empty 🛒");
+    return;
+  }
+
+  const phone = document.querySelector('input[name="phone"]')?.value;
+
+  if (!/^\d{10}$/.test(phone)) {
+    toast.warning("Enter valid 10-digit mobile number");
+    return;
+  }
+
+  toast("Confirm Cash on Delivery?", {
+    action: {
+      label: "Confirm",
+      onClick: () => completeOrder(phone, "COD"),
+    },
+  });
+};
   const UPI_ID = "sonupanda0999@okicici";
   const upiPaymentLink = `upi://pay?pa=${UPI_ID}&pn=Your%20Store&am=${totalAmount}&cu=INR&tn=Payment%20for%20Order`;
 
@@ -191,44 +340,6 @@ const customerInfo = [
     });
     return;
   }
-const completeOrder = async (phone) => {
-  const newOrder = {
-    id: Date.now(),
-    user: user?.fullName || "Guest",
-    phone: `+91 ${phone}`,
-    total: totalAmount,
-    date: new Date().toLocaleString(),
-    status: "Processing",
-    items: cartItem.map(item => ({
-      title: item.title,
-      price: item.price,
-      quantity: item.quantity,
-    })),
-  };
-
-  try {
-    const existingOrders =
-      JSON.parse(localStorage.getItem("orderHistory")) || [];
-
-    existingOrders.push(newOrder);
-
-    localStorage.setItem("orderHistory", JSON.stringify(existingOrders));
-  } catch (err) {
-    console.error("Failed to save order history:", err);
-  }
-
-  toast.success("Order placed successfully 🎉");
-
-  toast("Download invoice?", {
-    action: {
-      label: "Download",
-      onClick: async () => await generateInvoice(phone),
-    },
-  });
-
-  clearCart?.();
-  navigate("/order-success");
-};
 
   const phone = document.querySelector('input[name="phone"]')?.value;
 
@@ -422,7 +533,7 @@ const completeOrder = async (phone) => {
               {/* UPI Payment */}
               {cartItem.length > 0 && (
                 <div className="mt-6 text-center space-y-2 border-t border-white/30 pt-4">
-                  <h2 className="font-semibold text-base flex items-center justify-center gap-2"><FaQrcode /> Pay via UPI</h2>
+                  {/* <h2 className="font-semibold text-base flex items-center justify-center gap-2"><FaQrcode /> Pay via UPI</h2>
                   <p className="text-xs text-gray-300">Scan the QR below or tap to pay with your UPI app.</p>
                   <div className="text-center">
                     <a href={upiPaymentLink} target="_blank" rel="noreferrer">
@@ -430,15 +541,24 @@ const completeOrder = async (phone) => {
                     </a>
                     <a href={upiPaymentLink} target="_blank" rel="noreferrer" className="inline-block mt-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:scale-105 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all duration-300">Buy Now</a>
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">UPI ID: <span className="font-medium">{UPI_ID}</span></p>
+                  <p className="text-xs text-gray-400 mt-1">UPI ID: <span className="font-medium">{UPI_ID}</span></p> */}
                   <div className="flex justify-center mt-4">
                     <button
-                      onClick={handleCheckout}
+              onClick={handleRazorpayPayment}
                       className="bg-green-500/90 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold text-sm sm:text-base flex items-center justify-center gap-3 transition-all shadow-md hover:shadow-lg cursor-pointer"
                     >
-                      <FaCheckCircle className="w-5 h-5" /> I have completed payment
+                      <FaCheckCircle className="w-5 h-5" />Pay with Razorpay
                     </button>
                   </div>
+                  <div className="flex justify-center mt-4">
+  <button
+    onClick={handleCOD}
+    className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-3 rounded-lg font-semibold text-sm sm:text-base flex items-center justify-center gap-3 transition-all shadow-md hover:shadow-lg"
+  >
+    <FaWallet className="w-5 h-5" />
+    Cash on Delivery
+  </button>
+</div>
 
                 </div>
               )}

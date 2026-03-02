@@ -1,6 +1,7 @@
 import { useUser, SignOutButton } from "@clerk/clerk-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { FaUserEdit, FaTrashAlt, FaSignOutAlt } from "react-icons/fa";
 
 export default function ProfilePage() {
   const { user, isLoaded } = useUser();
@@ -19,7 +20,7 @@ export default function ProfilePage() {
       setUploading(true);
       await user.setProfileImage({ file });
       toast.success("Profile image updated 🎉");
-    } catch (error) {
+    } catch {
       toast.error("Image upload failed");
     } finally {
       setUploading(false);
@@ -46,7 +47,7 @@ export default function ProfilePage() {
     });
   };
 
-  /* ================= EDIT FULL NAME ================= */
+  /* ================= UPDATE NAME ================= */
   const handleUpdateName = async () => {
     if (!fullName.trim()) return;
 
@@ -55,19 +56,14 @@ export default function ProfilePage() {
     const lastName = names.slice(1).join(" ");
 
     try {
-      await user.update({
-        firstName,
-        lastName,
-      });
-
-      toast.success("Name updated successfully ✨");
+      await user.update({ firstName, lastName });
+      toast.success("Name updated ✨");
       setEditingName(false);
-    } catch (err) {
+    } catch {
       toast.error("Failed to update name");
     }
   };
 
-  /* ================= SIGN OUT CONFIRM ================= */
   const handleSignOutToast = () => {
     toast("Are you sure you want to sign out?", {
       action: {
@@ -80,31 +76,31 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen pt-20 mb-6 px-4 flex justify-center">
-      <div className="w-full max-w-4xl  border border-red-500/40 rounded-2xl p-8">
+    <div className="min-h-screen pt-24 mb-3 px-4 flex justify-center  text-white">
+      <div className="w-full max-w-5xl backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl shadow-2xl p-10">
 
-        {/* ================= HEADER ================= */}
-        <div className="flex flex-col sm:flex-row items-center gap-8">
+        {/* ================= PROFILE HEADER ================= */}
+        <div className="flex flex-col sm:flex-row items-center gap-10">
 
+          {/* Avatar */}
           <div className="relative group">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-red-500 to-pink-500 blur-lg opacity-40 group-hover:opacity-70 transition duration-500"></div>
+
             <img
               src={user?.imageUrl}
               alt="avatar"
-              className="h-28 w-28 rounded-full ring-4 ring-red-500 object-cover"
+              className="relative h-36 w-36 rounded-full object-cover border-4 border-red-500 shadow-xl"
             />
 
-            {/* Upload Overlay */}
             <label className="absolute inset-0 bg-black/60 
               opacity-0 group-hover:opacity-100 
               flex items-center justify-center 
               rounded-full cursor-pointer transition">
-
               {uploading ? (
                 <span className="text-xs">Uploading...</span>
               ) : (
                 <span className="text-xs">Change</span>
               )}
-
               <input
                 type="file"
                 accept="image/*"
@@ -114,12 +110,12 @@ export default function ProfilePage() {
             </label>
           </div>
 
-          <div className="text-center sm:text-left w-full">
+          {/* User Info */}
+          <div className="flex-1 text-center sm:text-left">
 
-            {/* ===== Editable Name ===== */}
             {!editingName ? (
               <>
-                <h2 className="text-2xl font-bold text-red-400">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent">
                   {user?.fullName}
                 </h2>
 
@@ -128,31 +124,28 @@ export default function ProfilePage() {
                     setFullName(user?.fullName || "");
                     setEditingName(true);
                   }}
-                  className="text-sm text-red-400 hover:underline mt-1"
+                  className="flex items-center gap-2 text-sm mt-2 text-red-400 hover:underline"
                 >
-                  Edit Name
+                  <FaUserEdit /> Edit Name
                 </button>
               </>
             ) : (
-              <div className="flex flex-col gap-3 mt-2">
+              <div className="flex flex-col gap-4 mt-4">
                 <input
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="bg-black/40 border border-red-500/30 
-                  rounded-xl p-2 text-white"
+                  className="bg-black/40 border border-red-500/40 rounded-xl p-3 text-white focus:ring-2 focus:ring-red-500 outline-none"
                 />
-
                 <div className="flex gap-4">
                   <button
                     onClick={handleUpdateName}
-                    className="px-4 py-1 rounded-lg bg-red-600"
+                    className="px-6 py-2 rounded-lg bg-gradient-to-r from-red-600 to-pink-600 hover:scale-105 transition"
                   >
                     Save
                   </button>
-
                   <button
                     onClick={() => setEditingName(false)}
-                    className="px-4 py-1 rounded-lg bg-gray-600"
+                    className="px-6 py-2 rounded-lg bg-gray-600 hover:bg-gray-700 transition"
                   >
                     Cancel
                   </button>
@@ -160,54 +153,50 @@ export default function ProfilePage() {
               </div>
             )}
 
-            <p className="text-gray-400 mt-3">
+            <p className="text-gray-400 mt-4">
               {user?.primaryEmailAddress?.emailAddress}
             </p>
 
             <button
               onClick={handleRemoveImage}
               disabled={uploading}
-              className="mt-4 text-sm text-red-400 hover:underline"
+              className="flex items-center gap-2 mt-4 text-sm text-red-400 hover:text-red-300 transition"
             >
-              Remove Image
+              <FaTrashAlt /> Remove Image
             </button>
           </div>
         </div>
 
-        {/* ================= ACCOUNT INFO ================= */}
-        <div className="mt-10 grid sm:grid-cols-2 gap-6">
-          <div className="p-6 rounded-xl bg-black/40 border border-red-500/20">
+        {/* ================= ACCOUNT INFO CARDS ================= */}
+        <div className="mt-14 grid sm:grid-cols-2 gap-8">
+
+          <div className="p-8 rounded-2xl  border border-white/10 shadow-md hover:shadow-red-500/20 transition">
             <p className="text-gray-400 text-sm">First Name</p>
-            <p className="text-white font-medium mt-1">
-              {user?.firstName}
-            </p>
+            <p className="text-xl font-semibold mt-2">{user?.firstName}</p>
           </div>
 
-          <div className="p-6 rounded-xl bg-black/40 border border-red-500/20">
+          <div className="p-8 rounded-2xl border border-white/10 shadow-md hover:shadow-red-500/20 transition">
             <p className="text-gray-400 text-sm">Last Name</p>
-            <p className="text-white font-medium mt-1">
-              {user?.lastName}
-            </p>
+            <p className="text-xl font-semibold mt-2">{user?.lastName}</p>
           </div>
+
         </div>
 
-        {/* ================= LOGOUT ================= */}
-        <div className="mt-12">
-
+        {/* ================= SIGN OUT ================= */}
+        <div className="mt-16 text-center">
           <button
             onClick={handleSignOutToast}
-            className="px-6 py-3 rounded-xl
-              bg-gradient-to-r from-red-600 to-pink-600
-              hover:shadow-lg hover:shadow-red-500/30 transition"
+            className="flex items-center justify-center gap-3 mx-auto px-8 py-3 rounded-full
+            bg-gradient-to-r from-red-600 to-pink-600
+            hover:shadow-xl hover:shadow-red-500/40
+            hover:scale-105 transition-all duration-300"
           >
-            Sign Out
+            <FaSignOutAlt /> Sign Out
           </button>
 
-          {/* Hidden real signout */}
           <SignOutButton>
             <button id="realSignOutBtn" className="hidden" />
           </SignOutButton>
-
         </div>
 
       </div>

@@ -1,7 +1,9 @@
 import React, { useEffect } from "react";
 import { IoCartOutline } from "react-icons/io5";
+import { FaHeart } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/wishlistContext";
 import { toast } from "sonner";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -9,19 +11,24 @@ import "aos/dist/aos.css";
 export default function ProductCard({ product }) {
   const navigate = useNavigate();
   const { addToCart, cartItem } = useCart();
+  const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
 
   const isAlreadyInCart = cartItem.some(
     (item) => item.id === product.id
   );
 
-  useEffect(() => {
-    AOS.init({
-      duration: 500,
-      easing: "ease-in-out",
-      once: false,
-      offset: 50,
-    });
-  }, []);
+  const isLiked = wishlist.some(
+    (item) => item.id === product.id
+  );
+
+  // useEffect(() => {
+  //   AOS.init({
+  //     duration: 500,
+  //     easing: "ease-in-out",
+  //     once: false,
+  //     offset: 50,
+  //   });
+  // }, []);
 
   const handleAddToCart = () => {
     if (isAlreadyInCart) {
@@ -36,6 +43,18 @@ export default function ProductCard({ product }) {
     });
   };
 
+  const handleToggleWishlist = (e) => {
+    e.stopPropagation();
+
+    if (isLiked) {
+      removeFromWishlist(product.id);
+      toast("Removed from wishlist 💔");
+    } else {
+      addToWishlist(product);
+      toast.success("Added to wishlist ❤️");
+    }
+  };
+
   return (
     <div
       className="relative group bg-white/10 backdrop-blur-lg border border-red-200/40 rounded-2xl 
@@ -43,8 +62,22 @@ export default function ProductCard({ product }) {
                  sm:hover:scale-[1.03] active:scale-[0.99] overflow-hidden"
       data-aos="zoom-in-up"
     >
+
       {/* Glow */}
       <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 blur-xl transition duration-700 bg-gradient-to-tr from-red-400/30 via-pink-300/20 to-red-400/30 pointer-events-none"></div>
+
+      {/* ❤️ Like Button */}
+      <button
+        onClick={handleToggleWishlist}
+        className={`absolute top-5 sm:top-7 right-4 sm:right-7 z-10 p-2 rounded-full backdrop-blur-md 
+         transition-all duration-300 ${
+          isLiked
+            ? "bg-transparent text-red-600  shadow-lg scale-110"
+            : "   hover:scale-110"
+        }`}
+      >
+        <FaHeart className="w-4 h-4" />
+      </button>
 
       {/* Image */}
       <div
@@ -68,7 +101,7 @@ export default function ProductCard({ product }) {
       </div>
 
       {/* Info */}
-      <div className="mt-1 sm:mt-4 text-center space-y-0">
+      <div className="mt-1 sm:mt-4 text-center space-y-1">
         <h1
           className="text-sm sm:text-lg font-semibold text-gray-300 line-clamp-2"
           onClick={() => navigate(`/products/${product.id}`)}
@@ -85,7 +118,7 @@ export default function ProductCard({ product }) {
         </p>
       </div>
 
-      {/* Button */}
+      {/* Add to Cart Button */}
       <div className="mt-3 sm:mt-4">
         <button
           className={`w-full flex items-center justify-center gap-2 py-2 text-sm sm:text-base font-semibold rounded-lg shadow-md transition-all duration-300 active:scale-95 ${
@@ -100,6 +133,7 @@ export default function ProductCard({ product }) {
           {isAlreadyInCart ? "Added" : "Add to Cart"}
         </button>
       </div>
+
     </div>
   );
 }
