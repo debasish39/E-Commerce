@@ -76,13 +76,13 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen pt-24 mb-3 px-4 flex justify-center  text-white">
-      <div className="w-full max-w-5xl backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl shadow-2xl p-10">
+    <div className="min-h-screen   px-4 flex justify-center items-center  text-white">
+      <div className="w-full max-w-5xl backdrop-blur-xl bg-black/3 border border-white/10 rounded-3xl shadow-2xl p-6">
 
-        {/* ================= PROFILE HEADER ================= */}
+       
         <div className="flex flex-col sm:flex-row items-center gap-10">
 
-          {/* Avatar */}
+         
           <div className="relative group">
             <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-red-500 to-pink-500 blur-lg opacity-40 group-hover:opacity-70 transition duration-500"></div>
 
@@ -110,7 +110,6 @@ export default function ProfilePage() {
             </label>
           </div>
 
-          {/* User Info */}
           <div className="flex-1 text-center sm:text-left">
 
             {!editingName ? (
@@ -124,7 +123,7 @@ export default function ProfilePage() {
                     setFullName(user?.fullName || "");
                     setEditingName(true);
                   }}
-                  className="flex items-center gap-2 text-sm mt-2 text-red-400 hover:underline"
+                  className="flex items-center gap-2 text-sm mt-2 text-red-400 hover:underline cursor-pointer"
                 >
                   <FaUserEdit /> Edit Name
                 </button>
@@ -139,13 +138,13 @@ export default function ProfilePage() {
                 <div className="flex gap-4">
                   <button
                     onClick={handleUpdateName}
-                    className="px-6 py-2 rounded-lg bg-gradient-to-r from-red-600 to-pink-600 hover:scale-105 transition"
+                    className="px-6 py-2 rounded-lg bg-gradient-to-r from-red-600 to-pink-600 hover:scale-105 transition cursor-pointer"
                   >
                     Save
                   </button>
                   <button
                     onClick={() => setEditingName(false)}
-                    className="px-6 py-2 rounded-lg bg-gray-600 hover:bg-gray-700 transition"
+                    className="px-6 py-2 rounded-lg bg-gray-600 hover:bg-gray-700 transition cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -167,29 +166,48 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* ================= ACCOUNT INFO CARDS ================= */}
-        <div className="mt-14 grid sm:grid-cols-2 gap-8">
+     <div className="mt-12 grid sm:grid-cols-2 gap-8">
+  
+  <div className="p-3 px-9 rounded-2xl bg-gradient-to-br from-zinc-900/70 to-zinc-800/40 
+                  backdrop-blur-xl border border-white/10 
+                  shadow-lg hover:shadow-red-500/20 
+                  hover:scale-[1.02] transition-all duration-300">
+    
+    <p className="text-gray-400 text-sm tracking-wide uppercase">
+      First Name
+    </p>
+    
+    <p className="text-2xl font-semibold mt-1 text-white">
+      {user?.firstName || "—"}
+    </p>
+    
+  </div>
 
-          <div className="p-8 rounded-2xl  border border-white/10 shadow-md hover:shadow-red-500/20 transition">
-            <p className="text-gray-400 text-sm">First Name</p>
-            <p className="text-xl font-semibold mt-2">{user?.firstName}</p>
-          </div>
+  <div className="p-3 px-9 rounded-2xl bg-gradient-to-br from-zinc-900/70 to-zinc-800/40 
+                  backdrop-blur-xl border border-white/10 
+                  shadow-lg hover:shadow-red-500/20 
+                  hover:scale-[1.02] transition-all duration-300">
+    
+    <p className="text-gray-400 text-sm tracking-wide uppercase">
+      Last Name
+    </p>
+    
+    <p className="text-2xl font-semibold mt-1 text-white">
+      {user?.lastName || "—"}
+    </p>
 
-          <div className="p-8 rounded-2xl border border-white/10 shadow-md hover:shadow-red-500/20 transition">
-            <p className="text-gray-400 text-sm">Last Name</p>
-            <p className="text-xl font-semibold mt-2">{user?.lastName}</p>
-          </div>
+  </div>
 
-        </div>
+</div>
 
-        {/* ================= SIGN OUT ================= */}
-        <div className="mt-16 text-center">
+
+        <div className="mt-9 text-center">
           <button
             onClick={handleSignOutToast}
             className="flex items-center justify-center gap-3 mx-auto px-8 py-3 rounded-full
             bg-gradient-to-r from-red-600 to-pink-600
             hover:shadow-xl hover:shadow-red-500/40
-            hover:scale-105 transition-all duration-300"
+            hover:scale-105 transition-all duration-300 cursor-pointer"
           >
             <FaSignOutAlt /> Sign Out
           </button>
