@@ -76,7 +76,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen   px-4 flex justify-center items-center  text-white">
+    <div className="min-h-screen  sm:px-4 flex justify-center items-center  text-white">
       <div className="w-full max-w-5xl backdrop-blur-xl bg-black/3 border border-white/10 rounded-3xl shadow-2xl p-6">
 
        
