@@ -90,7 +90,7 @@ const AppWrapper = () => {
 
     AOS.init({
       duration: 300,
-      once: true,
+      once: false,
       easing: "ease-in-out",
     });
   }, []);

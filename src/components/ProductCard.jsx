@@ -59,7 +59,7 @@ export default function ProductCard({ product }) {
     <div
       className="relative group bg-white/10 backdrop-blur-lg border border-red-200/40 rounded-2xl 
                  p-3 sm:p-4 shadow-md transition-all duration-300 cursor-pointer 
-                 sm:hover:scale-[1.03] active:scale-[0.99] overflow-hidden"
+                 overflow-hidden"
       data-aos="zoom-in-up"
     >
 

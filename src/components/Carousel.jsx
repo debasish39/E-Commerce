@@ -45,25 +45,36 @@ const Carousel = () => {
   );
 
   const initialSlideIndex = data ? data.findIndex(item => item.id === 30) : 0;
+const settings = {
+  dots: true,
+  autoplay: true,
+  autoplaySpeed: 4500,
+  infinite: true,
+  speed: 700,
+  slidesToShow: 1,
+  slidesToScroll: 1,
+  pauseOnHover: true,
+  nextArrow: <SampleNextArrow />,
+  prevArrow: <SamplePrevArrow />,
+  initialSlide: initialSlideIndex >= 0 ? initialSlideIndex : 0,
 
-  const settings = {
-    dots: true,
-    autoplay: true,
-    autoplaySpeed: 4500,
-    infinite: true,
-    speed: 700,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    pauseOnHover: true,
-    nextArrow: <SampleNextArrow />,
-    prevArrow: <SamplePrevArrow />,
-    initialSlide: initialSlideIndex >= 0 ? initialSlideIndex : 0,
-    responsive: [
-      { breakpoint: 1024, settings: { arrows: false } },
-      { breakpoint: 640, settings: { arrows: false, dots: true } },
-    ],
-  };
+  appendDots: dots => (
+    <div>
+      <ul className="flex justify-center mt-6 gap-3">
+        {dots.slice(0, Math.min(dots.length, 6))}
+      </ul>
+    </div>
+  ),
 
+  customPaging: () => (
+    <div className="progress-dot"></div>
+  ),
+
+  responsive: [
+    { breakpoint: 1024, settings: { arrows: false } },
+    { breakpoint: 640, settings: { arrows: false, dots: true } },
+  ],
+};
   const orderedData = data || [];
 
   return (
@@ -81,7 +92,7 @@ const Carousel = () => {
         `}</style>
       </div>
 
-      <div className="max-w-7xl mx-auto round flex px-9 sm:flex-row justify-between items-center mb-6 sm:px-8 gap-4 sm:gap-0">
+      <div className="max-w-7xl mx-auto round flex px-3 sm:flex-row justify-between items-center mb-6 sm:px-3 gap-4 sm:gap-0">
         <h2
           className="text-[24px] sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-300 drop-shadow-lg text-center sm:text-left"
           style={{ fontFamily: "'Pacifico', cursive" }}
@@ -97,7 +108,7 @@ const Carousel = () => {
         </span>
       </div>
 
-      <div className="max-w-7xl mx-auto relative px-4 sm:px-8">
+      <div className="max-w-9xl  relative px-4 sm:px-8">
         {loading ? (
           <div className="flex justify-center items-center min-h-[300px] py-10">
             <video autoPlay loop muted playsInline className="w-32 h-32 sm:w-48 sm:h-48 object-contain">
@@ -132,7 +143,7 @@ const Carousel = () => {
                       {item.title}
                     </h1>
 
-                    <p className="text-gray-100/90 text-sm sm:text-base md:text-lg max-w-xl mx-auto lg:mx-0">
+                    <p className="text-gray-100/90 text-sm hidden sm:block sm:text-base md:text-lg max-w-xl mx-auto lg:mx-0">
                       {item.description}
                     </p>
 

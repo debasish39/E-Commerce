@@ -27,7 +27,7 @@ export default function Products() {
   }, []);
 
   useEffect(() => {
-    AOS.init({ duration: 600, easing: "ease-in-out", once: true });
+    AOS.init({ duration: 600, easing: "ease-in-out", once: false });
   }, []);
 
   useEffect(() => {
@@ -145,7 +145,7 @@ export default function Products() {
               {paginatedProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="transition-all duration-300 sm:hover:scale-[1.05] sm:hover:shadow-[0_0_20px_rgba(255,0,80,0.3)] rounded-xl"
+                  className="transition-all duration-300  sm:hover:shadow-[0_0_20px_rgba(255,0,80,0.3)] rounded-xl"
                   data-aos="zoom-in"
                 >
                   <ProductCard product={product} />
