@@ -119,11 +119,11 @@ const settings = {
           <Slider {...settings}>
             {orderedData.map((item) => (
               <div key={item.id} className="px-2 sm:px-4 lg:px-10">
-                <div className="grid lg:grid-cols-2 items-center gap-10 p-6 sm:p-10 lg:p-18 rounded-3xl backdrop-blur-xl bg-gradient-to-r from-white/5 to-white/10 border border-white/20 transition-all duration-700">
+             <div className="grid lg:grid-cols-2 items-center gap-6 sm:gap-10 p-4 sm:p-10 lg:p-18 rounded-3xl backdrop-blur-xl bg-gradient-to-r from-white/5 to-white/10 border border-white/20 transition-all duration-700">
                   <div className="relative flex justify-center order-1 lg:order-2">
                     <img
                       src={item.thumbnail}
-                      alt={item.title}
+                      alt={item.title}onClick={() => navigate(`/products/${item.id}`)}
                       className="h-64 sm:h-72 md:h-80 lg:h-[380px] w-full object-contain rounded-xl drop-shadow-2xl transition-transform hover:scale-110"
                     />
                     <div className="absolute top-4 left-4 bg-gradient-to-r from-[#f53347] to-[#ff6f61] text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
@@ -137,7 +137,7 @@ const settings = {
                     </p>
 
                     <h1
-                      className="text-2xl sm:text-4xl lg:text-5xl font-extrabold leading-tight drop-shadow-lg cursor-pointer hover:text-[#ff6f61] transition-colors"
+                      className="text-xl sm:text-4xl lg:text-5xl font-extrabold leading-tight drop-shadow-lg cursor-pointer hover:text-[#ff6f61] transition-colors"
                       onClick={() => navigate(`/products/${item.id}`)}
                     >
                       {item.title}
@@ -147,31 +147,37 @@ const settings = {
                       {item.description}
                     </p>
 
-                    <div className="flex justify-center lg:justify-start gap-1 text-yellow-400">
+                    <div className="hidden sm:flex justify-center lg:justify-start gap-1 text-yellow-400">
                       {[...Array(5)].map((_, i) => (
                         <FaStar key={i} className="text-sm drop-shadow-sm" />
                       ))}
                     </div>
 
-                    <p className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-[#ff5c6e] to-[#ff9a8b] bg-clip-text text-transparent">
-                      ₹{item.price}
-                    </p>
+                <p className="hidden sm:block text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-[#ff5c6e] to-[#ff9a8b] bg-clip-text text-transparent">
+  ₹{item.price}
+</p>
 
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
-                      <button
-                        onClick={() => addToCart(item)}
-                        className="bg-gradient-to-r from-[#f53347] to-[#ff6f61] hover:from-[#d02b3b] hover:to-[#ff3a4c] text-white font-semibold px-6 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center justify-center gap-2 cursor-pointer"
-                      >
-                        <FaShoppingCart /> Add to Cart
-                      </button>
+                  <div className="grid grid-cols-2 sm:flex gap-3 sm:gap-4 justify-center lg:justify-start pt-2 w-full">
 
-                      <button
-                        onClick={() => navigate(`/products/${item.id}`)}
-                        className="bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 cursor-pointer"
-                      >
-                        <AiOutlineEye /> View Product
-                      </button>
-                    </div>
+  <button
+    onClick={() => addToCart(item)}
+    className="bg-gradient-to-r from-[#f53347] to-[#ff6f61] hover:from-[#d02b3b] hover:to-[#ff3a4c] text-white font-semibold text-sm sm:text-base px-4 sm:px-6 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+  >
+    <FaShoppingCart /> 
+    <span className="hidden sm:inline">Add to Cart</span>
+    <span className="sm:hidden">Add</span>
+  </button>
+
+  <button
+    onClick={() => navigate(`/products/${item.id}`)}
+    className="bg-white/10 hover:bg-white/20 text-white font-semibold text-sm sm:text-base px-4 sm:px-6 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+  >
+    <AiOutlineEye /> 
+    <span className="hidden sm:inline">View Product</span>
+    <span className="sm:hidden">View</span>
+  </button>
+
+</div>
                   </div>
                 </div>
               </div>
