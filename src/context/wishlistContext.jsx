@@ -1,6 +1,5 @@
-import React, { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useContext } from "react";
 import toast from "react-hot-toast";
-import { useContext } from "react";
 
 export const WishlistContext = createContext();
 
@@ -15,17 +14,21 @@ export const WishlistProvider = ({ children }) => {
   }, [wishlist]);
 
   const addToWishlist = (product) => {
-    const exists = wishlist.find((item) => item.id === product.id);
-    if (exists) {
-      toast("Already in Wishlist ❤️");
-      return;
-    }
-    setWishlist([...wishlist, product]);
-    toast.success("Added to Wishlist ❤️");
+    setWishlist((prev) => {
+      const exists = prev.find((item) => item.id === product.id);
+
+      if (exists) {
+        toast("Already in Wishlist ❤️");
+        return prev;
+      }
+
+      toast.success("Added to Wishlist ❤️");
+      return [...prev, product];
+    });
   };
 
   const removeFromWishlist = (id) => {
-    setWishlist(wishlist.filter((item) => item.id !== id));
+    setWishlist((prev) => prev.filter((item) => item.id !== id));
     toast("Removed from Wishlist 💔");
   };
 
@@ -42,6 +45,5 @@ export const WishlistProvider = ({ children }) => {
     </WishlistContext.Provider>
   );
 };
-
 
 export const useWishlist = () => useContext(WishlistContext);
