@@ -45,26 +45,27 @@ const AppWrapper = () => {
   const location = useLocation();
 
   /* ================= Tawk Chat ================= */
-  useEffect(() => {
-    if (window.Tawk_API) return;
+useEffect(() => {
+  if (window.Tawk_API) return;
 
-    window.Tawk_API = window.Tawk_API || {};
-    window.Tawk_LoadStart = new Date();
+  window.Tawk_API = window.Tawk_API || {};
+  window.Tawk_LoadStart = new Date();
 
-    const script = document.createElement("script");
-    script.async = true;
-    script.src =
-      "https://embed.tawk.to/698ef4a1b449001c39035ca4/1jhb6n6eu";
-    script.charset = "UTF-8";
-    script.setAttribute("crossorigin", "*");
+  const script = document.createElement("script");
+  script.async = true;
 
-    document.body.appendChild(script);
+  // YOUR TAWK SCRIPT URL
+  script.src = "https://embed.tawk.to/69084ab76435f2194e4f2aa9/1j9467o9s";
 
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
+  script.charset = "UTF-8";
+  script.setAttribute("crossorigin", "*");
 
+  document.body.appendChild(script);
+
+  return () => {
+    document.body.removeChild(script);
+  };
+}, []);
   /* ================= Get User Location ================= */
   const getLocation = async () => {
     if (!navigator.geolocation) return;
