@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { getData } from "../context/DataContext";
 import FilterSection from "../components/FilterSection";
-import Loading from "../assets/Loading4.webm";
 import ProductCard from "../components/ProductCard";
+import ProductCardSkeleton from "../components/ProductCardSkeleton";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import Lottie from "lottie-react";
 import notfound from "../assets/notfound.json";
@@ -10,6 +10,7 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 
 export default function Products() {
+
   const {
     data,
     fetchAllProducts,
@@ -19,21 +20,36 @@ export default function Products() {
     priceRange,
   } = getData();
 
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+
   const itemsPerPage = 12;
 
+  /* Fetch Products */
   useEffect(() => {
-    fetchAllProducts();
+    const loadProducts = async () => {
+      await fetchAllProducts();
+      setLoading(false);
+    };
+
+    loadProducts();
   }, []);
 
+  /* AOS animation */
   useEffect(() => {
-    AOS.init({ duration: 600, easing: "ease-in-out", once: false });
+    AOS.init({
+      duration: 600,
+      easing: "ease-in-out",
+      once: false,
+    });
   }, []);
 
+  /* Reset page when filters change */
   useEffect(() => {
     setPage(1);
   }, [search, brand, category, priceRange]);
 
+  /* Filters */
   const filteredProducts = data
     .filter((product) =>
       product.title.toLowerCase().includes(search.toLowerCase())
@@ -48,16 +64,21 @@ export default function Products() {
     )
     .filter(
       (product) =>
-        product.price >= priceRange[0] && product.price <= priceRange[1]
+        product.price >= priceRange[0] &&
+        product.price <= priceRange[1]
     );
 
+  /* Pagination */
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
   const startIndex = (page - 1) * itemsPerPage;
+
   const paginatedProducts = filteredProducts.slice(
     startIndex,
     startIndex + itemsPerPage
   );
 
+  /* Pagination UI */
   const renderPagination = () => {
     const pages = [];
 
@@ -74,6 +95,7 @@ export default function Products() {
     const buttons = [];
 
     pages.forEach((p, idx) => {
+
       if (idx > 0 && p - pages[idx - 1] > 1) {
         buttons.push(
           <span key={`dots-${p}`} className="px-1 text-gray-400">
@@ -95,6 +117,7 @@ export default function Products() {
           {p}
         </button>
       );
+
     });
 
     return buttons;
@@ -103,16 +126,20 @@ export default function Products() {
   return (
     <div className="relative min-h-screen py-8 sm:py-12 px-3 sm:px-6 lg:px-10 text-white overflow-hidden">
 
-      {/* Background Gradients */}
+      {/* Background Effects */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
+
         <div className="absolute top-[-10%] left-[-10%] w-[300px] sm:w-[400px] h-[300px] sm:h-[400px] bg-red-500/20 blur-[150px] rounded-full animate-pulse" />
+
         <div className="absolute bottom-[-10%] right-[-10%] w-[300px] sm:w-[400px] h-[300px] sm:h-[400px] bg-pink-500/20 blur-[150px] rounded-full animate-[float_8s_infinite_linear]" />
+
         <style>{`
           @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-25px); }
+            0%,100%{transform:translateY(0px);}
+            50%{transform:translateY(-25px);}
           }
         `}</style>
+
       </div>
 
       {/* Header */}
@@ -131,36 +158,62 @@ export default function Products() {
       </div>
 
       {/* Products */}
-      {data?.length > 0 ? (
+      {loading ? (
+
+        /* Skeleton Loading */
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 lg:gap-6">
+          {Array(12)
+            .fill(0)
+            .map((_, index) => (
+              <ProductCardSkeleton key={index} />
+            ))}
+        </div>
+
+      ) : (
+
         <>
           {filteredProducts.length === 0 ? (
-            <div className="flex justify-center items-center min-h-[350px]" data-aos="fade-in">
-              <Lottie animationData={notfound} className="w-3/4 max-w-sm" />
+
+            /* Not Found Animation */
+            <div
+              className="flex justify-center items-center min-h-[350px]"
+              data-aos="fade-in"
+            >
+              <Lottie
+                animationData={notfound}
+                className="w-3/4 max-w-sm"
+              />
             </div>
+
           ) : (
+
             <div
               className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 lg:gap-6 w-full"
               data-aos="fade-up"
             >
               {paginatedProducts.map((product) => (
+
                 <div
                   key={product.id}
-                  className="transition-all duration-300  sm:hover:shadow-[0_0_20px_rgba(255,0,80,0.3)] rounded-xl"
+                  className="transition-all duration-300 sm:hover:shadow-[0_0_20px_rgba(255,0,80,0.3)] rounded-xl"
                   data-aos="zoom-in"
                 >
                   <ProductCard product={product} />
                 </div>
+
               ))}
             </div>
+
           )}
 
           {/* Pagination */}
           {filteredProducts.length > 0 && (
+
             <div
               className="mt-10 sm:mt-12 flex justify-center items-center flex-wrap gap-2 sm:gap-3 px-2"
               data-aos="fade-up"
             >
-              {/* Prev */}
+
               <button
                 onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
                 disabled={page === 1}
@@ -175,7 +228,6 @@ export default function Products() {
 
               {renderPagination()}
 
-              {/* Next */}
               <button
                 onClick={() =>
                   setPage((prev) => Math.min(prev + 1, totalPages))
@@ -189,25 +241,14 @@ export default function Products() {
               >
                 Next <FaAngleRight />
               </button>
+
             </div>
+
           )}
         </>
-      ) : (
-        <div
-          className="flex items-center justify-center h-[350px]"
-          data-aos="fade-in"
-        >
-          <video
-            muted
-            autoPlay
-            loop
-            aria-hidden="true"
-            className="w-40 sm:w-56 md:w-64 rounded-3xl shadow-lg border border-white/10"
-          >
-            <source src={Loading} type="video/webm" />
-          </video>
-        </div>
+
       )}
+
     </div>
   );
 }
