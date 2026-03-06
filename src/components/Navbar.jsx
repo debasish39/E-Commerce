@@ -169,7 +169,7 @@ export default function Navbar({ location, onLocationChange }) {
       {/* Background overlay for mobile menu */}
       {isMobileNavOpen && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-30"
           onClick={() => setIsMobileNavOpen(false)}
           data-aos="fade-in"
         ></div>
@@ -191,7 +191,7 @@ export default function Navbar({ location, onLocationChange }) {
           <div className="flex items-center gap-4" data-aos="zoom-in">
             <Link
               to="/"
-              className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-red-400 to-orange-300 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(255,99,71,0.6)]"
+              className="text-[24px] sm:text-3xl font-bold bg-gradient-to-b from-red-600 to-white/30 bg-clip-text text-transparent drop-shadow-[3px_3px_18px_red]"
               style={{ fontFamily: "'Pacifico', cursive" }}
             >
               E-Shop
@@ -225,7 +225,7 @@ export default function Navbar({ location, onLocationChange }) {
         : "text-gray-400 hover:text-red-400"
     }`}
   >
-    {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+    {isListening ? <MicOff size={20} /> : <Mic size={20} />}
   </button>
 </div>
 
@@ -395,7 +395,7 @@ export default function Navbar({ location, onLocationChange }) {
       {/* Mobile Offcanvas Menu */}
       <aside
         className={`sm:hidden fixed min-h-screen top-0 left-0 w-3/4 max-w-xs h-full 
-        bg-black/90 backdrop-blur-lg border-r border-red-500/40 rounded-r-2xl 
+        bg-black/70 backdrop-blur-lg border-r border-red-500/40 rounded-r-2xl 
         transform transition-transform z-49 duration-300 ease-in-out 
         ${isMobileNavOpen ? "translate-x-0" : "-translate-x-full"}`}
         data-aos="fade-right"
@@ -461,15 +461,14 @@ export default function Navbar({ location, onLocationChange }) {
       </aside>
       {/* ================= MOBILE BOTTOM NAVBAR ================= */}
       <div
-        className={`sm:hidden fixed bottom-3 left-1/2 -translate-x-1/2 
-  w-[95%] max-w-md z-48
-  bg-black/90 backdrop-blur-2xl
-  rounded-2xl 
-  shadow-[0_0_12px_red]
+        className={`sm:hidden fixed bottom-0 left-1/2 -translate-x-1/2 
+  w-full max-w-md z-48
+  bg-black/50 backdrop-blur-2xl 
+  shadow-[0_0_9px_red]
   transition-transform duration-300 ease-in-out
   ${showBottomNav ? "translate-y-0" : "translate-y-24"}`}
       >
-        <div className="flex justify-between items-center px-4 py-3">
+        <div className="flex justify-between items-center px-4 py-2.5">
 
           {/* Home */}
           <NavLink
@@ -499,15 +498,15 @@ export default function Navbar({ location, onLocationChange }) {
           <NavLink
             to="/cart"
             className={({ isActive }) =>
-              `relative -mt-8 flex flex-col items-center justify-center
+              `relative -mt-6 flex flex-col items-center justify-center
     h-14 w-14 rounded-full
-    bg-gradient-to-r from-red-500 to-red-800
+    bg-gradient-to-r from-red-600 to-black/50
     shadow-[0_8px_25px_rgba(255,80,80,0.5)]
     transition-all duration-300
     ${isActive ? "scale-110" : "hover:scale-105"}`
             }
           >
-            <ShoppingCart className="h-6 w-6 text-white" />
+            <ShoppingCart className="h-6 w-6 text-gray-300" />
 
             <span
               className={`absolute -top-1 -right-1

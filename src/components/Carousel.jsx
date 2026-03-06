@@ -92,20 +92,27 @@ const settings = {
         `}</style>
       </div>
 
-      <div className="max-w-7xl mx-auto round flex px-3 sm:flex-row justify-between items-center mb-6 sm:px-3 gap-4 sm:gap-0">
+      <div className="max-w-7xl mx-auto round flex px-6 sm:flex-row justify-between items-center mb-6 sm:px-3 gap-4 sm:gap-0">
         <h2
           className="text-[24px] sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-300 drop-shadow-lg text-center sm:text-left"
           style={{ fontFamily: "'Pacifico', cursive" }}
         >
           <span className="text-white">✨</span> Featured Products
         </h2>
-
-        <span
-          onClick={() => navigate("/products")}
-          className="text-red-100 font-semibold text-base sm:text-lg cursor-pointer transition-transform duration-300 underline hover:scale-105 hover:text-[#ff6f61] active:scale-95 active:text-[#f53347]"
-        >
-          View All
-        </span>
+<span
+  onClick={() => navigate("/products")}
+  className="inline-flex items-center gap-2 px-5 py-2
+  rounded-full
+  bg-gradient-to-r from-red-500 via-black/30 to-black/40
+  text-white font-semibold text-sm sm:text-base
+  cursor-pointer
+  border border-white/20
+  shadow-lg hover:shadow-2xl
+  hover:scale-105 active:scale-95
+  transition-all duration-300 "
+>
+  Explore All →
+</span>
       </div>
 
       <div className="max-w-9xl  relative px-4 sm:px-8">
@@ -163,7 +170,7 @@ const settings = {
     onClick={() => addToCart(item)}
     className="bg-gradient-to-r from-[#f53347] to-[#ff6f61] hover:from-[#d02b3b] hover:to-[#ff3a4c] text-white font-semibold text-sm sm:text-base px-4 sm:px-6 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
   >
-    <FaShoppingCart /> 
+    <FaShoppingCart size={20}/> 
     <span className="hidden sm:inline">Add to Cart</span>
     <span className="sm:hidden">Add</span>
   </button>
@@ -172,7 +179,7 @@ const settings = {
     onClick={() => navigate(`/products/${item.id}`)}
     className="bg-white/10 hover:bg-white/20 text-white font-semibold text-sm sm:text-base px-4 sm:px-6 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
   >
-    <AiOutlineEye /> 
+    <AiOutlineEye size={20}/> 
     <span className="hidden sm:inline">View Product</span>
     <span className="sm:hidden">View</span>
   </button>

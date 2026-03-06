@@ -46,7 +46,7 @@ body {
   display: none !important;
 } */
 .progress-dot{
-  width:18px;
+  width:6px;
   height:6px;
   background:#e5e7ebb6;
   border-radius:999px;
