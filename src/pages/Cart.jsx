@@ -12,6 +12,8 @@ import { jsPDF } from 'jspdf';
 import 'react-tooltip/dist/react-tooltip.css';
 import Logo from "../assets/logo.png";
 import {toast} from 'sonner';
+import razorpayLogo from "../assets/razorpay.png";
+import codLogo from "../assets/cod.png";
 const Cart = ({ location, getLocation }) => {
   const { cartItem, removeFromCart, increaseQty, decreaseQty, clearCart } = useCart();
   const { user } = useUser();
@@ -543,21 +545,30 @@ const customerInfo = [
                   </div>
                   <p className="text-xs text-gray-400 mt-1">UPI ID: <span className="font-medium">{UPI_ID}</span></p> */}
                   <div className="flex justify-center mt-4">
-                    <button
-              onClick={handleRazorpayPayment}
-                      className="bg-green-500/90 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold text-sm sm:text-base flex items-center justify-center gap-3 transition-all shadow-md hover:shadow-lg cursor-pointer"
-                    >
-                      <FaCheckCircle className="w-5 h-5" />Pay with Razorpay
-                    </button>
+              <button
+  onClick={handleRazorpayPayment}
+  className="bg-green-500/90 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold text-sm sm:text-base flex items-center justify-center gap-3 transition-all shadow-md hover:shadow-lg cursor-pointer"
+>
+  <img
+    src={razorpayLogo}
+    alt="Razorpay"
+    className="w-6 h-6 object-contain"
+  />
+  Pay with Razorpay
+</button>
                   </div>
                   <div className="flex justify-center mt-4">
-  <button
-    onClick={handleCOD}
-    className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-3 rounded-lg font-semibold text-sm sm:text-base flex items-center justify-center gap-3 transition-all shadow-md hover:shadow-lg"
-  >
-    <FaWallet className="w-5 h-5" />
-    Cash on Delivery
-  </button>
+<button
+  onClick={handleCOD}
+  className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-3 rounded-lg font-semibold text-sm sm:text-base flex items-center justify-center gap-3 transition-all shadow-md hover:shadow-lg"
+>
+  <img
+    src={codLogo}
+    alt="Cash on Delivery"
+    className="w-6 h-6 object-contain"
+  />
+  Cash on Delivery
+</button>
 </div>
 
                 </div>
