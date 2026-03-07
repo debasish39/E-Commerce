@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useEffect} from 'react';
 import { useCart } from '../context/CartContext';
 import { FaRegTrashAlt, FaQrcode, FaCheckCircle, FaHistory, FaWallet } from 'react-icons/fa';
 import { LuNotebookText } from 'react-icons/lu';
@@ -31,7 +31,7 @@ import { MdLocationCity } from "react-icons/md";
 import { AiFillEnvironment } from "react-icons/ai";
 import { FaSave } from "react-icons/fa";
 import { MdMyLocation } from "react-icons/md";
-const Cart = ({ location, getLocation }) => {
+const Cart = ({ location, getLocation, onLocationChange }) => {
   const { cartItem, removeFromCart, increaseQty, decreaseQty, clearCart } = useCart();
   const { user } = useUser();
   const navigate = useNavigate();
@@ -39,6 +39,29 @@ const Cart = ({ location, getLocation }) => {
   const [scrollBehavior, setScrollBehavior] = React.useState("inside");
   const [showDeleteAlert, setShowDeleteAlert] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState(null);
+  const [address, setAddress] = React.useState({
+  name: "",
+  street: "",
+  state: "",
+  postcode: "",
+  country: "",
+});
+useEffect(() => {
+  if (location) {
+    setAddress({
+      name: user?.fullName || "",
+      street:
+        location.city ||
+        location.town ||
+        location.village ||
+        location.county ||
+        "",
+      state: location.state || "",
+      postcode: location.postcode || "",
+      country: location.country || "",
+    });
+  }
+}, [location, user]);
   const [paymentType, setPaymentType] = React.useState(null);
   const BACKEND_URL = "https://eshop-backend-y0e7.onrender.com";
 
@@ -604,8 +627,11 @@ const Cart = ({ location, getLocation }) => {
 
                   <input
                     type="text"
-                    placeholder="Full Name"
-                    defaultValue={user?.fullName || ""}
+  placeholder="Full Name"
+  value={address.name}
+  onChange={(e) =>
+    setAddress({ ...address, name: e.target.value })
+  }
                     className="w-full pl-11 pr-3 py-3 rounded-xl
         bg-black/30 border border-white/10
         text-white placeholder-gray-400
@@ -626,7 +652,10 @@ const Cart = ({ location, getLocation }) => {
                   <input
                     type="text"
                     placeholder="Street Address"
-                    defaultValue={location?.county || ""}
+                   value={address.street}
+onChange={(e) =>
+  setAddress({ ...address, street: e.target.value })
+}
                     className="w-full pl-11 pr-3 py-3 rounded-xl
         bg-black/30 border border-white/10
         text-white placeholder-gray-400
@@ -649,7 +678,10 @@ const Cart = ({ location, getLocation }) => {
                     <input
                       type="text"
                       placeholder="State"
-                      defaultValue={location?.state || ""}
+                value={address.state}
+onChange={(e) =>
+  setAddress({ ...address, state: e.target.value })
+}
                       className="w-full pl-11 pr-3 py-3 rounded-xl
           bg-black/30 border border-white/10
           text-white placeholder-gray-400
@@ -665,7 +697,10 @@ const Cart = ({ location, getLocation }) => {
                   <input
                     type="text"
                     placeholder="Post Code"
-                    defaultValue={location?.postcode || ""}
+                  value={address.postcode}
+onChange={(e) =>
+  setAddress({ ...address, postcode: e.target.value })
+}
                     className="w-full px-3 py-3 rounded-xl
         bg-black/30 border border-white/10
         text-white placeholder-gray-400
@@ -684,7 +719,10 @@ const Cart = ({ location, getLocation }) => {
                   <input
                     type="text"
                     placeholder="Country"
-                    defaultValue={location?.country || ""}
+                value={address.country}
+onChange={(e) =>
+  setAddress({ ...address, country: e.target.value })
+}
                     className="w-full px-3 py-3 rounded-xl
         bg-black/30 border border-white/10
         text-white placeholder-gray-400
@@ -740,7 +778,17 @@ const Cart = ({ location, getLocation }) => {
 
                 {/* Secondary */}
                 <button
-                  onClick={getLocation}
+                   onClick={() => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation not supported");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition((pos) => {
+      onLocationChange(pos.coords.latitude, pos.coords.longitude);
+      toast.success("Location updated");
+    });
+  }}
                   className="flex-1 flex items-center justify-center gap-2
 border-2 border-red-900 text-white/90 font-semibold
 py-3 rounded-xl

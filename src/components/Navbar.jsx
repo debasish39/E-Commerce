@@ -10,7 +10,7 @@ import {
   Phone,
   Search,
   Mic,
-  MicOff
+  MicOff, X
 } from "lucide-react";
 import {
   Modal,
@@ -21,7 +21,7 @@ import {
   Button,
   useDisclosure,
 } from "@heroui/react";
-import { FaRegUserCircle,FaUser } from "react-icons/fa";
+import { FaRegUserCircle, FaUser } from "react-icons/fa";
 import { HiMenuAlt1, HiMenuAlt3 } from "react-icons/hi";
 import { AiOutlineHeart } from "react-icons/ai";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
@@ -32,7 +32,7 @@ import "aos/dist/aos.css";
 import { getData } from "../context/DataContext";
 import OrderHistory from "../pages/OrderHistory";
 import { useUser } from "@clerk/clerk-react";
-
+import LocationMap from "../components/LocationMap";
 export default function Navbar({ location, onLocationChange }) {
   const { user } = useUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -44,37 +44,61 @@ export default function Navbar({ location, onLocationChange }) {
   const [showNavbar, setShowNavbar] = useState(true);
   const [showBottomNav, setShowBottomNav] = useState(true);
   const [isListening, setIsListening] = useState(false);
+  const [area, setArea] = useState("");
+  const handleAreaSearch = async () => {
+    if (!area) return;
+
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${area}`
+      );
+
+      const data = await res.json();
+
+      if (data.length > 0) {
+        const lat = data[0].lat;
+        const lon = data[0].lon;
+
+        onLocationChange(lat, lon);
+        onClose();
+      } else {
+        alert("Location not found");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const handleVoiceSearch = () => {
-  const SpeechRecognition =
-    window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  if (!SpeechRecognition) {
-    alert("Speech recognition not supported in this browser");
-    return;
-  }
+    if (!SpeechRecognition) {
+      alert("Speech recognition not supported in this browser");
+      return;
+    }
 
-  const recognition = new SpeechRecognition();
-  recognition.continuous = false;
-  recognition.lang = "en-US"; // Change to hi-IN if needed
-  recognition.interimResults = false;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.lang = "en-US"; // Change to hi-IN if needed
+    recognition.interimResults = false;
 
-  setIsListening(true);
-  recognition.start();
+    setIsListening(true);
+    recognition.start();
 
-  recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript;
-    setSearch(transcript);
-    navigate("/products");
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setSearch(transcript);
+      navigate("/products");
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.onerror = () => {
+      setIsListening(false);
+    };
   };
-
-  recognition.onend = () => {
-    setIsListening(false);
-  };
-
-  recognition.onerror = () => {
-    setIsListening(false);
-  };
-};
   useEffect(() => {
     let lastScrollY = window.scrollY;
 
@@ -141,7 +165,7 @@ export default function Navbar({ location, onLocationChange }) {
     { name: "Home", path: "/", icon: <Home className="h-4 w-4 text-red-500" /> },
     { name: "Products", path: "/products", icon: <Package className="h-4 w-4 text-red-500" /> },
     { name: "Contact", path: "/contact", icon: <Phone className="h-4 w-4 text-red-500" /> },
-     { name: "Orders", path: "/order-history", icon: <ShoppingBag className="h-4 w-4 text-red-500" /> },
+    { name: "Orders", path: "/order-history", icon: <ShoppingBag className="h-4 w-4 text-red-500" /> },
   ];
 
   const renderLocation = () => (
@@ -149,7 +173,8 @@ export default function Navbar({ location, onLocationChange }) {
       className="flex items-center gap-1 text-gray-300 text-sm relative cursor-pointer hover:text-red-400 transition"
       onClick={(e) => {
         e.stopPropagation();
-onOpen();      }}
+        onOpen();
+      }}
       data-aos="fade-up"
     >
       <MapPin className="h-4 w-4 text-red-500" />
@@ -209,33 +234,32 @@ onOpen();      }}
 
           {/* Desktop Navigation */}
           <nav className="hidden sm:flex items-center justify-center gap-6" data-aos="fade-left">
-         <div className="relative flex items-center">
-  <input
-    type="text"
-    value={search}
-    onChange={handleSearchChange}
-    onKeyDown={handleKeyDown}
-    placeholder="Search products..."
-    className="bg-black/10 border border-orange-700/60 
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                value={search}
+                onChange={handleSearchChange}
+                onKeyDown={handleKeyDown}
+                placeholder="Search products..."
+                className="bg-black/10 border border-orange-700/60 
     text-white rounded-xl pl-5 pr-20 py-2.5 text-sm
     focus:outline-none focus:ring-1 focus:ring-red-900
     backdrop-blur-md transition w-56 focus:w-72"
-  />
+              />
 
 
 
-  {/* 🎙 Mic Button */}
-  <button
-    onClick={handleVoiceSearch}
-    className={`absolute right-4 transition-all duration-300 cursor-pointer ${
-      isListening
-        ? "text-red-500 animate-pulse scale-110"
-        : "text-gray-400 hover:text-red-400"
-    }`}
-  >
-    {isListening ? <MicOff size={20} /> : <Mic size={20} />}
-  </button>
-</div>
+              {/* 🎙 Mic Button */}
+              <button
+                onClick={handleVoiceSearch}
+                className={`absolute right-4 transition-all duration-300 cursor-pointer ${isListening
+                  ? "text-red-500 animate-pulse scale-110"
+                  : "text-gray-400 hover:text-red-400"
+                  }`}
+              >
+                {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+              </button>
+            </div>
 
             <ul className="flex gap-6 font-medium">
               {navLinks.map(({ name, path, icon }) => (
@@ -277,60 +301,59 @@ onOpen();      }}
 
             {/* Auth */}
             <div className="ml-4" data-aos="fade-left">
-              
-  <SignedOut>
-    <button
-      onClick={() => navigate("/sign-in")}
-      className="flex flex-col sm:flex-row items-center gap-1 text-white hover:text-red-500 transition cursor-pointer"
-    >
-      <FaRegUserCircle className="h-5 sm:h-6 w-5 mb-1 sm:w-6" />
-    <span className="text-[11px] sm:hidden"> Account</span>
-    </button>
-  </SignedOut>
 
-  <SignedIn>
-    <div className="flex flex-col items-center">
-      {user && (
-  <img
-    src={user.imageUrl}
-    alt="profile"
-    onClick={() => navigate("/profile")}
-    className="h-8 w-8 rounded-full ring-2 ring-red-500 cursor-pointer"
-  />
-)}
-      <span className="text-[11px] mt-1">Profile</span>
-    </div>
-  </SignedIn>
+              <SignedOut>
+                <button
+                  onClick={() => navigate("/sign-in")}
+                  className="flex flex-col sm:flex-row items-center gap-1 text-white hover:text-red-500 transition cursor-pointer"
+                >
+                  <FaRegUserCircle className="h-5 sm:h-6 w-5 mb-1 sm:w-6" />
+                  <span className="text-[11px] sm:hidden"> Account</span>
+                </button>
+              </SignedOut>
+
+              <SignedIn>
+                <div className="flex flex-col items-center">
+                  {user && (
+                    <img
+                      src={user.imageUrl}
+                      alt="profile"
+                      onClick={() => navigate("/profile")}
+                      className="h-8 w-8 rounded-full ring-2 ring-red-500 cursor-pointer"
+                    />
+                  )}
+                  <span className="text-[11px] mt-1">Profile</span>
+                </div>
+              </SignedIn>
             </div>
           </nav>
 
           {/* Mobile Nav + Cart + Auth */}
           <div className="sm:hidden flex items-center justify-center gap-4" data-aos="fade-right">
-          <div className="relative flex items-center w-full">
-  <input
-    type="text"
-    value={search}
-    onChange={handleSearchChange}
-    onKeyDown={handleKeyDown}
-    placeholder="Search products..."
-    className="w-60 bg-black/10 border border-orange-700/60 
+            <div className="relative flex items-center w-full">
+              <input
+                type="text"
+                value={search}
+                onChange={handleSearchChange}
+                onKeyDown={handleKeyDown}
+                placeholder="Search products..."
+                className="w-60 bg-black/10 border border-orange-700/60 
     text-white rounded-xl pl-5 pr-20 py-2.5 text-sm
     focus:outline-none focus:ring-1 focus:ring-red-900
     backdrop-blur-md transition"
-  />
+              />
 
 
-  <button
-    onClick={handleVoiceSearch}
-    className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-300 cursor-pointer ${
-      isListening
-        ? "text-red-500 animate-pulse scale-110"
-        : "text-gray-400 hover:text-red-400"
-    }`}
-  >
-    {isListening ? <MicOff size={18} /> : <Mic size={18} />}
-  </button>
-</div>
+              <button
+                onClick={handleVoiceSearch}
+                className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-300 cursor-pointer ${isListening
+                  ? "text-red-500 animate-pulse scale-110"
+                  : "text-gray-400 hover:text-red-400"
+                  }`}
+              >
+                {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+              </button>
+            </div>
 
 
 
@@ -351,103 +374,158 @@ onOpen();      }}
       </header>
 
       {/* Location Modal */}
-<Modal
-  isOpen={isOpen}
-  onClose={onClose}
-  placement="center"
-  backdrop="blur"
-  className="z-[9999]"
-  hideCloseButton
->
-  <ModalContent
-    className="bg-gradient-to-br from-black/60 via-black/40 to-gray-900/80
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        placement="center"
+        backdrop="blur"
+        hideCloseButton
+        className="z-[9999]"
+      >
+        <ModalContent
+          className="
+    relative bg-gradient-to-br from-black/70 via-black/60 to-gray-900/90
     backdrop-blur-3xl border border-white/10
-    rounded-3xl shadow-[0_0_40px_rgba(255,60,60,0.35)]
-    text-gray-300 overflow-hidden"
-  >
-    {(onClose) => (
-      <>
-        {/* HEADER */}
-        <ModalHeader
-          className="flex justify-center items-center gap-3
-          text-red-500 text-lg font-semibold
-          border-b border-white/10 pb-4"
+    rounded-3xl shadow-[0_0_45px_rgba(255,70,70,0.35)]
+    text-gray-200 overflow-hidden
+    max-w-lg w-[95%]"
         >
-          <div
-            className="h-10 w-10 flex items-center justify-center
-            rounded-xl bg-red-500/20 border border-red-500/30"
-          >
-            <MapPin className="text-red-400" size={20} />
-          </div>
+          {(onClose) => (
+            <>
+              {/* Close Button */}
+              <button
+                onClick={onClose}
+                className="absolute top-6 right-6
+w-9 h-9 flex items-center justify-center
+rounded-full
+bg-white/10
+hover:bg-red-500/70
+active:bg-red-500/70
+focus:bg-red-500/70
+text-gray-300
+hover:text-white
+active:text-white
+focus:text-white
+transition duration-200 cursor-pointer"
+              >
+                <X size={33} />
+              </button>
+              {/* HEADER */}
+              <ModalHeader
+                className="
+          flex flex-col items-center gap-2
+          border-b border-white/10
+          pb-5 pt-6
+        "
+              >
+                <div
+                  className="
+            h-12 w-12 flex items-center justify-center
+            rounded-xl bg-red-500/20 border border-red-500/30
+            shadow-[0_0_10px_rgba(255,70,70,0.4)]
+          "
+                >
+                  <MapPin className="text-red-400" size={22} />
+                </div>
 
-          Set Your Location
-        </ModalHeader>
+                <h2 className="text-lg font-semibold text-white">
+                  Set Delivery Location
+                </h2>
 
-        {/* BODY */}
-        <ModalBody className="space-y-4 py-6">
+                <p className="text-xs text-gray-400">
+                  Choose your address to check delivery availability
+                </p>
+              </ModalHeader>
 
-          <p className="text-sm text-gray-300 leading-relaxed">
-            Allow access to your location for faster delivery and personalized
-            product recommendations.
-          </p>
+              {/* BODY */}
+              <ModalBody className="space-y-1 py-2">
 
-          {/* Info Card */}
-          <div
-            className="flex items-start gap-3
-            bg-black/40 border border-white/10
-            rounded-xl p-4"
-          >
-            <MapPin className="text-red-400 mt-1" size={18} />
+                {/* Search Input */}
+                <div className="flex gap-2">
 
-            <div className="text-sm text-gray-300">
-              Your location helps us show nearby products, delivery time,
-              and better offers.
-            </div>
-          </div>
+                  <div
+                    className="
+              flex items-center gap-2
+              flex-1 px-3 py-2
+              rounded-xl
+              bg-black/40 border border-white/10
+              focus-within:border-red-400
+              transition"
+                  >
+                    <MapPin size={16} className="text-gray-400" />
 
-        </ModalBody>
+                    <input
+                      type="text"
+                      placeholder="Search city, area or pincode"
+                      value={area}
+                      onChange={(e) => setArea(e.target.value)}
+                      className="
+                flex-1 bg-transparent
+                text-sm text-white
+                outline-none placeholder-gray-400"
+                    />
+                  </div>
 
-        {/* FOOTER */}
-        <ModalFooter className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-white/10">
+                  <button
+                    onClick={handleAreaSearch}
+                    className="
+              px-3 py-1 rounded-xl
+              bg-gradient-to-r from-red-500 to-black/30 border border-red-500/40
+              text-gray-300 font-medium text-sm
+              shadow-md
+              hover:scale-105 active:scale-95
+              transition curor-pointer"
+                  >
+                    Search
+                  </button>
 
-          {/* Use Location Button */}
-          <Button
-            onPress={() => {
-              handleUseMyLocation();
-              onClose();
-            }}
-            className="flex items-center justify-center gap-2
-            bg-gradient-to-r from-red-500 to-black/30
-            text-white font-semibold
-            px-6 py-2 rounded-xl
-            shadow-lg shadow-red-500/30
-            hover:shadow-red-500/50 hover:scale-[1.03]
-            active:scale-[0.97]
-            transition-all duration-300 w-full sm:w-auto"
-          >
-            <MapPin size={18} />
-            Use My Location
-          </Button>
+                </div>
 
-          {/* Cancel Button */}
-          <Button
-            variant="light"
-            onPress={onClose}
-            className="flex items-center justify-center
+
+                {/* Detect location button */}
+                <button
+                  onClick={() => {
+                    handleUseMyLocation();
+                    onClose();
+                  }}
+                  className="
+            flex items-center justify-center gap-2
+            w-full py-2
+            rounded-xl
+            border border-red-500/40
+            bg-red-500/10
+            text-red-300 font-medium
+            hover:bg-red-500/20
+            transition"
+                >
+                  <MapPin size={16} />
+                  Detect My Location
+                </button>
+
+
+                {/* MAP SECTION */}
+                <div
+                  className="
+            rounded-2xl overflow-hidden
             border border-white/10
-            text-gray-300 px-6 py-2 rounded-xl
-            hover:bg-white/10 hover:text-white
-            active:bg-white/20 active:scale-[0.97]
-            transition-all duration-300 w-full sm:w-auto"
-          >
-            Cancel
-          </Button>
+            shadow-lg
+            bg-black/30 mb-3"
+                >
+                  <LocationMap
+                    onSelect={(lat, lng) => {
+                      onLocationChange(lat, lng);
+                      onClose();
+                    }}
+                  />
+                </div>
 
-        </ModalFooter>
-      </>
-    )}
-  </ModalContent>
-</Modal>
+              </ModalBody>
+
+
+            </>
+          )}
+        </ModalContent>
+      </Modal>
       {/* Mobile Offcanvas Menu */}
       <aside
         className={`sm:hidden fixed min-h-screen top-0 left-0 w-3/4 max-w-xs h-full 
@@ -482,7 +560,7 @@ onOpen();      }}
               <Package size={18} className="transition-transform duration-200 group-hover:translate-x-1" />
               <span>Order History</span>
             </NavLink>
-            
+
             <NavLink
               to="/contact"
               onClick={() => setIsMobileNavOpen(false)}
@@ -517,10 +595,10 @@ onOpen();      }}
       </aside>
       {/* ================= MOBILE BOTTOM NAVBAR ================= */}
       <div
-        className={`sm:hidden fixed bottom-0 left-1/2 -translate-x-1/2 
-  w-full max-w-md z-48
+        className={`sm:hidden fixed bottom-3 rounded-3xl left-1/2 -translate-x-1/2 
+  w-[93%] max-w-md z-48
   bg-black/50 backdrop-blur-2xl 
-  shadow-[0_0_9px_red]
+  shadow-[0_3px_12px_red]
   transition-transform duration-300 ease-in-out
   ${showBottomNav ? "translate-y-0" : "translate-y-24"}`}
       >
@@ -605,34 +683,34 @@ onOpen();      }}
 
             Wishlist
           </NavLink>
-{/* Account */}
-<div className="flex flex-col items-center text-xs text-gray-400">
+          {/* Account */}
+          <div className="flex flex-col items-center text-xs text-gray-400">
 
-  <SignedOut>
-    <button
-      onClick={() => navigate("/sign-in")}
-      className="flex flex-col items-center gap-1 text-gray-450 "
-    >
-      <FaRegUserCircle className="h-5 w-5 mb-1" />
-      Account
-    </button>
-  </SignedOut>
+            <SignedOut>
+              <button
+                onClick={() => navigate("/sign-in")}
+                className="flex flex-col items-center gap-1 text-gray-450 "
+              >
+                <FaRegUserCircle className="h-5 w-5 mb-1" />
+                Account
+              </button>
+            </SignedOut>
 
-  <SignedIn>
-    <div className="flex flex-col items-center">
-      {user && (
-  <img
-    src={user.imageUrl}
-    alt="profile"
-    onClick={() => navigate("/profile")}
-    className="h-8 w-8 rounded-full ring-2 ring-red-500 cursor-pointer"
-  />
-)}
-      <span className="text-[11px] mt-1">Profile</span>
-    </div>
-  </SignedIn>
+            <SignedIn>
+              <div className="flex flex-col items-center">
+                {user && (
+                  <img
+                    src={user.imageUrl}
+                    alt="profile"
+                    onClick={() => navigate("/profile")}
+                    className="h-8 w-8 rounded-full ring-2 ring-red-500 cursor-pointer"
+                  />
+                )}
+                <span className="text-[11px] mt-1">Profile</span>
+              </div>
+            </SignedIn>
 
-</div>
+          </div>
 
         </div>
       </div>

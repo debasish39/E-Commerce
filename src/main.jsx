@@ -6,7 +6,7 @@ import { ClerkProvider } from '@clerk/clerk-react';
 import { DataProvider } from './context/DataContext.jsx';
 import CartProvider from './context/CartContext.jsx';
 import { WishlistProvider } from "./context/wishlistContext";
-
+import "leaflet/dist/leaflet.css";
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 if (!PUBLISHABLE_KEY) {

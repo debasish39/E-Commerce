@@ -84,7 +84,24 @@ const AppWrapper = () => {
       }
     });
   };
+const onLocationChange = async (lat, lon) => {
+  try {
+    const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
 
+    const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=${apiKey}`;
+
+    const response = await axios.get(url);
+
+    const newLocation = response.data.features[0]?.properties;
+
+    setLocationData(newLocation);
+
+    localStorage.setItem("userLocation", JSON.stringify(newLocation));
+
+  } catch (error) {
+    console.error("Manual location update failed", error);
+  }
+};
   /* ================= Initial Effects ================= */
   useEffect(() => {
     getLocation();
@@ -177,7 +194,10 @@ const AppWrapper = () => {
           {/* ================= Main Content ================= */}
           <div className="relative z-10">
 
-            <Navbar location={locationData} />
+          <Navbar
+  location={locationData}
+  onLocationChange={onLocationChange}
+/>
             <div className="pt-12" />
 
             <Routes>
@@ -216,7 +236,11 @@ const AppWrapper = () => {
                 path="/cart"
                 element={
                   <ProtectedRoute>
-                    <Cart location={locationData} getLocation={getLocation} />
+                   <Cart
+  location={locationData}
+  getLocation={getLocation}
+  onLocationChange={onLocationChange}
+/>
                   </ProtectedRoute>
                 }
               />
