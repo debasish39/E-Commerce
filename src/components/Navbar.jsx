@@ -12,6 +12,15 @@ import {
   Mic,
   MicOff
 } from "lucide-react";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  useDisclosure,
+} from "@heroui/react";
 import { FaRegUserCircle,FaUser } from "react-icons/fa";
 import { HiMenuAlt1, HiMenuAlt3 } from "react-icons/hi";
 import { AiOutlineHeart } from "react-icons/ai";
@@ -26,7 +35,7 @@ import { useUser } from "@clerk/clerk-react";
 
 export default function Navbar({ location, onLocationChange }) {
   const { user } = useUser();
-  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const { cartItem } = useCart();
   const { wishlist } = useWishlist();
@@ -120,7 +129,7 @@ export default function Navbar({ location, onLocationChange }) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         onLocationChange(position.coords.latitude, position.coords.longitude);
-        setIsLocationModalOpen(false);
+        onClose();
       },
       (error) => {
         alert("Failed to get location: " + error.message);
@@ -140,8 +149,7 @@ export default function Navbar({ location, onLocationChange }) {
       className="flex items-center gap-1 text-gray-300 text-sm relative cursor-pointer hover:text-red-400 transition"
       onClick={(e) => {
         e.stopPropagation();
-        setIsLocationModalOpen(true);
-      }}
+onOpen();      }}
       data-aos="fade-up"
     >
       <MapPin className="h-4 w-4 text-red-500" />
@@ -183,7 +191,7 @@ export default function Navbar({ location, onLocationChange }) {
   transition-transform duration-300 ease-in-out
   ${showNavbar ? "translate-y-0" : "-translate-y-full"}`}
         data-aos="fade-down"
-        onClick={() => setIsLocationModalOpen(false)}
+        onClick={() => onClose()}
       >
 
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
@@ -343,55 +351,103 @@ export default function Navbar({ location, onLocationChange }) {
       </header>
 
       {/* Location Modal */}
-      {isLocationModalOpen && (
-        <div className="z-[100]">
+<Modal
+  isOpen={isOpen}
+  onClose={onClose}
+  placement="center"
+  backdrop="blur"
+  className="z-[9999]"
+  hideCloseButton
+>
+  <ModalContent
+    className="bg-gradient-to-br from-black/60 via-black/40 to-gray-900/80
+    backdrop-blur-3xl border border-white/10
+    rounded-3xl shadow-[0_0_40px_rgba(255,60,60,0.35)]
+    text-gray-300 overflow-hidden"
+  >
+    {(onClose) => (
+      <>
+        {/* HEADER */}
+        <ModalHeader
+          className="flex justify-center items-center gap-3
+          text-red-500 text-lg font-semibold
+          border-b border-white/10 pb-4"
+        >
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-fadeIn"
-            onClick={() => setIsLocationModalOpen(false)}
-          ></div>
-
-          <div
-            className="fixed inset-0 flex items-start justify-center z-50 px-4 pt-30 min-h-screen"
-            onClick={() => setIsLocationModalOpen(false)}
+            className="h-10 w-10 flex items-center justify-center
+            rounded-xl bg-red-500/20 border border-red-500/30"
           >
-            <div
-              className="relative bg-gradient-to-br from-gray-900/80 via-black/70 to-gray-800/80
-              backdrop-blur-2xl border border-red-500/30 shadow-[0_0_30px_rgba(255,60,60,0.3)]
-              rounded-2xl w-full max-w-md px-8 py-6 text-center text-gray-100
-              animate-scaleIn"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-300 mb-3 drop-shadow-[0_0_10px_rgba(255,99,71,0.4)]">
-                Set Your Location
-              </h2>
+            <MapPin className="text-red-400" size={20} />
+          </div>
 
-              <p className="text-sm text-gray-400 mb-6">
-                Allow access to your location for tailored recommendations and faster delivery.
-              </p>
+          Set Your Location
+        </ModalHeader>
 
-              <div className="space-y-4">
-                <button
-                  onClick={() => { handleUseMyLocation(), setIsLocationModalOpen(false) }}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg
-                  bg-gradient-to-r from-red-500 to-orange-400 hover:from-red-600 hover:to-orange-500
-                  text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-red-500/30 cursor-pointer"
-                >
-                  <MapPin className="w-5 h-5" />
-                  Use My Current Location
-                </button>
+        {/* BODY */}
+        <ModalBody className="space-y-4 py-6">
 
-                <button
-                  onClick={() => setIsLocationModalOpen(false)}
-                  className="text-gray-400 hover:text-red-400 text-sm w-full mt-4 transition cursor-pointer"
-                >
-                  Cancel
-                </button>
-              </div>
+          <p className="text-sm text-gray-300 leading-relaxed">
+            Allow access to your location for faster delivery and personalized
+            product recommendations.
+          </p>
+
+          {/* Info Card */}
+          <div
+            className="flex items-start gap-3
+            bg-black/40 border border-white/10
+            rounded-xl p-4"
+          >
+            <MapPin className="text-red-400 mt-1" size={18} />
+
+            <div className="text-sm text-gray-300">
+              Your location helps us show nearby products, delivery time,
+              and better offers.
             </div>
           </div>
-        </div>
-      )}
 
+        </ModalBody>
+
+        {/* FOOTER */}
+        <ModalFooter className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-white/10">
+
+          {/* Use Location Button */}
+          <Button
+            onPress={() => {
+              handleUseMyLocation();
+              onClose();
+            }}
+            className="flex items-center justify-center gap-2
+            bg-gradient-to-r from-red-500 to-black/30
+            text-white font-semibold
+            px-6 py-2 rounded-xl
+            shadow-lg shadow-red-500/30
+            hover:shadow-red-500/50 hover:scale-[1.03]
+            active:scale-[0.97]
+            transition-all duration-300 w-full sm:w-auto"
+          >
+            <MapPin size={18} />
+            Use My Location
+          </Button>
+
+          {/* Cancel Button */}
+          <Button
+            variant="light"
+            onPress={onClose}
+            className="flex items-center justify-center
+            border border-white/10
+            text-gray-300 px-6 py-2 rounded-xl
+            hover:bg-white/10 hover:text-white
+            active:bg-white/20 active:scale-[0.97]
+            transition-all duration-300 w-full sm:w-auto"
+          >
+            Cancel
+          </Button>
+
+        </ModalFooter>
+      </>
+    )}
+  </ModalContent>
+</Modal>
       {/* Mobile Offcanvas Menu */}
       <aside
         className={`sm:hidden fixed min-h-screen top-0 left-0 w-3/4 max-w-xs h-full 
