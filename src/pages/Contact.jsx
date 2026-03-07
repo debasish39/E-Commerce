@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Toaster, toast } from "sonner";
-import { FaUser, FaEnvelope, FaFileAlt, } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaFileAlt } from "react-icons/fa";
 import { IoIosSend } from "react-icons/io";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -18,6 +18,36 @@ export default function Contact() {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
+
+  /* ================= FAQ STATE ================= */
+  const [openFAQ, setOpenFAQ] = useState(null);
+
+  const toggleFAQ = (index) => {
+    setOpenFAQ(openFAQ === index ? null : index);
+  };
+
+  const faqs = [
+    {
+      question: "How can I track my order?",
+      answer:
+        "After placing an order, you will receive a tracking ID via email. You can use the order tracking page to check the status.",
+    },
+    {
+      question: "What is your return policy?",
+      answer:
+        "You can request a return within 7 days of delivery if the product is damaged or defective.",
+    },
+    {
+      question: "How long does shipping take?",
+      answer:
+        "Shipping usually takes 3–5 business days depending on your location.",
+    },
+    {
+      question: "How can I contact support?",
+      answer:
+        "You can contact our support team using the form above or email us at djproject963@gmail.com.",
+    },
+  ];
 
   useEffect(() => {
     AOS.init({
@@ -52,8 +82,7 @@ export default function Contact() {
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else {
-      const emailRegex =
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email))
         newErrors.email = "Invalid email format";
     }
@@ -134,18 +163,11 @@ export default function Contact() {
   return (
     <>
       <div className="min-h-screen py-12 px-4 bg-transparent relative">
-
-        {/* ================= TOASTER ================= */}
-        <Toaster
-          position="top-right"
-          richColors
-          closeButton
-          theme="dark"
-        />
+        <Toaster position="top-right" richColors closeButton theme="dark" />
 
         <div className="max-w-7xl mx-auto flex flex-col-reverse lg:flex-row gap-10">
-
-          {/* ================= MAP ================= */}
+          
+          {/* MAP */}
           <div
             className="w-full lg:w-1/2 h-[400px] lg:h-[80vh] rounded-2xl overflow-hidden"
             data-aos="fade-right"
@@ -159,7 +181,7 @@ export default function Contact() {
             ></iframe>
           </div>
 
-          {/* ================= FORM ================= */}
+          {/* FORM */}
           <div
             className="w-full lg:w-1/2 flex flex-col"
             data-aos="fade-left"
@@ -168,11 +190,7 @@ export default function Contact() {
               Customer Support
             </h2>
 
-            <form
-              onSubmit={handleSubmit}
-              noValidate
-              className="space-y-5"
-            >
+            <form onSubmit={handleSubmit} className="space-y-5">
 
               {/* NAME */}
               <div>
@@ -184,17 +202,13 @@ export default function Contact() {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="John Doe"
-                    className={`w-full pl-10 px-4 py-2 rounded-lg border bg-transparent focus:ring-2 focus:ring-red-500 transition ${
-                      errors.name
-                        ? "border-red-500"
-                        : "border-gray-300"
+                    className={`w-full pl-10 px-4 py-2 rounded-lg border bg-transparent ${
+                      errors.name ? "border-red-500" : "border-gray-300"
                     }`}
                   />
                 </div>
                 {errors.name && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.name}
-                  </p>
+                  <p className="text-red-500 text-sm">{errors.name}</p>
                 )}
               </div>
 
@@ -208,43 +222,34 @@ export default function Contact() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="john@example.com"
-                    className={`w-full pl-10 px-4 py-2 rounded-lg border bg-transparent focus:ring-2 focus:ring-red-500 transition ${
-                      errors.email
-                        ? "border-red-500"
-                        : "border-gray-300"
+                    className={`w-full pl-10 px-4 py-2 rounded-lg border bg-transparent ${
+                      errors.email ? "border-red-500" : "border-gray-300"
                     }`}
                   />
                 </div>
                 {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.email}
-                  </p>
+                  <p className="text-red-500 text-sm">{errors.email}</p>
                 )}
               </div>
 
               {/* INQUIRY TYPE */}
               <div>
-                <div className="relative">
-                  <FaFileAlt className="absolute top-3 left-3 text-gray-400" />
-                  <select
-                    name="inquiryType"
-                    value={formData.inquiryType}
-                    onChange={handleChange}
-                    className={`w-full pl-10 px-4 py-2 rounded-lg border bg-transparent focus:ring-2 focus:ring-red-500 ${
-                      errors.inquiryType
-                        ? "border-red-500"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    <option value="">Select Inquiry Type</option>
-                    <option value="order">Order Issue</option>
-                    <option value="product">Product Inquiry</option>
-                    <option value="return">Returns & Refunds</option>
-                    <option value="general">General Question</option>
-                  </select>
-                </div>
+                <select
+                  name="inquiryType"
+                  value={formData.inquiryType}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-2 rounded-lg border bg-transparent ${
+                    errors.inquiryType ? "border-red-500" : "border-gray-300"
+                  }`}
+                >
+                  <option value="">Select Inquiry Type</option>
+                  <option value="order">Order Issue</option>
+                  <option value="product">Product Inquiry</option>
+                  <option value="return">Returns & Refunds</option>
+                  <option value="general">General Question</option>
+                </select>
                 {errors.inquiryType && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-red-500 text-sm">
                     {errors.inquiryType}
                   </p>
                 )}
@@ -253,23 +258,18 @@ export default function Contact() {
               {/* ORDER ID */}
               {formData.inquiryType === "order" && (
                 <div>
-                  <div className="relative">
-                    <FaFileAlt className="absolute top-3 left-3 text-gray-400" />
-                    <input
-                      type="text"
-                      name="orderId"
-                      value={formData.orderId}
-                      onChange={handleChange}
-                      placeholder="#123456"
-                      className={`w-full pl-10 px-4 py-2 rounded-lg border bg-transparent focus:ring-2 focus:ring-red-500 ${
-                        errors.orderId
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      }`}
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    name="orderId"
+                    value={formData.orderId}
+                    onChange={handleChange}
+                    placeholder="#123456"
+                    className={`w-full px-4 py-2 rounded-lg border bg-transparent ${
+                      errors.orderId ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
                   {errors.orderId && (
-                    <p className="text-red-500 text-sm mt-1">
+                    <p className="text-red-500 text-sm">
                       {errors.orderId}
                     </p>
                   )}
@@ -284,37 +284,31 @@ export default function Contact() {
                   value={formData.message}
                   onChange={handleChange}
                   placeholder="Type your message..."
-                  className={`w-full px-4 py-2 rounded-lg border bg-transparent focus:ring-2 focus:ring-red-500 ${
-                    errors.message
-                      ? "border-red-500"
-                      : "border-gray-300"
+                  className={`w-full px-4 py-2 rounded-lg border bg-transparent ${
+                    errors.message ? "border-red-500" : "border-gray-300"
                   }`}
                 ></textarea>
                 {errors.message && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-red-500 text-sm">
                     {errors.message}
                   </p>
                 )}
               </div>
-{/* SUBMIT */}
-<button
-  type="submit"
-  disabled={isSubmitting}
-  className="w-full py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-red-500 to-black/90 border border-red-900 hover:from-red-600 hover:to-black-500 transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
->
-  {isSubmitting ? (
-    <>
-      <span className="animate-pulse">Sending...</span>
-    </>
-  ) : (
-    <>
-      <IoIosSend className="text-lg" />
-      Submit Request
-    </>
-  )}
-</button>
 
-
+              {/* SUBMIT */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-red-500 to-black/90 hover:from-red-600 transition flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? (
+                  "Sending..."
+                ) : (
+                  <>
+                    <IoIosSend /> Submit Request
+                  </>
+                )}
+              </button>
             </form>
 
             <div className="mt-6 text-center text-gray-400 text-sm">
@@ -322,6 +316,66 @@ export default function Contact() {
             </div>
           </div>
         </div>
+
+      {/* FAQ SECTION */}
+<div className="max-w-7xl mx-auto mt-9 px-4">
+
+  <h2 className="text-3xl md:text-4xl font-bold text-center mb-10
+  bg-gradient-to-r from-red-500 to-black/30 bg-clip-text text-transparent">
+    Frequently Asked Questions
+  </h2>
+
+  <div className="space-y-4">
+
+    {faqs.map((faq, index) => (
+      <div
+        key={index}
+        className="rounded-2xl border border-red-500/20
+        bg-black/30 backdrop-blur-md
+        shadow-md hover:border-red-500/40
+        transition-all duration-300"
+      >
+
+        <button
+          onClick={() => toggleFAQ(index)}
+          className="w-full flex justify-between items-center
+          px-6 py-4 text-left"
+        >
+
+          <span className="text-white font-semibold text-base md:text-lg">
+            {faq.question}
+          </span>
+
+          <span
+            className={`text-red-500 text-2xl transition-transform duration-300 ${
+              openFAQ === index ? "rotate-45" : "rotate-0"
+            }`}
+          >
+            +
+          </span>
+
+        </button>
+
+        <div
+          className={`grid transition-all duration-300 ease-in-out ${
+            openFAQ === index
+              ? "grid-rows-[1fr] opacity-100"
+              : "grid-rows-[0fr] opacity-0"
+          }`}
+        >
+          <div className="overflow-hidden">
+            <p className="px-6 pb-5 text-gray-300 leading-relaxed">
+              {faq.answer}
+            </p>
+          </div>
+        </div>
+
+      </div>
+    ))}
+
+  </div>
+
+</div>
       </div>
 
       <Footer />
