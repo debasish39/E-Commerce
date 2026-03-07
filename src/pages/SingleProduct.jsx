@@ -25,13 +25,14 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
+import ProductCard from "../components/ProductCard";
 
 export default function SingleProduct() {
   const { id } = useParams();
 
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
-
+const [relatedProducts, setRelatedProducts] = useState([]);
   // ✅ Persist selected image per product
   const [selectedImage, setSelectedImage] = useState(() => {
     const saved = localStorage.getItem(`selectedImage_${id}`);
@@ -66,11 +67,31 @@ export default function SingleProduct() {
 
     fetchProduct();
   }, [id]);
+useEffect(() => {
+  const fetchRelated = async () => {
+    if (!product?.category) return;
 
+    try {
+      const res = await axios.get(
+        `https://dummyjson.com/products/category/${product.category}`
+      );
+
+      const filtered = res.data.products
+        .filter((item) => item.id !== product.id)
+        .slice(0, 6);
+
+      setRelatedProducts(filtered);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  fetchRelated();
+}, [product]);
   useEffect(() => {
     AOS.init({
       duration: 800,
-      once: true,
+      once: false,
     });
   }, []);
 
@@ -173,6 +194,7 @@ export default function SingleProduct() {
 
   /* ================= UI ================= */
   return (
+    <>
     <div className="relative min-h-screen py-12 px-4 sm:px-6 lg:px-10 text-white overflow-hidden">
       <Breadcrums title={product.title} />
 
@@ -308,6 +330,26 @@ export default function SingleProduct() {
           </div>
         </div>
       </div>
+          <div className="max-w-6xl mx-auto mt-9" data-aos="fade-up">
+
+  <h2 className="text-2xl font-bold mb-3">
+    Related Products
+  </h2>
+
+  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+
+    {relatedProducts.map((item) => (
+      <ProductCard
+        key={item.id}
+        product={item}
+      />
+    ))}
+
+  </div>
+
+</div>
     </div>
+
+</>
   );
 }
