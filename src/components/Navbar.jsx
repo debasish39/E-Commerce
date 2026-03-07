@@ -33,6 +33,7 @@ import { getData } from "../context/DataContext";
 import OrderHistory from "../pages/OrderHistory";
 import { useUser } from "@clerk/clerk-react";
 import LocationMap from "../components/LocationMap";
+import { toast } from "sonner";
 export default function Navbar({ location, onLocationChange }) {
   const { user } = useUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -45,29 +46,40 @@ export default function Navbar({ location, onLocationChange }) {
   const [showBottomNav, setShowBottomNav] = useState(true);
   const [isListening, setIsListening] = useState(false);
   const [area, setArea] = useState("");
-  const handleAreaSearch = async () => {
-    if (!area) return;
+const handleAreaSearch = async () => {
+  if (!area) {
+    toast.warning("Please enter a location");
+    return;
+  }
 
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${area}`
-      );
+  const loadingToast = toast.loading("Searching location...");
 
-      const data = await res.json();
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${area}`
+    );
 
-      if (data.length > 0) {
-        const lat = data[0].lat;
-        const lon = data[0].lon;
+    const data = await res.json();
 
-        onLocationChange(lat, lon);
-        onClose();
-      } else {
-        alert("Location not found");
-      }
-    } catch (error) {
-      console.error(error);
+    if (data.length > 0) {
+      const lat = data[0].lat;
+      const lon = data[0].lon;
+
+      onLocationChange(lat, lon);
+      onClose();
+
+      toast.dismiss(loadingToast);
+      toast.success("Location found successfully");
+    } else {
+      toast.dismiss(loadingToast);
+      toast.error("Location not found");
     }
-  };
+  } catch (error) {
+    console.error(error);
+    toast.dismiss(loadingToast);
+    toast.error("Something went wrong");
+  }
+};
   const handleVoiceSearch = () => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -474,7 +486,7 @@ transition duration-200 cursor-pointer"
               text-gray-300 font-medium text-sm
               shadow-md
               hover:scale-105 active:scale-95
-              transition curor-pointer"
+              transition cursor-pointer"
                   >
                     Search
                   </button>

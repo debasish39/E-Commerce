@@ -27,9 +27,9 @@ export default function LocationMap({ onSelect }) {
   return (
     <div className="space-y-3">
       <MapContainer
-        center={[20.2961, 85.8245]}
-        zoom={13}
-        style={{ height: "300px", width: "100%", borderRadius: "12px" }}
+        center={[20.1322288, 85.6216961]}
+        zoom={12}
+        style={{ height: "180px", width: "100%", borderRadius: "12px" }}
       >
         <TileLayer
           attribution="© OpenStreetMap"

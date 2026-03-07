@@ -47,7 +47,7 @@ export default function CategoryProduct() {
           <source src={Loading} type="video/webm" />
           Your browser does not support the video tag.
         </video>
-        <p className="text-[#f53347] text-lg font-semibold mt-4 capitalize">
+        <p className="text-red-600 text-lg font-semibold mt-4 capitalize">
           Loading {category} products...
         </p>
       </div>
