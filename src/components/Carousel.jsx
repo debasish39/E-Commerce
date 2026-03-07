@@ -44,7 +44,7 @@ const Carousel = () => {
     </div>
   );
 
-  const initialSlideIndex = data ? data.findIndex(item => item.id === 30) : 0;
+  const initialSlideIndex = data ? data.findIndex(item => item.id === 83) : 0;
 const settings = {
   dots: true,
   autoplay: true,
@@ -101,9 +101,9 @@ const settings = {
         </h2>
 <span
   onClick={() => navigate("/products")}
-  className="inline-flex items-center gap-2 px-5 py-2
-  rounded-full
-  bg-gradient-to-r from-red-500 via-black/30 to-black/40
+  className="inline-flex items-center gap-2 px-3 py-1
+  rounded-xl
+  bg-gradient-to-r from-red-500 via-black/10 to-black/10
   text-white font-semibold text-sm sm:text-base
   cursor-pointer
   border border-white/20

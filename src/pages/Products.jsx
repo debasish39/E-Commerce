@@ -3,7 +3,7 @@ import { getData } from "../context/DataContext";
 import FilterSection from "../components/FilterSection";
 import ProductCard from "../components/ProductCard";
 import ProductCardSkeleton from "../components/ProductCardSkeleton";
-import { FaAngleLeft, FaAngleRight} from "react-icons/fa";
+import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import { VscFilterFilled } from "react-icons/vsc";
 import Lottie from "lottie-react";
 import notfound from "../assets/notfound.json";
@@ -98,11 +98,10 @@ export default function Products() {
         <button
           key={p}
           onClick={() => setPage(p)}
-          className={`px-3 py-1.5 rounded-md text-sm ${
-            page === p
+          className={`px-3 py-1.5 rounded-md text-sm ${page === p
               ? "bg-red-500 text-white"
               : "border border-gray-700 hover:bg-gray-800"
-          }`}
+            }`}
         >
           {p}
         </button>
@@ -116,8 +115,10 @@ export default function Products() {
       <div className="min-h-screen py-10 px-4 text-white">
 
         {/* Header */}
-        <div className="flex justify-center mb-10">
-
+        <div
+          data-aos="fade-down"
+          className="flex justify-center mb-10"
+        >
           <h2 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-red-500 to-pink-300 text-transparent bg-clip-text">
             <span className="text-white">🛍️</span> Explore Our Collection
           </h2>
@@ -142,7 +143,10 @@ export default function Products() {
           <>
             {filteredProducts.length === 0 ? (
 
-              <div className="flex justify-center items-center min-h-[350px]">
+              <div
+                data-aos="zoom-in"
+                className="flex justify-center items-center min-h-[350px]"
+              >
                 <Lottie animationData={notfound} className="w-80" />
               </div>
 
@@ -152,7 +156,11 @@ export default function Products() {
 
                 {paginatedProducts.map((product) => (
 
-                  <div key={product.id} data-aos="zoom-in">
+                  <div
+                    key={product.id}
+                    data-aos="zoom-in"
+                    data-aos-delay={product.id * 30}
+                  >
                     <ProductCard product={product} />
                   </div>
 
@@ -165,8 +173,10 @@ export default function Products() {
             {/* Pagination */}
             {filteredProducts.length > 0 && (
 
-              <div className="mt-12 flex justify-center items-center gap-3 flex-wrap">
-
+              <div
+                data-aos="fade-up"
+                className="mt-12 flex justify-center items-center gap-3 flex-wrap"
+              >
                 <button
                   onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
                   disabled={page === 1}
@@ -198,11 +208,12 @@ export default function Products() {
 
       {/* Floating Filter Button */}
       <button
+        data-aos="fade-left"
         onClick={() => setShowFilters(true)}
         className="fixed left-6 bottom-20 sm:bottom-15 -translate-y-1/2 z-40
-        bg-gradient-to-r from-black/30 to-red-900
-        text-gray-300 p-3 rounded-full
-        shadow-lg hover:scale-110 transition-all duration-300 cursor-pointer border border-red-500/60"
+  bg-gradient-to-r from-black/30 to-red-900
+  text-gray-300 p-3 rounded-full
+  shadow-lg hover:scale-110 transition-all duration-300 cursor-pointer border border-red-500/60"
       >
         <VscFilterFilled size={30} />
       </button>

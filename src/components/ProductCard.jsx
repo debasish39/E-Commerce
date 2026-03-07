@@ -148,13 +148,13 @@ export default function ProductCard({ product }) {
         <button
           className={`w-full flex items-center justify-center gap-2 py-2 text-sm sm:text-base font-semibold rounded-lg shadow-md transition-all duration-300 active:scale-95 ${
             isAlreadyInCart
-              ? "bg-gray-400 text-white cursor-not-allowed"
-              : "bg-gradient-to-r from-red-500 to-pink-500 text-white sm:hover:shadow-lg sm:hover:shadow-red-300"
+              ? "bg-white/10 text-white cursor-not-allowed"
+              : "bg-gradient-to-r from-red-800 to-black/30 border border-red-900/60 text-white sm:hover:shadow-lg sm:hover:shadow-red-300"
           }`}
           disabled={isAlreadyInCart}
           onClick={handleAddToCart}
         >
-          <IoCartOutline className="w-4 h-4 sm:w-5 sm:h-5" />
+          <IoCartOutline className="w-6 h-6" />
           {isAlreadyInCart ? "Added" : "Add to Cart"}
         </button>
       </div>

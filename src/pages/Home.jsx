@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
-import ProductFilter from "../components/ProductFilter"; // ✅ New
+
 import Carousel from "../components/Carousel";
 import MidBanner from "../components/MidBanner";
 import Features from "../components/Features";

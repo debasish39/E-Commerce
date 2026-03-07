@@ -45,27 +45,27 @@ const AppWrapper = () => {
   const location = useLocation();
 
   /* ================= Tawk Chat ================= */
-useEffect(() => {
-  if (window.Tawk_API) return;
+  useEffect(() => {
+    if (window.Tawk_API) return;
 
-  window.Tawk_API = window.Tawk_API || {};
-  window.Tawk_LoadStart = new Date();
+    window.Tawk_API = window.Tawk_API || {};
+    window.Tawk_LoadStart = new Date();
 
-  const script = document.createElement("script");
-  script.async = true;
+    const script = document.createElement("script");
+    script.async = true;
 
-  // YOUR TAWK SCRIPT URL
-  script.src = "https://embed.tawk.to/69084ab76435f2194e4f2aa9/1j9467o9s";
+    // YOUR TAWK SCRIPT URL
+    script.src = "https://embed.tawk.to/69084ab76435f2194e4f2aa9/1j9467o9s";
 
-  script.charset = "UTF-8";
-  script.setAttribute("crossorigin", "*");
+    script.charset = "UTF-8";
+    script.setAttribute("crossorigin", "*");
 
-  document.body.appendChild(script);
+    document.body.appendChild(script);
 
-  return () => {
-    document.body.removeChild(script);
-  };
-}, []);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
   /* ================= Get User Location ================= */
   const getLocation = async () => {
     if (!navigator.geolocation) return;
@@ -111,17 +111,31 @@ useEffect(() => {
         richColors
         closeButton
         toastOptions={{
-          style: {
-            background: "rgba(0,0,0,0.85)",
-            backdropFilter: "blur(12px)",
-            color: "#fff",
-            border: "1px solid rgba(255,0,0,0.4)",
-            borderRadius: "14px",
-            boxShadow: "0 0 30px rgba(255,0,0,0.4)",
+          duration: 4000,
+
+          classNames: {
+            toast:
+              "bg-black/80 backdrop-blur-xl text-white border rounded-xl shadow-lg px-4 py-1",
+
+            success:
+              "border-green-400/40 shadow-[0_0_25px_rgba(34,197,94,0.5)]",
+
+            error:
+              "border-red-400/40 shadow-[0_0_25px_rgba(239,68,68,0.5)]",
+
+            warning:
+              "border-yellow-400/40 shadow-[0_0_25px_rgba(250,204,21,0.5)]",
+
+            description: "text-gray-300 text-xs",
+
+            actionButton:
+              "bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-3 py-1 rounded-md",
+
+            cancelButton:
+              "bg-white/10 text-white text-xs px-3 py-1 rounded-md",
           },
         }}
       />
-
       <Suspense fallback={<Spinner />}>
         <ScrollProgressBar />
 
@@ -156,7 +170,7 @@ useEffect(() => {
               particleBaseSize={180}
               moveParticlesOnHover
               alphaParticles
-            
+
             />
           </div>
 
@@ -170,8 +184,8 @@ useEffect(() => {
               <Route path="/verify" element={<Verify />} />
               <Route path="/sign-in/*" element={<SignInPage />} />
               <Route path="/verify-signin" element={<VerifySignIn />} />
-<Route path="/sign-up/*" element={<SignUpPage />} />
-<Route path="/sso-callback" element={<SsoCallback />} />
+              <Route path="/sign-up/*" element={<SignUpPage />} />
+              <Route path="/sso-callback" element={<SsoCallback />} />
               <Route path="/" element={<Home />} />
               <Route path="/products" element={<Products />} />
               <Route path="/products/:id" element={<SingleProduct />} />
