@@ -2,31 +2,36 @@ import React, { useEffect, useState } from "react";
 import { jsPDF } from "jspdf";
 import Logo from "../assets/logo.png";
 import { FaDownload } from "react-icons/fa";
+import { useUser } from "@clerk/clerk-react";
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
+  const { user } = useUser();
 
- useEffect(() => {
-  const fetchOrders = async () => {
-    try {
-      const res = await fetch(
-        "https://eshop-backend-y0e7.onrender.com/api/orders"
-      );
+  useEffect(() => {
+    if (!user) return;
 
-      const data = await res.json();
+    const fetchOrders = async () => {
+      try {
+        const res = await fetch(
+          `https://eshop-backend-y0e7.onrender.com/api/orders/${user.id}`
+        );
 
-      if (Array.isArray(data)) {
-        setOrders(data);
-      } else {
-        console.error("Invalid order response:", data);
+        const data = await res.json();
+
+        if (Array.isArray(data)) {
+          setOrders(data);
+        } else {
+          console.error("Invalid order response:", data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch orders:", error);
       }
-    } catch (error) {
-      console.error("Failed to fetch orders:", error);
-    }
-  };
+    };
 
-  fetchOrders();
-}, []);
+    fetchOrders();
+  }, [user]);
+
   const generateInvoice = (order) => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -44,9 +49,15 @@ const OrderHistory = () => {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
     doc.text("EShop", centerX, 48, { align: "center" });
+
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
-    doc.text("https://eshop.debasish.xyz | djproject963@gmail.com", centerX, 54, { align: "center" });
+    doc.text(
+      "https://eshop.debasish.xyz | djproject963@gmail.com",
+      centerX,
+      54,
+      { align: "center" }
+    );
 
     doc.setDrawColor(...themeColor);
     doc.setLineWidth(0.8);
@@ -58,32 +69,35 @@ const OrderHistory = () => {
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
-doc.text(`Invoice No: INV-${order._id.slice(-6)}`, margin, 83);
+    doc.text(`Invoice No: INV-${order._id.slice(-6)}`, margin, 83);
     doc.text(`Date: ${order.date}`, margin, 89);
 
-    // Customer Info
     doc.setFont("helvetica", "bold");
     doc.text("Bill To:", margin, 105);
+
     doc.setFont("helvetica", "normal");
 
     const customerInfo = [
       order.user || "Guest",
-      order.address || "",
-      order.statePostCode || "",
-      order.country || "",
-      `Phone: ${order.phone}`
+      order.deliveryAddress?.street || "",
+      `${order.deliveryAddress?.state || ""} ${order.deliveryAddress?.postcode || ""
+      }`,
+      order.deliveryAddress?.country || "",
+      `Phone: ${order.phone}`,
     ];
 
     let infoY = 111;
     const lineSpacing = 7;
-    customerInfo.forEach(line => {
+
+    customerInfo.forEach((line) => {
       doc.text(line, margin, infoY);
       infoY += lineSpacing;
     });
+
     infoY += 12;
 
-    // Item Table
     let tableY = infoY + 10;
+
     const colX = {
       item: margin + 3,
       qty: pageWidth / 2 - 20,
@@ -93,7 +107,9 @@ doc.text(`Invoice No: INV-${order._id.slice(-6)}`, margin, 83);
 
     doc.setFillColor(...themeColor);
     doc.setTextColor(255, 255, 255);
+
     doc.rect(margin, tableY - 6, pageWidth - margin * 2, 10, "F");
+
     doc.setFont("helvetica", "bold");
     doc.text("Item", colX.item, tableY);
     doc.text("Qty", colX.qty, tableY);
@@ -101,55 +117,101 @@ doc.text(`Invoice No: INV-${order._id.slice(-6)}`, margin, 83);
     doc.text("Total", colX.total, tableY);
 
     tableY += 10;
+
     doc.setTextColor(0, 0, 0);
     doc.setFont("helvetica", "normal");
 
     order.items.forEach((item, i) => {
-      if (tableY > pageHeight - 40) { doc.addPage(); tableY = 30; }
+      if (tableY > pageHeight - 40) {
+        doc.addPage();
+        tableY = 30;
+      }
+
       doc.text(`${i + 1}. ${item.title}`, colX.item, tableY);
       doc.text(`${item.quantity}`, colX.qty, tableY);
       doc.text(`₹${item.price.toFixed(2)}`, colX.price, tableY);
-      doc.text(`₹${(item.price * item.quantity).toFixed(2)}`, colX.total, tableY);
+      doc.text(
+        `₹${(item.price * item.quantity).toFixed(2)}`,
+        colX.total,
+        tableY
+      );
+
       tableY += 8;
     });
 
-    // Totals
     tableY += 5;
+
     doc.setDrawColor(220);
     doc.line(margin, tableY, pageWidth - margin, tableY);
+
     tableY += 10;
 
+    const subtotal = order.items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
     doc.setFont("helvetica", "bold");
-    const subtotal = order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
     doc.text("Subtotal:", pageWidth - 65, tableY);
-    doc.text(`₹${subtotal.toFixed(2)}`, pageWidth - margin, tableY, { align: "right" });
+    doc.text(`₹${subtotal.toFixed(2)}`, pageWidth - margin, tableY, {
+      align: "right",
+    });
 
     tableY += 6;
+
     doc.text("Handling:", pageWidth - 65, tableY);
     doc.text("₹5.00", pageWidth - margin, tableY, { align: "right" });
 
     tableY += 6;
+
     doc.setDrawColor(...themeColor);
     doc.line(pageWidth - 80, tableY + 2, pageWidth - margin, tableY + 2);
+
     tableY += 8;
 
     doc.setFontSize(13);
-    doc.text("Grand Total:", pageWidth - 65, tableY);
-    doc.text(`₹${(subtotal + 5).toFixed(2)}`, pageWidth - margin, tableY, { align: "right" });
 
-    // Footer
+    doc.text("Grand Total:", pageWidth - 65, tableY);
+    doc.text(`₹${(subtotal + 5).toFixed(2)}`, pageWidth - margin, tableY, {
+      align: "right",
+    });
+
     doc.setFontSize(10);
     doc.setTextColor(120, 120, 120);
-    doc.text("Thank you for shopping with EShop ❤️", centerX, pageHeight - 25, { align: "center" });
-    doc.text("For support, contact: djproject963@gmail.com", centerX, pageHeight - 19, { align: "center" });
-    doc.text("Generated automatically by EShop © 2025", centerX, pageHeight - 13, { align: "center" });
+
+    doc.text(
+      "Thank you for shopping with EShop ❤️",
+      centerX,
+      pageHeight - 25,
+      { align: "center" }
+    );
+
+    doc.text(
+      "For support, contact: djproject963@gmail.com",
+      centerX,
+      pageHeight - 19,
+      { align: "center" }
+    );
+
+    doc.text(
+      "Generated automatically by EShop © 2025",
+      centerX,
+      pageHeight - 13,
+      { align: "center" }
+    );
 
     doc.save(`EShop-Invoice-${order._id}.pdf`);
   };
 
   return (
     <div className="min-h-screen px-4 py-10 text-white flex flex-col items-center">
-      <h1 className="text-3xl font-bold mb-6 text-red-400">📜 Order History</h1>
+      <h1
+        data-aos="fade-down"
+        className="text-3xl font-bold mb-6 text-red-400"
+      >
+        📜 Order History
+      </h1>
 
       {orders.length === 0 ? (
         <p className="text-gray-300">No previous orders found.</p>
@@ -160,6 +222,7 @@ doc.text(`Invoice No: INV-${order._id.slice(-6)}`, margin, 83);
               (sum, item) => sum + item.price * item.quantity,
               0
             );
+
             const grandTotal = subtotal + 5;
 
             const statusColor =
@@ -176,12 +239,9 @@ doc.text(`Invoice No: INV-${order._id.slice(-6)}`, margin, 83);
             return (
               <div
                 key={order._id}
-                className="relative bg-white/10 backdrop-blur-xl
-      border border-white/20 rounded-3xl p-6 shadow-xl
-      hover:shadow-red-500/20 hover:scale-[1.01]
-      transition-all duration-300"
+                data-aos="fade-up"
+                className="relative bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 shadow-xl"
               >
-                {/* Top Header */}
                 <div className="flex justify-between items-center flex-wrap gap-3">
                   <div>
                     <h2 className="text-lg font-semibold text-white">
@@ -192,51 +252,45 @@ doc.text(`Invoice No: INV-${order._id.slice(-6)}`, margin, 83);
                     </p>
                   </div>
 
-                  <div className="flex flex-col items-end gap-1">
-                    <span
-                      className={`px-3 py-1 text-xs font-semibold rounded-full border ${statusColor}`}
-                    >
-                      {order.status || "Placed"}
-                    </span>
-                    <p className="text-xs text-gray-400">{order.date}</p>
-                  </div>
+                  <span
+                    className={`px-3 py-1 text-xs font-semibold rounded-full border ${statusColor}`}
+                  >
+                    {order.status || "Placed"}
+                  </span>
+
+                  <p className="text-xs text-gray-400">
+                    {new Date(order.createdAt).toLocaleString()}
+                  </p>
                 </div>
 
-                <p className="text-sm text-gray-300 mt-3">
-                  Phone: {order.phone}
-                </p>
-
-                {/* Items */}
                 <div className="mt-5 space-y-3">
                   {order.items.map((item, idx) => (
                     <div
                       key={idx}
-                      className="flex justify-between items-center text-sm
-            border-b border-white/10 pb-2"
+                      className="flex justify-between border-b border-white/10 pb-2"
                     >
-                      <span className="text-white/80">
+                      <span>
                         {item.title} × {item.quantity}
                       </span>
-                      <span className="text-red-400 font-semibold">
+                      <span className="text-red-400">
                         ₹{(item.price * item.quantity).toFixed(2)}
                       </span>
                     </div>
                   ))}
                 </div>
 
-                {/* Totals */}
                 <div className="mt-4 text-sm space-y-1">
-                  <div className="flex justify-between text-gray-300">
+                  <div className="flex justify-between">
                     <span>Subtotal</span>
                     <span>₹{subtotal.toFixed(2)}</span>
                   </div>
 
-                  <div className="flex justify-between text-gray-300">
+                  <div className="flex justify-between">
                     <span>Handling Fee</span>
                     <span>₹5.00</span>
                   </div>
 
-                  <div className="border-t border-white/20 mt-2 pt-2 flex justify-between font-bold text-lg">
+                  <div className="border-t border-white/20 pt-2 flex justify-between font-bold">
                     <span>Grand Total</span>
                     <span className="text-red-400">
                       ₹{grandTotal.toFixed(2)}
@@ -244,15 +298,10 @@ doc.text(`Invoice No: INV-${order._id.slice(-6)}`, margin, 83);
                   </div>
                 </div>
 
-                {/* Invoice Button */}
                 <div className="mt-6 flex justify-end">
                   <button
                     onClick={() => generateInvoice(order)}
-                    className="flex items-center gap-2
-          bg-gradient-to-r from-red-500 to-pink-600
-          hover:scale-105 transition-all duration-300
-          text-white px-5 py-2 rounded-xl text-sm
-          shadow-lg hover:shadow-red-500/40 cursor-pointer"
+                    className="flex items-center gap-2 bg-red-500 px-5 py-2 rounded-xl"
                   >
                     <FaDownload />
                     Download Invoice
@@ -261,7 +310,6 @@ doc.text(`Invoice No: INV-${order._id.slice(-6)}`, margin, 83);
               </div>
             );
           })}
-
         </div>
       )}
     </div>

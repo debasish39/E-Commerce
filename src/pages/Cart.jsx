@@ -73,13 +73,31 @@ useEffect(() => {
 
 const completeOrder = async (phone, paymentMethod = "Razorpay") => {
 
+  if (!user) {
+    toast.error("Please login before placing an order");
+    return;
+  }
+
   const newOrder = {
-    user: user?.fullName || "Guest",
+    userId: user.id,   // unique user id from Clerk
+    user: address.name || user.fullName || "Guest",
+
     phone: `+91 ${phone}`,
-    total: totalAmount,
+
+    deliveryAddress: {
+      street: address.street,
+      state: address.state,
+      postcode: address.postcode,
+      country: address.country
+    },
+
+    total: Number(totalAmount),
+
     paymentMethod,
     paymentStatus: paymentMethod === "COD" ? "Pending" : "Paid",
+
     status: "Processing",
+
     items: cartItem.map(item => ({
       title: item.title,
       price: item.price,
@@ -89,27 +107,28 @@ const completeOrder = async (phone, paymentMethod = "Razorpay") => {
 
   try {
 
-    await fetch(`${BACKEND_URL}/api/save-order`, {
+    const res = await fetch(`${BACKEND_URL}/api/save-order`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify(newOrder),
+      body: JSON.stringify(newOrder)
     });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Order failed");
+    }
 
   } catch (err) {
     console.error("Order save failed:", err);
+    toast.error("Failed to place order");
+    return;
   }
 
   if (paymentMethod === "Razorpay") {
     toast.success("Payment Successful 🎉");
-
-    toast("Download Invoice?", {
-      action: {
-        label: "Download",
-        onClick: () => generateInvoice(phone),
-      },
-    });
   } else {
     toast.success("Order placed (Cash on Delivery)");
   }
