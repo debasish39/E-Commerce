@@ -6,11 +6,27 @@ import { FaDownload } from "react-icons/fa";
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
 
-  useEffect(() => {
-    const savedOrders = JSON.parse(localStorage.getItem("orderHistory")) || [];
-    setOrders(savedOrders.reverse()); // newest first
-  }, []);
+ useEffect(() => {
+  const fetchOrders = async () => {
+    try {
+      const res = await fetch(
+        "https://eshop-backend-y0e7.onrender.com/api/orders"
+      );
 
+      const data = await res.json();
+
+      if (Array.isArray(data)) {
+        setOrders(data);
+      } else {
+        console.error("Invalid order response:", data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch orders:", error);
+    }
+  };
+
+  fetchOrders();
+}, []);
   const generateInvoice = (order) => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -42,7 +58,7 @@ const OrderHistory = () => {
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
-    doc.text(`Invoice No: INV-${order.id.toString().slice(-6)}`, margin, 83);
+doc.text(`Invoice No: INV-${order._id.slice(-6)}`, margin, 83);
     doc.text(`Date: ${order.date}`, margin, 89);
 
     // Customer Info
@@ -128,7 +144,7 @@ const OrderHistory = () => {
     doc.text("For support, contact: djproject963@gmail.com", centerX, pageHeight - 19, { align: "center" });
     doc.text("Generated automatically by EShop © 2025", centerX, pageHeight - 13, { align: "center" });
 
-    doc.save(`EShop-Invoice-${order.id}.pdf`);
+    doc.save(`EShop-Invoice-${order._id}.pdf`);
   };
 
   return (
@@ -159,7 +175,7 @@ const OrderHistory = () => {
 
             return (
               <div
-                key={order.id}
+                key={order._id}
                 className="relative bg-white/10 backdrop-blur-xl
       border border-white/20 rounded-3xl p-6 shadow-xl
       hover:shadow-red-500/20 hover:scale-[1.01]
@@ -172,7 +188,7 @@ const OrderHistory = () => {
                       {order.user}
                     </h2>
                     <p className="text-xs text-gray-400">
-                      Order ID: #{order.id.toString().slice(-6)}
+                      Order ID: #{order._id.slice(-6)}
                     </p>
                   </div>
 

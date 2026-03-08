@@ -71,50 +71,52 @@ useEffect(() => {
   );
   const totalAmount = (totalPrice + 5).toFixed(2);
 
-  const completeOrder = async (phone, paymentMethod = "Razorpay") => {
-    const newOrder = {
-      id: Date.now(),
-      user: user?.fullName || "Guest",
-      phone: `+91 ${phone}`,
-      total: totalAmount,
-      paymentMethod,
-      paymentStatus: paymentMethod === "COD" ? "Pending" : "Paid",
-      date: new Date().toLocaleString(),
-      status: "Processing",
-      items: cartItem.map(item => ({
-        title: item.title,
-        price: item.price,
-        quantity: item.quantity,
-      })),
-    };
+const completeOrder = async (phone, paymentMethod = "Razorpay") => {
 
-    try {
-      const existingOrders =
-        JSON.parse(localStorage.getItem("orderHistory")) || [];
-
-      existingOrders.push(newOrder);
-      localStorage.setItem("orderHistory", JSON.stringify(existingOrders));
-    } catch (err) {
-      console.error("Failed to save order history:", err);
-    }
-
-    if (paymentMethod === "Razorpay") {
-      toast.success("Payment Successful 🎉");
-
-      toast("Download Invoice?", {
-        description: "Click below to download your invoice.",
-        action: {
-          label: "Download",
-          onClick: () => generateInvoice(phone),
-        },
-      });
-    } else {
-      toast.success("Order placed (Cash on Delivery)");
-    }
-
-    clearCart?.();
-    navigate("/order-success");
+  const newOrder = {
+    user: user?.fullName || "Guest",
+    phone: `+91 ${phone}`,
+    total: totalAmount,
+    paymentMethod,
+    paymentStatus: paymentMethod === "COD" ? "Pending" : "Paid",
+    status: "Processing",
+    items: cartItem.map(item => ({
+      title: item.title,
+      price: item.price,
+      quantity: item.quantity
+    }))
   };
+
+  try {
+
+    await fetch(`${BACKEND_URL}/api/save-order`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newOrder),
+    });
+
+  } catch (err) {
+    console.error("Order save failed:", err);
+  }
+
+  if (paymentMethod === "Razorpay") {
+    toast.success("Payment Successful 🎉");
+
+    toast("Download Invoice?", {
+      action: {
+        label: "Download",
+        onClick: () => generateInvoice(phone),
+      },
+    });
+  } else {
+    toast.success("Order placed (Cash on Delivery)");
+  }
+
+  clearCart?.();
+  navigate("/order-success");
+};
   const confirmRemoveItem = (id) => {
     toast("Remove item from cart?", {
       description: "This product will be removed permanently.",
