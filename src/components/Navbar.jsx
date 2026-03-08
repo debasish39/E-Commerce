@@ -214,7 +214,7 @@ const handleAreaSearch = async () => {
       {/* Background overlay for mobile menu */}
       {isMobileNavOpen && (
         <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-30"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30"
           onClick={() => setIsMobileNavOpen(false)}
           data-aos="fade-in"
         ></div>
@@ -223,8 +223,8 @@ const handleAreaSearch = async () => {
       {/* Navbar */}
       <header
         className={`fixed top-0 left-0 right-0 z-40 
-  bg-black/40 backdrop-blur-md border-b border-red-600/50 
-  py-3 shadow-[0_2px_20px_rgba(255,80,80,0.25)]
+  bg-black/10 backdrop-blur-md border-b border-red-600/50 
+  py-3 shadow-[0_2px_66px_rgba(255,80,80,0.25)]
   transition-transform duration-300 ease-in-out
   ${showNavbar ? "translate-y-0" : "-translate-y-full"}`}
         data-aos="fade-down"
@@ -236,7 +236,7 @@ const handleAreaSearch = async () => {
           <div className="flex items-center gap-4" data-aos="zoom-in">
             <Link
               to="/"
-              className="text-[24px] sm:text-3xl font-bold bg-gradient-to-b from-red-600 to-white/30 bg-clip-text text-transparent drop-shadow-[3px_3px_18px_red]"
+              className="text-[24px] sm:text-3xl font-bold bg-gradient-to-r from-red-400 to-orange-300 bg-clip-text text-transparent drop-shadow-[3px_3px_30px_red]"
               style={{ fontFamily: "'Pacifico', cursive" }}
             >
               E-Shop
@@ -331,10 +331,10 @@ const handleAreaSearch = async () => {
                       src={user.imageUrl}
                       alt="profile"
                       onClick={() => navigate("/profile")}
-                      className="h-8 w-8 rounded-full ring-2 ring-red-500 cursor-pointer"
+                      className="h-8 w-8 rounded-full ring-1 ring-red-500 cursor-pointer"
                     />
                   )}
-                  <span className="text-[11px] mt-1">Profile</span>
+                  <span className="text-[11px] mt-1s sm:hidden">Profile</span>
                 </div>
               </SignedIn>
             </div>

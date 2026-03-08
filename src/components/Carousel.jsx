@@ -45,36 +45,36 @@ const Carousel = () => {
   );
 
   const initialSlideIndex = data ? data.findIndex(item => item.id === 83) : 0;
-const settings = {
-  dots: true,
-  autoplay: true,
-  autoplaySpeed: 4500,
-  infinite: true,
-  speed: 700,
-  slidesToShow: 1,
-  slidesToScroll: 1,
-  pauseOnHover: true,
-  nextArrow: <SampleNextArrow />,
-  prevArrow: <SamplePrevArrow />,
-  initialSlide: initialSlideIndex >= 0 ? initialSlideIndex : 0,
+  const settings = {
+    dots: true,
+    autoplay: true,
+    autoplaySpeed: 4500,
+    infinite: true,
+    speed: 700,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    pauseOnHover: true,
+    nextArrow: <SampleNextArrow />,
+    prevArrow: <SamplePrevArrow />,
+    initialSlide: initialSlideIndex >= 0 ? initialSlideIndex : 0,
 
-  appendDots: dots => (
-    <div>
-      <ul className="flex justify-center mt-6 gap-3">
-        {dots.slice(0, Math.min(dots.length, 6))}
-      </ul>
-    </div>
-  ),
+    appendDots: dots => (
+      <div>
+        <ul className="flex justify-center mt-6 gap-3">
+          {dots.slice(0, Math.min(dots.length, 6))}
+        </ul>
+      </div>
+    ),
 
-  customPaging: () => (
-    <div className="progress-dot"></div>
-  ),
+    customPaging: () => (
+      <div className="progress-dot"></div>
+    ),
 
-  responsive: [
-    { breakpoint: 1024, settings: { arrows: false } },
-    { breakpoint: 640, settings: { arrows: false, dots: true } },
-  ],
-};
+    responsive: [
+      { breakpoint: 1024, settings: { arrows: false } },
+      { breakpoint: 640, settings: { arrows: false, dots: true } },
+    ],
+  };
   const orderedData = data || [];
 
   return (
@@ -99,20 +99,20 @@ const settings = {
         >
           <span className="text-white">✨</span> Featured Products
         </h2>
-<span
-  onClick={() => navigate("/products")}
-  className="inline-flex items-center gap-2 px-3 py-1
+        <span
+          onClick={() => navigate("/products")}
+          className="inline-flex items-center gap-2 px-3 py-1
   rounded-xl
-  bg-gradient-to-r from-red-500 via-black/10 to-black/10
-  text-white font-semibold text-sm sm:text-base
+  bg-gradient-to-r from-red-500/30 via-black/10 to-black/10 
+  text-gray-300 font-semibold text-sm sm:text-base
   cursor-pointer
   border border-white/20
   shadow-lg hover:shadow-2xl
   hover:scale-105 active:scale-95
   transition-all duration-300 "
->
-  Explore All →
-</span>
+        >
+          Explore All →
+        </span>
       </div>
 
       <div className="max-w-9xl  relative px-4 sm:px-8">
@@ -126,11 +126,11 @@ const settings = {
           <Slider {...settings}>
             {orderedData.map((item) => (
               <div key={item.id} className="px-2 sm:px-4 lg:px-10">
-             <div className="grid lg:grid-cols-2 items-center gap-6 sm:gap-10 p-4 sm:p-10 lg:p-18 rounded-3xl backdrop-blur-xl bg-gradient-to-r from-white/5 to-white/10 border border-white/20 transition-all duration-700">
+                <div className="grid lg:grid-cols-2 items-center gap-6 sm:gap-10 p-4 sm:p-10 lg:p-18 rounded-3xl backdrop-blur-xl bg-gradient-to-r from-white/5 to-white/10 border border-white/20 transition-all duration-700">
                   <div className="relative flex justify-center order-1 lg:order-2">
                     <img
                       src={item.thumbnail}
-                      alt={item.title}onClick={() => navigate(`/products/${item.id}`)}
+                      alt={item.title} onClick={() => navigate(`/products/${item.id}`)}
                       className="h-64 sm:h-72 md:h-80 lg:h-[380px] w-full object-contain rounded-xl drop-shadow-2xl transition-transform hover:scale-110"
                     />
                     <div className="absolute top-4 left-4 bg-gradient-to-r from-[#f53347] to-[#ff6f61] text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
@@ -160,31 +160,31 @@ const settings = {
                       ))}
                     </div>
 
-                <p className="hidden sm:block text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-[#ff5c6e] to-[#ff9a8b] bg-clip-text text-transparent">
-  ₹{item.price}
-</p>
+                    <p className="hidden sm:block text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-[#ff5c6e] to-[#ff9a8b] bg-clip-text text-transparent">
+                      ₹{item.price}
+                    </p>
 
-                  <div className="grid grid-cols-2 sm:flex gap-3 sm:gap-4 justify-center lg:justify-start pt-2 w-full">
+                    <div className="grid grid-cols-2 sm:flex gap-3 sm:gap-4 justify-center lg:justify-start pt-2 w-full">
 
-  <button
-    onClick={() => addToCart(item)}
-    className="bg-gradient-to-r from-[#f53347] to-[#ff6f61] hover:from-[#d02b3b] hover:to-[#ff3a4c] text-white font-semibold text-sm sm:text-base px-4 sm:px-6 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
-  >
-    <FaShoppingCart size={20}/> 
-    <span className="hidden sm:inline">Add to Cart</span>
-    <span className="sm:hidden">Add</span>
-  </button>
+                      <button
+                        onClick={() => addToCart(item)}
+                        className="bg-gradient-to-r from-[#f53347] to-[#ff6f61] hover:from-[#d02b3b] hover:to-[#ff3a4c] text-white font-semibold text-sm sm:text-base px-4 sm:px-6 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                      >
+                        <FaShoppingCart size={20} />
+                        <span className="hidden sm:inline">Add to Cart</span>
+                        <span className="sm:hidden">Add</span>
+                      </button>
 
-  <button
-    onClick={() => navigate(`/products/${item.id}`)}
-    className="bg-white/10 hover:bg-white/20 text-white font-semibold text-sm sm:text-base px-4 sm:px-6 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
-  >
-    <AiOutlineEye size={20}/> 
-    <span className="hidden sm:inline">View Product</span>
-    <span className="sm:hidden">View</span>
-  </button>
+                      <button
+                        onClick={() => navigate(`/products/${item.id}`)}
+                        className="bg-white/10 hover:bg-white/20 text-white font-semibold text-sm sm:text-base px-4 sm:px-6 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                      >
+                        <AiOutlineEye size={20} />
+                        <span className="hidden sm:inline">View Product</span>
+                        <span className="sm:hidden">View</span>
+                      </button>
 
-</div>
+                    </div>
                   </div>
                 </div>
               </div>
