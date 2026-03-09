@@ -9,7 +9,18 @@ export default function WishlistPage() {
   const [activeCardId, setActiveCardId] = useState(null);
   const [modalType, setModalType] = useState(null);
   const [selectedItemId, setSelectedItemId] = useState(null);
+const calculatePrice = (price) => {
+  let finalPrice;
 
+  if (price <= 50) finalPrice = price + 69;
+  else if (price <= 100) finalPrice = price + 99;
+  else if (price <= 300) finalPrice = price + 199;
+  else if (price <= 800) finalPrice = price + 299;
+  else if (price <= 2000) finalPrice = price + 499;
+  else finalPrice = price + 599;
+
+  return Math.round(finalPrice / 10) * 10;
+};
   const toggleOverlay = (id) => {
     setActiveCardId((prev) => (prev === id ? null : id));
   };
@@ -111,8 +122,7 @@ export default function WishlistPage() {
 
     {/* Price Badge */}
     <div className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-orange-400 text-white text-sm font-semibold px-3 py-1 rounded-full shadow-lg">
-      ₹{item.price}
-    </div>
+    ₹{calculatePrice(item.price)}    </div>
   </div>
 
   {/* Product Info */}

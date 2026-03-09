@@ -22,7 +22,31 @@ export default function ProductCard({ product }) {
   const isLiked = wishlist.some(
     (item) => item.id === product.id
   );
+  const calculatePrice = (price) => {
 
+    let finalPrice;
+
+    if (price <= 50) {
+      finalPrice = price + 69;
+    }
+    else if (price <= 100) {
+      finalPrice = price + 99;
+    }
+    else if (price <= 300) {
+      finalPrice = price + 199;
+    }
+    else if (price <= 800) {
+      finalPrice = price + 299;
+    }
+    else if (price <= 2000) {
+      finalPrice = price + 499;
+    }
+    else {
+      finalPrice = price + 599;
+    }
+
+    return Math.round(finalPrice / 10) * 10;
+  };
   useEffect(() => {
     AOS.init({
       duration: 500,
@@ -34,11 +58,14 @@ export default function ProductCard({ product }) {
 
   const handleAddToCart = () => {
     if (isAlreadyInCart) {
-      toast.info("Already in cart 🛒");
+      toast.info("Already in cart 😊");
       return;
     }
 
-    addToCart(product);
+    addToCart({
+      ...product,
+      price: calculatePrice(product.price),
+    });
 
     toast.success("Added to cart!", {
       description: product.title,
@@ -71,11 +98,10 @@ export default function ProductCard({ product }) {
       {/* ❤️ Wishlist Button */}
       <button
         onClick={handleToggleWishlist}
-        className={`absolute top-5 sm:top-7 right-4 sm:right-7 z-10 p-2 rounded-full backdrop-blur-md transition-all duration-300 cursor-pointer ${
-          isLiked
-            ? "bg-transparent text-red-600 shadow-lg scale-110"
-            : "hover:scale-110"
-        }`}
+        className={`absolute top-5 sm:top-7 right-4 sm:right-7 z-10 p-2 rounded-full backdrop-blur-md transition-all duration-300 cursor-pointer ${isLiked
+          ? "bg-transparent text-red-600 shadow-lg scale-110"
+          : "hover:scale-110"
+          }`}
       >
         <FaHeart className="w-4 h-4" />
       </button>
@@ -96,9 +122,9 @@ export default function ProductCard({ product }) {
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" strokeWidth="1.5"/>
-              <circle cx="9" cy="9" r="2" strokeWidth="1.5"/>
-              <path d="M21 15l-5-5L5 21" strokeWidth="1.5"/>
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" strokeWidth="1.5" />
+              <circle cx="9" cy="9" r="2" strokeWidth="1.5" />
+              <path d="M21 15l-5-5L5 21" strokeWidth="1.5" />
             </svg>
           </div>
         )}
@@ -108,12 +134,11 @@ export default function ProductCard({ product }) {
           alt={product.title}
           loading="lazy"
           onLoad={() => setImgLoading(false)}
-          className={`w-full h-full object-contain transition-all duration-500 sm:group-hover:scale-110 ${
-            imgLoading ? "opacity-0" : "opacity-100"
-          }`}
+          className={`w-full h-full object-contain transition-all duration-500 sm:group-hover:scale-110 ${imgLoading ? "opacity-0" : "opacity-100"
+            }`}
           onError={(e) =>
-            (e.target.src =
-              "https://via.placeholder.com/300x200?text=No+Image")
+          (e.target.src =
+            "https://via.placeholder.com/300x200?text=No+Image")
           }
         />
 
@@ -138,23 +163,21 @@ export default function ProductCard({ product }) {
         </p>
 
         <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-500 text-transparent bg-clip-text">
-          ₹{product.price}
-        </p>
+          ₹{calculatePrice(Number(product.price))}        </p>
 
       </div>
 
       {/* Add to Cart */}
       <div className="mt-1 sm:mt-3">
         <button
-          className={`w-full flex items-center justify-center gap-2 py-2 text-sm sm:text-base font-semibold rounded-lg shadow-md transition-all duration-300 active:scale-95 ${
-            isAlreadyInCart
-              ? "bg-white/10 text-white cursor-not-allowed"
-              : "bg-gradient-to-r from-red-800 to-black/30 border border-red-900/60 text-white sm:hover:shadow-lg sm:hover:shadow-red-300"
-          }`}
-          disabled={isAlreadyInCart}
+          className={`w-full flex items-center justify-center gap-2 py-2 text-sm sm:text-base font-semibold rounded-lg shadow-md transition-all duration-300 active:scale-95 cursor-pointer ${isAlreadyInCart
+            ? "bg-white/10 text-white "
+            : "bg-gradient-to-r from-red-900 to-black/50 border border-red-800/90 text-white  sm:hover:shadow-lg sm:hover:shadow-red-300 cursor-pointer"
+            }`}
+          // disabled={isAlreadyInCart}
           onClick={handleAddToCart}
         >
-          <IoCartOutline className="w-6 h-6" />
+          <IoCartOutline className="w-5 h-5" />
           {isAlreadyInCart ? "Added" : "Add to Cart"}
         </button>
       </div>

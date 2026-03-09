@@ -389,8 +389,13 @@ const handleAreaSearch = async () => {
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        placement="center"
+        placement="top-center"
         backdrop="blur"
+           classNames={{
+          body: "py-6",
+          backdrop: "bg-black/60 backdrop-opacity-40",
+          
+        }}
         hideCloseButton
         className="z-[9999]"
       >

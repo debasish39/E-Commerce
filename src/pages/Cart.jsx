@@ -1,4 +1,4 @@
-import React,{useEffect} from 'react';
+import React, { useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { FaRegTrashAlt, FaQrcode, FaCheckCircle, FaHistory, FaWallet } from 'react-icons/fa';
 import { LuNotebookText } from 'react-icons/lu';
@@ -40,102 +40,128 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
   const [showDeleteAlert, setShowDeleteAlert] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState(null);
   const [address, setAddress] = React.useState({
-  name: "",
-  street: "",
-  state: "",
-  postcode: "",
-  country: "",
-});
-useEffect(() => {
-  if (location) {
-    setAddress({
-      name: user?.fullName || "",
-      street:
-        location.city ||
-        location.town ||
-        location.village ||
-        location.county ||
-        "",
-      state: location.state || "",
-      postcode: location.postcode || "",
-      country: location.country || "",
-    });
-  }
-}, [location, user]);
+    name: "",
+    street: "",
+    state: "",
+    postcode: "",
+    country: "",
+  });
+  useEffect(() => {
+    if (location) {
+      setAddress({
+        name: user?.fullName || "",
+        street:
+          location.city ||
+          location.town ||
+          location.village ||
+          location.county ||
+          "",
+        state: location.state || "",
+        postcode: location.postcode || "",
+        country: location.country || "",
+      });
+    }
+  }, [location, user]);
   const [paymentType, setPaymentType] = React.useState(null);
   const BACKEND_URL = "https://eshop-backend-y0e7.onrender.com";
+  const calculatePrice = (price) => {
 
+    let finalPrice;
+
+    if (price <= 50) {
+      finalPrice = price + 69;
+    }
+    else if (price <= 100) {
+      finalPrice = price + 99;
+    }
+    else if (price <= 300) {
+      finalPrice = price + 199;
+    }
+    else if (price <= 800) {
+      finalPrice = price + 299;
+    }
+    else if (price <= 2000) {
+      finalPrice = price + 499;
+    }
+    else {
+      finalPrice = price + 599;
+    }
+
+    // Round to nearest 10
+    return Math.round(finalPrice / 10) * 10;
+  };
   const totalPrice = cartItem.reduce(
-    (total, item) => total + Number(item.price) * item.quantity,
+    (total, item) => total + calculatePrice(Number(item.price)) * item.quantity,
     0
   );
   const totalAmount = (totalPrice + 5).toFixed(2);
 
-const completeOrder = async (phone, paymentMethod = "Razorpay") => {
+  const completeOrder = async (phone, paymentMethod = "Razorpay") => {
 
-  if (!user) {
-    toast.error("Please login before placing an order");
-    return;
-  }
-
-  const newOrder = {
-    userId: user.id,   // unique user id from Clerk
-    user: address.name || user.fullName || "Guest",
-
-    phone: `+91 ${phone}`,
-
-    deliveryAddress: {
-      street: address.street,
-      state: address.state,
-      postcode: address.postcode,
-      country: address.country
-    },
-
-    total: Number(totalAmount),
-
-    paymentMethod,
-    paymentStatus: paymentMethod === "COD" ? "Pending" : "Paid",
-
-    status: "Processing",
-
-    items: cartItem.map(item => ({
-      title: item.title,
-      price: item.price,
-      quantity: item.quantity
-    }))
-  };
-
-  try {
-
-    const res = await fetch(`${BACKEND_URL}/api/save-order`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(newOrder)
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error || "Order failed");
+    if (!user) {
+      toast.error("Please login before placing an order");
+      return;
     }
 
-  } catch (err) {
-    console.error("Order save failed:", err);
-    toast.error("Failed to place order");
-    return;
-  }
+    const newOrder = {
+      userId: user.id,   // unique user id from Clerk
+      user: address.name || user.fullName || "Guest",
 
-  if (paymentMethod === "Razorpay") {
-    toast.success("Payment Successful 🎉");
-  } else {
-    toast.success("Order placed (Cash on Delivery)");
-  }
+      phone: `+91 ${phone}`,
 
-  clearCart?.();
-  navigate("/order-success");
-};
+      deliveryAddress: {
+        street: address.street,
+        state: address.state,
+        postcode: address.postcode,
+        country: address.country
+      },
+
+      total: Number(totalAmount),
+
+      paymentMethod,
+      paymentStatus: paymentMethod === "COD" ? "Pending" : "Paid",
+
+      status: "Processing",
+
+      items: cartItem.map(item => ({
+        title: item.title,
+        price: calculatePrice(item.price),
+        quantity: item.quantity
+      }))
+    };
+
+    try {
+
+      const res = await fetch(`${BACKEND_URL}/api/save-order`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(newOrder)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Order failed");
+      }
+
+    } catch (err) {
+      console.error("Order save failed:", err);
+      toast.error("Failed to place order");
+      return;
+    }
+
+    if (paymentMethod === "Razorpay") {
+      toast.success("Payment Successful 🎉");
+    } else {
+      toast.success("Order placed (Cash on Delivery)");
+    }
+
+    clearCart?.();
+    navigate("/order-success");
+  };
+
   const confirmRemoveItem = (id) => {
     toast("Remove item from cart?", {
       description: "This product will be removed permanently.",
@@ -394,8 +420,12 @@ const completeOrder = async (phone, paymentMethod = "Razorpay") => {
       if (tableY > pageHeight - 40) { doc.addPage(); tableY = 30; }
       doc.text(`${i + 1}. ${item.title}`, colX.item, tableY);
       doc.text(`${item.quantity}`, colX.qty, tableY);
-      doc.text(`₹${item.price}`, colX.price, tableY);
-      doc.text(`₹${(item.price * item.quantity).toFixed(2)}`, colX.total, tableY);
+      doc.text(`₹${calculatePrice(item.price)}`, colX.price, tableY);
+      doc.text(
+        `₹${(calculatePrice(item.price) * item.quantity).toFixed(2)}`,
+        colX.total,
+        tableY
+      );
       tableY += 8;
     });
 
@@ -488,7 +518,7 @@ const completeOrder = async (phone, paymentMethod = "Razorpay") => {
 
             <button
               onClick={() => navigate('/order-history')}
-              className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-5 py-2 rounded-lg font-semibold text-sm sm:text-base hover:scale-105 transition-all shadow-md flex items-center gap-2 cursor-pointer"
+              className="bg-gradient-to-r from-red-500 to-white/10 text-gray-300 px-5 py-2 rounded-lg font-semibold text-sm sm:text-base hover:scale-105 transition-all shadow-md flex items-center gap-2 cursor-pointer"
             >
               <FaHistory /> Orders
             </button>
@@ -594,15 +624,16 @@ const completeOrder = async (phone, paymentMethod = "Razorpay") => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      confirmRemoveItem(item.id);
+                      setSelectedItem(item.id);
+                      setShowDeleteAlert(true);
                     }}
                     className="p-3 rounded-full
   bg-white/10 border border-white/10
-  hover:bg-red-500/80 hover:border-red-500
-  active:bg-red-500/80 active:border-red-500
-  focus:bg-red-500/80 focus:border-red-500
-  active:scale-95
-  transition-all duration-200"
+  hover:bg-red-900/80 hover:border-red-900
+  active:bg-red-500/80 active:border-red-900
+  focus:bg-red-900/80 focus:border-red-900
+  active:scale-95 
+  transition-all duration-200 cursor-pointer"
                   >
                     <FaRegTrashAlt className="text-red-400 text-lg" />
                   </button>
@@ -612,7 +643,50 @@ const completeOrder = async (phone, paymentMethod = "Razorpay") => {
 
             ))}
           </div>
+          {showDeleteAlert && (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30 backdrop-blur-sm">
 
+              <div className="bg-black/70 border border-white/20 rounded-2xl p-6 w-[90%] max-w-sm text-center shadow-2xl">
+
+                <h2 className="text-lg font-semibold text-white mb-2">
+                  Remove Item?
+                </h2>
+
+                <p className="text-gray-400 text-sm mb-5">
+                  Are you sure you want to remove this product from your cart?
+                </p>
+
+                <div className="flex justify-center gap-4">
+
+                  {/* Cancel */}
+                  <button
+                    onClick={() => {
+                      setShowDeleteAlert(false);
+                      setSelectedItem(null);
+                    }}
+                    className="px-4 py-2 bg-gray-500/20 border border-gray-400/30 rounded-lg hover:bg-gray-500/30 transition"
+                  >
+                    Cancel
+                  </button>
+
+                  {/* Delete */}
+                  <button
+                    onClick={() => {
+                      removeFromCart(selectedItem);
+                      setShowDeleteAlert(false);
+                      setSelectedItem(null);
+
+                      toast.success("Item removed from cart");
+                    }}
+                    className="px-4 py-2 bg-red-500 rounded-lg hover:bg-red-600 transition cursor-pointer"
+                  >
+                    Remove
+                  </button>
+
+                </div>
+              </div>
+            </div>
+          )}
           {/* Delivery & Bill Details */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-10">
             {/* Delivery Info */}
@@ -648,11 +722,11 @@ const completeOrder = async (phone, paymentMethod = "Razorpay") => {
 
                   <input
                     type="text"
-  placeholder="Full Name"
-  value={address.name}
-  onChange={(e) =>
-    setAddress({ ...address, name: e.target.value })
-  }
+                    placeholder="Full Name"
+                    value={address.name}
+                    onChange={(e) =>
+                      setAddress({ ...address, name: e.target.value })
+                    }
                     className="w-full pl-11 pr-3 py-3 rounded-xl
         bg-black/30 border border-white/10
         text-white placeholder-gray-400
@@ -673,10 +747,10 @@ const completeOrder = async (phone, paymentMethod = "Razorpay") => {
                   <input
                     type="text"
                     placeholder="Street Address"
-                   value={address.street}
-onChange={(e) =>
-  setAddress({ ...address, street: e.target.value })
-}
+                    value={address.street}
+                    onChange={(e) =>
+                      setAddress({ ...address, street: e.target.value })
+                    }
                     className="w-full pl-11 pr-3 py-3 rounded-xl
         bg-black/30 border border-white/10
         text-white placeholder-gray-400
@@ -699,10 +773,10 @@ onChange={(e) =>
                     <input
                       type="text"
                       placeholder="State"
-                value={address.state}
-onChange={(e) =>
-  setAddress({ ...address, state: e.target.value })
-}
+                      value={address.state}
+                      onChange={(e) =>
+                        setAddress({ ...address, state: e.target.value })
+                      }
                       className="w-full pl-11 pr-3 py-3 rounded-xl
           bg-black/30 border border-white/10
           text-white placeholder-gray-400
@@ -718,10 +792,10 @@ onChange={(e) =>
                   <input
                     type="text"
                     placeholder="Post Code"
-                  value={address.postcode}
-onChange={(e) =>
-  setAddress({ ...address, postcode: e.target.value })
-}
+                    value={address.postcode}
+                    onChange={(e) =>
+                      setAddress({ ...address, postcode: e.target.value })
+                    }
                     className="w-full px-3 py-3 rounded-xl
         bg-black/30 border border-white/10
         text-white placeholder-gray-400
@@ -740,10 +814,10 @@ onChange={(e) =>
                   <input
                     type="text"
                     placeholder="Country"
-                value={address.country}
-onChange={(e) =>
-  setAddress({ ...address, country: e.target.value })
-}
+                    value={address.country}
+                    onChange={(e) =>
+                      setAddress({ ...address, country: e.target.value })
+                    }
                     className="w-full px-3 py-3 rounded-xl
         bg-black/30 border border-white/10
         text-white placeholder-gray-400
@@ -780,48 +854,82 @@ onChange={(e) =>
               </div>
 
 
-              {/* Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 pt-3">
+  <div className="flex flex-col sm:flex-row gap-4 pt-3">
 
-                {/* Primary */}
-                <button
-                  className="flex-1 flex items-center justify-center gap-2
-  bg-gradient-to-r from-red-600 via-red-700 to-red-900
-  text-white font-semibold py-3 rounded-xl
-  shadow-lg hover:shadow-red-500/40
-  hover:scale-[1.02] active:scale-[0.98]
-  transition-all duration-300 cursor-pointer"
-                >
-                  <FaSave className="text-sm mt-0.5" />
-                  Save Address
-                </button>
+  {/* Save Address */}
+  <button
+    className="w-full group relative overflow-hidden
+    bg-gradient-to-br from-red-900/40 to-black/10
+    backdrop-blur-xl
+    border border-red-900/40
+    rounded-2xl px-5 py-3
+
+    flex items-center justify-center gap-2
+    text-white/90 font-medium
+
+    shadow-lg shadow-black/40
+
+    hover:border-red-500
+    hover:shadow-red-600/30
+    hover:-translate-y-[2px]
+
+    active:scale-[0.96]
+    active:bg-red-500/10
+
+    transition-all duration-300 cursor-pointer
+    "
+  >
+    <FaSave className="text-sm opacity-90 group-hover:text-red-400 transition-colors" />
+    Save Address
+
+    {/* hover glow */}
+    <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-300 bg-gradient-to-r from-transparent via-red-500/10 to-transparent"></span>
+  </button>
 
 
-                {/* Secondary */}
-                <button
-                   onClick={() => {
-    if (!navigator.geolocation) {
-      toast.error("Geolocation not supported");
-      return;
-    }
+  {/* Detect Location */}
+  <button
+    onClick={() => {
+      if (!navigator.geolocation) {
+        toast.error("Geolocation not supported");
+        return;
+      }
 
-    navigator.geolocation.getCurrentPosition((pos) => {
-      onLocationChange(pos.coords.latitude, pos.coords.longitude);
-      toast.success("Location updated");
-    });
-  }}
-                  className="flex-1 flex items-center justify-center gap-2
-border-2 border-red-900 text-white/90 font-semibold
-py-3 rounded-xl
-hover:bg-red-900 hover:text-white
-active:bg-red-900 active:text-white active:scale-[0.97]
-focus:bg-red-900 focus:text-white
-transition-all duration-300 cursor-pointer"
-                >
-                  <MdMyLocation className="text-lg mt-0.5" />
-                  Detect Location
-                </button>
-              </div>
+      navigator.geolocation.getCurrentPosition((pos) => {
+        onLocationChange(pos.coords.latitude, pos.coords.longitude);
+        toast.success("Location updated");
+      });
+    }}
+    className="
+    w-full group relative overflow-hidden
+    bg-gradient-to-br from-red-900/40 to-black/10
+    backdrop-blur-xl
+    border border-red-900/40
+    rounded-2xl px-5 py-3
+
+    flex items-center justify-center gap-2
+    text-white/90 font-medium
+
+    shadow-lg shadow-black/40
+
+    hover:border-red-500
+    hover:shadow-red-600/30
+    hover:-translate-y-[2px]
+
+    active:scale-[0.96]
+    active:bg-red-500/10
+
+    transition-all duration-300 cursor-pointer
+    "
+  >
+    <MdMyLocation className="text-lg opacity-90 group-hover:text-red-400 transition-colors" />
+    Detect Location
+
+    {/* glow effect */}
+    <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-300 bg-gradient-to-r from-transparent via-red-500/10 to-transparent"></span>
+  </button>
+
+</div>
 
             </div>
 

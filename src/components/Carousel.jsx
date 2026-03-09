@@ -75,6 +75,31 @@ const Carousel = () => {
       { breakpoint: 640, settings: { arrows: false, dots: true } },
     ],
   };
+  const calculatePrice = (price) => {
+
+    let finalPrice;
+
+    if (price <= 50) {
+      finalPrice = price + 69;
+    }
+    else if (price <= 100) {
+      finalPrice = price + 99;
+    }
+    else if (price <= 300) {
+      finalPrice = price + 199;
+    }
+    else if (price <= 800) {
+      finalPrice = price + 299;
+    }
+    else if (price <= 2000) {
+      finalPrice = price + 499;
+    }
+    else {
+      finalPrice = price + 599;
+    }
+
+    return Math.round(finalPrice / 10) * 10;
+  };
   const orderedData = data || [];
 
   return (
@@ -94,10 +119,10 @@ const Carousel = () => {
 
       <div className="max-w-7xl mx-auto round flex px-6 sm:flex-row justify-between items-center mb-6 sm:px-3 gap-4 sm:gap-0">
         <h2
-          className="text-[24px] sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-300 drop-shadow-lg text-center sm:text-left"
+          className="text-[24px] sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-white/30 drop-shadow-lg text-center sm:text-left"
           style={{ fontFamily: "'Pacifico', cursive" }}
         >
-          <span className="text-white">✨</span> Featured Products
+          <span className="text-gray-100">✨</span> Featured Products
         </h2>
         <span
           onClick={() => navigate("/products")}
@@ -133,24 +158,24 @@ const Carousel = () => {
                       alt={item.title} onClick={() => navigate(`/products/${item.id}`)}
                       className="h-64 sm:h-72 md:h-80 lg:h-[380px] w-full object-contain rounded-xl drop-shadow-2xl transition-transform hover:scale-110"
                     />
-                    <div className="absolute top-4 left-4 bg-gradient-to-r from-[#f53347] to-[#ff6f61] text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
+                    <div className="absolute top-4 left-4 bg-gradient-to-r from-[#ec031a] to-[#6b0d04] text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
                       ✨ Featured
                     </div>
                   </div>
 
                   <div className="text-center lg:text-left space-y-4 text-white order-2 lg:order-1">
-                    <p className="lg:block text-sm font-semibold text-red-300">
+                    <p className="lg:block text-sm font-semibold text-red-400 uppercase tracking-wider">
                       Welcome to E-shop
                     </p>
 
                     <h1
-                      className="text-xl sm:text-4xl lg:text-5xl font-extrabold leading-tight drop-shadow-lg cursor-pointer hover:text-[#ff6f61] transition-colors"
+                      className="text-xl sm:text-4xl lg:text-5xl text-gray-100 font-extrabold leading-tight drop-shadow-lg cursor-pointer hover:text-gray-300 transition-colors"
                       onClick={() => navigate(`/products/${item.id}`)}
                     >
                       {item.title}
                     </h1>
 
-                    <p className="text-gray-100/90 text-sm hidden sm:block sm:text-base md:text-lg max-w-xl mx-auto lg:mx-0">
+                    <p className="text-gray-300 text-sm hidden sm:block sm:text-base md:text-lg max-w-xl mx-auto lg:mx-0">
                       {item.description}
                     </p>
 
@@ -160,15 +185,15 @@ const Carousel = () => {
                       ))}
                     </div>
 
-                    <p className="hidden sm:block text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-[#ff5c6e] to-[#ff9a8b] bg-clip-text text-transparent">
-                      ₹{item.price}
+                    <p className="hidden sm:block text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-[#fae2e5] to-[#d88477] bg-clip-text text-transparent">
+                      ₹{calculatePrice(item.price)}
                     </p>
 
                     <div className="grid grid-cols-2 sm:flex gap-3 sm:gap-4 justify-center lg:justify-start pt-2 w-full">
 
                       <button
                         onClick={() => addToCart(item)}
-                        className="bg-gradient-to-r from-[#f53347] to-[#ff6f61] hover:from-[#d02b3b] hover:to-[#ff3a4c] text-white font-semibold text-sm sm:text-base px-4 sm:px-6 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                        className="bg-gradient-to-r from-[#5a020b] to-[#ff1500] hover:from-[#ca0317] hover:to-[#a9010f] text-gray-300 font-semibold text-sm sm:text-base px-4 sm:px-6 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 cursor-pointer"
                       >
                         <FaShoppingCart size={20} />
                         <span className="hidden sm:inline">Add to Cart</span>
@@ -177,7 +202,7 @@ const Carousel = () => {
 
                       <button
                         onClick={() => navigate(`/products/${item.id}`)}
-                        className="bg-white/10 hover:bg-white/20 text-white font-semibold text-sm sm:text-base px-4 sm:px-6 py-2.5 rounded-full shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                        className="bg-white/10 hover:bg-white/20 text-gray-300 font-semibold text-sm sm:text-base px-4 sm:px-6 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
                       >
                         <AiOutlineEye size={20} />
                         <span className="hidden sm:inline">View Product</span>

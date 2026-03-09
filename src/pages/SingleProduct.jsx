@@ -94,7 +94,30 @@ useEffect(() => {
       once: false,
     });
   }, []);
+const calculatePrice = (price) => {
+  let finalPrice;
 
+  if (price <= 50) {
+    finalPrice = price + 69;
+  } 
+  else if (price <= 100) {
+    finalPrice = price + 99;
+  } 
+  else if (price <= 300) {
+    finalPrice = price + 199;
+  } 
+  else if (price <= 800) {
+    finalPrice = price + 299;
+  } 
+  else if (price <= 2000) {
+    finalPrice = price + 499;
+  } 
+  else {
+    finalPrice = price + 599;
+  }
+
+  return Math.round(finalPrice / 10) * 10;
+};
   /* ================= Derived Wishlist State ================= */
   const isWishlisted = wishlist?.some(
     (item) => item.id === product?.id
@@ -277,13 +300,13 @@ useEffect(() => {
 
           <div className="flex items-center gap-3">
             <h2 className="text-3xl font-bold text-red-500 flex items-center gap-1">
-              <FaRupeeSign /> {product.price}
+              <FaRupeeSign /> {calculatePrice(Number(product.price))}
             </h2>
 
             <span className="text-gray-400 line-through">
               ₹
               {Math.round(
-                product.price /
+                calculatePrice(product.price) /
                   (1 - product.discountPercentage / 100)
               )}
             </span>
