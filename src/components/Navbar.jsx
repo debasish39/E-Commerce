@@ -241,11 +241,11 @@ const handleAreaSearch = async () => {
             >
               E-Shop
             </Link>
-            <div className="hidden sm:flex">{renderLocation()}</div>
+            <div className="hidden md:flex">{renderLocation()}</div>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden sm:flex items-center justify-center gap-6" data-aos="fade-left">
+          <nav className="hidden md:flex items-center justify-center gap-6" data-aos="fade-left">
             <div className="relative flex items-center">
               <input
                 type="text"
@@ -320,7 +320,7 @@ const handleAreaSearch = async () => {
                   className="flex flex-col sm:flex-row items-center gap-1 text-white hover:text-red-500 transition cursor-pointer"
                 >
                   <FaRegUserCircle className="h-5 sm:h-6 w-5 mb-1 sm:w-6" />
-                  <span className="text-[11px] sm:hidden"> Account</span>
+                  <span className="text-[11px] md:hidden"> Account</span>
                 </button>
               </SignedOut>
 
@@ -334,14 +334,14 @@ const handleAreaSearch = async () => {
                       className="h-8 w-8 rounded-full ring-1 ring-red-500 cursor-pointer"
                     />
                   )}
-                  <span className="text-[11px] mt-1s sm:hidden">Profile</span>
+                  <span className="text-[11px] mt-1s md:hidden">Profile</span>
                 </div>
               </SignedIn>
             </div>
           </nav>
 
           {/* Mobile Nav + Cart + Auth */}
-          <div className="sm:hidden flex items-center justify-center gap-4" data-aos="fade-right">
+          <div className="md:hidden flex items-center justify-center gap-4" data-aos="fade-right">
             <div className="relative flex items-center w-full">
               <input
                 type="text"
@@ -545,7 +545,7 @@ transition duration-200 cursor-pointer"
       </Modal>
       {/* Mobile Offcanvas Menu */}
       <aside
-        className={`sm:hidden fixed min-h-screen top-0 left-0 w-3/4 max-w-xs h-full 
+        className={`md:hidden fixed min-h-screen top-0 left-0 w-3/4 max-w-xs h-full 
         bg-black/70 backdrop-blur-lg border-r border-red-500/40 rounded-r-2xl 
         transform transition-transform z-49 duration-300 ease-in-out 
         ${isMobileNavOpen ? "translate-x-0" : "-translate-x-full"}`}
