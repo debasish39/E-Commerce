@@ -99,8 +99,8 @@ export default function Products() {
           key={p}
           onClick={() => setPage(p)}
           className={`px-3 py-1.5 rounded-md text-sm ${page === p
-              ? "bg-red-500 text-white"
-              : "border border-gray-700 hover:bg-gray-800"
+            ? "bg-red-500 text-white"
+            : "border border-gray-700 hover:bg-gray-800"
             }`}
         >
           {p}
@@ -208,9 +208,9 @@ export default function Products() {
 
       {/* Floating Filter Button */}
       <button
-        data-aos="fade-left"
+        data-aos="fade-right" data-aos-delay="3000"
         onClick={() => setShowFilters(true)}
-        className="fixed left-6 bottom-20 sm:bottom-15 -translate-y-1/2 z-40
+        className="fixed right-6 bottom-36 sm:bottom-15 -translate-y-1/2 z-40
   bg-gradient-to-r from-black/30 to-red-900
   text-gray-300 p-3 rounded-full
   shadow-lg hover:scale-110 transition-all duration-300 cursor-pointer border border-red-500/60"

@@ -22,8 +22,8 @@ body {
   opacity: 1;
 }
 ::selection{
-  background-color: rgb(226, 0, 0);
-  color:rgb(10, 10, 10)
+  background-color: rgb(144, 23, 23);
+  color:rgb(223, 216, 216);
 }
 
 ::-webkit-scrollbar {
