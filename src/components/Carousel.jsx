@@ -9,10 +9,12 @@ import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import Loading from "../assets/Loading4.webm";
 import { AiOutlineEye } from "react-icons/ai";
-
+import { useUser } from "@clerk/clerk-react";
+import { toast } from "sonner";
 const Carousel = () => {
   const { data, fetchAllProducts } = getData();
-  const { addToCart } = useCart();
+const { addToCart, cartItem } = useCart();
+  const { isSignedIn } = useUser();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
@@ -75,33 +77,52 @@ const Carousel = () => {
       { breakpoint: 640, settings: { arrows: false, dots: true } },
     ],
   };
-  const calculatePrice = (price) => {
+  // const calculatePrice = (price) => {
 
-    let finalPrice;
+  //   let finalPrice;
 
-    if (price <= 50) {
-      finalPrice = price + 69;
-    }
-    else if (price <= 100) {
-      finalPrice = price + 99;
-    }
-    else if (price <= 300) {
-      finalPrice = price + 199;
-    }
-    else if (price <= 800) {
-      finalPrice = price + 299;
-    }
-    else if (price <= 2000) {
-      finalPrice = price + 499;
-    }
-    else {
-      finalPrice = price + 599;
-    }
+  //   if (price <= 50) {
+  //     finalPrice = price + 69;
+  //   }
+  //   else if (price <= 100) {
+  //     finalPrice = price + 99;
+  //   }
+  //   else if (price <= 300) {
+  //     finalPrice = price + 199;
+  //   }
+  //   else if (price <= 800) {
+  //     finalPrice = price + 299;
+  //   }
+  //   else if (price <= 2000) {
+  //     finalPrice = price + 499;
+  //   }
+  //   else {
+  //     finalPrice = price + 599;
+  //   }
 
-    return Math.round(finalPrice / 10) * 10;
-  };
+  //   return Math.round(finalPrice / 10) * 10;
+  // };
   const orderedData = data || [];
+const handleAddToCart = (item) => {
 
+  if (!isSignedIn) {
+    toast.error("Please login first");
+    navigate("/sign-in");
+    return;
+  }
+
+  const alreadyInCart = cartItem.some(
+    (cart) => String(cart.productId) === String(item.id)
+  );
+
+  if (alreadyInCart) {
+    navigate("/cart");
+    return;
+  }
+
+  addToCart(item);
+
+};
   return (
     <div className="relative w-full py-12 sm:py-16 overflow-hidden bg-transparent">
       <div className="absolute inset-0 -z-10 overflow-hidden">
@@ -148,73 +169,109 @@ const Carousel = () => {
             </video>
           </div>
         ) : (
-          <Slider {...settings}>
-            {orderedData.map((item) => (
-              <div key={item.id} className="px-2 sm:px-4 lg:px-10">
-                <div className="grid lg:grid-cols-2 items-center gap-6 sm:gap-10 p-4 sm:p-10 lg:p-18 rounded-3xl backdrop-blur-xl bg-gradient-to-r from-white/5 to-white/10 border border-white/20 transition-all duration-700">
-                  <div className="relative flex justify-center order-1 lg:order-2">
-                    <img
-                      src={item.thumbnail}
-                      alt={item.title} onClick={() => navigate(`/products/${item.id}`)}
-                      className="h-64 sm:h-72 md:h-80 lg:h-[380px] w-full object-contain rounded-xl drop-shadow-2xl transition-transform hover:scale-110"
-                    />
-                    <div className="absolute top-4 left-4 bg-gradient-to-r from-[#ec031a] to-[#6b0d04] text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
-                      ✨ Featured
-                    </div>
-                  </div>
+         <Slider {...settings}>
+  {orderedData.map((item) => {
 
-                  <div className="text-center lg:text-left space-y-4 text-white order-2 lg:order-1">
-                    <p className="lg:block text-sm font-semibold text-red-400 uppercase tracking-wider">
-                      Welcome to E-shop
-                    </p>
+    const alreadyInCart = cartItem.some(
+      (cart) => String(cart.productId) === String(item.id)
+    );
 
-                    <h1
-                      className="text-xl sm:text-4xl lg:text-5xl text-gray-100 font-extrabold leading-tight drop-shadow-lg cursor-pointer hover:text-gray-300 transition-colors"
-                      onClick={() => navigate(`/products/${item.id}`)}
-                    >
-                      {item.title}
-                    </h1>
+    return (
+      <div key={item.id} className="px-2 sm:px-4 lg:px-10">
+        <div className="grid lg:grid-cols-2 items-center gap-6 sm:gap-10 p-4 sm:p-10 lg:p-18 rounded-3xl backdrop-blur-xl bg-gradient-to-r from-white/5 to-white/10 border border-white/20 transition-all duration-700">
 
-                    <p className="text-gray-300 text-sm hidden sm:block sm:text-base md:text-lg max-w-xl mx-auto lg:mx-0">
-                      {item.description}
-                    </p>
+          {/* PRODUCT IMAGE */}
+          <div className="relative flex justify-center order-1 lg:order-2">
+            <img
+              src={item.thumbnail}
+              alt={item.title}
+              onClick={() => navigate(`/products/${item.id}`)}
+              className="h-64 sm:h-72 md:h-80 lg:h-[380px] w-full object-contain rounded-xl drop-shadow-2xl transition-transform hover:scale-110"
+            />
 
-                    <div className="hidden sm:flex justify-center lg:justify-start gap-1 text-yellow-400">
-                      {[...Array(5)].map((_, i) => (
-                        <FaStar key={i} className="text-sm drop-shadow-sm" />
-                      ))}
-                    </div>
+            <div className="absolute top-4 left-4 bg-gradient-to-r from-[#ec031a] to-[#6b0d04] text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
+              ✨ Featured
+            </div>
+          </div>
 
-                    <p className="hidden sm:block text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-[#fae2e5] to-[#d88477] bg-clip-text text-transparent">
-                      ₹{calculatePrice(item.price)}
-                    </p>
+          {/* PRODUCT INFO */}
+          <div className="text-center lg:text-left space-y-4 text-white order-2 lg:order-1">
 
-                    <div className="grid grid-cols-2 sm:flex gap-3 sm:gap-4 justify-center lg:justify-start pt-2 w-full">
+            <p className="lg:block text-sm font-semibold text-red-400 uppercase tracking-wider">
+              Welcome to E-shop
+            </p>
 
-                      <button
-                        onClick={() => addToCart(item)}
-                        className="bg-gradient-to-r from-[#5a020b] to-[#ff1500] hover:from-[#ca0317] hover:to-[#a9010f] text-gray-300 font-semibold text-sm sm:text-base px-4 sm:px-6 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 cursor-pointer"
-                      >
-                        <FaShoppingCart size={20} />
-                        <span className="hidden sm:inline">Add to Cart</span>
-                        <span className="sm:hidden">Add</span>
-                      </button>
+            <h1
+              className="text-xl sm:text-4xl lg:text-5xl text-gray-100 font-extrabold leading-tight drop-shadow-lg cursor-pointer hover:text-gray-300 transition-colors"
+              onClick={() => navigate(`/products/${item.id}`)}
+            >
+              {item.title}
+            </h1>
 
-                      <button
-                        onClick={() => navigate(`/products/${item.id}`)}
-                        className="bg-white/10 hover:bg-white/20 text-gray-300 font-semibold text-sm sm:text-base px-4 sm:px-6 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
-                      >
-                        <AiOutlineEye size={20} />
-                        <span className="hidden sm:inline">View Product</span>
-                        <span className="sm:hidden">View</span>
-                      </button>
+            <p className="text-gray-300 text-sm hidden sm:block sm:text-base md:text-lg max-w-xl mx-auto lg:mx-0">
+              {item.description}
+            </p>
 
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </Slider>
+            <div className="hidden sm:flex justify-center lg:justify-start gap-1 text-yellow-400">
+              {[...Array(5)].map((_, i) => (
+                <FaStar key={i} className="text-sm drop-shadow-sm" />
+              ))}
+            </div>
+
+            <p className="hidden sm:block text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-[#fae2e5] to-[#d88477] bg-clip-text text-transparent">
+              ₹{item.price}
+            </p>
+
+            {/* BUTTONS */}
+            <div className="grid grid-cols-2 sm:flex gap-3 sm:gap-4 justify-center lg:justify-start pt-2 w-full">
+
+              {/* ADD TO CART */}
+              <button
+                onClick={() =>
+                  alreadyInCart
+                    ? navigate("/cart")
+                    : handleAddToCart(item)
+                }
+                className={`flex items-center justify-center gap-2 
+                text-gray-300 font-semibold text-sm sm:text-base 
+                px-4 sm:px-6 py-2.5 rounded-xl shadow-md 
+                transition-all transform hover:scale-105 cursor-pointer
+
+                ${
+                  alreadyInCart
+                    ? "bg-green-300/20  text-green-300 hover:bg-green-500/30"
+                    : "bg-gradient-to-r from-[#5a020b] to-[#ff1500] hover:from-[#ca0317] hover:to-[#a9010f]"
+                }`}
+              >
+                <FaShoppingCart size={20} />
+
+                <span className="hidden sm:inline">
+                  {alreadyInCart ? "View Cart" : "Add to Cart"}
+                </span>
+
+                <span className="sm:hidden">
+                  {alreadyInCart ? "Cart" : "Add"}
+                </span>
+              </button>
+
+              {/* VIEW PRODUCT */}
+              <button
+                onClick={() => navigate(`/products/${item.id}`)}
+                className="bg-white/10 hover:bg-white/20 text-gray-300 font-semibold text-sm sm:text-base px-4 sm:px-6 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+              >
+                <AiOutlineEye size={20} />
+                <span className="hidden sm:inline">View Product</span>
+                <span className="sm:hidden">View</span>
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+    );
+  })}
+</Slider>
         )}
       </div>
     </div>

@@ -10,19 +10,48 @@ export const DataProvider = ({ children }) => {
   const [category, setCategory] = useState("All");
   const [brand, setBrand] = useState("All");
   const [priceRange, setPriceRange] = useState([0, 5000]);
+const calculatePrice = (price) => {
+  let finalPrice;
 
-  const fetchAllProducts = async () => {
-    try {
-      const res = await axios.get("https://dummyjson.com/products?limit=199")
+  if (price <= 50) {
+    finalPrice = price + 69;
+  } 
+  else if (price <= 100) {
+    finalPrice = price + 99;
+  } 
+  else if (price <= 300) {
+    finalPrice = price + 199;
+  } 
+  else if (price <= 800) {
+    finalPrice = price + 299;
+  } 
+  else if (price <= 2000) {
+    finalPrice = price + 499;
+  } 
+  else {
+    finalPrice = price + 599;
+  }
 
-      const productsData = res.data.products;
-      setData(productsData);
-      console.log(productsData);
-    } catch (error) {
-      console.error(error);
-      // toast.error("Failed to fetch products "); 
-    }
-  };
+  return Math.round(finalPrice / 10) * 10;
+};
+const fetchAllProducts = async () => {
+  try {
+
+    const res = await axios.get("https://dummyjson.com/products?limit=199");
+
+    const productsData = res.data.products.map((product) => ({
+      ...product,
+      price: calculatePrice(product.price), // updated price
+     
+    }));
+
+    setData(productsData);
+
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to fetch products");
+  }
+};
 
   const getUniqueCategory = (data, property) => {
     if (!Array.isArray(data) || data.length === 0) return [];

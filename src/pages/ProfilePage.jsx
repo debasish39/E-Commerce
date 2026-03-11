@@ -1,110 +1,62 @@
-import { useUser, SignOutButton } from "@clerk/clerk-react";
+import { useUser, UserProfile, SignOutButton } from "@clerk/clerk-react";
 import { useState } from "react";
-import { toast } from "sonner";
-import { FaUserEdit, FaTrashAlt, FaSignOutAlt } from "react-icons/fa";
-import Tilt from "react-parallax-tilt";
+import { FaSignOutAlt, FaUser, FaTimes } from "react-icons/fa";
+import FuzzyText from "../components/FuzzyText";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button
+} from "@heroui/react";
 
 export default function ProfilePage() {
   const { user, isLoaded } = useUser();
 
-  const [uploading, setUploading] = useState(false);
-  const [editingName, setEditingName] = useState(false);
-  const [fullName, setFullName] = useState("");
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [openProfile, setOpenProfile] = useState(false);
 
   if (!isLoaded) return null;
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    try {
-      setUploading(true);
-      await user.setProfileImage({ file });
-      toast.success("Profile image updated 🎉");
-    } catch {
-      toast.error("Image upload failed");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleRemoveImage = async () => {
-    toast("Remove profile image?", {
-      action: {
-        label: "Confirm",
-        onClick: async () => {
-          try {
-            setUploading(true);
-            await user.setProfileImage({ file: null });
-            toast.success("Profile image removed");
-          } catch {
-            toast.error("Failed to remove image");
-          } finally {
-            setUploading(false);
-          }
-        },
-      },
-    });
-  };
-
-  const handleUpdateName = async () => {
-    if (!fullName.trim()) return;
-
-    const names = fullName.split(" ");
-    const firstName = names[0];
-    const lastName = names.slice(1).join(" ");
-
-    try {
-      await user.update({ firstName, lastName });
-      toast.success("Name updated ✨");
-      setEditingName(false);
-    } catch {
-      toast.error("Failed to update name");
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br = text-white flex justify-center px-4 py-9">
-
-      <div className="w-full max-w-5xl">
+    <div
+      className="
+      min-h-screen
+      flex justify-center
+      px-4 py-12
+      text-white
+      bg-[radial-gradient(circle_at_top,rgba(255,0,0,0.15),transparent_60%)]
+    "
+    >
+      <div className="w-full max-w-6xl">
 
         {/* COVER */}
-<div className="h-48 w-full rounded-3xl 
-bg-[conic-gradient(from_180deg_at_50%_50%,#ef4444,#dc2626,#fb7185,#ef4444)] 
-animate-spinSlow relative shadow-xl">
-          {/* AVATAR */}
-          <div className="absolute -bottom-16 left-10">
+        <div className="relative h-52 rounded-3xl overflow-hidden">
+          <div className="absolute inset-0
+bg-[conic-gradient(from_180deg_at_50%_50%,#ef4444,#dc2626,#fb7185,#ef4444)]
+opacity-30 blur-xl animate-spinSlow" />
 
-            <div className="relative group">
+          <div className="absolute inset-0 backdrop-blur-xl bg-black/30 border border-white/10" />
 
-              <div className="absolute -inset-2 rounded-full bg-gradient-to-tr from-red-500 via-red-400 to-black/30 blur-xl opacity-50"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
 
-              <Tilt tiltMaxAngleX={10} tiltMaxAngleY={10} scale={1.05}>
-                <img
-                  src={user?.imageUrl}
-                  alt="avatar"
-                  className="relative h-32 w-32 rounded-full border-4 border-black object-cover shadow-2xl"
-                />
-              </Tilt>
+            <div className="relative px-10 py-5 rounded-3xl
+bg-black/40 backdrop-blur-xl border border-white/10">
 
-              {/* Upload Overlay */}
-              <label className="absolute inset-0 rounded-full flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 cursor-pointer transition">
+              <div className="absolute -inset-4 bg-gradient-to-r
+from-red-500 via-pink-500 to-purple-500
+opacity-20 blur-2xl rounded-3xl"/>
 
-                {uploading ? (
-                  <span className="text-xs animate-pulse">Uploading...</span>
-                ) : (
-                  <span className="text-xs font-medium">Change</span>
-                )}
-
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-
-              </label>
+              <FuzzyText
+                fontSize="clamp(2rem,6vw,5rem)"
+                fontWeight={900}
+                color="#ffffff"
+                baseIntensity={0.12}
+                hoverIntensity={0.40}
+              >
+                E-Shop
+              </FuzzyText>
 
             </div>
 
@@ -112,139 +64,107 @@ animate-spinSlow relative shadow-xl">
 
         </div>
 
-        <div className="mt-20 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-10 shadow-xl">
 
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+        {/* USER HEADER */}
+        <div
+          className="
+          relative
+          mt-10
+          p-8
+          rounded-3xl
+          bg-white/5
+          backdrop-blur-2xl
+          border border-white/10
+          shadow-[0_10px_40px_rgba(0,0,0,0.6)]
+        "
+        >
 
-            <div className="max-w-md">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
 
-              {!editingName ? (
-                <>
-                  
+            {/* USER INFO */}
+            <div className="flex items-center gap-5">
 
-  <div className="flex flex-col gap-4">
+              <div className="relative">
 
-  
-  <div className="flex items-center gap-3">
+                <div
+                  className="
+                  absolute -inset-2
+                  rounded-full
+                  bg-gradient-to-tr
+                  from-red-500 to-pink-500
+                  blur-lg
+                  opacity-40
+                "
+                />
 
-    <h1 className="text-3xl font-semibold tracking-tight
-    bg-gradient-to-r from-red-400 via-pink-400 to-purple-400
-    bg-clip-text text-transparent">
-      {user?.fullName}
-    </h1>
+                <img
+                  src={user?.imageUrl}
+                  alt="avatar"
+                  className="
+                  relative
+                  h-20 w-20
+                  rounded-full
+                  border border-white/20
+                  object-cover
+                "
+                />
 
-    <span className="flex items-center gap-1 text-xs text-green-400">
-      <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-      Online
-    </span>
+              </div>
 
-  </div>
+              <div>
 
-  <div className="text-gray-400 text-sm">
-    {user?.primaryEmailAddress?.emailAddress}
-  </div>
+                <h1
+                  className="
+                  text-2xl font-semibold tracking-tight
+                  bg-gradient-to-r
+                  from-red-400 via-pink-400 to-purple-400
+                  bg-clip-text text-transparent
+                "
+                >
+                  {user?.fullName}
+                </h1>
 
-  <div>
+                <p className="text-sm text-gray-400 mt-1">
+                  {user?.primaryEmailAddress?.emailAddress}
+                </p>
 
-    <button
-      onClick={() => {
-        setFullName(user?.fullName || "");
-        setEditingName(true);
-      }}
-      className="group inline-flex items-center gap-2 px-4 py-2
-      text-sm rounded-lg
-      border border-white/10
-      bg-white/5 backdrop-blur-md
-      hover:bg-white/10 hover:border-white/20
-      transition-all duration-200"
-    >
-      <FaUserEdit className="text-red-400 group-hover:scale-110 transition"/>
-      Edit Profile
-    </button>
-
-  </div>
-
-</div>
-                </>
-              ) : (
-
-                <div className="flex flex-col gap-4 mt-4">
-
-                  <label className="text-sm text-gray-400">
-                    Full Name
-                  </label>
-
-                  <div className="relative">
-
-                    <FaUserEdit className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-
-                    <input
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Enter your full name"
-                      className="w-full bg-black/40 border border-white/10 rounded-xl
-                      pl-11 pr-4 py-3 text-white placeholder-gray-500
-                      focus:ring-2 focus:ring-red-500 outline-none transition"
-                    />
-
-                  </div>
-
-                  <p className="text-xs text-gray-500">
-                    This name will appear on your profile.
-                  </p>
-
-                  <div className="flex gap-3 pt-2">
-
-                    <button
-                      onClick={handleUpdateName}
-                      className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-red-600 to-pink-600 hover:shadow-lg hover:shadow-red-500/30 hover:scale-[1.03] transition"
-                    >
-                      Save Changes
-                    </button>
-
-                    <button
-                      onClick={() => setEditingName(false)}
-                      className="px-6 py-2.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition"
-                    >
-                      Cancel
-                    </button>
-
-                  </div>
-
-                </div>
-
-              )}
+              </div>
 
             </div>
 
-            {/* REMOVE IMAGE */}
-            <button
-              onClick={handleRemoveImage}
-              disabled={uploading}
-              className="flex items-center gap-2 mt-6 md:mt-0 px-4 py-2 rounded-lg
-              text-red-400 border border-red-500/20 bg-red-500/10
-              hover:bg-red-500/20 transition"
-            >
-              <FaTrashAlt />
-              Remove Photo
-            </button>
+            {/* ACTION BUTTONS */}
+            <div className="flex gap-3">
 
-          </div>
+              <Button
+                onPress={() => setOpenProfile(true)}
+                startContent={<FaUser />}
+                className="
+                bg-white/10
+                backdrop-blur-lg
+                border border-white/10
+                hover:bg-white/20
+                text-white
+                rounded-3xl
+              "
+              >
+                Profile Settings
+              </Button>
 
-      
-          {/* SIGN OUT */}
-          <div className="mt-12 text-center">
+              <Button
+                onPress={() => setShowLogoutConfirm(true)}
+                startContent={<FaSignOutAlt />}
+                className="
+                bg-gradient-to-r
+                from-red-600 to-red-500
+                hover:shadow-lg hover:shadow-red-500/30
+                text-white
+                rounded-3xl
+              "
+              >
+                Sign Out
+              </Button>
 
-            <button
-              onClick={() => setShowLogoutConfirm(true)}
-              className="inline-flex items-center gap-3 px-8 py-3 rounded-full
-              bg-gradient-to-r from-red-600 to-black/10 border border-red-500
-              hover:shadow-xl hover:shadow-red-500/40
-              hover:scale-105 transition-all"
-            >
-              <FaSignOutAlt />
-              Sign Out
-            </button>
+            </div>
 
           </div>
 
@@ -252,41 +172,113 @@ animate-spinSlow relative shadow-xl">
 
       </div>
 
-      {/* LOGOUT MODAL */}
-      {showLogoutConfirm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-50">
+      {/* PROFILE SETTINGS MODAL */}
+      <Modal
+        size="5xl"
+        isOpen={openProfile}
+        onOpenChange={setOpenProfile}
+        backdrop="blur"
+        scrollBehavior="inside"
 
-          <div className="bg-zinc-900 border border-white/10 rounded-2xl p-8 w-[320px] text-center shadow-xl">
+      >
 
-            <h3 className="text-lg font-semibold mb-4">
-              Sign out?
-            </h3>
+        <ModalContent>
 
-            <p className="text-gray-400 text-sm mb-6">
+          <ModalHeader className="border-b  mt-0 border-white/10 flex items-center justify-between">
+
+            <span className="text-2xl font-semibold tracking-tight text-gray-400">Profile Settings</span>
+
+            <button
+              onClick={() => setOpenProfile(false)}
+              className="
+    w-8 h-8
+    flex items-center justify-center
+    rounded-full
+    bg-white/10
+    hover:bg-red-500/70
+    text-gray-300 hover:text-white
+    transition
+    "
+            >
+              <FaTimes size={15} />
+            </button>
+
+          </ModalHeader>
+
+          <ModalBody className="m-0 sm:mx-auto">
+
+            <UserProfile />
+
+          </ModalBody>
+
+        </ModalContent>
+
+      </Modal>
+
+      {/* LOGOUT CONFIRM MODAL */}
+      <Modal
+        isOpen={showLogoutConfirm}
+        onOpenChange={setShowLogoutConfirm}
+        placement="center"
+        hideCloseButton={true}
+        backdrop="blur"
+        classNames={{
+          base: `
+          bg-white/5
+          backdrop-blur-2xl
+          border border-white/10
+          text-white
+          rounded-3xl
+          `,
+          backdrop: "bg-black/70 backdrop-blur-md"
+        }}
+      >
+
+        <ModalContent>
+
+          <ModalHeader className="border-b border-white/10">
+            Sign out?
+          </ModalHeader>
+
+          <ModalBody>
+            <p className="text-sm text-gray-400">
               Are you sure you want to sign out?
             </p>
+          </ModalBody>
 
-            <div className="flex justify-center gap-4">
+          <ModalFooter>
 
-              <button
-                onClick={() => setShowLogoutConfirm(false)}
-                className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition"
+            <Button
+              variant="flat"
+              onPress={() => setShowLogoutConfirm(false)}
+              className="
+              bg-white/10
+              hover:bg-white/20
+              text-white
+              rounded-2xl
+            "
+            >
+              Cancel
+            </Button>
+
+            <SignOutButton>
+              <Button
+                className="
+                bg-red-600
+                hover:bg-red-500
+                text-white
+                rounded-2xl
+              "
               >
-                Cancel
-              </button>
+                Sign Out
+              </Button>
+            </SignOutButton>
 
-              <SignOutButton>
-                <button className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 transition">
-                  Sign Out
-                </button>
-              </SignOutButton>
+          </ModalFooter>
 
-            </div>
+        </ModalContent>
 
-          </div>
-
-        </div>
-      )}
+      </Modal>
 
     </div>
   );

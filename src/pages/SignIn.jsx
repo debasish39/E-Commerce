@@ -1,318 +1,542 @@
 import { useSignIn } from "@clerk/clerk-react";
 import { useState, useEffect, useRef } from "react";
-import { Link, Links, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { toast } from "sonner";
-
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 /* ================= PASSWORD STRENGTH ================= */
-const getStrength = (password) => {
-  let score = 0;
-  if (password.length > 6) score++;
-  if (/[A-Z]/.test(password)) score++;
-  if (/[0-9]/.test(password)) score++;
-  if (/[^A-Za-z0-9]/.test(password)) score++;
-  return score;
-};
 
 export default function SignIn() {
-  const { signIn, isLoaded } = useSignIn();
-  const navigate = useNavigate();
+    const { signIn, setActive, isLoaded } = useSignIn();
+    const navigate = useNavigate();
 
-  const [step, setStep] = useState("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [otp, setOtp] = useState(Array(6).fill(""));
-  const [resetCode, setResetCode] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [timer, setTimer] = useState(0);
+    const [step, setStep] = useState("login");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [otp, setOtp] = useState(Array(6).fill(""));
+    const [resetCode, setResetCode] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [timer, setTimer] = useState(0);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const inputsRef = useRef([]);
+    /* ================= VALIDATION ================= */
 
-  const inputsRef = useRef([]);
+    const validateEmail = (email) => {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    };
 
-  /* ================= LOGIN ================= */
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    if (!isLoaded) return;
+    const validatePassword = (password) => {
+        return password.length >= 6;
+    };
+    /* ================= LOGIN ================= */
+    const handleLogin = async (e) => {
+        e.preventDefault();
 
-    setLoading(true);
+        if (!email) {
+            toast.error("Email is required");
+            return;
+        }
 
-    try {
-      const result = await signIn.create({
-        identifier: email,
-        password,
-      });
+        if (!validateEmail(email)) {
+            toast.error("Enter a valid email");
+            return;
+        }
 
-      if (result.status === "complete") {
-        toast.success("Welcome back ");
-        navigate("/");
-      } else if (result.status === "needs_first_factor") {
+        if (!password) {
+            toast.error("Password is required");
+            return;
+        }
+
+        if (!validatePassword(password)) {
+            toast.error("Password must be at least 6 characters");
+            return;
+        }
+
+        if (!isLoaded) return;
+
+        setLoading(true);
+
+        try {
+            const result = await signIn.create({
+                identifier: email,
+                password,
+            });
+
+            if (result.status === "complete") {
+
+                await setActive({
+                    session: result.createdSessionId,
+                });
+
+                toast.success("Login successful");
+                window.location.href = "/"
+            }
+
+            else if (result.status === "needs_first_factor") {
+                await signIn.prepareFirstFactor({
+                    strategy: "email_code",
+                });
+
+                setTimer(30);
+                toast.success("OTP sent");
+                setStep("otp");
+            }
+
+        } catch (err) {
+            toast.error(err.errors?.[0]?.message || "Login failed");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    /* ================= OTP ================= */
+    const verifyOTP = async (code) => {
+
+        if (code.length !== 6) {
+            toast.error("Enter complete 6 digit code");
+            return;
+        }
+
+        try {
+            const result = await signIn.attemptFirstFactor({
+                strategy: "email_code",
+                code,
+            });
+
+            if (result.status === "complete") {
+                toast.success("Login successful");
+                window.location.href = "/";
+            }
+
+        } catch {
+            toast.error("Invalid OTP");
+        }
+    };
+
+    const handleOtpChange = (value, index) => {
+        if (!/^\d?$/.test(value)) return;
+
+        const updated = [...otp];
+        updated[index] = value;
+        setOtp(updated);
+
+        if (value && index < 5) {
+            inputsRef.current[index + 1]?.focus();
+        }
+
+        if (!value && index > 0) {
+            inputsRef.current[index - 1]?.focus();
+        }
+
+        if (updated.every((d) => d !== "")) {
+            verifyOTP(updated.join(""));
+        }
+    };
+
+    useEffect(() => {
+        if (timer <= 0) return;
+        const interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
+        return () => clearInterval(interval);
+    }, [timer]);
+
+    const resendOTP = async () => {
         await signIn.prepareFirstFactor({ strategy: "email_code" });
         setTimer(30);
-        toast.success("OTP sent ");
-        setStep("otp");
-      }
-    } catch (err) {
-      toast.error(err.errors?.[0]?.message || "Login failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+        toast.success("OTP resent ");
+    };
 
-  /* ================= OTP ================= */
-  const verifyOTP = async (code) => {
-    try {
-      const result = await signIn.attemptFirstFactor({
-        strategy: "email_code",
-        code,
-      });
+    /* ================= RESET ================= */
+    const handleForgotPassword = async () => {
 
-      if (result.status === "complete") {
-        toast.success("Login successful ");
-        navigate("/");
-      }
-    } catch {
-      toast.error("Invalid OTP");
-    }
-  };
+        if (!email) {
+            toast.error("Enter email first");
+            return;
+        }
 
-  const handleOtpChange = (value, index) => {
-    if (!/^\d?$/.test(value)) return;
+        if (!validateEmail(email)) {
+            toast.error("Enter a valid email");
+            return;
+        }
 
-    const updated = [...otp];
-    updated[index] = value;
-    setOtp(updated);
+        try {
 
-    if (value && index < 5) {
-      inputsRef.current[index + 1].focus();
-    }
+            await signIn.create({
+                strategy: "reset_password_email_code",
+                identifier: email,
+            });
 
-    if (updated.every((d) => d !== "")) {
-      verifyOTP(updated.join(""));
-    }
-  };
+            toast.success("Reset code sent");
+            setStep("reset");
 
-  useEffect(() => {
-    if (timer <= 0) return;
-    const interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
-    return () => clearInterval(interval);
-  }, [timer]);
+        } catch (err) {
+            toast.error(err.errors?.[0]?.message);
+        }
+    };
+    const handleResetPassword = async (e) => {
+        e.preventDefault();
 
-  const resendOTP = async () => {
-    await signIn.prepareFirstFactor({ strategy: "email_code" });
-    setTimer(30);
-    toast.success("OTP resent ");
-  };
+        if (!resetCode) {
+            toast.error("Enter reset code");
+            return;
+        }
 
-  /* ================= RESET ================= */
-  const handleForgotPassword = async () => {
-    if (!email) return toast.error("Enter email first");
+        if (resetCode.length !== 6) {
+            toast.error("Reset code must be 6 digits");
+            return;
+        }
 
-    try {
-      await signIn.create({
-        strategy: "reset_password_email_code",
-        identifier: email,
-      });
+        if (!newPassword) {
+            toast.error("Enter new password");
+            return;
+        }
 
-      toast.success("Reset code sent ");
-      setStep("reset");
-    } catch (err) {
-      toast.error(err.errors?.[0]?.message);
-    }
-  };
+        if (!validatePassword(newPassword)) {
+            toast.error("Password must be at least 6 characters");
+            return;
+        }
 
-  const handleResetPassword = async (e) => {
-    e.preventDefault();
-    try {
-      const result = await signIn.attemptFirstFactor({
-        strategy: "reset_password_email_code",
-        code: resetCode,
-        password: newPassword,
-      });
+        try {
 
-      if (result.status === "complete") {
-        toast.success("Password reset successful ");
-        navigate("/");
-      }
-    } catch (err) {
-  const clerkErrors = err.errors || [];
+            const result = await signIn.attemptFirstFactor({
+                strategy: "reset_password_email_code",
+                code: resetCode,
+                password: newPassword,
+            });
 
-  if (clerkErrors.length > 0) {
-    clerkErrors.forEach((error) => {
-      toast.error(error.longMessage || error.message);
-    });
-  } else {
-    toast.error("Password reset failed");
-  }
-}
-  };
+            if (result.status === "complete") {
+                toast.success("Password reset successful");
+                window.location.href = "/";
 
-  const handleGoogle = () =>
-    signIn.authenticateWithRedirect({
-      strategy: "oauth_google",
-      redirectUrl: "/sso-callback",
-      redirectUrlComplete: "/",
-    });
+            }
 
-  const handleGithub = () =>
-    signIn.authenticateWithRedirect({
-      strategy: "oauth_github",
-      redirectUrl: "/sso-callback",
-      redirectUrlComplete: "/",
-    });
+        } catch (err) {
 
-  return (
-    <AuthLayout title="Welcome Back">
-      <div className="bg-black/60 backdrop-blur-xl rounded-3xl p-5 sm:p-10 space-y-3 shadow-[0_0_40px_rgba(255,0,0,0.2)]">
-      
-            <button type="button"
-              onClick={handleGoogle}
-              className="w-full flex items-center justify-center gap-3 bg-white text-black py-3 sm:py-4 rounded-2xl hover:scale-[1.02] transition">
-              <FcGoogle size={20}/> Continue with Google
-            </button>
+            const clerkErrors = err.errors || [];
 
-            <button type="button"
-              onClick={handleGithub}
-              className="w-full flex items-center justify-center gap-3 bg-black border border-gray-700 py-3 sm:py-4 rounded-2xl hover:bg-gray-900 transition">
-              <FaGithub size={20}/> Continue with GitHub
-            </button>
- <div className="flex items-center gap-3 text-gray-500 text-sm">
-              <div className="flex-1 h-px bg-gray-700" />
-              OR
-              <div className="flex-1 h-px bg-gray-700" />
-            </div>
-        {/* ================= LOGIN ================= */}
-        {step === "login" && (
-          <form onSubmit={handleLogin} className="space-y-3">
+            if (clerkErrors.length > 0) {
+                clerkErrors.forEach((error) => {
+                    toast.error(error.longMessage || error.message);
+                });
+            } else {
+                toast.error("Password reset failed");
+            }
 
-            <input
-              type="email"
-              placeholder="Email"
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 sm:p-5 rounded-2xl  bg-white/5
-                border border-white/10
-                focus:border-red-500
-                focus:ring-2 focus:ring-red-500/30
-                outline-none  transition"
-            />
+        }
+    };
+    const handleGoogle = () =>
+        signIn.authenticateWithRedirect({
+            strategy: "oauth_google",
+            redirectUrl: "/sso-callback",
+            redirectUrlComplete: "/",
+        });
 
-            <input
-              type="password"
-              placeholder="Password"
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 sm:p-5 rounded-2xl  bg-white/5
-                border border-white/10
-                focus:border-red-500
-                focus:ring-2 focus:ring-red-500/30
-                outline-none transition"
-            />
+    const handleGithub = () =>
+        signIn.authenticateWithRedirect({
+            strategy: "oauth_github",
+            redirectUrl: "/sso-callback",
+            redirectUrlComplete: "/",
+        });
 
-            {password && (
-              <div className="flex gap-2">
-                {[1,2,3,4].map(level => (
-                  <div key={level}
-                    className={`h-1 flex-1 rounded ${
-                      getStrength(password) >= level
-                        ? level <= 2 ? "bg-red-500"
-                        : level === 3 ? "bg-yellow-500"
-                        : "bg-green-500"
-                        : "bg-gray-700"
-                    }`}
-                  />
-                ))}
-              </div>
-            )}
+    return (
+        <AuthLayout title="Welcome Back">
 
-            <button disabled={loading}
-              className="w-full py-3 sm:py-4 rounded-2xl bg-gradient-to-r from-red-500 to-red-600
-              text-white hover:scale-[1.02] transition shadow-lg shadow-red-500/30">
-              {loading ? "Signing In..." : "Sign In"}
-            </button>
+            <div className="space-y-3">
 
-            <button type="button"
-              onClick={handleForgotPassword}
-              className="text-sm flex justify-end text-red-400 hover:underline text-center w-full">
-              Forgot Password?
-            </button>
+                {/* ===== SOCIAL LOGIN ===== */}
 
-           
+                <div className="space-y-3">
 
-  <div className="pt-4 border-t border-white/10 text-center text-sm">
-      <span className="text-gray-400">
-        Don’t have an account?{" "}
-      </span>
-      <Link
-        to="/sign-up"
-        className="
-          text-red-400
+                    <button
+                        type="button"
+                        onClick={handleGoogle}
+                        className="
+          w-full
+          flex items-center justify-center gap-3
+          py-3
+          rounded-2xl
+          bg-white
+          text-black
           font-medium
-          hover:text-red-300
+          hover:scale-[1.02]
           transition
-        "
-      >
-        Create Account
-      </Link>
-    </div>
-          </form>
-        )}
+          "
+                    >
+                        <FcGoogle size={20} />
+                        Continue with Google
+                    </button>
 
-        {/* ================= OTP ================= */}
-        {step === "otp" && (
-          <div className="space-y-6 text-center">
-            <h2 className="text-xl font-semibold">Enter 6-digit OTP</h2>
+                    <button
+                        type="button"
+                        onClick={handleGithub}
+                        className="
+          w-full
+          flex items-center justify-center gap-3
+          py-3
+          rounded-2xl
+          border border-white/10
+          bg-white/5
+          hover:bg-white/10
+          transition
+          "
+                    >
+                        <FaGithub size={20} />
+                        Continue with GitHub
+                    </button>
 
-            <div className="flex justify-center gap-3">
-              {otp.map((digit, index) => (
-                <input
-                  key={index}
-                  ref={(el) => inputsRef.current[index] = el}
-                  type="text"
-                  maxLength="1"
-                  value={digit}
-                  onChange={(e) => handleOtpChange(e.target.value, index)}
-                  className="w-14 h-14 text-center text-xl font-semibold bg-black/50 border border-gray-700 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/40 transition"
-                />
-              ))}
+                </div>
+
+                {/* ===== DIVIDER ===== */}
+
+                <div className="flex items-center gap-3 text-gray-400 text-sm">
+                    <div className="flex-1 h-px bg-white/10" />
+                    OR
+                    <div className="flex-1 h-px bg-white/10" />
+                </div>
+
+                {/* ================= LOGIN ================= */}
+
+                {step === "login" && (
+                    <form onSubmit={handleLogin} className="space-y-3">
+
+                        <input
+                            type="email"
+                            placeholder="Email address"
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="
+            w-full
+            p-3
+            rounded-xl
+            bg-white/5
+            border border-white/10
+            focus:border-red-500
+            focus:ring-2 focus:ring-red-500/30
+            outline-none
+            transition
+            "
+                        />
+
+                        <div className="relative">
+
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Password"
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="
+    w-full
+    p-3
+    rounded-xl
+    bg-white/5
+    border border-white/10
+    focus:border-red-500
+    focus:ring-2 focus:ring-red-500/30
+    outline-none
+    transition
+    pr-10
+    "
+                            />
+
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="
+    absolute
+    right-3
+    top-1/2
+    -translate-y-1/2
+    text-gray-400
+    hover:text-white
+    transition
+    "
+                            >
+                                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                            </button>
+
+                        </div>
+
+
+                        <button
+                            disabled={loading}
+                            className="
+            w-full
+            py-3
+            rounded-2xl
+            bg-gradient-to-r from-red-500 to-red-600
+            text-white
+            font-medium
+            hover:scale-[1.02]
+            transition
+            shadow-lg shadow-red-500/30
+            "
+                        >
+                            {loading ? "Signing In..." : "Sign In"}
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={handleForgotPassword}
+                            className="text-red-400 text-sm hover:underline w-full text-right"
+                        >
+                            Forgot Password?
+                        </button>
+
+                        <div className="pt-4 border-t border-white/10 text-center text-sm">
+                            <span className="text-gray-400">
+                                Don’t have an account?{" "}
+                            </span>
+
+                            <Link
+                                to="/sign-up"
+                                className="text-red-400 font-medium hover:text-red-300"
+                            >
+                                Create Account
+                            </Link>
+                        </div>
+
+                    </form>
+                )}
+
+                {/* ================= OTP ================= */}
+
+                {step === "otp" && (
+                    <div className="space-y-6 text-center">
+
+                        <h2 className="text-xl font-semibold tracking-wide">
+                            Verification Code
+                        </h2>
+
+                        <p className="text-sm text-gray-400">
+                            Enter the 6-digit code sent to your email
+                        </p>
+
+                        {step === "otp" && (
+                            <div className="space-y-6 text-center">
+
+                                <h2 className="text-xl font-semibold tracking-wide">
+                                    Verification Code
+                                </h2>
+
+                                <p className="text-sm text-gray-400">
+                                    Enter the 6-digit code sent to your email
+                                </p>
+
+                                <div className="flex justify-center">
+
+                                    <InputOtp
+                                        length={6}
+                                        value={otpValue}
+                                        onValueChange={handleOtpChange}
+                                        classNames={{
+                                            input:
+                                                "w-12 h-12 sm:w-14 sm:h-14 text-lg font-semibold text-center bg-white/5 border border-white/10 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/40",
+                                        }}
+                                    />
+
+                                </div>
+
+                                {timer > 0 ? (
+                                    <p className="text-gray-400 text-sm">
+                                        Resend code in <span className="text-red-400">{timer}s</span>
+                                    </p>
+                                ) : (
+                                    <button
+                                        onClick={resendOTP}
+                                        className="text-red-400 text-sm hover:underline"
+                                    >
+                                        Resend Code
+                                    </button>
+                                )}
+
+                            </div>
+                        )}
+
+
+
+                    </div>
+                )}
+
+                {/* ================= RESET PASSWORD ================= */}
+
+                {step === "reset" && (
+                    <form
+                        onSubmit={handleResetPassword}
+                        className="space-y-4"
+                    >
+
+                        <input
+                            placeholder="Reset Code"
+                            onChange={(e) => setResetCode(e.target.value)}
+                            className="
+            w-full
+            p-3
+            rounded-xl
+            bg-white/5
+            border border-white/10
+            focus:border-red-500
+            focus:ring-2 focus:ring-red-500/30
+            outline-none
+            "
+                        />
+                        <div className="relative">
+
+                            <input
+                                type={showNewPassword ? "text" : "password"}
+                                placeholder="New Password"
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                className="
+    w-full
+    p-3
+    rounded-xl
+    bg-white/5
+    border border-white/10
+    focus:border-red-500
+    focus:ring-2 focus:ring-red-500/30
+    outline-none
+    transition
+    pr-10
+    "
+                            />
+
+                            <button
+                                type="button"
+                                onClick={() => setShowNewPassword(!showNewPassword)}
+                                className="
+    absolute
+    right-3
+    top-1/2
+    -translate-y-1/2
+    text-gray-400
+    hover:text-white
+    transition
+    "
+                            >
+                                {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+                            </button>
+
+                        </div>
+                        <button
+                            className="
+            w-full
+            py-3
+            rounded-2xl
+            bg-gradient-to-r from-red-500 to-red-600
+            text-white
+            hover:scale-[1.02]
+            transition
+            "
+                        >
+                            Reset Password
+                        </button>
+
+                    </form>
+                )}
+
             </div>
 
-            {timer > 0 ? (
-              <p className="text-gray-400 text-sm">Resend in {timer}s</p>
-            ) : (
-              <button onClick={resendOTP}
-                className="text-red-400 text-sm hover:underline">
-                Resend OTP
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* ================= RESET ================= */}
-        {step === "reset" && (
-          <form onSubmit={handleResetPassword} className="space-y-6 text-center">
-
-            <input
-              type="text"
-              placeholder="Reset Code" 
-              onChange={(e) => setResetCode(e.target.value)}
-              className="w-full p-3 sm:p-5 rounded-2xl bg-black/40 border border-gray-700 focus:border-red-500 focus:ring-2 focus:ring-red-500/30 transition"
-            />
-
-            <input
-              type="password"
-              placeholder="New Password"
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full p-3 sm:p-5 rounded-2xl bg-black/40 border border-gray-700 focus:border-red-500 focus:ring-2 focus:ring-red-500/30 transition"
-            />
-
-            <button className="w-full py-3 sm:py-5 rounded-2xl bg-gradient-to-r from-red-500 to-red-600
-              text-white border-2 border-white/10 hover:scale-[1.02] transition">
-              Reset Password
-            </button>
-          </form>
-        )}
-
-      </div>
-    </AuthLayout>
-  );
+        </AuthLayout>
+    );
 }

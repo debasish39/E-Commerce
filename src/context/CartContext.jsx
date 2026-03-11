@@ -1,66 +1,216 @@
-import React, { useState, createContext, useContext, useEffect } from 'react';
-import { toast } from 'react-hot-toast';
-
+import React, { useState, createContext, useContext, useEffect } from "react";
+import { toast } from "react-hot-toast";
+import { useUser } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 export const CartContext = createContext(null);
 
+const BACKEND_URL = "https://eshop-backend-y0e7.onrender.com";
+
 export default function CartProvider({ children }) {
-  const [cartItem, setCartItem] = useState(() => {
-    const storedCart = localStorage.getItem('cart');
-    return storedCart ? JSON.parse(storedCart) : [];
-  });
 
-  // Save cart to localStorage whenever cartItem changes
+const { user, isSignedIn } = useUser();
+  const [cartItem, setCartItem] = useState([]);
+// const calculatePrice = (price) => {
+//   let finalPrice;
+
+//   if (price <= 50) {
+//     finalPrice = price + 69;
+//   } 
+//   else if (price <= 100) {
+//     finalPrice = price + 99;
+//   } 
+//   else if (price <= 300) {
+//     finalPrice = price + 199;
+//   } 
+//   else if (price <= 800) {
+//     finalPrice = price + 299;
+//   } 
+//   else if (price <= 2000) {
+//     finalPrice = price + 499;
+//   } 
+//   else {
+//     finalPrice = price + 599;
+//   }
+
+//   return Math.round(finalPrice / 10) * 10;
+// };
+  /* ==========================
+     LOAD CART FROM DATABASE
+  ========================== */
+
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cartItem));
-  }, [cartItem]);
 
-  // ✅ Updated: addToCart now accepts quantity
-  const addToCart = (product, quantity = 1) => {
-    const itemInCart = cartItem.find((item) => item.id === product.id);
-    if (itemInCart) {
-      const updatedCart = cartItem.map((item) =>
-        item.id === product.id
-          ? { ...item, quantity: item.quantity + quantity }
-          : item
-      );
-      setCartItem(updatedCart);
-      toast.success(`Increased product quantity by ${quantity}`);
-    } else {
-      setCartItem([...cartItem, { ...product, quantity }]);
-      toast.success(`${product.title} added to cart`);
-    }
+    if (!user) return;
+
+    const fetchCart = async () => {
+      try {
+
+        const res = await fetch(`${BACKEND_URL}/api/cart/${user.id}`);
+        const data = await res.json();
+
+        if (data?.items) {
+          setCartItem(data.items);
+        }
+
+      } catch (error) {
+
+        console.error("Cart fetch error:", error);
+
+      }
+    };
+
+    fetchCart();
+
+  }, [user]);
+
+  /* ==========================
+     ADD TO CART
+  ========================== */
+
+  const addToCart = async (product) => {
+
+  if (!isSignedIn) {
+
+    toast.error("Please login first");
+    navigate("/sign-in");
+
+    return;
+  }
+
+  const exists = cartItem.some(
+    (item) => item.productId === product.id
+  );
+
+  if (exists) {
+
+    toast("Product already in cart", {
+      icon: "🛒",
+    });
+
+    return;
+  }
+
+  try {
+
+    const res = await fetch(`${BACKEND_URL}/api/cart/add`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        product: {
+          productId: product.id,
+          title: product.title,
+          price: product.price,
+          image: product.images?.[0]
+        }
+      })
+    });
+
+    const data = await res.json();
+
+    setCartItem(data.cart.items);
+
+    toast.success(`${product.title} added to cart`);
+
+  } catch (error) {
+
+    toast.error("Failed to add item");
+
+  }
+
+};
+
+  /* ==========================
+     INCREASE QUANTITY
+  ========================== */
+
+  const increaseQty = async (productId) => {
+
+    const res = await fetch(`${BACKEND_URL}/api/cart/increase`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        productId
+      })
+    });
+
+    const data = await res.json();
+
+    setCartItem(data.cart.items);
+
   };
 
-  const removeFromCart = (id) => {
-    const updatedCart = cartItem.filter((item) => item.id !== id);
-    setCartItem(updatedCart);
-    toast.success('Removed from cart');
+  /* ==========================
+     DECREASE QUANTITY
+  ========================== */
+
+  const decreaseQty = async (productId) => {
+
+    const res = await fetch(`${BACKEND_URL}/api/cart/decrease`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        productId
+      })
+    });
+
+    const data = await res.json();
+
+    setCartItem(data.cart.items);
+
   };
 
-  const increaseQty = (id) => {
-    const updatedCart = cartItem.map((item) =>
-      item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-    );
-    setCartItem(updatedCart);
-    toast.success('Increased quantity');
-  };
+  /* ==========================
+     REMOVE FROM CART
+  ========================== */
 
-  const decreaseQty = (id) => {
-    const updatedCart = cartItem
-      .map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity - 1 } : item
-      )
-      .filter((item) => item.quantity > 0);
-    setCartItem(updatedCart);
-    toast.success('Decreased quantity');
-  };
+  const removeFromCart = async (productId) => {
 
-  const clearCart = () => {
+    const res = await fetch(`${BACKEND_URL}/api/cart/remove`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        productId
+      })
+    });
+
+    const data = await res.json();
+
+    setCartItem(data.cart.items);
+
+    toast.success("Item removed");
+
+  };
+const clearCart = async () => {
+
+  if (!user?.id) return;
+
+  try {
+
+    await fetch(`${BACKEND_URL}/api/cart/clear/${user.id}`, {
+      method: "DELETE",
+    });
+
     setCartItem([]);
-    localStorage.removeItem('cart');
-    toast.success('Cart cleared');
-  };
 
+  } catch (error) {
+
+    console.error("Clear cart failed", error);
+
+  }
+
+};
   return (
     <CartContext.Provider
       value={{
@@ -69,7 +219,7 @@ export default function CartProvider({ children }) {
         removeFromCart,
         increaseQty,
         decreaseQty,
-        clearCart,
+        clearCart
       }}
     >
       {children}

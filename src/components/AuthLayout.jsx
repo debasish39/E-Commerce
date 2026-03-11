@@ -1,70 +1,97 @@
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { FaTimes } from "react-icons/fa";
+
 export default function AuthLayout({ title, children }) {
+  const navigate = useNavigate();
+
+  const handleClose = () => {
+    navigate("/");
+  };
+
+  /* ESC key close */
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === "Escape") handleClose();
+    };
+
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
+
   return (
-    <div className="
-      relative
-      min-h-[800px]
-      flex
-      items-center
-      justify-center
-      overflow-hidden
-      text-white
-    ">
-
-
-      {/* Large Glow Top Left */}
-      {/* <div className="
+    <div
+      className="
+      fixed inset-0
+      flex items-center justify-center
+      bg-black/60
+      backdrop-blur-md
+      z-50
+      px-4
+      "
+    >
+      {/* Background glow */}
+      <div
+        className="
         absolute
-        -top-40
-        -left-40
-        w-[600px]
-        h-[600px]
+        -top-40 -left-40
+        w-[500px] h-[500px]
         bg-red-600/20
-        blur-[140px]
+        blur-[150px]
         rounded-full
         animate-pulse
-      " /> */}
+      "
+      />
 
-      {/* Large Glow Bottom Right */}
-      {/* <div className="
+      <div
+        className="
         absolute
-        -bottom-40
-        -right-40
-        w-[600px]
-        h-[600px]
+        -bottom-40 -right-40
+        w-[500px] h-[500px]
         bg-orange-500/20
-        blur-[140px]
+        blur-[150px]
         rounded-full
         animate-pulse
-      " /> */}
+      "
+      />
 
-      {/* Subtle Grid Overlay */}
-      {/* <div
-        className="absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
-        }}
-      /> */}
-
-      {/* ===== Card Container ===== */}
-      <div className="
+      {/* Card */}
+      <div
+        className="
         relative
         w-full
         max-w-md
-        mx-4 
-        backdrop-blur-2xl
+        bg-black/70
         border border-white/10
+        backdrop-blur-2xl
         rounded-3xl
-      py-3 px-3 sm:p-8
-       
-      ">
+        shadow-[0_20px_60px_rgba(0,0,0,0.6)]
+        p-6 sm:p-8
+        animate-[fadeIn_0.3s_ease]
+        "
+      >
+        {/* Close button */}
+        <button
+          onClick={handleClose}
+          className="
+          absolute
+          top-4 right-4
+          w-9 h-9
+          flex items-center justify-center
+          rounded-full
+          bg-white/10
+          hover:bg-red-500
+          transition
+          "
+        >
+          <FaTimes size={14} />
+        </button>
 
         {/* Title */}
-        <div className="mb-3 text-center space-y-2">
-
-          <h1 className="
-            text-3xl pt-3
+        <div className="mb-6 text-center">
+          <h1
+            className="
+            text-3xl
             font-semibold
             tracking-tight
             bg-gradient-to-r
@@ -73,15 +100,13 @@ export default function AuthLayout({ title, children }) {
             to-red-400
             bg-clip-text
             text-transparent
-            animate-gradient
-          ">
+          "
+          >
             {title}
           </h1>
-
         </div>
 
         {children}
-
       </div>
     </div>
   );

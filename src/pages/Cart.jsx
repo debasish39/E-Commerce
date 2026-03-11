@@ -64,34 +64,34 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
   }, [location, user]);
   const [paymentType, setPaymentType] = React.useState(null);
   const BACKEND_URL = "https://eshop-backend-y0e7.onrender.com";
-  const calculatePrice = (price) => {
+  // const calculatePrice = (price) => {
 
-    let finalPrice;
+  //   let finalPrice;
 
-    if (price <= 50) {
-      finalPrice = price + 69;
-    }
-    else if (price <= 100) {
-      finalPrice = price + 99;
-    }
-    else if (price <= 300) {
-      finalPrice = price + 199;
-    }
-    else if (price <= 800) {
-      finalPrice = price + 299;
-    }
-    else if (price <= 2000) {
-      finalPrice = price + 499;
-    }
-    else {
-      finalPrice = price + 599;
-    }
+  //   if (price <= 50) {
+  //     finalPrice = price + 69;
+  //   }
+  //   else if (price <= 100) {
+  //     finalPrice = price + 99;
+  //   }
+  //   else if (price <= 300) {
+  //     finalPrice = price + 199;
+  //   }
+  //   else if (price <= 800) {
+  //     finalPrice = price + 299;
+  //   }
+  //   else if (price <= 2000) {
+  //     finalPrice = price + 499;
+  //   }
+  //   else {
+  //     finalPrice = price + 599;
+  //   }
 
-    // Round to nearest 10
-    return Math.round(finalPrice / 10) * 10;
-  };
+  //   // Round to nearest 10
+  //   return Math.round(finalPrice / 10) * 10;
+  // };
   const totalPrice = cartItem.reduce(
-    (total, item) => total + calculatePrice(Number(item.price)) * item.quantity,
+    (total, item) => total + Number(item.price) * item.quantity,
     0
   );
   const totalAmount = (totalPrice + 5).toFixed(2);
@@ -125,7 +125,7 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
 
       items: cartItem.map(item => ({
         title: item.title,
-        price: calculatePrice(item.price),
+        price: Number(item.price),
         quantity: item.quantity
       }))
     };
@@ -158,8 +158,8 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
       toast.success("Order placed (Cash on Delivery)");
     }
 
-    clearCart?.();
-    navigate("/order-success");
+   await clearCart();
+navigate("/order-success");
   };
 
   const confirmRemoveItem = (id) => {
@@ -529,8 +529,7 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
             {cartItem.map((item, index) => (
 
               <div
-                key={index}
-                data-aos="fade-up"
+key={item.productId}                data-aos="fade-up"
                 data-aos-delay={index * 80}
                 className="bg-white/10 backdrop-blur-xl border border-white/20
   shadow-lg rounded-2xl p-4 sm:p-5
@@ -543,13 +542,13 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
 
                 {/* PRODUCT */}
                 <div
-                  onClick={() => navigate(`/products/${item.id}`)}
+                 onClick={() => navigate(`/products/${item.productId}`)}
                   className="flex items-center gap-4 w-full cursor-pointer group"
                 >
 
                   {/* IMAGE */}
                   <img
-                    src={item.images[0]}
+                    src={item.image}
                     alt={item.title}
                     className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl
       border border-white/20 object-cover
@@ -590,7 +589,7 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDecrease(item.id, item.quantity);
+                       handleDecrease(item.productId, item.quantity);
                       }}
                       className="p-1 rounded-full
         hover:bg-red-500/20
@@ -607,7 +606,7 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        increaseQty(item.id);
+                        increaseQty(item.productId);
                       }}
                       className="p-1 rounded-full
         hover:bg-green-500/20 active:bg-green-500/20 focus:bg-green-500/20
@@ -624,7 +623,7 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedItem(item.id);
+                      setSelectedItem(item.productId);
                       setShowDeleteAlert(true);
                     }}
                     className="p-3 rounded-full

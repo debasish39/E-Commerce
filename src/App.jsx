@@ -23,7 +23,7 @@ const CategoryProduct = lazy(() => import("./pages/CategoryProduct"));
 const WishlistPage = lazy(() => import("./pages/WishlistPage"));
 const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
 const OrderHistory = lazy(() => import("./pages/OrderHistory"));
-const Verify = lazy(() => import("./pages/verify"));
+const Verify = lazy(() => import("./pages/Verify"));
 /* ===========================
    Lazy Loaded Components
 =========================== */

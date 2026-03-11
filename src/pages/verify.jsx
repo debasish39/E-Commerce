@@ -1,204 +1,110 @@
 import { useSignUp } from "@clerk/clerk-react";
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
-import { FcGoogle } from "react-icons/fc";
-import { FaGithub } from "react-icons/fa";
 import { toast } from "sonner";
 
-export default function SignUp() {
-  const { signUp, isLoaded } = useSignUp();
-  const navigate = useNavigate();
+export default function Verify() {
 
-  const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-  });
+    const { signUp, setActive } = useSignUp();
+    const [code, setCode] = useState("");
+    const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false);
+    const verifyCode = async (e) => {
+        e.preventDefault();
 
-  /* ================= PASSWORD SIGNUP ================= */
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!isLoaded) return;
+        try {
+            const result = await signUp.attemptEmailAddressVerification({
+                code,
+            });
 
-    setLoading(true);
-
-    try {
-      await signUp.create({
-        firstName: form.firstName,
-        lastName: form.lastName,
-        emailAddress: form.email,
-        password: form.password,
-      });
-
-      await signUp.prepareEmailAddressVerification({
-        strategy: "email_code",
-      });
-
-      toast.success("Verification code sent 📩");
-      navigate("/");
-    } catch (err) {
-      toast.error(err.errors?.[0]?.message || "Signup failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /* ================= MAGIC LINK SIGNUP ================= */
-  const handleMagicLink = async () => {
-    if (!isLoaded) return;
-    if (!form.email) {
-      toast.error("Enter your email first");
-      return;
-    }
-
-    try {
-      await signUp.create({
-        emailAddress: form.email,
-        firstName: form.firstName,
-        lastName: form.lastName,
-      });
-
-      await signUp.prepareEmailAddressVerification({
-        strategy: "email_link",
-        redirectUrl: `${window.location.origin}/verify`,
-      });
-
-      toast.success("Signup link sent to your email 📩");
-
-    } catch (err) {
-      toast.error(err.errors?.[0]?.message || "Failed to send link");
-    }
-  };
-
-  /* ================= GOOGLE ================= */
-  const handleGoogle = async () => {
-    if (!isLoaded) return;
-
-    await signUp.authenticateWithRedirect({
-      strategy: "oauth_google",
-      redirectUrl: "/sso-callback",
-      redirectUrlComplete: "/",
-    });
-  };
-
-  /* ================= GITHUB ================= */
-  const handleGithub = async () => {
-    if (!isLoaded) return;
-
-    await signUp.authenticateWithRedirect({
-      strategy: "oauth_github",
-      redirectUrl: "/sso-callback",
-      redirectUrlComplete: "/",
-    });
-  };
-
-  return (
-    <AuthLayout title="Create Account">
-
-      {/* ============== SOCIAL LOGIN ============== */}
-      <div className="space-y-3 mb-6">
-
-        <button
-          type="button"
-          onClick={handleGoogle}
-          className="w-full flex items-center justify-center gap-3 
-          bg-white text-black py-3 rounded-xl hover:scale-105 transition"
-        >
-          <FcGoogle size={20} />
-          Continue with Google
-        </button>
-
-        <button
-          type="button"
-          onClick={handleGithub}
-          className="w-full flex items-center justify-center gap-3 
-          bg-black border border-gray-700 py-3 rounded-xl 
-          hover:bg-gray-900 transition"
-        >
-          <FaGithub size={20} />
-          Continue with GitHub
-        </button>
-      </div>
-
-      <div className="relative my-6">
-        <div className="border-t border-gray-700"></div>
-        <span className="absolute left-1/2 -translate-x-1/2 -top-3 bg-black px-3 text-sm text-gray-400">
-          OR
-        </span>
-      </div>
-
-      {/* ============== FORM ============== */}
-      <form onSubmit={handleSubmit} className="space-y-4">
-
-        <div className="grid grid-cols-2 gap-3">
-          <input
-            placeholder="First Name"
-            className="p-3 rounded-xl bg-black/40 border border-gray-700"
-            onChange={(e) =>
-              setForm({ ...form, firstName: e.target.value })
+            if (result.status === "complete") {
+                await setActive({ session: result.createdSessionId });
+                toast.success("Account verified 🎉");
+                navigate("/");
             }
-          />
 
-          <input
-            placeholder="Last Name"
-            className="p-3 rounded-xl bg-black/40 border border-gray-700"
-            onChange={(e) =>
-              setForm({ ...form, lastName: e.target.value })
-            }
-          />
-        </div>
+        } catch (err) {
+            toast.error("Invalid verification code");
+            console.error(err);
+        }
+    };
 
-        <input
-          type="email"
-          required
-          placeholder="Email"
-          className="w-full p-3 rounded-xl bg-black/40 border border-gray-700"
-          onChange={(e) =>
-            setForm({ ...form, email: e.target.value })
-          }
-        />
+    return (
+        <AuthLayout title="Verify Your Email">
 
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full p-3 rounded-xl bg-black/40 border border-gray-700"
-          onChange={(e) =>
-            setForm({ ...form, password: e.target.value })
-          }
-        />
+            <div className="flex justify-center items-center w-full">
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-3 rounded-xl
-          bg-gradient-to-r from-orange-500 to-red-600"
-        >
-          {loading ? "Creating..." : "Sign Up with Password"}
-        </button>
+                <div className="
+          w-full max-w-md
+          bg-black/60
+          backdrop-blur-xl
+          border border-white/10
+          rounded-3xl
+          shadow-[0_0_40px_rgba(255,0,0,0.25)]
+          p-6 sm:p-8
+          space-y-6
+        ">
 
-        {/* Magic Link Button */}
-        <button
-          type="button"
-          onClick={handleMagicLink}
-          className="w-full py-3 rounded-xl
-          border border-orange-500 text-orange-400
-          hover:bg-orange-500 hover:text-white transition"
-        >
-          Send Signup Link Instead
-        </button>
+                    <div className="text-center space-y-2">
+                        <h2 className="text-xl sm:text-2xl font-semibold text-white">
+                            Enter Verification Code
+                        </h2>
 
-        <p className="text-sm text-center text-gray-400 mt-4">
-          Already have an account?{" "}
-          <Link to="/sign-in" className="text-orange-400 hover:underline">
-            Sign In
-          </Link>
-        </p>
+                        <p className="text-gray-400 text-sm">
+                            We sent a 6-digit code to your email.
+                        </p>
+                    </div>
 
-      </form>
-    </AuthLayout>
-  );
+                    <form onSubmit={verifyCode} className="space-y-5">
+
+                        <input
+                            type="text"
+                            maxLength={6}
+                            placeholder="Enter code"
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                            className="
+                w-full
+                text-center
+                tracking-widest
+                text-lg
+                p-4
+                rounded-xl
+                bg-black/50
+                border border-gray-700
+                focus:border-red-500
+                focus:ring-2 focus:ring-red-500/30
+                outline-none
+                transition
+              "
+                        />
+
+                        <button
+                            type="submit"
+                            className="
+                w-full
+                py-3 sm:py-4
+                rounded-xl
+                bg-gradient-to-r
+                from-red-500
+                to-red-600
+                text-white
+                font-medium
+                shadow-lg shadow-red-500/30
+                hover:scale-[1.02]
+                transition
+              "
+                        >
+                            Verify Account
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </AuthLayout>
+    );
 }

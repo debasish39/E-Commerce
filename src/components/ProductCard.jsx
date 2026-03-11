@@ -7,46 +7,21 @@ import { useWishlist } from "../context/wishlistContext";
 import { toast } from "sonner";
 import AOS from "aos";
 import "aos/dist/aos.css";
-
+import { useUser } from "@clerk/clerk-react";
 export default function ProductCard({ product }) {
   const navigate = useNavigate();
   const { addToCart, cartItem } = useCart();
   const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
-
+const { isSignedIn } = useUser();
   const [imgLoading, setImgLoading] = useState(true);
 
-  const isAlreadyInCart = cartItem.some(
-    (item) => item.id === product.id
-  );
+ const isAlreadyInCart = cartItem.some(
+  (item) => String(item.productId) === String(product.id)
+);
 
-  const isLiked = wishlist.some(
-    (item) => item.id === product.id
-  );
-  const calculatePrice = (price) => {
-
-    let finalPrice;
-
-    if (price <= 50) {
-      finalPrice = price + 69;
-    }
-    else if (price <= 100) {
-      finalPrice = price + 99;
-    }
-    else if (price <= 300) {
-      finalPrice = price + 199;
-    }
-    else if (price <= 800) {
-      finalPrice = price + 299;
-    }
-    else if (price <= 2000) {
-      finalPrice = price + 499;
-    }
-    else {
-      finalPrice = price + 599;
-    }
-
-    return Math.round(finalPrice / 10) * 10;
-  };
+const isLiked = wishlist.some(
+  (item) => String(item.productId) === String(product.id)
+);
   useEffect(() => {
     AOS.init({
       duration: 500,
@@ -56,34 +31,46 @@ export default function ProductCard({ product }) {
     });
   }, []);
 
-  const handleAddToCart = () => {
-    if (isAlreadyInCart) {
-      toast.info("Already in cart 😊");
-      return;
-    }
+const handleAddToCart = () => {
 
-    addToCart({
-      ...product,
-      price: calculatePrice(product.price),
-    });
+  if (!isSignedIn) {
+    toast.error("Please login first");
+    navigate("/sign-in");
+    return;
+  }
 
-    toast.success("Added to cart!", {
-      description: product.title,
-    });
-  };
+  if (isAlreadyInCart) {
+    toast.info("Product already in cart 🛒");
+    return;
+  }
 
-  const handleToggleWishlist = (e) => {
-    e.stopPropagation();
+  addToCart(product);
+  toast.success("Added to cart 🛒");
 
-    if (isLiked) {
-      removeFromWishlist(product.id);
-      toast("Removed from wishlist 💔");
-    } else {
-      addToWishlist(product);
-      toast.success("Added to wishlist ❤️");
-    }
-  };
+};
+ const handleToggleWishlist = (e) => {
 
+  e.stopPropagation();
+
+  if (!isSignedIn) {
+    toast.error("Please login first");
+    navigate("/sign-in");
+    return;
+  }
+
+  if (isLiked) {
+
+    removeFromWishlist(String(product.id));
+    toast("Removed from wishlist 💔");
+
+  } else {
+
+    addToWishlist(product);
+    toast.success("Added to wishlist ❤️");
+
+  }
+
+};
   return (
     <div
       className="relative group bg-white/10 backdrop-blur-lg border border-red-200/40 rounded-2xl 
@@ -163,23 +150,27 @@ export default function ProductCard({ product }) {
         </p>
 
         <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-500 text-transparent bg-clip-text">
-          ₹{calculatePrice(Number(product.price))}        </p>
+          ₹{product.price}      </p>
 
       </div>
 
       {/* Add to Cart */}
       <div className="mt-1 sm:mt-3">
-        <button
-          className={`w-full flex items-center justify-center gap-2 py-2 text-sm sm:text-base font-semibold rounded-lg shadow-md transition-all duration-300 active:scale-95 cursor-pointer ${isAlreadyInCart
-            ? "bg-white/10 text-white "
-            : "bg-gradient-to-r from-red-900 to-black/50 border border-red-800/90 text-white  sm:hover:shadow-lg sm:hover:shadow-red-300 cursor-pointer"
-            }`}
-          // disabled={isAlreadyInCart}
-          onClick={handleAddToCart}
-        >
-          <IoCartOutline className="w-5 h-5" />
-          {isAlreadyInCart ? "Added" : "Add to Cart"}
-        </button>
+      <button
+  className={`w-full flex items-center justify-center gap-2 py-2 text-sm sm:text-base font-semibold rounded-lg shadow-md transition-all duration-300 active:scale-95 cursor-pointer ${
+    isAlreadyInCart
+      ? "bg-white/10 text-gray-300 "
+      : "bg-gradient-to-r from-red-900 to-black/50 border border-red-800/90 text-white sm:hover:shadow-lg sm:hover:shadow-red-300 cursor-pointer"
+  }`}
+  onClick={() =>
+    isAlreadyInCart
+      ? navigate("/cart")
+      : handleAddToCart()
+  }
+>
+  <IoCartOutline className="w-5 h-5" />
+  {isAlreadyInCart ? "View Cart" : "Add to Cart"}
+</button>
       </div>
 
     </div>
