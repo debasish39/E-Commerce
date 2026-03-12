@@ -389,7 +389,7 @@ const handleAreaSearch = async () => {
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        placement="top-center"
+        placement="center"
         backdrop="blur"
            classNames={{
           body: "py-6",
