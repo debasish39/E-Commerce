@@ -19,6 +19,8 @@
     "@react-three/drei": "^10.7.6",
     "@react-three/fiber": "^9.4.0",
     "@tailwindcss/vite": "^4.1.11",
+    "@tsparticles/react": "^3.0.0",
+    "@tsparticles/slim": "^3.9.1",
     "aos": "^2.3.4",
     "axios": "^1.10.0",
     "cors": "^2.8.5",
