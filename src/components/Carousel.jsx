@@ -106,8 +106,13 @@ const { addToCart, cartItem } = useCart();
 const handleAddToCart = (item) => {
 
   if (!isSignedIn) {
+
     toast.error("Please login first");
-    navigate("/sign-in");
+
+    setTimeout(() => {
+      navigate("/sign-in");
+    }, 800);
+
     return;
   }
 
@@ -116,11 +121,19 @@ const handleAddToCart = (item) => {
   );
 
   if (alreadyInCart) {
-    navigate("/cart");
+
+    toast.info("Product already in cart 🛒");
+
+    setTimeout(() => {
+      navigate("/cart");
+    }, 800);
+
     return;
   }
 
   addToCart(item);
+
+  toast.success(`${item.title} added to cart 🛒`);
 
 };
   return (
