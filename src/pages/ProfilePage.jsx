@@ -29,10 +29,10 @@ export default function ProfilePage() {
       bg-[radial-gradient(circle_at_top,rgba(255,0,0,0.15),transparent_60%)]
     "
     >
-      <div className="w-full max-w-6xl">
+      <div className="w-full max-w-7xl">
 
         {/* COVER */}
-        <div className="relative h-52 rounded-3xl overflow-hidden">
+        <div className="relative h-39 rounded-3xl overflow-hidden">
           <div className="absolute inset-0
 bg-[conic-gradient(from_180deg_at_50%_50%,#ef4444,#dc2626,#fb7185,#ef4444)]
 opacity-30 blur-xl animate-spinSlow" />
@@ -179,18 +179,22 @@ opacity-20 blur-2xl rounded-3xl"/>
         onOpenChange={setOpenProfile}
         backdrop="blur"
         scrollBehavior="inside"
-
+        isDismissable={true}
+        isKeyboardDismissDisabled={false}
       >
 
         <ModalContent>
 
-          <ModalHeader className="border-b  mt-0 border-white/10 flex items-center justify-between">
+          <ModalHeader className="relative border-b border-white/10">
 
-            <span className="text-2xl font-semibold tracking-tight text-gray-400">Profile Settings</span>
+            <span className="text-2xl font-semibold tracking-tight text-gray-400">
+              Profile Settings
+            </span>
 
             <button
               onClick={() => setOpenProfile(false)}
               className="
+    absolute right-4 top-1/2 -translate-y-1/2
     w-8 h-8
     flex items-center justify-center
     rounded-full
@@ -198,6 +202,7 @@ opacity-20 blur-2xl rounded-3xl"/>
     hover:bg-red-500/70
     text-gray-300 hover:text-white
     transition
+    z-50
     "
             >
               <FaTimes size={15} />
@@ -207,8 +212,9 @@ opacity-20 blur-2xl rounded-3xl"/>
 
           <ModalBody className="m-0 sm:mx-auto">
 
-            <UserProfile />
-
+            <div className="max-h-[75vh] overflow-y-hidden overflow-x-auto">
+              <UserProfile />
+            </div>
           </ModalBody>
 
         </ModalContent>

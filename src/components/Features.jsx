@@ -16,7 +16,7 @@ const Features = () => {
     autoplay: true,
     autoplaySpeed: 3500,
     infinite: true,
-    speed: 700,
+    speed: 600,
     slidesToShow: 1,
     slidesToScroll: 1,
     arrows: false,
@@ -24,70 +24,87 @@ const Features = () => {
   };
 
   return (
-    <section className="relative py-14 px-4 sm:px-8 md:px-12  transition-all duration-700">
-      <div className="max-w-7xl mx-auto text-center">
-        {/* --- Section Title --- */}
-        <h2
-          className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-10 text-gray-800 dark:text-gray-100 tracking-tight"
-          style={{ fontFamily: "'Poppins', sans-serif" }}
-          data-aos="fade-up"
-        >
-          Why Shop With <span className="text-red-500 drop-shadow-md">Us?</span>
-        </h2>
+    <section className="relative py-20 px-6 sm:px-10 bg-transparent">
 
-        {/* --- Mobile Carousel --- */}
+    
+
+      <div className="max-w-7xl mx-auto relative z-10">
+
+        {/* Title */}
+        <div className="text-center mb-14">
+
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white">
+            Why Shop With{" "}
+            <span className="bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">
+              Us
+            </span>
+            ?
+          </h2>
+
+          <p className="mt-3 text-gray-400 max-w-xl mx-auto">
+            We deliver quality products with secure payments, fast shipping,
+            and dedicated customer support.
+          </p>
+
+        </div>
+
+        {/* Mobile Slider */}
         <div className="sm:hidden">
           <Slider {...settings}>
             {features.map((feature, index) => (
-              <div key={index} className="px-6 py-4">
-                <div
-                  className="flex flex-col items-center justify-center p-8 bg-white/70 dark:bg-[#1e1e1e]/70 
-                  backdrop-blur-lg border border-red-200/20 rounded-3xl shadow-lg hover:shadow-red-500/10 
-                  transition-all duration-500 hover:scale-[1.03]"
-                >
-                  <feature.icon className="h-12 w-12 text-red-500 mb-3 drop-shadow-md" />
-                  <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    {feature.text}
-                  </p>
-                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                    {feature.subtext}
-                  </p>
-                </div>
+              <div key={index} className="px-3">
+                <FeatureCard feature={feature} />
               </div>
             ))}
           </Slider>
         </div>
 
-        {/* --- Responsive Grid (for tablets & up) --- */}
-        <div
-          className="hidden sm:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8 md:gap-10 mt-6"
-          data-aos="fade-up"
-        >
+        {/* Desktop Grid */}
+        <div className="hidden sm:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => (
-            <div
-              key={index}
-              className="group relative flex flex-col items-center text-center p-8 rounded-3xl 
-              bg-white/70 dark:bg-[#1e1e1e]/70 backdrop-blur-lg border border-red-200/20 shadow-md 
-              transition-all duration-500 hover:scale-[1.06] hover:shadow-xl hover:border-red-500/30"
-            >
-              {/* Animated Glow on Hover */}
-              <div className="absolute inset-0 bg-gradient-to-br from-red-400/0 via-red-400/10 to-transparent opacity-0 group-hover:opacity-100 blur-2xl transition-all duration-700" />
-
-              <feature.icon
-                className="h-12 w-12 md:h-14 md:w-14 text-red-500 mb-4 drop-shadow-sm transition-transform duration-500 group-hover:scale-110"
-                aria-hidden="true"
-              />
-              <p className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">
-                {feature.text}
-              </p>
-              <p className="mt-1 text-sm md:text-base text-gray-600 dark:text-gray-300">
-                {feature.subtext}
-              </p>
-            </div>
+            <FeatureCard key={index} feature={feature} />
           ))}
         </div>
+
       </div>
     </section>
+  );
+};
+
+const FeatureCard = ({ feature }) => {
+  const Icon = feature.icon;
+
+  return (
+    <div
+      className="group relative p-3 rounded-3xl text-center
+      shadow-md
+      transition-all duration-500
+      hover:shadow-2xl
+      hover:-translate-y-1
+      hover:border-red-500/40"
+    >
+
+      {/* hover glow */}
+      <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-red-500/0 via-red-500/15 to-transparent opacity-0 group-hover:opacity-100 blur-xl transition-all duration-500" />
+
+      {/* icon container */}
+      <div
+        className="w-14 h-14 mx-auto mb-4 flex items-center justify-center
+        rounded-xl bg-red-500/10 text-red-500
+        group-hover:scale-110 transition-transform duration-500"
+      >
+        <Icon size={26} />
+      </div>
+
+      <h3 className="text-lg font-semibold text-white">
+        {feature.text}
+      </h3>
+
+      <p className="mt-1 text-sm text-gray-400">
+        {feature.subtext}
+      </p>
+
+    </div>
   );
 };
 
