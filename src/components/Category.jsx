@@ -14,12 +14,12 @@ export default function Category() {
   const settings = {
     dots: false,
     infinite: true,
-    speed: 500,
+    speed: 6000,
     slidesToShow: 5,
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 2000,
-    cssEase: "linear",
+    cssEase: "ease-in",
 
     responsive: [
       { breakpoint: 1280, settings: { slidesToShow: 4 } },
@@ -99,7 +99,7 @@ export default function Category() {
                   font-semibold
                   uppercase
                   tracking-wider
-                  bg-gradient-to-r from-[#f53347] to-red-400
+                  bg-gradient-to-r from-[#ffffff] to-red-400
                   bg-clip-text text-transparent
                   group-hover:from-white group-hover:to-white
                   transition-all duration-300

@@ -37,7 +37,16 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [scrollBehavior, setScrollBehavior] = React.useState("inside");
-  const [showDeleteAlert, setShowDeleteAlert] = React.useState(false);
+const {
+  isOpen: isDeleteOpen,
+  onOpen: onDeleteOpen,
+  onClose: onDeleteClose,
+} = useDisclosure();
+const {
+  isOpen: isCodConfirmOpen,
+  onOpen: onCodConfirmOpen,
+  onClose: onCodConfirmClose,
+} = useDisclosure();
   const [selectedItem, setSelectedItem] = React.useState(null);
   const [address, setAddress] = React.useState({
     name: "",
@@ -290,25 +299,20 @@ navigate("/order-success");
     }
   };
   const handleCOD = () => {
-    if (cartItem.length === 0) {
-      toast.error("Cart is empty 🛒");
-      return;
-    }
+  if (cartItem.length === 0) {
+    toast.error("Cart is empty 🛒");
+    return;
+  }
 
-    const phone = document.querySelector('input[name="phone"]')?.value;
+  const phone = document.querySelector('input[name="phone"]')?.value;
 
-    if (!/^\d{10}$/.test(phone)) {
-      toast.warning("Enter valid 10-digit mobile number");
-      return;
-    }
+  if (!/^\d{10}$/.test(phone)) {
+    toast.warning("Enter valid 10-digit mobile number");
+    return;
+  }
 
-    toast("Confirm Cash on Delivery?", {
-      action: {
-        label: "Confirm",
-        onClick: () => completeOrder(phone, "COD"),
-      },
-    });
-  };
+  onCodConfirmOpen();
+};
   const UPI_ID = "sonupanda0999@okicici";
   const upiPaymentLink = `upi://pay?pa=${UPI_ID}&pn=Your%20Store&am=${totalAmount}&cu=INR&tn=Payment%20for%20Order`;
 
@@ -621,11 +625,11 @@ key={item.productId}                data-aos="fade-up"
 
                   {/* DELETE */}
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedItem(item.productId);
-                      setShowDeleteAlert(true);
-                    }}
+                  onClick={(e) => {
+  e.stopPropagation();
+  setSelectedItem(item.productId);
+  onDeleteOpen();
+}}
                     className="p-3 rounded-full
   bg-white/10 border border-white/10
   hover:bg-red-900/80 hover:border-red-900
@@ -642,50 +646,94 @@ key={item.productId}                data-aos="fade-up"
 
             ))}
           </div>
-          {showDeleteAlert && (
-            <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30 backdrop-blur-sm">
+         <Modal
+  isOpen={isDeleteOpen}
+  onClose={onDeleteClose}
+  placement="center"
+  backdrop="blur"
+  hideCloseButton
+>
+  <ModalContent className="bg-black/50 backdrop-blur-xl border border-white/20 rounded-3xl text-white">
 
-              <div className="bg-black/70 border border-white/20 rounded-2xl p-6 w-[90%] max-w-sm text-center shadow-2xl">
+    {(onClose) => (
+      <>
+        <ModalHeader className="text-red-400 font-semibold">
+          Remove Item
+        </ModalHeader>
 
-                <h2 className="text-lg font-semibold text-white mb-2">
-                  Remove Item?
-                </h2>
+        <ModalBody className="text-gray-300">
+          Are you sure you want to remove this product from your cart?
+        </ModalBody>
 
-                <p className="text-gray-400 text-sm mb-5">
-                  Are you sure you want to remove this product from your cart?
-                </p>
+        <ModalFooter>
+          <Button
+            variant="light"
+            onPress={onDeleteClose}
+            className="text-gray-300"
+          >
+            Cancel
+          </Button>
 
-                <div className="flex justify-center gap-4">
+          <Button
+            className="bg-red-500 hover:bg-red-600 text-white border border-red-900 active:bg-red-500/80 active:border-red-900 focus:bg-red-500/80 focus:border-red-900 active:scale-95 transition-all duration-200 cursor-pointer rounded-3xl"
+            onPress={() => {
+              removeFromCart(selectedItem);
+              toast.success("Item removed from cart");
+              onDeleteClose();
+            }}
+          >
+            Remove
+          </Button>
+        </ModalFooter>
+      </>
+    )}
 
-                  {/* Cancel */}
-                  <button
-                    onClick={() => {
-                      setShowDeleteAlert(false);
-                      setSelectedItem(null);
-                    }}
-                    className="px-4 py-2 bg-gray-500/20 border border-gray-400/30 rounded-lg hover:bg-gray-500/30 transition"
-                  >
-                    Cancel
-                  </button>
+  </ModalContent>
+</Modal>
+<Modal
+  isOpen={isCodConfirmOpen}
+  onClose={onCodConfirmClose}
+  placement="center"
+  backdrop="blur"
+  hideCloseButton
+>
+  <ModalContent className="bg-black/50 backdrop-blur-xl border border-white/20 rounded-3xl text-white">
 
-                  {/* Delete */}
-                  <button
-                    onClick={() => {
-                      removeFromCart(selectedItem);
-                      setShowDeleteAlert(false);
-                      setSelectedItem(null);
+    {(onClose) => (
+      <>
+        <ModalHeader className="text-yellow-400 font-semibold">
+          Confirm Cash On Delivery
+        </ModalHeader>
 
-                      toast.success("Item removed from cart");
-                    }}
-                    className="px-4 py-2 bg-red-500 rounded-lg hover:bg-red-600 transition cursor-pointer"
-                  >
-                    Remove
-                  </button>
+        <ModalBody className="text-gray-300 space-y-2">
+          <p>You selected <span className="text-yellow-400 font-semibold">Cash on Delivery</span>.</p>
+        </ModalBody>
 
-                </div>
-              </div>
-            </div>
-          )}
+        <ModalFooter>
+          <Button
+            variant="light"
+            onPress={onCodConfirmClose}
+            className="text-gray-300"
+          >
+            Cancel
+          </Button>
+
+          <Button
+            className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-2xl"
+            onPress={() => {
+              const phone = document.querySelector('input[name="phone"]')?.value;
+              completeOrder(phone, "COD");
+              onCodConfirmClose();
+            }}
+          >
+            Confirm Order
+          </Button>
+        </ModalFooter>
+      </>
+    )}
+
+  </ModalContent>
+</Modal>
           {/* Delivery & Bill Details */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-10">
             {/* Delivery Info */}
