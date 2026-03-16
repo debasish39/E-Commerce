@@ -251,7 +251,7 @@ navigate("/order-success");
       }
 
       const razor = new window.Razorpay({
-        key: "rzp_test_SMNdX5YBGk1ooX",
+        key: import.meta.env.VITE_RAZORPAY_KEY,
         amount: orderData.amount,
         currency: "INR",
         name: "EShop",
