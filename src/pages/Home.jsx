@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
-
 import Carousel from "../components/Carousel";
 import MidBanner from "../components/MidBanner";
 import Features from "../components/Features";
@@ -14,15 +13,15 @@ export default function Home() {
 
   useEffect(() => {
     AOS.init({
-      duration: 300,
+      duration: 400,
       easing: "ease-in-out",
       once: false,
+      offset: 40,
     });
-
-    AOS.refresh();
 
     const timeout = setTimeout(() => {
       setLoading(false);
+      AOS.refresh();
     }, 900);
 
     return () => clearTimeout(timeout);
@@ -30,7 +29,7 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center min-h-screen bg-gray-100">
         <video
           autoPlay
           loop
@@ -44,10 +43,10 @@ export default function Home() {
       </div>
     );
   }
-  
 
   return (
-    <div  className="relative min-h-screen text-gray-800  overflow-hidden">
+    <div className="relative min-h-screen text-gray-800 overflow-hidden transition-opacity duration-500">
+
       <div data-aos="fade-up">
         <Carousel />
       </div>
@@ -55,12 +54,15 @@ export default function Home() {
       <div data-aos="fade-right">
         <Category />
       </div>
+
       <div data-aos="zoom-in">
         <MidBanner />
       </div>
+
       <div data-aos="fade-left">
         <Features />
       </div>
+
     </div>
   );
 }

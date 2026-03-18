@@ -22,55 +22,57 @@ export default function FilterSection({ open, setOpen }) {
       {/* Backdrop */}
       <div
         onClick={() => setOpen(false)}
-        className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
-          open ? "opacity-100 visible" : "opacity-0 invisible"
-        }`}
+       className={`fixed inset-0 z-40 bg-gray-900/30 backdrop-blur-sm transition-opacity duration-300 ${
+  open ? "opacity-100 visible" : "opacity-0 invisible"
+}`}
       />
 
       {/* Drawer */}
       <div
         className={`fixed top-0 right-0 z-50 h-full w-[92%] sm:w-[420px]
-        bg-[#0f0f10]/95 backdrop-blur-xl text-white
-        border-l border-white/10
-        shadow-[0_0_80px_rgba(0,0,0,0.8)]
-        transform transition-transform duration-300 ${
-          open ? "translate-x-0" : "translate-x-full"
-        }`}
+bg-white/95 backdrop-blur-xl text-gray-800
+border-l border-blue-100
+shadow-[0_0_80px_rgba(0,0,0,0.15)]
+transform transition-transform duration-300 ${
+  open ? "translate-x-0" : "translate-x-full"
+}`}
       >
         {/* Decorative Glow */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-20 -left-20 w-[260px] h-[260px] bg-red-500/20 blur-[120px] rounded-full" />
-          <div className="absolute bottom-[-100px] right-[-100px] w-[260px] h-[260px] bg-pink-500/20 blur-[120px] rounded-full" />
+          <div className="absolute -top-20 -left-20 w-[260px] h-[260px] bg-blue-400/30 blur-[120px] rounded-full" />
+          <div className="absolute bottom-[-100px] right-[-100px] w-[260px] h-[260px] bg-blue-300/30 blur-[120px] rounded-full" />
         </div>
 
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-5 border-b border-white/10 bg-black/30 backdrop-blur-xl">
-          <h2 className="text-xl font-semibold bg-gradient-to-r from-red-500 to-pink-400 text-transparent bg-clip-text">
+        <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-5 border-b border-blue-100 bg-white/80 backdrop-blur-xl">
+         <h2 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-blue-400 text-transparent bg-clip-text">
             Filters
           </h2>
 
           <button
             onClick={() => setOpen(false)}
-            className="text-gray-400 hover:text-white transition"
+            className="text-gray-500 hover:text-blue-600 transition"
           >
             <FaTimes size={18} />
           </button>
         </div>
 
         {/* Body */}
-        <div
-          className="p-6 space-y-8 overflow-y-auto h-[calc(100%-140px)]
-          [&::-webkit-scrollbar]:w-[6px]
-          [&::-webkit-scrollbar-thumb]:bg-gray-700
-          [&::-webkit-scrollbar-thumb]:rounded"
-        >
+      <div
+  className="p-6 space-y-8 overflow-y-auto h-[calc(100%-140px)]
+  [&::-webkit-scrollbar]:w-[6px]
+  [&::-webkit-scrollbar-track]:bg-transparent
+  [&::-webkit-scrollbar-thumb]:bg-blue-300
+  [&::-webkit-scrollbar-thumb]:rounded-full
+  hover:[&::-webkit-scrollbar-thumb]:bg-blue-400 scroll-smooth"
+>
           {/* CATEGORY */}
-          <div className="bg-[#141414]/70 rounded-2xl p-4 border border-white/5 shadow-md">
+          <div className="bg-white rounded-2xl p-4 border border-blue-100 shadow-sm">
             <button
               onClick={() => setOpenCategory(!openCategory)}
-              className="group flex justify-between items-center w-full px-3 py-2 rounded-lg hover:bg-[#1c1c1c] transition"
+              className="group flex justify-between items-center w-full px-3 py-2 rounded-lg hover:bg-blue-50 transition"
             >
-              <span className="text-sm font-semibold text-gray-300 group-hover:text-white">
+              <span className="text-sm font-semibold text-gray-700 group-hover:text-blue-600">
                 Category
               </span>
 
@@ -100,14 +102,14 @@ export default function FilterSection({ open, setOpen }) {
                       className={`flex justify-between items-center px-3 py-2 rounded-lg cursor-pointer transition
                       ${
                         active
-                          ? "bg-red-500/20 border border-red-500/40"
-                          : "hover:bg-[#1d1d1d]"
+                          ? "bg-blue-100 border border-blue-300"
+                          : "hover:bg-blue-50"
                       }`}
                     >
                       <span className="text-sm">{cat}</span>
 
                       {active && (
-                        <FaCheck className="text-red-400 text-xs" />
+                        <FaCheck className="text-blue-600 text-xs" />
                       )}
                     </li>
                   );
@@ -117,12 +119,12 @@ export default function FilterSection({ open, setOpen }) {
           </div>
 
           {/* BRAND */}
-          <div className="bg-[#141414]/70 rounded-2xl p-4 border border-white/5 shadow-md">
+          <div className="bg-white rounded-2xl p-4 border border-blue-100 shadow-sm">
             <button
               onClick={() => setOpenBrand(!openBrand)}
-              className="group flex justify-between items-center w-full px-3 py-2 rounded-lg hover:bg-[#1c1c1c] transition"
+              className="group flex justify-between items-center w-full px-3 py-2 rounded-lg hover:bg-blue-50 transition"
             >
-              <span className="text-sm font-semibold text-gray-300 group-hover:text-white">
+              <span className="text-sm font-semibold text-gray-700 group-hover:text-blue-600">
                 Brand
               </span>
 
@@ -152,14 +154,14 @@ export default function FilterSection({ open, setOpen }) {
                       className={`flex justify-between items-center px-3 py-2 rounded-lg cursor-pointer transition
                       ${
                         active
-                          ? "bg-red-500/20 border border-red-500/40"
-                          : "hover:bg-[#1d1d1d]"
+                          ? "bg-blue-100 border border-blue-300"
+                          : "hover:bg-blue-50"
                       }`}
                     >
                       <span className="text-sm">{b}</span>
 
                       {active && (
-                        <FaCheck className="text-red-400 text-xs" />
+                       <FaCheck className="text-blue-600 text-xs" />
                       )}
                     </li>
                   );
@@ -169,11 +171,11 @@ export default function FilterSection({ open, setOpen }) {
           </div>
 
           {/* PRICE */}
-          <div className="bg-[#141414]/70 rounded-2xl p-4 border border-white/5 shadow-md">
-            <div className="flex justify-between text-sm text-gray-400 mb-4">
+         <div className="bg-white rounded-2xl p-4 border border-blue-100 shadow-sm">
+            <div className="flex justify-between text-sm text-gray-600 mb-4">
               <span>Price</span>
 
-              <span className="text-red-400 font-medium">
+              <span className="text-blue-600 font-medium">
                 ₹{priceRange[0]} — ₹{priceRange[1]}
               </span>
             </div>
@@ -187,27 +189,27 @@ export default function FilterSection({ open, setOpen }) {
               onChange={(e) =>
                 setPriceRange([priceRange[0], Number(e.target.value)])
               }
-              className="w-full accent-red-500"
+              className="w-full accent-blue-600"
             />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-black/40 backdrop-blur-xl border-t border-white/10 p-6 flex gap-3">
+        <div className="sticky bottom-0  backdrop-blur-xl bg-white/80 border-t border-blue-100 p-6 flex gap-3">
           <button
             onClick={() => {
               setCategory("All");
               setBrand("All");
               setPriceRange([0, 5000]);
             }}
-            className="flex-1 border border-gray-700 py-2 rounded-xl hover:bg-[#1a1a1a] transition"
+            className="flex-1 border border-gray-300 hover:bg-blue-50 py-2 rounded-xl transition"
           >
             Reset
           </button>
 
           <button
             onClick={() => setOpen(false)}
-            className="flex-1 bg-gradient-to-r from-red-500 to-red-800 py-2 rounded-xl hover:opacity-90 transition shadow-lg"
+            className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 py-2 rounded-xl hover:opacity-90 transition shadow-lg"
           >
             Apply
           </button>

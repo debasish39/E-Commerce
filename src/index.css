@@ -2,53 +2,68 @@
 @import "slick-carousel/slick/slick-theme.css";
 @import "tailwindcss";
 
+/* ================= BASE ================= */
+
 body {
   margin: 0;
   padding: 0;
-  
-}
-.slick-dots {
-  bottom: -35px;
 }
 
-.slick-dots li button:before {
-  font-size: 12px;
-  color: #ffffff;
-  opacity: 0.6;
-}
 
-.slick-dots li.slick-active button:before {
-  color: #f53347;
-  opacity: 1;
-}
+/* ================= TEXT SELECTION ================= */
+
 ::selection{
-  background-color: rgb(144, 23, 23);
-  color:rgb(223, 216, 216);
+  background-color:#6366f1;
+  color:white;
 }
+
+
+/* ================= SCROLLBAR ================= */
 
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 3px;
+  width:6px;
+  height:4px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #000000;
-  border-radius: 10px;
+  background:#0f172a;
+  border-radius:10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #ef0303; 
-  border-radius: 10px;
-  border: 2px solid rgb(0, 0, 0); 
+  background:linear-gradient(180deg,#2563eb,#6366f1,#7c3aed);
+  border-radius:10px;
 }
-/* Remove dots below slick carousel completely
+
+::-webkit-scrollbar-thumb:hover{
+  background:linear-gradient(180deg,#1d4ed8,#4f46e5,#6d28d9);
+}
+
+
+/* ================= SLICK DOTS ================= */
+
 .slick-dots {
-  display: none !important;
-} */
+  bottom:-35px;
+}
+
+.slick-dots li button:before{
+  font-size:12px;
+  color:#94a3b8;
+  opacity:0.6;
+}
+
+.slick-dots li.slick-active button:before{
+  color:#6366f1;
+  opacity:1;
+}
+
+
+/* ================= PROGRESS DOT ================= */
+
 .progress-dot{
   width:6px;
   height:6px;
-  background:#e5e7ebb6;
+  background:#e5e7eb;
   border-radius:999px;
   overflow:hidden;
   position:relative;
@@ -61,7 +76,7 @@ body {
   top:0;
   height:100%;
   width:0%;
-  background:red;
+  background:linear-gradient(90deg,#2563eb,#6366f1,#7c3aed);
   border-radius:999px;
 }
 
@@ -77,29 +92,31 @@ body {
     width:100%;
   }
 }
-:root {
-  --clerk-color-background: #212126;
-  --clerk-color-neutral: white;
-  --clerk-color-primary: #FFFFFF;
-  --clerk-color-primary-foreground: black;
-  --clerk-color-foreground: white;
-  --clerk-color-input-foreground: white;
-  --clerk-color-input: #26262B;
-}
 
-/* .dark {
-  --clerk-color-background: #211919;
-  --clerk-color-neutral: #D1CBCB;
-  --clerk-color-primary: #EDE6E6;
-  --clerk-color-primary-foreground: black;
-  --clerk-color-foreground: #E0C8C8;
-  --clerk-color-input-foreground: #5C5050;
-  --clerk-color-input: #292727;
-  --clerk-color-muted: #301010;
-  --clerk-color-muted-foreground: #FFF7F7;
-  --clerk-color-ring: #FFFFFF;
-  --clerk-color-border: #FCFCFC;
-  --clerk-color-shadow: #E3C1C1;
-  --clerk-color-modal-backdrop: #FCB3B3;
-  --clerk-color-danger: #AB8585;
-} */
+
+/* ================= CLERK THEME ================= */
+
+:root {
+  /* BACKGROUND (LIGHT LIKE YOUR IMAGE) */
+  --clerk-color-background: #f8fafc; /* slate-50 */
+
+  /* TEXT */
+  --clerk-color-foreground: #1e293b; /* slate-800 */
+  --clerk-color-neutral: #0f172a;
+
+  /* PRIMARY (GRADIENT BASE) */
+  --clerk-color-primary: #6366f1; /* indigo */
+  --clerk-color-primary-foreground: #ffffff;
+
+  /* INPUT */
+  --clerk-color-input: #ffffff;
+  --clerk-color-input-foreground: #1e293b;
+
+  /* BORDER */
+  --clerk-color-border: rgba(0,0,0,0.08);
+
+  /* STATES */
+  --clerk-color-focus: #6366f1;
+  --clerk-color-success: #22c55e;
+  --clerk-color-danger: #ef4444;
+}

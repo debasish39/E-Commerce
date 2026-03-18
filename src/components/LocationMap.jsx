@@ -39,13 +39,24 @@ export default function LocationMap({ onSelect }) {
         <LocationMarker setCoords={setCoords} />
       </MapContainer>
 
-      <button
-        onClick={() => coords && onSelect(coords.lat, coords.lng)}
-        className="w-full py-2 bg-gradient-to-r from-red-500 to-black/30 border border-red-500/40
-              text-gray-300 rounded-lg cursor-pointer"
-      >
-        Confirm Selected Location
-      </button>
+    <button
+  onClick={() => coords && onSelect(coords.lat, coords.lng)}
+  className="
+  w-full py-2
+  bg-gradient-to-r from-blue-600  to-indigo-500
+  text-white
+  rounded-lg
+  border border-indigo-300
+  hover:shadow-[0_6px_20px_rgba(99,102,241,0.35)]
+  hover:scale-[1.02]
+  active:scale-[0.98]
+  transition-all duration-200
+  disabled:opacity-50
+  cursor-pointer
+  "
+>
+  Confirm Selected Location
+</button>
     </div>
   );
 }

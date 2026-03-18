@@ -112,7 +112,7 @@ const { user, isSignedIn } = useUser();
 
     setCartItem(data.cart.items);
 
-    toast.success(`${product.title} added to cart`);
+    toast.success("Added to cart 🛒");
 
   } catch (error) {
 

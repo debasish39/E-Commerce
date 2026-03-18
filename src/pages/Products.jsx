@@ -99,8 +99,8 @@ export default function Products() {
           key={p}
           onClick={() => setPage(p)}
           className={`px-3 py-1.5 rounded-md text-sm ${page === p
-            ? "bg-red-500 text-white"
-            : "border border-gray-700 hover:bg-gray-800"
+            ? "bg-indigo-600 text-white"
+            : "border border-blue-200 hover:bg-blue-50"
             }`}
         >
           {p}
@@ -112,14 +112,14 @@ export default function Products() {
   return (
     <>
 
-      <div className="min-h-screen py-10 px-4 text-white">
+    <div className="min-h-screen py-6 px-2 text-gray-800">
 
         {/* Header */}
         <div
           data-aos="fade-down"
-          className="flex justify-center mb-10"
+        className="flex justify-center mb-6"
         >
-          <h2 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-red-500 to-pink-300 text-transparent bg-clip-text">
+          <h2 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600text-transparent bg-clip-text mt-6">
             <span className="text-white">🛍️</span> Explore Our Collection
           </h2>
 
@@ -128,7 +128,7 @@ export default function Products() {
         {/* Products */}
         {loading ? (
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
 
             {Array(12)
               .fill(0)
@@ -145,9 +145,9 @@ export default function Products() {
 
               <div
                 data-aos="zoom-in"
-                className="flex justify-center items-center min-h-[350px]"
+                className="flex justify-center items-center min-h-[350px] sm:mt-3"
               >
-                <Lottie animationData={notfound} className="w-80" />
+                <Lottie animationData={notfound} className="w-[800px] h-[500px]" />
               </div>
 
             ) : (
@@ -180,7 +180,7 @@ export default function Products() {
                 <button
                   onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
                   disabled={page === 1}
-                  className="px-3 py-2 rounded border border-gray-700 hover:bg-gray-800 disabled:opacity-40"
+                  className="px-3 py-2 rounded border border-blue-200 hover:bg-blue-50disabled:opacity-40"
                 >
                   <FaAngleLeft />
                 </button>
@@ -192,7 +192,7 @@ export default function Products() {
                     setPage((prev) => Math.min(prev + 1, totalPages))
                   }
                   disabled={page === totalPages}
-                  className="px-3 py-2 rounded border border-gray-700 hover:bg-gray-800 disabled:opacity-40"
+                  className="px-3 py-2 rounded border border-blue-200 hover:bg-blue-50 disabled:opacity-40"
                 >
                   <FaAngleRight />
                 </button>
@@ -207,16 +207,22 @@ export default function Products() {
       </div>
 
       {/* Floating Filter Button */}
-      <button
-        data-aos="fade-right" data-aos-delay="3000"
-        onClick={() => setShowFilters(true)}
-        className="fixed right-6 bottom-36 sm:bottom-15 -translate-y-1/2 z-40
-  bg-gradient-to-r from-black/30 to-red-900
-  text-gray-300 p-3 rounded-full
-  shadow-lg hover:scale-110 transition-all duration-300 cursor-pointer border border-red-500/60"
-      >
-        <VscFilterFilled size={30} />
-      </button>
+    <button
+  data-aos="fade-right"
+  data-aos-delay="3000"
+  onClick={() => setShowFilters(true)}
+  className="
+  fixed right-6 bottom-36 sm:bottom-15 -translate-y-1/2 z-40
+  bg-gradient-to-r from-blue-400 to-indigo-600
+  text-white
+  p-3 rounded-full
+  shadow-lg hover:scale-110 transition-all duration-300
+  border border-indigo-400
+  cursor-pointer
+  "
+>
+  <VscFilterFilled size={30} />
+</button>
 
       {/* Filter Drawer */}
       <FilterSection open={showFilters} setOpen={setShowFilters} />

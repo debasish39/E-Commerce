@@ -163,7 +163,7 @@ export default function Contact() {
   return (
     <>
       <div className="min-h-screen py-12 px-4 bg-transparent relative">
-        <Toaster position="top-right" richColors closeButton theme="dark" />
+        <Toaster position="top-right" richColors  />
 
         <div className="max-w-7xl mx-auto flex flex-col-reverse lg:flex-row gap-10">
           
@@ -186,7 +186,7 @@ export default function Contact() {
             className="w-full lg:w-1/2 flex flex-col"
             data-aos="fade-left"
           >
-            <h2 className="text-3xl font-bold text-center text-red-600 mb-4">
+            <h2 className="text-3xl font-bold text-center text-indigo-600 mb-4">
               Customer Support
             </h2>
 
@@ -202,8 +202,8 @@ export default function Contact() {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="John Doe"
-                    className={`w-full pl-10 px-4 py-2 rounded-lg border bg-transparent ${
-                      errors.name ? "border-red-500" : "border-gray-300"
+                    className={`w-full pl-10 px-4 py-2 rounded-lg border-2 bg-transparent ${
+                      errors.name ? "border-red-500" : "border-indigo-600 focus:border-indigo-600 focus:outline-none"
                     }`}
                   />
                 </div>
@@ -222,8 +222,8 @@ export default function Contact() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="john@example.com"
-                    className={`w-full pl-10 px-4 py-2 rounded-lg border bg-transparent ${
-                      errors.email ? "border-red-500" : "border-gray-300"
+                    className={`w-full pl-10 px-4 py-2 rounded-lg border-2 bg-transparent ${
+                      errors.email ? "border-red-500" : "border-indigo-600 focus:border-indigo-600 focus:outline-none"
                     }`}
                   />
                 </div>
@@ -238,8 +238,8 @@ export default function Contact() {
                   name="inquiryType"
                   value={formData.inquiryType}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 rounded-lg border bg-transparent ${
-                    errors.inquiryType ? "border-red-500" : "border-gray-300"
+                  className={`w-full px-4 py-2 rounded-lg border-2 bg-transparent ${
+                    errors.inquiryType ? "border-red-500" : "border-indigo-600 focus:border-indigo-600 focus:outline-none"
                   }`}
                 >
                   <option value="">Select Inquiry Type</option>
@@ -264,8 +264,8 @@ export default function Contact() {
                     value={formData.orderId}
                     onChange={handleChange}
                     placeholder="#123456"
-                    className={`w-full px-4 py-2 rounded-lg border bg-transparent ${
-                      errors.orderId ? "border-red-500" : "border-gray-300"
+                    className={`w-full px-4 py-2 rounded-lg border-2 bg-transparent ${
+                      errors.orderId ? "border-red-500" : "border-indigo-600 focus:border-indigo-600 focus:outline-none"
                     }`}
                   />
                   {errors.orderId && (
@@ -284,8 +284,8 @@ export default function Contact() {
                   value={formData.message}
                   onChange={handleChange}
                   placeholder="Type your message..."
-                  className={`w-full px-4 py-2 rounded-lg border bg-transparent ${
-                    errors.message ? "border-red-500" : "border-gray-300"
+                  className={`w-full px-4 py-2 rounded-lg border-2 bg-transparent ${
+                    errors.message ? "border-red-500" : "border-indigo-600 focus:border-indigo-600 focus:outline-none"
                   }`}
                 ></textarea>
                 {errors.message && (
@@ -299,7 +299,7 @@ export default function Contact() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-red-500 to-black/90 hover:from-red-600 transition flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-blue-500 via-indigo-500 to-gray-800 hover:from-blue-600 transition flex items-center justify-center gap-2 cursor-pointer" 
               >
                 {isSubmitting ? (
                   "Sending..."
@@ -321,59 +321,67 @@ export default function Contact() {
 <div className="max-w-7xl mx-auto mt-9 px-4">
 
   <h2 className="text-3xl md:text-4xl font-bold text-center mb-10
-  bg-gradient-to-r from-red-500 to-black/30 bg-clip-text text-transparent">
+  bg-gradient-to-r from-indigo-500 to-black/30 bg-clip-text text-transparent">
     Frequently Asked Questions
   </h2>
 
-  <div className="space-y-4">
+ <div className="space-y-4">
 
-    {faqs.map((faq, index) => (
+  {faqs.map((faq, index) => {
+    const isOpen = openFAQ === index;
+
+    return (
       <div
         key={index}
-        className="rounded-2xl border border-red-500/20
-        bg-black/30 backdrop-blur-md
-        shadow-md hover:border-red-500/40
-        transition-all duration-300"
+        className={`group rounded-2xl border 
+        border-indigo-200 hover:border-indigo-400
+        bg-gradient-to-br from-gray-100 via-blue-50 to-indigo-100
+        shadow-md hover:shadow-indigo-200/50
+        transition-all duration-300`}
       >
 
+        {/* BUTTON */}
         <button
           onClick={() => toggleFAQ(index)}
-          className="w-full flex justify-between items-center
-          px-6 py-4 text-left"
+          className="w-full flex justify-between items-center px-6 py-5"
         >
 
-          <span className="text-white font-semibold text-base md:text-lg">
+          <span
+            className={`text-base md:text-lg font-semibold transition-colors duration-300
+            ${isOpen ? "text-indigo-600" : "text-gray-700 group-hover:text-indigo-500"}`}
+          >
             {faq.question}
           </span>
 
-          <span
-            className={`text-red-500 text-2xl transition-transform duration-300 ${
-              openFAQ === index ? "rotate-45" : "rotate-0"
-            }`}
+          {/* ICON */}
+          <div
+            className={`flex items-center justify-center w-8 h-8 rounded-full
+            transition-all duration-300 cursor-pointer
+            ${isOpen
+              ? "bg-indigo-100 text-indigo-600 rotate-45"
+              : "bg-gray-200 text-gray-600 group-hover:bg-indigo-100"}
+            `}
           >
-            +
-          </span>
+            <span className="text-xl leading-none">+</span>
+          </div>
 
         </button>
 
+        {/* ANSWER */}
         <div
-          className={`grid transition-all duration-300 ease-in-out ${
-            openFAQ === index
-              ? "grid-rows-[1fr] opacity-100"
-              : "grid-rows-[0fr] opacity-0"
-          }`}
+          className={`transition-all duration-500 ease-in-out overflow-hidden
+          ${isOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}
         >
-          <div className="overflow-hidden">
-            <p className="px-6 pb-5 text-gray-300 leading-relaxed">
-              {faq.answer}
-            </p>
-          </div>
+          <p className="px-6 pb-5 text-gray-600 leading-relaxed text-sm md:text-base">
+            {faq.answer}
+          </p>
         </div>
 
       </div>
-    ))}
+    );
+  })}
 
-  </div>
+</div>
 
 </div>
       </div>

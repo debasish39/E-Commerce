@@ -40,10 +40,9 @@ const fetchAllProducts = async () => {
     const res = await axios.get("https://dummyjson.com/products?limit=199");
 
     const productsData = res.data.products.map((product) => ({
-      ...product,
-      price: calculatePrice(product.price), // updated price
-     
-    }));
+  ...product,
+  price: calculatePrice(product.price), 
+}));
 
     setData(productsData);
 

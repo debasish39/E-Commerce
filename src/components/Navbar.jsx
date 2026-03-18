@@ -46,40 +46,40 @@ export default function Navbar({ location, onLocationChange }) {
   const [showBottomNav, setShowBottomNav] = useState(true);
   const [isListening, setIsListening] = useState(false);
   const [area, setArea] = useState("");
-const handleAreaSearch = async () => {
-  if (!area) {
-    toast.warning("Please enter a location");
-    return;
-  }
-
-  const loadingToast = toast.loading("Searching location...");
-
-  try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${area}`
-    );
-
-    const data = await res.json();
-
-    if (data.length > 0) {
-      const lat = data[0].lat;
-      const lon = data[0].lon;
-
-      onLocationChange(lat, lon);
-      onClose();
-
-      toast.dismiss(loadingToast);
-      toast.success("Location found successfully");
-    } else {
-      toast.dismiss(loadingToast);
-      toast.error("Location not found");
+  const handleAreaSearch = async () => {
+    if (!area) {
+      toast.warning("Please enter a location");
+      return;
     }
-  } catch (error) {
-    console.error(error);
-    toast.dismiss(loadingToast);
-    toast.error("Something went wrong");
-  }
-};
+
+    const loadingToast = toast.loading("Searching location...");
+
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${area}`
+      );
+
+      const data = await res.json();
+
+      if (data.length > 0) {
+        const lat = data[0].lat;
+        const lon = data[0].lon;
+
+        onLocationChange(lat, lon);
+        onClose();
+
+        toast.dismiss(loadingToast);
+        toast.success("Location found successfully");
+      } else {
+        toast.dismiss(loadingToast);
+        toast.error("Location not found");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.dismiss(loadingToast);
+      toast.error("Something went wrong");
+    }
+  };
   const handleVoiceSearch = () => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -174,23 +174,54 @@ const handleAreaSearch = async () => {
   };
 
   const navLinks = [
-    { name: "Home", path: "/", icon: <Home className="h-4 w-4 text-red-500" /> },
-    { name: "Products", path: "/products", icon: <Package className="h-4 w-4 text-red-500" /> },
-    { name: "Contact", path: "/contact", icon: <Phone className="h-4 w-4 text-red-500" /> },
-    { name: "Orders", path: "/order-history", icon: <ShoppingBag className="h-4 w-4 text-red-500" /> },
+    {
+      name: "Home",
+      path: "/",
+      icon: <Home className="h-4 w-4 text-indigo-500" />,
+    },
+    {
+      name: "Products",
+      path: "/products",
+      icon: <Package className="h-4 w-4 text-indigo-500" />,
+    },
+    {
+      name: "Contact",
+      path: "/contact",
+      icon: <Phone className="h-4 w-4 text-indigo-500" />,
+    },
+    {
+      name: "Orders",
+      path: "/order-history",
+      icon: <ShoppingBag className="h-4 w-4 text-indigo-500" />,
+    },
   ];
 
   const renderLocation = () => (
     <div
-      className="flex items-center gap-1 text-gray-300 text-sm relative cursor-pointer hover:text-red-400 transition"
+      className="flex items-center gap-2 
+
+    text-gray-700 text-sm font-medium
+
+     
+    
+
+     hover:text-indigo-600
+   
+
+    transition-all duration-300 cursor-pointer"
+
       onClick={(e) => {
         e.stopPropagation();
         onOpen();
       }}
       data-aos="fade-up"
     >
-      <MapPin className="h-4 w-4 text-red-500" />
-      <span className="font-semibold max-w-[150px] truncate">
+
+      {/* ICON */}
+      <MapPin className="h-4 w-4 text-indigo-500" />
+
+      {/* TEXT */}
+      <span className="max-w-[150px] truncate">
         {location ? (
           <>
             {location.village ||
@@ -199,13 +230,15 @@ const handleAreaSearch = async () => {
               location.suburb ||
               location.county ||
               location.state_district}
-            , {location.state}, {location.country}
+            , {location.state}
           </>
         ) : (
           "Add Location"
         )}
       </span>
-      <ChevronDown className="ml-1 transition-transform" />
+
+      {/* DROPDOWN */}
+      <ChevronDown className="ml-1 text-gray-400 transition-transform group-hover:rotate-180" />
     </div>
   );
 
@@ -214,7 +247,7 @@ const handleAreaSearch = async () => {
       {/* Background overlay for mobile menu */}
       {isMobileNavOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30"
+          className="fixed inset-0 bg-white/40 backdrop-blur-sm z-30"
           onClick={() => setIsMobileNavOpen(false)}
           data-aos="fade-in"
         ></div>
@@ -222,11 +255,15 @@ const handleAreaSearch = async () => {
 
       {/* Navbar */}
       <header
-        className={`fixed top-0 left-0 right-0 z-40 
-  bg-black/10 backdrop-blur-md border-b border-red-600/50 
-  py-3 shadow-[0_2px_66px_rgba(255,80,80,0.25)]
+        className={`fixed top-0 left-0 right-0 z-40
+
+  bg-white/50 backdrop-blur-md
+  border-b border-gray-200
+  py-3
+  shadow-sm
   transition-transform duration-300 ease-in-out
   ${showNavbar ? "translate-y-0" : "-translate-y-full"}`}
+
         data-aos="fade-down"
         onClick={() => onClose()}
       >
@@ -234,18 +271,40 @@ const handleAreaSearch = async () => {
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
           {/* Logo + Location */}
           <div className="flex items-center gap-4" data-aos="zoom-in">
+
+            {/* LOGO */}
             <Link
               to="/"
-              className="text-[24px] sm:text-3xl font-bold bg-gradient-to-r from-red-400 to-orange-300 bg-clip-text text-transparent drop-shadow-[3px_3px_30px_red]"
+              className="text-2xl sm:text-3xl font-bold
+
+    bg-gradient-to-r from-indigo-500 to-blue-500
+    bg-clip-text text-transparent
+
+    tracking-tight
+
+    hover:opacity-80
+
+    transition"
+
               style={{ fontFamily: "'Pacifico', cursive" }}
             >
               E-Shop
             </Link>
-            <div className="hidden md:flex">{renderLocation()}</div>
+
+            {/* LOCATION */}
+            <div className="hidden md:flex">
+              {renderLocation()}
+            </div>
+
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center justify-center gap-6" data-aos="fade-left">
+          <nav
+            className="hidden md:flex items-center justify-center gap-6"
+            data-aos="fade-left"
+          >
+
+            {/* SEARCH */}
             <div className="relative flex items-center">
               <input
                 type="text"
@@ -253,26 +312,30 @@ const handleAreaSearch = async () => {
                 onChange={handleSearchChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Search products..."
-                className="bg-black/10 border border-orange-700/60 
-    text-white rounded-xl pl-5 pr-20 py-2.5 text-sm
-    focus:outline-none focus:ring-1 focus:ring-red-900
-    backdrop-blur-md transition w-56 focus:w-72"
+                className="bg-white border border-gray-300
+
+      text-gray-800 placeholder-gray-400
+
+      rounded-lg pl-4 pr-12 py-2 text-sm
+
+      focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+
+      transition-all duration-300 w-56 focus:w-60"
               />
 
-
-
-              {/* 🎙 Mic Button */}
+              {/* MIC */}
               <button
                 onClick={handleVoiceSearch}
-                className={`absolute right-4 transition-all duration-300 cursor-pointer ${isListening
-                  ? "text-red-500 animate-pulse scale-110"
-                  : "text-gray-400 hover:text-red-400"
+                className={`absolute right-3 transition-all duration-300 ${isListening
+                    ? "text-indigo-600 animate-pulse scale-110"
+                    : "text-gray-400 hover:text-indigo-600"
                   }`}
               >
                 {isListening ? <MicOff size={20} /> : <Mic size={20} />}
               </button>
             </div>
 
+            {/* NAV LINKS */}
             <ul className="flex gap-6 font-medium">
               {navLinks.map(({ name, path, icon }) => (
                 <li key={name} className="relative group">
@@ -280,47 +343,54 @@ const handleAreaSearch = async () => {
                     to={path}
                     className={({ isActive }) =>
                       `flex items-center gap-1 pb-1 transition-all duration-300 ${isActive
-                        ? "text-red-400 font-bold"
-                        : "text-gray-300 hover:text-red-400 font-medium"
+                        ? "text-indigo-600 font-semibold"
+                        : "text-gray-600 hover:text-indigo-600"
                       }`
                     }
                   >
                     {icon} {name}
                   </NavLink>
+
+                  {/* UNDERLINE */}
                   <span
-                    className={`absolute bottom-0 left-0 w-0 h-[2px] bg-red-400 transition-all duration-300 group-hover:w-full ${window.location.pathname === path ? "w-full" : "w-0"
-                      }`}
-                  ></span>
+                    className={`absolute bottom-0 left-0 h-[2px]
+          bg-indigo-500 transition-all duration-300
+          ${window.location.pathname === path ? "w-full" : "w-0 group-hover:w-full"}`}
+                  />
                 </li>
               ))}
             </ul>
 
-            {/* Cart */}
-            <Link to="/cart" className="relative" data-aos="fade-left">
-              <ShoppingCart className="h-6 w-6 text-gray-300 hover:text-red-400 transition" />
-              <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
+            {/* CART */}
+            <Link to="/cart" className="relative group">
+              <ShoppingCart className="h-6 w-6 text-gray-600 group-hover:text-indigo-600 transition" />
+
+              <span className="absolute -top-2 -right-2 h-5 w-5 text-xs
+    bg-indigo-600 text-white rounded-full flex items-center justify-center">
                 {cartItem.length}
               </span>
             </Link>
 
-            {/* Wishlist */}
-            <Link to="/wishlist" className="relative" data-aos="fade-left">
-              <AiOutlineHeart className="h-6 w-6 text-gray-300 hover:text-red-400 transition" />
-              <span className="absolute -top-2 -right-2 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
+            {/* WISHLIST */}
+            <Link to="/wishlist" className="relative group">
+              <AiOutlineHeart className="h-6 w-6 text-gray-600 group-hover:text-indigo-600 transition" />
+
+              <span className="absolute -top-2 -right-2 h-5 w-5 text-xs
+    bg-indigo-600 text-white rounded-full flex items-center justify-center">
                 {wishlist.length}
               </span>
             </Link>
 
-            {/* Auth */}
-            <div className="ml-4" data-aos="fade-left">
+            {/* AUTH */}
+            <div className="ml-4">
 
               <SignedOut>
                 <button
                   onClick={() => navigate("/sign-in")}
-                  className="flex flex-col sm:flex-row items-center gap-1 text-white hover:text-red-500 transition cursor-pointer"
+                  className="flex flex-col sm:flex-row items-center gap-1
+        text-gray-600 hover:text-indigo-600 transition"
                 >
-                  <FaRegUserCircle className="h-5 sm:h-6 w-5 mb-1 sm:w-6" />
-                  <span className="text-[11px] md:hidden"> Account</span>
+                  <FaRegUserCircle className="h-6 w-6" />
                 </button>
               </SignedOut>
 
@@ -331,56 +401,72 @@ const handleAreaSearch = async () => {
                       src={user.imageUrl}
                       alt="profile"
                       onClick={() => navigate("/profile")}
-                      className="h-8 w-8 rounded-full ring-1 ring-red-500 cursor-pointer"
+                      className="h-8 w-8 rounded-full
+            ring-2 ring-indigo-500 cursor-pointer"
                     />
                   )}
-                  <span className="text-[11px] mt-1s md:hidden">Profile</span>
                 </div>
               </SignedIn>
+
             </div>
+
           </nav>
 
           {/* Mobile Nav + Cart + Auth */}
-          <div className="md:hidden flex items-center justify-center gap-4" data-aos="fade-right">
+          <div
+            className="md:hidden flex items-center justify-center gap-3"
+            data-aos="fade-right"
+          >
+
+            {/* SEARCH */}
             <div className="relative flex items-center w-full">
+
               <input
                 type="text"
                 value={search}
                 onChange={handleSearchChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Search products..."
-                className="w-60 bg-black/10 border border-orange-700/60 
-    text-white rounded-xl pl-5 pr-20 py-2.5 text-sm
-    focus:outline-none focus:ring-1 focus:ring-red-900
-    backdrop-blur-md transition"
+                className="w-52 focus:w-55 bg-white/80 border border-gray-300
+
+      text-gray-800 placeholder-gray-400
+
+      rounded-lg pl-3 pr-10 py-1.5 text-sm
+
+      focus:outline-none
+      focus:ring-1 focus:ring-indigo-300
+      focus:border-indigo-300
+
+      transition"
               />
 
-
+              {/* MIC */}
               <button
                 onClick={handleVoiceSearch}
-                className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-300 cursor-pointer ${isListening
-                  ? "text-red-500 animate-pulse scale-110"
-                  : "text-gray-400 hover:text-red-400"
+                className={`absolute right-3 top-1/2 -translate-y-1/2 transition-all duration-300 cursor-pointer ${isListening
+                    ? "text-indigo-600 animate-pulse scale-110"
+                    : "text-gray-400 hover:text-indigo-600"
                   }`}
               >
-                {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+                {isListening ? <MicOff size={20} /> : <Mic size={20} />}
               </button>
+
             </div>
 
 
-
-            {/* Toggle */}
+            {/* MENU TOGGLE */}
             {isMobileNavOpen ? (
               <HiMenuAlt3
                 onClick={() => setIsMobileNavOpen(false)}
-                className="h-7 w-7 text-gray-300 hover:text-red-400 cursor-pointer"
+                className="h-7 w-7 text-indigo-600 hover:text-indigo-900 cursor-pointer transition"
               />
             ) : (
               <HiMenuAlt1
                 onClick={() => setIsMobileNavOpen(true)}
-                className="h-7 w-7 text-gray-300 hover:text-red-400 cursor-pointer"
+                className="h-7 w-7 text-indigo-600 hover:text-indigo-900 cursor-pointer transition"
               />
             )}
+
           </div>
         </div>
       </header>
@@ -391,143 +477,149 @@ const handleAreaSearch = async () => {
         onClose={onClose}
         placement="center"
         backdrop="blur"
-           classNames={{
+        classNames={{
           body: "py-6",
-          backdrop: "bg-black/60 backdrop-opacity-40",
-          
+          backdrop: "bg-black/40 backdrop-blur-md",
         }}
         hideCloseButton
         className="z-[9999]"
       >
         <ModalContent
-          className="
-    relative bg-gradient-to-br from-black/70 via-black/60 to-gray-900/90
-    backdrop-blur-3xl border border-white/10
-    rounded-3xl shadow-[0_0_45px_rgba(255,70,70,0.35)]
-    text-gray-200 overflow-hidden
+          className="relative bg-white border border-gray-200
+    rounded-2xl shadow-xl text-gray-800 overflow-hidden
     max-w-lg w-[95%]"
         >
           {(onClose) => (
             <>
-              {/* Close Button */}
+              {/* CLOSE */}
               <button
                 onClick={onClose}
-                className="absolute top-6 right-6
-w-9 h-9 flex items-center justify-center
-rounded-full
-bg-white/10
-hover:bg-red-500/70
-active:bg-red-500/70
-focus:bg-red-500/70
-text-gray-300
-hover:text-white
-active:text-white
-focus:text-white
-transition duration-200 cursor-pointer"
+                className="absolute top-5 right-5
+          w-8 h-8 flex items-center justify-center
+          rounded-full bg-gray-100
+
+          hover:bg-indigo-100 hover:text-indigo-600
+          transition cursor-pointer"
               >
-                <X size={33} />
+                <X size={20} />
               </button>
+
               {/* HEADER */}
-              <ModalHeader
-                className="
-          flex flex-col items-center gap-2
-          border-b border-white/10
-          pb-5 pt-6
-        "
-              >
-                <div
-                  className="
-            h-12 w-12 flex items-center justify-center
-            rounded-xl bg-red-500/20 border border-red-500/30
-            shadow-[0_0_10px_rgba(255,70,70,0.4)]
-          "
-                >
-                  <MapPin className="text-red-400" size={22} />
+              <ModalHeader className="flex flex-col items-center gap-2 border-b border-gray-200 pb-5 pt-6">
+
+                <div className="h-12 w-12 flex items-center justify-center
+          rounded-xl bg-indigo-100">
+                  <MapPin className="text-indigo-600" size={20} />
                 </div>
 
-                <h2 className="text-lg font-semibold text-white">
+                <h2 className="text-lg font-semibold">
                   Set Delivery Location
                 </h2>
 
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-gray-500">
                   Choose your address to check delivery availability
                 </p>
+
               </ModalHeader>
 
               {/* BODY */}
-              <ModalBody className="space-y-1 py-2">
+              <ModalBody className="space-y-4 py-4">
 
-                {/* Search Input */}
-                <div className="flex gap-2">
+                {/* SEARCH */}
+               <div className="flex items-center gap-2 w-full">
 
-                  <div
-                    className="
-              flex items-center gap-2
-              flex-1 px-3 py-2
-              rounded-xl
-              bg-black/40 border border-white/10
-              focus-within:border-red-400
-              transition"
-                  >
-                    <MapPin size={16} className="text-gray-400" />
+  {/* INPUT */}
+  <div
+    className="flex items-center gap-2 flex-1
+    px-4 h-11
 
-                    <input
-                      type="text"
-                      placeholder="Search city, area or pincode"
-                      value={area}
-                      onChange={(e) => setArea(e.target.value)}
-                      className="
-                flex-1 bg-transparent
-                text-sm text-white
-                outline-none placeholder-gray-400"
-                    />
-                  </div>
+    rounded-lg border border-gray-300 bg-white
 
-                  <button
-                    onClick={handleAreaSearch}
-                    className="
-              px-3 py-1 rounded-xl
-              bg-gradient-to-r from-red-500 to-black/30 border border-red-500/40
-              text-gray-300 font-medium text-sm
-              shadow-md
-              hover:scale-105 active:scale-95
-              transition cursor-pointer"
-                  >
-                    Search
-                  </button>
+    focus-within:ring-2 focus-within:ring-indigo-500
+    focus-within:border-indigo-500
 
-                </div>
+    transition"
+  >
+    <MapPin size={16} className="text-gray-400" />
 
+    <input
+      type="text"
+      placeholder="Search city, area or pincode"
+      value={area}
+      onChange={(e) => setArea(e.target.value)}
+      className="flex-1 bg-transparent text-sm
+      outline-none placeholder-gray-400 focus:ring-indigo-300"
+    />
+  </div>
 
-                {/* Detect location button */}
+  {/* BUTTON */}
+  <button
+    onClick={handleAreaSearch}
+    className="group relative h-11 px-5 rounded-lg
+
+    text-white font-medium text-sm
+
+    bg-gradient-to-r from-blue-500 via-indigo-500 to-indigo-600
+
+    shadow-md shadow-indigo-500/20
+    hover:shadow-indigo-500/40
+
+    hover:scale-[1.03] active:scale-[0.96]
+
+    transition-all duration-300 overflow-hidden whitespace-nowrap cursor-pointer"
+  >
+
+    {/* Shine */}
+    <span className="absolute inset-0 opacity-0 group-hover:opacity-100
+    bg-gradient-to-r from-transparent via-white/20 to-transparent
+    transition duration-500"></span>
+
+    Search
+  </button>
+
+</div>
+
+                {/* DETECT LOCATION */}
                 <button
                   onClick={() => {
                     handleUseMyLocation();
                     onClose();
                   }}
-                  className="
-            flex items-center justify-center gap-2
-            w-full py-2
-            rounded-xl
-            border border-red-500/40
-            bg-red-500/10
-            text-red-300 font-medium
-            hover:bg-red-500/20
-            transition"
+                  className="group relative w-full flex items-center justify-center gap-2
+  py-2.5 rounded-xl
+
+  border border-indigo-200
+  bg-gradient-to-r from-indigo-50 to-blue-50
+
+  text-indigo-600 font-medium
+
+  shadow-sm hover:shadow-md
+
+  hover:border-indigo-400
+  hover:from-indigo-100 hover:to-blue-100
+
+  active:scale-[0.97]
+
+  transition-all duration-300 cursor-pointer overflow-hidden"
                 >
-                  <MapPin size={16} />
+
+                  {/* Icon */}
+                  <MapPin
+                    size={16}
+                    className="transition-transform duration-300 group-hover:scale-110"
+                  />
+
                   Detect My Location
+
+                  {/* Subtle Shine */}
+                  <span className="absolute inset-0 opacity-0 group-hover:opacity-100
+  bg-gradient-to-r from-transparent via-white/40 to-transparent
+  transition duration-500"></span>
+
                 </button>
 
-
-                {/* MAP SECTION */}
-                <div
-                  className="
-            rounded-2xl overflow-hidden
-            border border-white/10
-            shadow-lg
-            bg-black/30 mb-3"
-                >
+                {/* MAP */}
+                <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm">
                   <LocationMap
                     onSelect={(lat, lng) => {
                       onLocationChange(lat, lng);
@@ -537,199 +629,235 @@ transition duration-200 cursor-pointer"
                 </div>
 
               </ModalBody>
-
-
             </>
           )}
         </ModalContent>
       </Modal>
       {/* Mobile Offcanvas Menu */}
       <aside
-        className={`md:hidden fixed min-h-screen top-0 left-0 w-3/4 max-w-xs h-full 
-        bg-black/70 backdrop-blur-lg border-r border-red-500/40 rounded-r-2xl 
-        transform transition-transform z-49 duration-300 ease-in-out 
-        ${isMobileNavOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`md:hidden fixed top-0 left-0 h-full w-3/4 max-w-xs
+  bg-white border-r border-gray-200
+
+  shadow-2xl
+
+  transform transition-transform duration-300 ease-in-out z-50
+  ${isMobileNavOpen ? "translate-x-0" : "-translate-x-full"}`}
         data-aos="fade-right"
       >
-        <div className="flex items-center justify-between px-4 py-3.5 border-b border-red-500/40">
-          <h2
-            className="text-lg font-bold bg-gradient-to-r from-red-400 to-orange-300 bg-clip-text text-transparent"
+
+        {/* HEADER */}
+        <div className="flex items-center justify-between px-4 py-4 border-b border-gray-200">
+
+          <h1
+            className="text-2xl font-bold
+      bg-gradient-to-r from-blue-500 via-indigo-500 to-indigo-600
+      bg-clip-text text-transparent"
             style={{ fontFamily: "'Pacifico', cursive" }}
           >
             E-Shop
-          </h2>
+          </h1>
+
         </div>
 
+        {/* CONTENT */}
         <div className="flex flex-col justify-between h-full">
-          <div className="p-4 space-y-4 overflow-y-auto">
-            {renderLocation()}
 
-            <NavLink
-              to="/order-history"
-              onClick={() => setIsMobileNavOpen(false)}
-              className={({ isActive }) =>
-                `group flex items-center gap-2 w-full px-3 py-2 rounded-md border-l-4 transition ${isActive
-                  ? "text-red-400 border-red-500 bg-red-500/10 font-semibold"
-                  : "text-gray-300 hover:text-red-400 hover:bg-white/10 border-transparent"
-                }`
-              }
-            >
-              <Package size={18} className="transition-transform duration-200 group-hover:translate-x-1" />
-              <span>Order History</span>
-            </NavLink>
+          <div className="p-4 space-y-5 overflow-y-auto">
 
-            <NavLink
-              to="/contact"
-              onClick={() => setIsMobileNavOpen(false)}
-              className={({ isActive }) =>
-                `group flex items-center gap-2 w-full px-3 py-2 rounded-md border-l-4 transition ${isActive
-                  ? "text-red-400 border-red-500 bg-red-500/10 font-semibold"
-                  : "text-gray-300 hover:text-red-400 hover:bg-white/10 border-transparent"
-                }`
-              }
-            >
-              <Phone size={18} className="transition-transform duration-200 group-hover:translate-x-1" />
-              <span>Contact</span>
-            </NavLink>
-            {/* 
-<NavLink
-  to="/profile"
-  onClick={() => setIsMobileNavOpen(false)}
-  className={({ isActive }) =>
-    `group flex items-center gap-2 w-full px-3 py-2 rounded-md border-l-4 transition ${
-      isActive
-        ? "text-red-400 border-red-500 bg-red-500/10 font-semibold"
-        : "text-gray-300 hover:text-red-400 hover:bg-white/10 border-transparent"
-    }`
-  }
->
-  <User size={18} className="transition-transform duration-200 group-hover:translate-x-1" />
-  <span>My Profile</span>
-</NavLink> */}
-
-          </div>
-        </div>
-      </aside>
-      {/* ================= MOBILE BOTTOM NAVBAR ================= */}
-      <div
-        className={`sm:hidden fixed bottom-3 rounded-3xl left-1/2 -translate-x-1/2 
-  w-[93%] max-w-md z-48
-  bg-black/50 backdrop-blur-2xl 
-  shadow-[0_3px_12px_red]
-  transition-transform duration-300 ease-in-out
-  ${showBottomNav ? "translate-y-0" : "translate-y-24"}`}
-      >
-        <div className="flex justify-between items-center px-4 py-2.5">
-
-          {/* Home */}
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              `flex flex-col items-center text-xs transition-all duration-300
-        ${isActive ? "text-red-400 scale-110" : "text-gray-400 hover:text-red-400"}`
-            }
-          >
-            <Home className="h-5 w-5 mb-1" />
-            Home
-          </NavLink>
-
-          {/* Products */}
-          <NavLink
-            to="/products"
-            className={({ isActive }) =>
-              `flex flex-col items-center text-xs transition-all duration-300
-        ${isActive ? "text-red-400 scale-110" : "text-gray-400 hover:text-red-400"}`
-            }
-          >
-            <Package className="h-5 w-5 mb-1" />
-            Products
-          </NavLink>
-
-          {/* Floating Cart Button */}
-          <NavLink
-            to="/cart"
-            className={({ isActive }) =>
-              `relative -mt-6 flex flex-col items-center justify-center
-    h-14 w-14 rounded-full
-    bg-gradient-to-r from-red-600 to-black/50
-    shadow-[0_8px_25px_rgba(255,80,80,0.5)]
-    transition-all duration-300
-    ${isActive ? "scale-110" : "hover:scale-105"}`
-            }
-          >
-            <ShoppingCart className="h-6 w-6 text-gray-300" />
-
-            <span
-              className={`absolute -top-1 -right-1
-    min-w-[18px] h-5 px-1 text-[10px]
-    rounded-full flex items-center justify-center
-    shadow-md
-    ${cartItem.length > 0
-                  ? "bg-red-500 text-white"
-                  : "bg-gray-600 text-gray-300"
-                }`}
-            >
-              {cartItem.length}
-            </span>
-          </NavLink>
-
-          <NavLink
-            to="/wishlist"
-            className={({ isActive }) =>
-              `relative flex flex-col items-center text-xs transition-all duration-300
-    ${isActive ? "text-red-400 scale-110" : "text-gray-400 hover:text-red-400"}`
-            }
-          >
-            <div className="relative">
-              <AiOutlineHeart className="h-5 w-5 mb-1" />
-
-              <span
-                className={`absolute -top-2 -right-3
-      min-w-[18px] h-5 px-1
-      text-[10px] font-semibold
-      rounded-full flex items-center justify-center
-      shadow-md border border-black
-      ${wishlist.length > 0
-                    ? "bg-red-500 text-white"
-                    : "bg-gray-600 text-gray-300"
-                  }`}
-              >
-                {wishlist.length}
-              </span>
+            {/* LOCATION */}
+            <div className="">
+              {renderLocation()}
             </div>
 
-            Wishlist
-          </NavLink>
-          {/* Account */}
-          <div className="flex flex-col items-center text-xs text-gray-400">
+            {/* NAV LINKS */}
+            <div className="space-y-2">
 
-            <SignedOut>
-              <button
-                onClick={() => navigate("/sign-in")}
-                className="flex flex-col items-center gap-1 text-gray-450 "
+              <NavLink
+                to="/order-history"
+                onClick={() => setIsMobileNavOpen(false)}
+                className={({ isActive }) =>
+                  `group flex items-center gap-3 w-full px-4 py-3 rounded-xl
+            transition-all duration-200
+
+            ${isActive
+                    ? "bg-indigo-50 text-indigo-600 font-semibold shadow-sm"
+                    : "text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
+                  }`
+                }
               >
-                <FaRegUserCircle className="h-5 w-5 mb-1" />
-                Account
-              </button>
-            </SignedOut>
+                <Package
+                  size={18}
+                  className="transition-transform duration-200 group-hover:translate-x-1"
+                />
+                <span>Order History</span>
+              </NavLink>
 
-            <SignedIn>
-              <div className="flex flex-col items-center">
-                {user && (
-                  <img
-                    src={user.imageUrl}
-                    alt="profile"
-                    onClick={() => navigate("/profile")}
-                    className="h-8 w-8 rounded-full ring-2 ring-red-500 cursor-pointer"
-                  />
-                )}
-                <span className="text-[11px] mt-1">Profile</span>
-              </div>
-            </SignedIn>
+              <NavLink
+                to="/contact"
+                onClick={() => setIsMobileNavOpen(false)}
+                className={({ isActive }) =>
+                  `group flex items-center gap-3 w-full px-4 py-3 rounded-xl
+            transition-all duration-200
+
+            ${isActive
+                    ? "bg-indigo-50 text-indigo-600 font-semibold shadow-sm"
+                    : "text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
+                  }`
+                }
+              >
+                <Phone
+                  size={18}
+                  className="transition-transform duration-200 group-hover:translate-x-1"
+                />
+                <span>Contact</span>
+              </NavLink>
+
+            </div>
 
           </div>
 
         </div>
+
+      </aside>
+      {/* ================= MOBILE BOTTOM NAVBAR ================= */}
+     <div
+  className={`sm:hidden fixed bottom-0 left-1/2 -translate-x-1/2
+  w-full max-w-md z-50
+
+  bg-white/90 border border-gray-200
+  
+
+  
+
+  transition-transform duration-300 ease-in-out
+  ${showBottomNav ? "translate-y-0" : "translate-y-24"}`}
+>
+       <div className="flex justify-between items-center px-4 py-2.5">
+
+  {/* Home */}
+  <NavLink
+    to="/"
+    className={({ isActive }) =>
+      `flex flex-col items-center text-xs transition-all duration-300
+      ${isActive
+        ? "text-indigo-600 scale-105"
+        : "text-gray-500 hover:text-indigo-600"
+      }`
+    }
+  >
+    <Home className="h-5 w-5 mb-1" />
+    Home
+  </NavLink>
+
+  {/* Products */}
+  <NavLink
+    to="/products"
+    className={({ isActive }) =>
+      `flex flex-col items-center text-xs transition-all duration-300
+      ${isActive
+        ? "text-indigo-600 scale-105"
+        : "text-gray-500 hover:text-indigo-600"
+      }`
+    }
+  >
+    <Package className="h-5 w-5 mb-1" />
+    Products
+  </NavLink>
+
+  {/* FLOATING CART */}
+  <NavLink
+    to="/cart"
+    className={({ isActive }) =>
+      `relative -mt-7 flex items-center justify-center
+      h-14 w-14 rounded-full
+
+      bg-gradient-to-r from-blue-500 via-indigo-500 to-indigo-600
+
+      shadow-lg shadow-indigo-500/30
+
+      transition-all duration-300
+      ${isActive ? "scale-110" : "hover:scale-105"}`
+    }
+  >
+    <ShoppingCart className="h-6 w-6 text-white" />
+
+    {/* BADGE */}
+    <span
+      className={`absolute -top-1 -right-1
+      min-w-[18px] h-5 px-1 text-[10px]
+      rounded-full flex items-center justify-center
+      shadow-sm
+      ${cartItem.length > 0
+        ? "bg-white text-indigo-600"
+        : "bg-gray-300 text-gray-600"
+      }`}
+    >
+      {cartItem.length}
+    </span>
+  </NavLink>
+
+  {/* Wishlist */}
+  <NavLink
+    to="/wishlist"
+    className={({ isActive }) =>
+      `relative flex flex-col items-center text-xs transition-all duration-300
+      ${isActive
+        ? "text-indigo-600 scale-105"
+        : "text-gray-500 hover:text-indigo-600"
+      }`
+    }
+  >
+    <div className="relative">
+      <AiOutlineHeart className="h-5 w-5 mb-1" />
+
+      <span
+        className={`absolute -top-2 -right-3
+        min-w-[18px] h-5 px-1 text-[10px]
+        rounded-full flex items-center justify-center
+        shadow-sm
+        ${wishlist.length > 0
+          ? "bg-indigo-600 text-white"
+          : "bg-gray-300 text-gray-600"
+        }`}
+      >
+        {wishlist.length}
+      </span>
+    </div>
+
+    Wishlist
+  </NavLink>
+
+  {/* Account */}
+  <div className="flex flex-col items-center text-xs text-gray-500">
+
+    <SignedOut>
+      <button
+        onClick={() => navigate("/sign-in")}
+        className="flex flex-col items-center gap-1 hover:text-indigo-600 transition"
+      >
+        <FaRegUserCircle className="h-5 w-5 mb-1" />
+        Account
+      </button>
+    </SignedOut>
+
+    <SignedIn>
+      <div className="flex flex-col items-center">
+        {user && (
+          <img
+            src={user.imageUrl}
+            alt="profile"
+            onClick={() => navigate("/profile")}
+            className="h-8 w-8 rounded-full
+            ring-2 ring-indigo-500 cursor-pointer"
+          />
+        )}
+        <span className="text-[11px] mt-1">Profile</span>
+      </div>
+    </SignedIn>
+
+  </div>
+
+</div>
       </div>
 
 

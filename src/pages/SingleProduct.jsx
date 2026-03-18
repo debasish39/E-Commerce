@@ -81,7 +81,11 @@ export default function SingleProduct() {
 
         const filtered = res.data.products
           .filter((item) => item.id !== product.id)
-          .slice(0, 6);
+          .slice(0, 6)
+          .map((item) => ({
+            ...item,
+            price: calculatePrice(item.price),
+          }));
 
         setRelatedProducts(filtered);
       } catch (error) {
@@ -124,69 +128,70 @@ export default function SingleProduct() {
   const isWishlisted = wishlist.some(
     (item) => String(item.productId) === String(product?.id)
   );
- const handleAddToCart = () => {
+  const handleAddToCart = () => {
 
-  if (!product) return;
+    if (!product) return;
 
-  if (!isSignedIn) {
-    toast.error("Please login first");
-    navigate("/sign-in");
-    return;
-  }
+    if (!isSignedIn) {
+      toast.error("Please login first");
+      navigate("/sign-in");
+      return;
+    }
 
-  const alreadyInCart = cartItem.some(
-    (item) => String(item.productId) === String(product.id)
-  );
+    const alreadyInCart = cartItem.some(
+      (item) => String(item.productId) === String(product.id)
+    );
 
-  if (alreadyInCart) {
-    navigate("/cart");
-    return;
-  }
+    if (alreadyInCart) {
+      navigate("/cart");
+      return;
+    }
 
-  if (product.stock <= 0) {
-    toast.error("Out of Stock");
-    return;
-  }
+    if (product.stock <= 0) {
+      toast.error("Out of Stock");
+      return;
+    }
 
-  addToCart({
-    ...product,
-    price: calculatePrice(product.price)
-  });
-
-};
-  /* ================= Wishlist ================= */
- const handleWishlist = () => {
-
-  if (!product) return;
-
-  if (!isSignedIn) {
-    toast.error("Please login first");
-    navigate("/sign-in");
-    return;
-  }
-
-  if (isWishlisted) {
-
-    removeFromWishlist(String(product.id));
-
-    toast("Removed from Wishlist 💔", {
-      description: product.title,
-    });
-
-  } else {
-
-    addToWishlist({
+    addToCart({
       ...product,
-      price: calculatePrice(product.price)
+      price: calculatePrice(product.price),
+      quantity,
     });
 
-    toast.success("Added to Wishlist ❤️", {
-      description: product.title,
-    });
+  };
+  /* ================= Wishlist ================= */
+  const handleWishlist = () => {
 
-  }
+    if (!product) return;
 
-};
+    if (!isSignedIn) {
+      toast.error("Please login first");
+      navigate("/sign-in");
+      return;
+    }
+
+    if (isWishlisted) {
+
+      removeFromWishlist(String(product.id));
+
+      toast("Removed from Wishlist 💔", {
+        description: product.title,
+      });
+
+    } else {
+
+      addToWishlist({
+        ...product,
+        price: calculatePrice(product.price),
+      });
+
+      toast.success("Added to Wishlist ❤️", {
+        description: product.title,
+      });
+
+    }
+
+  };
   /* ================= Share ================= */
   const handleShare = async () => {
     const shareData = {
@@ -242,35 +247,90 @@ export default function SingleProduct() {
   /* ================= UI ================= */
   return (
     <>
-      <div className="relative min-h-screen py-9 sm:py-3 px-4 sm:px-6 lg:px-10 text-white overflow-hidden">
+      <div className="relative min-h-screen py-9 sm:py-3 px-4 sm:px-6 lg:px-10 text-gray-600 overflow-hidden">
         <Breadcrums title={product.title} />
 
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 py-6">
 
           {/* LEFT COLUMN */}
           <div data-aos="fade-right" className="flex flex-col items-center">
-            <div className="relative w-full max-w-xl bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
+
+            <div className="
+  relative w-full max-w-xl
+  bg-white/5 backdrop-blur-2xl
+  border border-indigo-400/20
+  rounded-3xl
+  p-8
+  shadow-[0_20px_60px_rgba(79,70,229,0.25)]
+  overflow-hidden
+  ">
+
+              {/* Gradient Glow Background */}
+              <div className="
+    absolute inset-0
+    bg-gradient-to-br
+    from-indigo-500/10
+    via-blue-500/5
+    to-purple-500/10
+    pointer-events-none
+    " />
 
               {/* Action Buttons */}
-              <div className="absolute top-6 right-6 flex flex-col gap-3">
+              <div className="absolute top-6 right-6 flex flex-col gap-3 z-10">
+
                 <button
                   onClick={handleWishlist}
-                  className={`w-12 h-12 rounded-full backdrop-blur-xl bg-white/10 border border-white/20 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 hover:bg-white/20 text-xl cursor-pointer ${isWishlisted ? "text-red-500" : "text-white"
-                    }`}
+                  className={`
+        w-11 h-11
+        rounded-full
+        flex items-center justify-center
+        backdrop-blur-xl
+        bg-black/5
+        border border-black/5
+        shadow-lg
+        transition-all duration-300
+        hover:scale-110
+        hover:bg-indigo-500/20
+        cursor-pointer
+        ${isWishlisted ? "text-pink-500" : "text-black/50"}
+        `}
                 >
-                  {isWishlisted ? <FaHeart /> : <FaRegHeart />}
+                  {isWishlisted ? <FaHeart size={18} /> : <FaRegHeart size={18} />}
                 </button>
 
                 <button
                   onClick={handleShare}
-                  className="w-12 h-12 rounded-full backdrop-blur-xl bg-white/10 border border-white/20 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 hover:bg-white/20 text-xl cursor-pointer"
+                  className="
+       w-11 h-11
+        rounded-full
+        flex items-center justify-center
+        backdrop-blur-xl
+        bg-black/5
+        border border-black/5
+        shadow-lg
+        transition-all duration-300
+        hover:scale-110
+        hover:bg-indigo-500/20
+        cursor-pointer
+        "
                 >
-                  <SlActionRedo />
+                  <SlActionRedo size={18} />
                 </button>
+
               </div>
 
-              {/* Discount */}
-              <div className="absolute top-6 left-6 bg-red-600 text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1">
+              {/* Discount Badge */}
+              <div className="
+    absolute top-6 left-6
+    bg-gradient-to-r from-indigo-600 to-purple-600
+    text-white
+    text-xs
+    font-semibold
+    px-4 py-1.5
+    rounded-full
+    shadow-lg
+    flex items-center gap-1
+    ">
                 <FaTag />
                 {Math.round(product.discountPercentage)}% OFF
               </div>
@@ -279,59 +339,88 @@ export default function SingleProduct() {
               <img
                 src={selectedImage}
                 alt={product.title}
-                className="w-full max-h-[420px] object-contain mx-auto transition-all duration-700 hover:scale-110"
+                loading="lazy"
+                className="
+      w-full max-h-[420px]
+      object-contain
+      mx-auto
+      transition-transform duration-700
+      hover:scale-110
+      "
               />
+
             </div>
 
             {/* Thumbnails */}
-            <div className="flex gap-4 mt-8 overflow-x-auto">
+            <div className="
+  flex gap-4 mt-8
+  overflow-x-auto
+  scrollbar-hide
+  ">
+
               {product.images?.map((img, idx) => (
-                <img
+
+                <div
                   key={idx}
-                  src={img}
-                  alt="thumbnail"
                   onClick={() => {
                     setSelectedImage(img);
-                    localStorage.setItem(
-                      `selectedImage_${id}`,
-                      img
-                    );
+                    localStorage.setItem(`selectedImage_${id}`, img);
                   }}
-                  className={`w-20 h-20 rounded-2xl object-cover cursor-pointer transition-all duration-300 flex-shrink-0 ${selectedImage === img
-                    ? "border border-red-500  shadow-xl"
-                    : "opacity-70 border hover:opacity-100"
-                    }`}
-                />
+                  className={`
+        relative
+        w-20 h-20
+        rounded-2xl
+        overflow-hidden
+        cursor-pointer
+        transition-all duration-300
+        flex-shrink-0
+border-1
+        ${selectedImage === img
+                      ? "ring-1 ring-indigo-500  shadow-lg shadow-indigo-500/30 "
+                      : "opacity-70 hover:opacity-100 "
+                    }
+        `}
+                >
+
+                  <img
+                    src={img}
+                    alt="thumbnail"
+                    className="w-full h-full object-cover"
+                  />
+
+                </div>
+
               ))}
+
             </div>
+
           </div>
 
           {/* RIGHT COLUMN */}
           <div className="flex flex-col justify-center space-y-6">
-            <h1 className="text-3xl md:text-4xl font-extrabold">
+            <h1 className="text-xl sm:text-3xl md:text-4xl font-extrabold">
               {product.title}
             </h1>
 
-            <div className="flex items-center gap-2 text-sm text-gray-300">
+            <div className="flex items-center gap-2 text-sm text-gray-500">
               <FaIndustry /> {product.brand}
               <span>/</span>
               <FaListAlt /> {product.category}
             </div>
 
-            <p className="text-gray-300">
+            <p className="text-gray-500">
               {product.description}
             </p>
 
             <div className="flex items-center gap-3">
-              <h2 className="text-3xl font-bold text-red-500 flex items-center gap-1">
-                <FaRupeeSign /> {calculatePrice(Number(product.price))}
+              <h2 className="text-3xl font-bold text-indigo-500 flex items-center gap-1">
+                <FaRupeeSign />{calculatePrice(product.price)}
               </h2>
 
               <span className="text-gray-400 line-through">
                 ₹
                 {Math.round(
-                  calculatePrice(product.price) /
-                  (1 - product.discountPercentage / 100)
+                  calculatePrice(product.price) / (1 - product.discountPercentage / 100)
                 )}
               </span>
             </div>
@@ -343,27 +432,53 @@ export default function SingleProduct() {
               </span>
             </div>
 
-            <div className="flex items-center gap-4">
-              <label className="text-sm font-medium">
-                Quantity:
-              </label>
-              <input
-                type="number"
-                min={1}
-                value={quantity}
-                onChange={(e) => {
-                  const value = Math.max(1, Number(e.target.value));
-                  setQuantity(value);
-                }}
-                className="w-20 border border-gray-400 rounded-md px-3 py-2 text-center bg-white/10 focus:ring-2 focus:ring-red-400"
-              />
-            </div>
+            {/* QUANTITY SELECTOR */}
+            {/* <div className="flex items-center gap-4">
+
+      <span className="text-sm font-medium text-gray-700">
+        Quantity
+      </span>
+
+      <div className="
+      flex items-center
+      border border-indigo-400/30
+      rounded-xl
+      overflow-hidden
+      ">
 
         <button
-  onClick={handleAddToCart}
-  className={`
-  group relative overflow-hidden
+          onClick={() => setQuantity(Math.max(1, quantity - 1))}
+          className="
+          px-3 py-2
+          bg-white/5
+          hover:bg-indigo-500/20
+          transition
+          "
+        >
+          -
+        </button>
 
+        <span className="px-4">{quantity}</span>
+
+        <button
+          onClick={() => setQuantity(quantity + 1)}
+          className="
+          px-3 py-2
+          bg-white/5
+          hover:bg-indigo-500/20
+          transition
+          "
+        >
+          +
+        </button>
+
+      </div>
+      </div> */}
+            <button
+              onClick={handleAddToCart}
+              className={`
+  group relative overflow-hidden
+cursor-pointer
   w-full sm:w-auto
   flex items-center justify-center gap-2
 
@@ -381,77 +496,85 @@ export default function SingleProduct() {
   active:scale-95
   hover:scale-[1.05]
 
-  shadow-md hover:shadow-xl
+  focus:outline-none
 
-  ${
-    cartItem.some((item) => String(item.productId) === String(product.id))
-      ? "bg-green-500/10 border-green-400/40 text-green-400 hover:bg-green-500/20"
-      : "bg-red-500/10 border-red-400/40 text-white hover:bg-red-500/20"
-  }
+  shadow-md hover:shadow-xl active:shadow-xl
+
+  ${cartItem.some((item) => String(item.productId) === String(product.id))
+                  ? "bg-green-400/10 border-green-400/40 text-green-400 hover:bg-green-500/20 active:bg-green-500/20"
+                  : "bg-indigo-900/10 border-indigo-400/40 text-white hover:bg-indigo-500/20 active:bg-indigo-500/20"
+                }
 `}
->
+            >
 
-{/* Animated Gradient Border */}
-<span
-  className="
+              {/* Gradient Border */}
+              <span
+                className="
   absolute inset-0 rounded-xl sm:rounded-2xl
   border border-transparent
-  bg-gradient-to-r from-red-500/40 via-pink-500/40 to-red-500/40
-  opacity-0 group-hover:opacity-100
-  blur-md
+  bg-gradient-to-r from-blue-500/40 via-indigo-500/40 to-purple-500/40
+  opacity-0 
+  group-hover:opacity-100 
+  group-active:opacity-100   /* ✅ MOBILE */
   transition duration-500
 "
-/>
+              />
 
-{/* Shine Sweep */}
-<span
-  className="
+              {/* Shine Sweep */}
+              <span
+                className="
   absolute inset-0
   bg-gradient-to-r
   from-transparent via-white/25 to-transparent
+
   translate-x-[-150%]
   group-hover:translate-x-[150%]
+  group-active:translate-x-[150%]  /* ✅ MOBILE */
+
   transition-transform duration-700
 "
-/>
+              />
 
-{/* Icon */}
-<FaShoppingCart
-  className="
+              {/* Icon */}
+              <FaShoppingCart
+                className="
   relative z-10
   text-sm sm:text-base
   transition-transform duration-300
+
   group-hover:-translate-y-1 group-hover:scale-110
+  group-active:-translate-y-1 group-active:scale-110  /* ✅ MOBILE */
 "
-/>
+              />
 
-{/* Text */}
-<span className="relative z-10 whitespace-nowrap">
+              {/* Text */}
+              <span className="relative z-10 whitespace-nowrap">
+                {cartItem.some((item) => String(item.productId) === String(product.id))
+                  ? "Buy Now"
+                  : "Add to Cart"}
+              </span>
 
-{cartItem.some((item) => String(item.productId) === String(product.id))
-  ? "Buy Now"
-  : "Add to Cart"}
-
-</span>
-
-{/* Glow */}
-<span
-  className={`
+              {/* Glow */}
+              <span
+                className={`
   absolute inset-0
   rounded-xl sm:rounded-2xl
-  opacity-0 group-hover:opacity-100
+
+  opacity-0 
+  group-hover:opacity-100 
+  group-active:opacity-100   /* ✅ MOBILE */
+
   blur-xl transition duration-300
 
-  ${
-    cartItem.some((item) => String(item.productId) === String(product.id))
-      ? "bg-green-500/20"
-      : "bg-red-500/20"
-  }
+  ${cartItem.some((item) => String(item.productId) === String(product.id))
+                    ? "bg-green-600"
+                    : "bg-indigo-900"
+                  }
 `}
-/>
+              />
 
-</button>
-            <div className="mt-6 text-sm text-gray-300 space-y-2 border-t border-gray-600 pt-4">
+            </button>
+            <div className="mt-6 text-sm text-gray-500 space-y-2 border-t border-gray-600 pt-4">
               <p className="flex items-center gap-2">
                 <FaTruck className="text-green-500" />
                 Free Delivery above ₹500

@@ -14,7 +14,7 @@ export default function Category() {
   const settings = {
     dots: false,
     infinite: true,
-    speed: 6000,
+    speed: 9000,
     slidesToShow: 5,
     slidesToScroll: 1,
     autoplay: true,
@@ -34,16 +34,15 @@ export default function Category() {
     <div className="py-6 text-center w-full">
 
       {/* TITLE */}
-      <h2 className="text-3xl sm:text-4xl font-bold mb-1 text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-400">
+      <h2 className="text-3xl sm:text-4xl font-bold mb-1 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-400">
 
         <span className="text-white">🏷️</span> Shop by Category
 
       </h2>
 
-      <p className="text-gray-400 mb-6 text-sm sm:text-base">
-        Discover categories that match your vibe.
-      </p>
-
+      <p className="text-gray-600 mb-6 text-sm sm:text-base">
+  Discover categories that match your vibe.
+</p>
 
       {/* FULL WIDTH SLIDER */}
       <div className="w-full px-2 sm:px-6">
@@ -58,17 +57,18 @@ export default function Category() {
                 onClick={() =>
                   navigate(`/category/${encodeURIComponent(item.name)}`)
                 }
-                className="
-                group cursor-pointer
-                rounded-2xl
-                border border-[#f53347]/40
-                hover:border-[#f53347]
-                shadow-lg hover:shadow-[#f53347]/30
-                transition-all duration-300
-                flex flex-col items-center
-                p-4
-                text-center
-                "
+              className="
+group cursor-pointer
+rounded-2xl
+border border-blue-100
+hover:border-blue-400
+shadow-md hover:shadow-[0_10px_30px_rgba(59,130,246,0.35)]
+transition-all duration-300
+flex flex-col items-center
+p-4
+text-center
+bg-white
+"
               >
 
                 {/* IMAGE */}
@@ -78,34 +78,34 @@ export default function Category() {
                     src={item.image}
                     alt={item.name}
                     className="
-                    h-full object-contain
-                    transform group-hover:scale-110
-                    transition-transform duration-500
-                    drop-shadow-[0_10px_25px_rgba(245,51,71,0.25)]
-                    border-red-900 border-2
-                    rounded-lg
-                    shadow-red-900/20
-                    "
+h-full object-contain
+transform group-hover:scale-110
+transition-transform duration-500
+drop-shadow-[0_10px_25px_rgba(59,130,246,0.25)]
+border-blue-100 border
+rounded-lg
+shadow-blue-100
+"
                   />
 
                 </div>
 
 
                 {/* CATEGORY NAME */}
-                <p
-                  className="
-                  mt-4
-                  text-xs sm:text-sm
-                  font-semibold
-                  uppercase
-                  tracking-wider
-                  bg-gradient-to-r from-[#ffffff] to-red-400
-                  bg-clip-text text-transparent
-                  group-hover:from-white group-hover:to-white
-                  transition-all duration-300
-                  drop-shadow-[0_2px_6px_rgba(245,51,71,0.35)]
-                  "
-                >
+           <p
+  className="
+  mt-4
+  text-xs sm:text-sm
+  font-semibold
+  uppercase
+  tracking-wider
+  bg-gradient-to-r from-blue-600 to-blue-400
+  bg-clip-text text-transparent
+  group-hover:from-blue-700 group-hover:to-blue-500
+  transition-all duration-300
+  drop-shadow-[0_2px_6px_rgba(59,130,246,0.35)]
+"
+>
                   {item.name.replace(/-/g, " ")}
                 </p>
 

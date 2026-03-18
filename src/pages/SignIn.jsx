@@ -38,7 +38,7 @@ export default function SignIn() {
         e.preventDefault();
 
         if (!email) {
-            toast.error("Email is required");
+            toast.error("Email is requiblue");
             return;
         }
 
@@ -48,7 +48,7 @@ export default function SignIn() {
         }
 
         if (!password) {
-            toast.error("Password is required");
+            toast.error("Password is requiblue");
             return;
         }
 
@@ -229,17 +229,17 @@ export default function SignIn() {
         }
     };
     const handleGoogle = () =>
-        signIn.authenticateWithRedirect({
+        signIn.authenticateWithblueirect({
             strategy: "oauth_google",
-            redirectUrl: "/sso-callback",
-            redirectUrlComplete: "/",
+            blueirectUrl: "/sso-callback",
+            blueirectUrlComplete: "/",
         });
 
     const handleGithub = () =>
-        signIn.authenticateWithRedirect({
+        signIn.authenticateWithblueirect({
             strategy: "oauth_github",
-            redirectUrl: "/sso-callback",
-            redirectUrlComplete: "/",
+            blueirectUrl: "/sso-callback",
+            blueirectUrlComplete: "/",
         });
 
     return (
@@ -259,11 +259,11 @@ export default function SignIn() {
           flex items-center justify-center gap-3
           py-3
           rounded-2xl
-          bg-white
+          bg-gray-300
           text-black
           font-medium
           hover:scale-[1.02]
-          transition
+          transition cursor-pointer
           "
                     >
                         <FcGoogle size={20} />
@@ -279,9 +279,9 @@ export default function SignIn() {
           py-3
           rounded-2xl
           border border-white/10
-          bg-white/5
-          hover:bg-white/10
-          transition
+          bg-gray-200
+          hover:bg-black/10
+          transition cursor-pointer
           "
                     >
                         <FaGithub size={20} />
@@ -292,10 +292,10 @@ export default function SignIn() {
 
                 {/* ===== DIVIDER ===== */}
 
-                <div className="flex items-center gap-3 text-gray-400 text-sm">
-                    <div className="flex-1 h-px bg-white/10" />
+                <div className="flex items-center gap-3 text-black text-sm">
+                    <div className="flex-1 h-px bg-black/60" />
                     OR
-                    <div className="flex-1 h-px bg-white/10" />
+                    <div className="flex-1 h-px bg-black/60" />
                 </div>
 
                 {/* ================= LOGIN ================= */}
@@ -312,9 +312,9 @@ export default function SignIn() {
             p-3
             rounded-xl
             bg-white/5
-            border border-white/10
-            focus:border-red-500
-            focus:ring-2 focus:ring-red-500/30
+            border border-indigo-300
+            focus:border-indigo-500
+focus:ring-2 focus:ring-indigo-500/30
             outline-none
             transition
             "
@@ -328,15 +328,15 @@ export default function SignIn() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="
     w-full
-    p-3
-    rounded-xl
-    bg-white/5
-    border border-white/10
-    focus:border-red-500
-    focus:ring-2 focus:ring-red-500/30
-    outline-none
-    transition
-    pr-10
+            p-3
+            rounded-xl
+            bg-white/5
+            border border-indigo-300
+            focus:border-indigo-500
+focus:ring-2 focus:ring-indigo-500/30
+            outline-none
+            transition
+
     "
                             />
 
@@ -349,8 +349,8 @@ export default function SignIn() {
     top-1/2
     -translate-y-1/2
     text-gray-400
-    hover:text-white
-    transition
+    hover:text-gray-600
+    transition cursor-pointer
     "
                             >
                                 {showPassword ? <FaEyeSlash /> : <FaEye />}
@@ -362,16 +362,16 @@ export default function SignIn() {
                         <button
                             disabled={loading}
                             className="
-            w-full
-            py-3
-            rounded-2xl
-            bg-gradient-to-r from-red-500 to-red-600
-            text-white
-            font-medium
-            hover:scale-[1.02]
-            transition
-            shadow-lg shadow-red-500/30
-            "
+w-full
+py-3
+rounded-2xl
+bg-gradient-to-r from-blue-600 to-indigo-600
+text-white
+font-medium
+hover:scale-[1.02]
+transition
+shadow-lg shadow-indigo-500/30 cursor-pointer
+"
                         >
                             {loading ? "Signing In..." : "Sign In"}
                         </button>
@@ -379,7 +379,7 @@ export default function SignIn() {
                         <button
                             type="button"
                             onClick={handleForgotPassword}
-                            className="text-red-400 text-sm hover:underline w-full text-right"
+                            className="text-indigo-400 text-sm hover:underline w-full text-right"
                         >
                             Forgot Password?
                         </button>
@@ -391,7 +391,7 @@ export default function SignIn() {
 
                             <Link
                                 to="/sign-up"
-                                className="text-red-400 font-medium hover:text-red-300"
+                                className=" font-medium text-indigo-400 hover:text-indigo-300"
                             >
                                 Create Account
                             </Link>
@@ -426,26 +426,35 @@ export default function SignIn() {
 
                                 <div className="flex justify-center">
 
-                                    <InputOtp
-                                        length={6}
-                                        value={otpValue}
-                                        onValueChange={handleOtpChange}
-                                        classNames={{
-                                            input:
-                                                "w-12 h-12 sm:w-14 sm:h-14 text-lg font-semibold text-center bg-white/5 border border-white/10 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-500/40",
-                                        }}
-                                    />
+                                  <InputOtp
+  length={6}
+  value={otpValue}
+  onValueChange={handleOtpChange}
+  classNames={{
+    input: `
+      w-12 h-12 sm:w-14 sm:h-14
+      text-lg font-semibold text-center
+      bg-black/50
+      border border-indigo-400
+      rounded-xl
+      hover:border-indigo-500
+      focus:border-indigo-500
+      focus:ring-2 focus:ring-indigo-500/40
+      transition
+    `,
+  }}
+/>
 
                                 </div>
 
                                 {timer > 0 ? (
                                     <p className="text-gray-400 text-sm">
-                                        Resend code in <span className="text-red-400">{timer}s</span>
+                                        Resend code in <span className="text-indigo-400">{timer}s</span>
                                     </p>
                                 ) : (
                                     <button
                                         onClick={resendOTP}
-                                        className="text-red-400 text-sm hover:underline"
+                                        className="text-blue-400 text-sm hover:underline"
                                     >
                                         Resend Code
                                     </button>
@@ -475,10 +484,11 @@ export default function SignIn() {
             p-3
             rounded-xl
             bg-white/5
-            border border-white/10
-            focus:border-red-500
-            focus:ring-2 focus:ring-red-500/30
+            border border-indigo-300
+            focus:border-indigo-500
+focus:ring-2 focus:ring-indigo-500/30
             outline-none
+            transition
             "
                         />
                         <div className="relative">
@@ -488,15 +498,15 @@ export default function SignIn() {
                                 placeholder="New Password"
                                 onChange={(e) => setNewPassword(e.target.value)}
                                 className="
-    w-full
-    p-3
-    rounded-xl
-    bg-white/5
-    border border-white/10
-    focus:border-red-500
-    focus:ring-2 focus:ring-red-500/30
-    outline-none
-    transition
+w-full
+            p-3
+            rounded-xl
+            bg-white/5
+            border border-indigo-300
+            focus:border-indigo-500
+focus:ring-2 focus:ring-indigo-500/30
+            outline-none
+            transition
     pr-10
     "
                             />
@@ -510,8 +520,8 @@ export default function SignIn() {
     top-1/2
     -translate-y-1/2
     text-gray-400
-    hover:text-white
-    transition
+    hover:text-gray-500
+    transition cursor-pointer
     "
                             >
                                 {showNewPassword ? <FaEyeSlash /> : <FaEye />}
@@ -523,7 +533,7 @@ export default function SignIn() {
             w-full
             py-3
             rounded-2xl
-            bg-gradient-to-r from-red-500 to-red-600
+            bg-gradient-to-r from-blue-600 to-indigo-600
             text-white
             hover:scale-[1.02]
             transition

@@ -129,8 +129,8 @@ const validatePassword = (password) => {
             flex items-center justify-center gap-3
             py-3
             rounded-2xl
-            bg-white
-            text-black
+            bg-black/10
+            text-black hover:bg-black/20 cursor-pointer 
             font-medium
             hover:scale-[1.02]
             transition
@@ -148,9 +148,9 @@ const validatePassword = (password) => {
             flex items-center justify-center gap-3
             py-3
             rounded-2xl
-            border border-white/10
-            bg-white/5
-            hover:bg-white/10
+            border border-indigo-300
+            bg-black/10
+            hover:bg-black/20 cursor-pointer
             transition
             "
           >
@@ -163,9 +163,9 @@ const validatePassword = (password) => {
         {/* ===== DIVIDER ===== */}
 
         <div className="flex items-center gap-3 text-gray-400 text-sm">
-          <div className="flex-1 h-px bg-white/10"/>
-          OR
-          <div className="flex-1 h-px bg-white/10"/>
+          <div className="flex-1 h-px bg-black/30"/>
+    <span className="text-black">OR</span>
+          <div className="flex-1 h-px bg-black/30"/>
         </div>
 
         {/* ===== SIGNUP FORM ===== */}
@@ -178,17 +178,17 @@ const validatePassword = (password) => {
 
             <input
               placeholder="First name"
-              className="
-              w-full
-              p-3
-              rounded-xl
-              bg-white/5
-              border border-white/10
-              focus:border-red-500
-              focus:ring-2 focus:ring-red-500/30
-              outline-none
-              transition
-              "
+            className="
+w-full
+p-3
+rounded-xl
+bg-white/5
+border border-indigo-300
+focus:border-indigo-500
+focus:ring-2 focus:ring-indigo-500/30
+outline-none
+transition
+"
               onChange={(e)=>
                 setForm({...form, firstName:e.target.value})
               }
@@ -197,16 +197,16 @@ const validatePassword = (password) => {
             <input
               placeholder="Last name"
               className="
-              w-full
-              p-3
-              rounded-xl
-              bg-white/5
-              border border-white/10
-              focus:border-red-500
-              focus:ring-2 focus:ring-red-500/30
-              outline-none
-              transition
-              "
+w-full
+p-3
+rounded-xl
+bg-white/5
+border border-indigo-300
+focus:border-indigo-500
+focus:ring-2 focus:ring-indigo-500/30
+outline-none
+transition
+"
               onChange={(e)=>
                 setForm({...form, lastName:e.target.value})
               }
@@ -220,17 +220,17 @@ const validatePassword = (password) => {
             type="email"
             required
             placeholder="Email address"
-            className="
-            w-full
-            p-3
-            rounded-xl
-            bg-white/5
-            border border-white/10
-            focus:border-red-500
-            focus:ring-2 focus:ring-red-500/30
-            outline-none
-            transition
-            "
+          className="
+w-full
+p-3
+rounded-xl
+bg-white/5
+border border-indigo-300
+focus:border-indigo-500
+focus:ring-2 focus:ring-indigo-500/30
+outline-none
+transition
+"
             onChange={(e)=>
               setForm({...form, email:e.target.value})
             }
@@ -243,18 +243,17 @@ const validatePassword = (password) => {
   <input
     type={showPassword ? "text" : "password"}
     placeholder="Password"
-    className="
-    w-full
-    p-3
-    rounded-xl
-    bg-white/5
-    border border-white/10
-    focus:border-red-500
-    focus:ring-2 focus:ring-red-500/30
-    outline-none
-    transition
-    pr-10
-    "
+   className="
+w-full
+p-3
+rounded-xl
+bg-white/5
+border border-indigo-400
+focus:border-indigo-500
+focus:ring-2 focus:ring-indigo-500/30
+outline-none
+transition
+"
     onChange={(e)=>
       setForm({...form, password:e.target.value})
     }
@@ -269,7 +268,7 @@ const validatePassword = (password) => {
     top-1/2
     -translate-y-1/2
     text-gray-400
-    hover:text-red-400
+    hover:text-gray-600 cursor-pointer
     transition
     "
   >
@@ -287,13 +286,12 @@ const validatePassword = (password) => {
             w-full
             py-3
             rounded-2xl
-            bg-gradient-to-r from-red-500 to-red-600
-            text-white
+bg-gradient-to-r from-blue-600 to-indigo-600
+shadow-indigo-500/30            text-white
             font-medium
             hover:scale-[1.02]
             transition
-            shadow-lg shadow-red-500/30
-            "
+            shadow-lg cursor-pointer"
           >
             {loading ? "Creating Account..." : "Create Account"}
           </button>
@@ -302,7 +300,7 @@ const validatePassword = (password) => {
 
         {/* ===== SIGN IN LINK ===== */}
 
-        <div className="pt-4 border-t border-white/10 text-center text-sm">
+        <div className="pt-4 border-t border-indigo-300 text-center text-sm">
 
           <span className="text-gray-400">
             Already have an account?{" "}
@@ -311,9 +309,9 @@ const validatePassword = (password) => {
           <Link
             to="/sign-in"
             className="
-            text-red-400
+            
             font-medium
-            hover:text-red-300
+           text-indigo-400 hover:text-indigo-300
             transition
             "
           >

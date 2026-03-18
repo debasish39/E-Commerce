@@ -108,7 +108,7 @@ const AnimatedList = ({
         ref={listRef}
         className={`max-h-[260px] overflow-y-auto p-2 rounded-lg ${
           displayScrollbar
-            ? "[&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:bg-gray-700 [&::-webkit-scrollbar-thumb]:rounded"
+            ? "[&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:bg-blue-400 [&::-webkit-scrollbar-thumb]:rounded"
             : "scrollbar-hide"
         }`}
         onScroll={handleScroll}
@@ -125,11 +125,11 @@ const AnimatedList = ({
           >
 
             <div
-              className={`p-3 rounded-lg transition ${
-                selectedIndex === index
-                  ? "bg-red-500 text-white"
-                  : "bg-[#111] hover:bg-[#222]"
-              } ${itemClassName}`}
+            className={`p-3 rounded-lg transition ${
+  selectedIndex === index
+    ? "bg-blue-500 text-white"
+    : "bg-gray-100 hover:bg-blue-50 text-gray-800"
+} ${itemClassName}`}
             >
               {item}
             </div>
@@ -143,12 +143,12 @@ const AnimatedList = ({
       {showGradients && (
         <>
           <div
-            className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-[#0f0f10] to-transparent pointer-events-none"
+            className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-gray-200 to-transparent pointer-events-none"
             style={{ opacity: topGradientOpacity }}
           />
 
           <div
-            className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-[#0f0f10] to-transparent pointer-events-none"
+            className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-gray-200 to-transparent pointer-events-none"
             style={{ opacity: bottomGradientOpacity }}
           />
         </>
@@ -158,4 +158,4 @@ const AnimatedList = ({
   );
 };
 
-export default AnimatedList;
+// export default AnimatedList;

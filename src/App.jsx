@@ -32,7 +32,7 @@ const Footer = lazy(() => import("./components/Footer"));
 const ProtectedRoute = lazy(() => import("./components/ProtectedRoute"));
 const NotFound = lazy(() => import("./components/NotFound"));
 const ScrollToTop = lazy(() => import("./components/scrollToTop"));
-const Particles = lazy(() => import("./components/Particles"));
+// const Particles = lazy(() => import("./components/Particles"));
 const ScrollProgressBar = lazy(() =>
   import("./components/ScrollProgressBar")
 );
@@ -123,7 +123,7 @@ const onLocationChange = async (lat, lon) => {
     <>
       {/* ================= Toast System ================= */}
       <Toaster
-        theme="dark"
+        
         position="top-right"
         richColors
         closeButton
@@ -131,8 +131,8 @@ const onLocationChange = async (lat, lon) => {
           duration: 4000,
 
           classNames: {
-            toast:
-              "bg-black/80 backdrop-blur-xl text-white border rounded-xl shadow-lg px-4 py-1",
+           toast:
+"bg-white/80 backdrop-blur-xl text-gray-800 border border-blue-200 rounded-xl shadow-lg px-4 py-1",
 
             success:
               "border-green-400/40 shadow-[0_0_25px_rgba(34,197,94,0.5)]",
@@ -157,30 +157,30 @@ const onLocationChange = async (lat, lon) => {
         <ScrollProgressBar />
 
         {/* ================= Background Wrapper ================= */}
-        <div className="relative min-h-screen w-full overflow-hidden text-gray-100">
+     <div className="relative min-h-screen w-full overflow-hidden text-gray-800">
 
           {/* Base Gradient */}
-          <div className="absolute inset-0 -z-30 bg-gradient-to-br from-gray-950 via-black to-gray-900" />
+          <div className="absolute inset-0 -z-30 bg-gradient-to-br from-gray-100 via-gray-200 to-blue-100" />
 
           {/* Glow Accent 1 */}
-          <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-red-600/20 blur-[180px] rounded-full animate-pulse -z-20" />
+          <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-blue-400/30 blur-[180px] rounded-full animate-pulse -z-20" />
 
           {/* Glow Accent 2 */}
-          <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-pink-600/20 blur-[200px] rounded-full animate-[float_12s_ease-in-out_infinite] -z-20" />
+          <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-blue-300/30 blur-[200px] rounded-full animate-[float_12s_ease-in-out_infinite] -z-20" />
 
           {/* Noise Overlay */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,_rgba(255,255,255,0.05)_1px,_transparent_0)] bg-[length:40px_40px] opacity-30 -z-20" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,_rgba(255,255,255,0.05)_1px,_transparent_0)] bg-[length:40px_40px] opacity-10 -z-20" />
 
           {/* Particles */}
-          <div className="absolute inset-0 -z-10">
+          {/* <div className="absolute inset-0 -z-10">
             <Particles
-              particleColors={[
-                "#ffffff",
-                "#ff2e63",
-                "#ff6a00",
-                "#f53347",
-                "#ffff00",
-              ]}
+          particleColors={[
+  "#2563eb",
+  "#60a5fa",
+  "#93c5fd",
+  "#3b82f6",
+  "#1d4ed8",
+]}
               particleCount={990}
               particleSpread={9}
               speed={0.3}
@@ -189,7 +189,7 @@ const onLocationChange = async (lat, lon) => {
               alphaParticles
 
             />
-          </div>
+          </div> */}
 
           {/* ================= Main Content ================= */}
           <div className="relative z-10">

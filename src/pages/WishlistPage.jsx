@@ -33,30 +33,40 @@ export default function WishlistPage() {
 
   /* ================= EMPTY STATE ================= */
 
-  if (!wishlist.length) {
-    return (
-      <div className="flex flex-col items-center justify-center h-[70vh] text-center text-gray-400">
+ if (!wishlist.length) {
+  return (
+    <div className="flex flex-col items-center justify-center h-[70vh] text-center text-gray-400">
 
-        <div className="text-6xl mb-4">💔</div>
-
-        <h2 className="text-2xl font-semibold mb-2">
-          Your wishlist is empty
-        </h2>
-
-        <p className="text-gray-500 mb-6">
-          Save items you love and find them easily later
-        </p>
-
-        <Link
-          to="/products"
-          className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-orange-400 text-white font-semibold shadow-lg hover:scale-105 transition"
-        >
-          Browse Products
-        </Link>
-
+      <div className="text-6xl mb-4 text-indigo-400">
+        💜
       </div>
-    );
-  }
+
+      <h2 className="text-2xl font-semibold mb-2">
+        Your wishlist is empty
+      </h2>
+
+      <p className="text-gray-500 mb-6 max-w-sm">
+        Save products you love and access them quickly anytime.
+      </p>
+
+      <Link
+        to="/products"
+        className="
+        px-6 py-3
+        rounded-xl
+        bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600
+        text-white font-semibold
+        shadow-lg shadow-indigo-500/30
+        hover:scale-105
+        transition
+        "
+      >
+        Browse Products
+      </Link>
+
+    </div>
+  );
+}
 
   /* ================= PAGE ================= */
 
@@ -64,45 +74,62 @@ export default function WishlistPage() {
     <div className="min-h-screen text-white py-10 px-6">
 
       {/* Header */}
-      <div className="flex justify-between items-center mb-10">
+   <div className="flex justify-between items-center mb-10">
 
-        <h2 className="text-2xl sm:text-4xl font-bold flex items-center gap-2">
+  <h2 className="text-2xl sm:text-4xl font-bold flex items-center gap-3">
 
-          <FaHeart className="text-red-400" />
+    <FaHeart className="text-indigo-400" />
 
-          <span className="bg-gradient-to-r from-red-400 to-orange-300 bg-clip-text text-transparent">
-            My Wishlist
-          </span>
+    <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+      My Wishlist
+    </span>
 
-          <span className="text-sm bg-white/10 px-3 py-1 rounded-full">
-            {wishlist.length}
-          </span>
+    <span className="text-sm bg-black/10 px-3 py-1 rounded-full border text-indigo-500 border-white/10">
+      {wishlist.length}
+    </span>
 
-        </h2>
+  </h2>
 
-        <button
-          onClick={() => setModalType("clear")}
-          className="px-5 py-2 rounded-xl border border-red-400/40 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition cursor-pointer"
-        >
-          Clear All
-        </button>
+  <button
+    onClick={() => setModalType("clear")}
+    className="
+    px-3 py-2 
+    rounded-xl
+    border border-indigo-400
+    bg-indigo-500/10
+    text-indigo-900 text-sm font-semibold sm:text-2xl
+    hover:bg-indigo-100
+    transition
+    cursor-pointer
+    "
+  >
+    Clear All
+  </button>
 
-      </div>
-
+</div>
 
       {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
         {wishlist.map(item => (
 
-          <div
-            key={item.productId}
-            onClick={() => toggleOverlay(item.productId)}
-            className="group relative rounded-3xl overflow-hidden bg-white/5 border border-white/10 backdrop-blur-xl shadow-xl hover:shadow-red-500/20 transition duration-300 hover:-translate-y-1"
-          >
+        <div
+  key={item.productId}
+  onClick={() => toggleOverlay(item.productId)}
+  className="
+  group relative
+  rounded-3xl overflow-hidden
+  bg-white/5 backdrop-blur-xl
+  border border-indigo-400/10
+  shadow-xl
+  hover:shadow-indigo-500/20
+  transition duration-300
+  hover:-translate-y-1
+"
+>
 
-            {/* Glow */}
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition blur-xl bg-gradient-to-tr from-red-500/20 via-pink-300/10 to-orange-400/20"></div>
+{/* Hover Glow */}
+<div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition blur-xl bg-gradient-to-tr from-blue-500/20 via-indigo-500/10 to-purple-500/20"></div>
 
             {/* Image */}
             <div className="relative h-56 overflow-hidden">
@@ -115,36 +142,57 @@ export default function WishlistPage() {
               />
 
               {/* Overlay */}
-              <div
-                className={`absolute inset-0 flex items-center justify-center gap-3 bg-black/60 backdrop-blur-sm transition ${activeCardId === item.productId
-                    ? "opacity-100"
-                    : "opacity-0 group-hover:opacity-100"
-                  }`}
-              >
+            <div
+  className={`absolute inset-0 flex items-center justify-center gap-3 bg-black/60 backdrop-blur-sm transition ${
+    activeCardId === item.productId
+      ? "opacity-100"
+      : "opacity-0 group-hover:opacity-100"
+  }`}
+>
 
-                <Link
-                  to={`/products/${item.productId}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="px-4 py-2 rounded-lg bg-white text-black flex items-center gap-2 hover:bg-gray-200 transition"
-                >
-                  <FaEye /> View
-                </Link>
+               <Link
+  to={`/products/${item.productId}`}
+  onClick={(e) => e.stopPropagation()}
+  className="
+  px-4 py-2 rounded-lg
+  bg-white text-black
+  flex items-center gap-2
+  hover:bg-gray-200
+  transition
+  "
+>
+  <FaEye /> View
+</Link>
 
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemoveItem(item.productId);
-                  }}
-                  className="px-4 py-2 rounded-lg bg-red-500 text-white flex items-center gap-2 hover:bg-red-600 transition"
-                >
-                  <FaTrash /> Remove
-                </button>
+<button
+  onClick={(e) => {
+    e.stopPropagation();
+    handleRemoveItem(item.productId);
+  }}
+  className="
+  px-4 py-2 rounded-lg
+  bg-gradient-to-r from-blue-600 to-indigo-600
+  text-white
+  flex items-center gap-2
+  hover:opacity-90
+  transition
+  "
+>
+  <FaTrash /> Remove
+</button>
 
               </div>
 
 
               {/* Price */}
-              <div className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-orange-400 px-3 py-1 rounded-full text-sm font-semibold shadow">
+            <div className="
+absolute top-3 left-3
+bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600
+px-3 py-1
+rounded-full
+text-sm font-semibold
+shadow-lg
+">
                 ₹{item.price}
               </div>
 
@@ -156,7 +204,7 @@ export default function WishlistPage() {
 
               <Link
                 to={`/products/${item.productId}`}
-                className="block font-semibold text-lg hover:text-red-400 transition line-clamp-2"
+                className="block font-semibold text-lg text-indigo-400 hover:text-indigo-600 transition line-clamp-2 cursor-pointer"
               >
                 {item.title}
               </Link>
@@ -200,7 +248,11 @@ export default function WishlistPage() {
 
               <button
                 onClick={confirmRemoveItem}
-                className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600"
+                className="
+px-4 py-2 rounded-lg
+bg-gradient-to-r from-blue-600 to-indigo-600
+hover:opacity-90
+"
               >
                 Remove
               </button>

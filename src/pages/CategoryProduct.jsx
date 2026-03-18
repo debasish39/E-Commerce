@@ -47,7 +47,7 @@ export default function CategoryProduct() {
           <source src={Loading} type="video/webm" />
           Your browser does not support the video tag.
         </video>
-        <p className="text-red-600 text-lg font-semibold mt-4 capitalize">
+        <p className="text-indigo-600 text-lg font-semibold mt-4 capitalize">
           Loading {category} products...
         </p>
       </div>
@@ -65,13 +65,13 @@ export default function CategoryProduct() {
   return (
     <div className="max-w-7xl mx-auto py-10 px-4">
       <h1
-        className="text-3xl font-bold text-center mb-8 capitalize text-[#f53347]"
+        className="text-3xl font-bold text-center mb-8 capitalize text-indigo-700"
         data-aos="fade-down"
       >
         {category} Products
       </h1>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
         {products.map((product, index) => (
           <div
             key={product.id}

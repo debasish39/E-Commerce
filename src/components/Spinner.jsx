@@ -12,7 +12,7 @@ export default function Spinner() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black/90">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
 
       <div className="relative w-20 h-20 flex items-center justify-center">
 
@@ -20,15 +20,16 @@ export default function Spinner() {
         <div
           className="absolute inset-0 rounded-full"
           style={{
-            background: `conic-gradient(red ${progress * 3.6}deg, #1f2937 0deg)`
+            background: `conic-gradient(#2563eb ${progress * 3.6}deg, #7c3aed ${progress *
+              1.8}deg, #4f46e5 ${progress * 3.6}deg, #e5e7eb 0deg)`
           }}
         />
 
         {/* Inner circle */}
-        <div className="absolute w-16 h-16 rounded-full bg-black/60 flex items-center justify-center">
+        <div className="absolute w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-md">
 
           {/* Percentage */}
-          <span className="text-white text-sm font-semibold">
+          <span className="text-indigo-600 text-sm font-semibold">
             {progress}%
           </span>
 

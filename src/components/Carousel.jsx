@@ -69,7 +69,7 @@ const Carousel = () => {
 
   return (
 
-    <div className="relative w-full py-12 overflow-hidden">
+    <div className="relative w-full py-1 overflow-hidden">
 
       {/* HEADER */}
 
@@ -94,19 +94,18 @@ const Carousel = () => {
 
             effect="coverflow"
             centeredSlides
-            slidesPerView={1.2}
-
+slidesPerView={1}
             autoplay={{
-              delay: 4000,
+              delay: 3000,
               disableOnInteraction: false,
             }}
 
             coverflowEffect={{
-              rotate: 10,
+              // rotate: 10,
               stretch: 0,
-              depth: 250,
+              // depth: 250,
               modifier: 1.5,
-              slideShadows: true,
+              // slideShadows: true,
             }}
 
             parallax={true}
@@ -130,10 +129,30 @@ const Carousel = () => {
 
                 <SwiperSlide key={item.id}>
 
-                  <div
-                    className="grid lg:grid-cols-2 gap-3 items-center bg-gradient-to-r from-white/5 to-white/10 border border-white/20 backdrop-blur-xl rounded-3xl px-6 sm:p-6 sm:py-9 w-full h-full"
-                  >
+                 <div
+className="
+relative
+grid lg:grid-cols-2 gap-3 items-center
 
+
+backdrop-blur-2xl
+
+border border-indigo-200/60
+
+shadow-[0_20px_60px_rgba(0,0,0,0.15)]
+
+
+
+px-6 sm:p-6 sm:py-9
+w-full h-full
+
+overflow-hidden
+"
+>
+{/* Glow background */}
+{/* <div className="absolute -top-20 -left-20 w-[260px] h-[260px] bg-blue-400/30 blur-[120px] rounded-full"></div> */}
+
+{/* <div className="absolute bottom-[-80px] right-[-80px] w-[260px] h-[260px] bg-indigo-400/30 blur-[120px] rounded-full"></div> */}
                     {/* IMAGE */}
                     <div
                       className="flex justify-center"
@@ -144,7 +163,7 @@ const Carousel = () => {
                         src={item.thumbnail}
                         alt={item.title}
                         onClick={() => navigate(`/products/${item.id}`)}
-                        className="w-[300px] h-[250px] sm:w-[350px] sm:h-[350px] object-contain transition hover:scale-110 cursor-pointer"
+                        className="w-[300px] h-[250px] sm:w-[350px] sm:h-[350px] object-contain transition hover:scale-110 hover:drop-shadow-[0_10px_25px_rgba(59,130,246,0.35)] cursor-pointer"
                       />
 
                     </div>
@@ -156,13 +175,12 @@ const Carousel = () => {
                       data-swiper-parallax="-100"
                     >
                       <h1
-                        className="text-xl sm:text-3xl lg:text-5xl font-extrabold cursor-pointer hover:text-gray-300"
-                        onClick={() => navigate(`/products/${item.id}`)}
-                      >
+className="sm:text-3xl lg:text-5xl font-extrabold cursor-pointer bg-gradient-to-r from-blue-700 via-indigo-600 to-purple-600 text-transparent bg-clip-text"
+>
                         {item.title}
                       </h1>
 
-                      <p className="hidden sm:block text-gray-300 max-w-xl">
+                      <p className="hidden sm:block text-gray-600 max-w-xl">
                         {item.description}
                       </p>
                       <div className="sm:flex gap-1 text-yellow-400 hidden">
@@ -171,77 +189,82 @@ const Carousel = () => {
                         ))}
                       </div>
 
-                      <p className="text-2xl sm:text-3xl font-bold text-red-400">
-                        ₹{item.price}
-                      </p>
+                     <p className="text-2xl sm:text-3xl font-bold text-blue-600">
+  ₹{item.price}
+</p>
 
 
-                      <div className="flex flex-row gap-9 sm:gap-6 pt-2 justify-center items-center lg:justify-start mb-6">
+ <div className="flex flex-row flex-wrap gap-4 pt-4 justify-center items-center lg:justify-start mb-6">
 
-                        <button
-                          onClick={() =>
-                            alreadyInCart
-                              ? navigate("/cart")
-                              : handleAddToCart(item)
-                          }
-                          className={`
-  relative flex items-center gap-3 justify-center
-  px-6 py-3
-  rounded-xl
-  font-semibold
-  overflow-hidden
-  transition-all duration-300
-  active:scale-95
-  hover:scale-105
-  shadow-lg
+  {/* Add to Cart */}
+  <button
+    onClick={() =>
+      alreadyInCart
+        ? navigate("/cart")
+        : handleAddToCart(item)
+    }
+    className={`
+    relative flex items-center gap-3 justify-center
+    px-6 py-3
+    rounded-xl
+    font-semibold
+    overflow-hidden
+    transition-all duration-300
+    active:scale-95
+    hover:scale-105
+    shadow-md
+    cursor-pointer
+    ${
+      alreadyInCart
+        ? "bg-green-500/20 text-green-600 border border-green-400/40 hover:bg-green-500/30"
+        : "bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white hover:shadow-lg hover:shadow-indigo-500/30"
+    }
+    `}
+  >
+    <FaShoppingCart size={18} />
 
-  ${alreadyInCart
-                              ? "bg-green-500/20 text-green-400 border border-green-400/40 hover:bg-green-500/30"
-                              : "bg-gradient-to-r from-red-600 to-red-500 text-white hover:shadow-[0_10px_35px_rgba(239,68,68,0.45)]"
-                            }
-  `}
-                        >
-                          <FaShoppingCart size={18} />
+    {/* Mobile */}
+    <span className="sm:hidden text-sm">
+      {alreadyInCart ? "Cart" : "Add"}
+    </span>
 
-                          {/* Mobile text */}
-                          <span className="sm:hidden text-sm">
-                            {alreadyInCart ? "Cart" : "Add"}
-                          </span>
+    {/* Desktop */}
+    <span className="hidden sm:inline">
+      {alreadyInCart ? "View Cart" : "Add to Cart"}
+    </span>
+  </button>
 
-                          {/* Desktop text */}
-                          <span className="hidden sm:inline">
-                            {alreadyInCart ? "View Cart" : "Add to Cart"}
-                          </span>
 
-                        </button>
-                        <button
-                          onClick={() => navigate(`/products/${item.id}`)}
-                          className="
-  flex items-center gap-2
-  px-6 py-3
-  rounded-xl
-  font-semibold
-  bg-white/10
-  border border-white/20
-  backdrop-blur-md
-  text-white
-  hover:bg-white/20
-  hover:scale-105
-  active:scale-95
-  transition-all duration-300
-  shadow-md
-"
-                        >
-                          <AiOutlineEye size={18} />
+  {/* View Product */}
+  <button
+    onClick={() => navigate(`/products/${item.id}`)}
+    className="
+    flex items-center gap-2
+    px-6 py-3
+    rounded-xl
+    font-semibold
+    bg-white/90
+    border border-indigo-200
+    text-gray-700
+ cursor-pointer
+    hover:bg-indigo-50
+    hover:scale-105
+    active:scale-95
 
-                          {/* Mobile */}
-                          <span className="sm:hidden">View</span>
+    transition-all duration-300
+    shadow-sm
+    "
+  >
+    <AiOutlineEye size={18} />
 
-                          {/* Desktop */}
-                          <span className="hidden sm:inline">View Product</span>
+    {/* Mobile */}
+    <span className="sm:hidden">View</span>
 
-                        </button>
-                      </div>
+    {/* Desktop */}
+    <span className="hidden sm:inline">View Product</span>
+  </button>
+
+</div>
 
                     </div>
 

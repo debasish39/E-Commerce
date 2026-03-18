@@ -57,14 +57,14 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-black/80 text-gray-300 pt-10 border-t-4 border-red-600 relative bottom-0">
+    <footer className="bg-white text-gray-700 pt-10 border-t-4 border-blue-500 shadow-[0_-5px_25px_rgba(0,0,0,0.08)]">
       <div className="max-w-full px-9 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
         
         {/* Logo Section */}
         <div>
           <Link to="/">
             <h1
-              className="text-red-500 text-3xl font-bold mb-3"
+              className="text-blue-600 text-3xl font-bold mb-3"
               style={{ fontFamily: "'Pacifico', cursive" }}
             >
               E-Shop
@@ -83,7 +83,7 @@ const Footer = () => {
             Email:
             <a
               href="mailto:djproject963@gmail.com"
-              className="text-red-400 ml-1"
+              className="text-blue-500 ml-1 hover:underline"
             >
               djproject963@gmail.com
             </a>
@@ -93,7 +93,7 @@ const Footer = () => {
             Phone:
             <a
               href="tel:+916370195243"
-              className="text-red-400 ml-1"
+              className="text-blue-500 ml-1 hover:underline"
             >
               +91 6370195243
             </a>
@@ -102,37 +102,37 @@ const Footer = () => {
 
         {/* Customer Service */}
         <div>
-          <h3 className="text-xl font-semibold text-white mb-4">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">
             Customer Service
           </h3>
 
           <ul className="text-sm space-y-2">
             <li>
-              <Link to="/contact" className="hover:text-red-500">
+              <Link to="/contact" className="hover:text-blue-600 transition">
                 Contact Us
               </Link>
             </li>
 
             <li>
-              <Link to="/contact" className="hover:text-red-500">
+              <Link to="/contact" className="hover:text-blue-600 transition">
                 Shipping & Returns
               </Link>
             </li>
 
             <li>
-              <Link to="/contact" className="hover:text-red-500">
+              <Link to="/contact" className="hover:text-blue-600 transition">
                 FAQs
               </Link>
             </li>
 
             <li>
-              <Link to="/contact" className="hover:text-red-500">
+              <Link to="/contact" className="hover:text-blue-600 transition">
                 Order Tracking
               </Link>
             </li>
 
             <li>
-              <Link to="/contact" className="hover:text-red-500">
+              <Link to="/contact" className="hover:text-blue-600 transition">
                 Support Center
               </Link>
             </li>
@@ -141,7 +141,7 @@ const Footer = () => {
 
         {/* Social Media */}
         <div>
-          <h3 className="text-xl font-semibold text-white mb-4">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">
             Follow Us
           </h3>
 
@@ -153,7 +153,7 @@ const Footer = () => {
             <a
               href="https://facebook.com"
               aria-label="Facebook"
-              className="hover:text-red-500"
+              className="hover:text-blue-600 transition"
             >
               <FaFacebook />
             </a>
@@ -161,7 +161,7 @@ const Footer = () => {
             <a
               href="https://instagram.com"
               aria-label="Instagram"
-              className="hover:text-red-500"
+              className="hover:text-blue-600 transition"
             >
               <FaInstagram />
             </a>
@@ -169,7 +169,7 @@ const Footer = () => {
             <a
               href="https://twitter.com"
               aria-label="Twitter"
-              className="hover:text-red-500"
+              className="hover:text-blue-600 transition"
             >
               <FaTwitter />
             </a>
@@ -177,7 +177,7 @@ const Footer = () => {
             <a
               href="https://linkedin.com"
               aria-label="Linkedin"
-              className="hover:text-red-500"
+              className="hover:text-blue-600 transition"
             >
               <FaLinkedin />
             </a>
@@ -186,7 +186,7 @@ const Footer = () => {
 
         {/* Newsletter */}
         <div>
-          <h3 className="text-xl font-semibold text-white mb-4">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">
             Stay Updated
           </h3>
 
@@ -205,14 +205,14 @@ const Footer = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Your email address"
-              className="w-full p-2 rounded-l-md bg-gray-100 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="w-full p-2 rounded-l-md bg-gray-100 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
 
             <button
               type="submit"
               disabled={loading}
-              className="bg-red-600 text-white px-4 rounded-r-md hover:bg-red-700 transition disabled:opacity-50 cursor-pointer"
+              className="bg-blue-600 text-white px-4 rounded-r-md hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer"
             >
               {loading ? "Sending..." : "Subscribe"}
             </button>
@@ -221,10 +221,10 @@ const Footer = () => {
       </div>
 
       {/* Footer Bottom */}
-      <div className="mt-10 border-t border-gray-600 pt-5 text-center text-sm pb-3 text-gray-400">
+      <div className="mt-10 border-t border-gray-200 pt-5 text-center text-sm pb-3 text-gray-500">
         <p>
           &copy; {new Date().getFullYear()}{" "}
-          <span className="text-red-500 font-semibold">
+          <span className="text-blue-600 font-semibold">
             E-Shop
           </span>
           . All rights reserved.
