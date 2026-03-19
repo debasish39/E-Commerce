@@ -112,12 +112,12 @@ export default function Products() {
   return (
     <>
 
-    <div className="min-h-screen py-6 px-2 text-gray-800">
+      <div className="min-h-screen py-6 px-2 text-gray-800">
 
         {/* Header */}
         <div
           data-aos="fade-down"
-        className="flex justify-center mb-6"
+          className="flex justify-center mb-6"
         >
           <h2 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600text-transparent bg-clip-text mt-6">
             <span className="text-white">🛍️</span> Explore Our Collection
@@ -207,12 +207,12 @@ export default function Products() {
       </div>
 
       {/* Floating Filter Button */}
-    <button
-  data-aos="fade-right"
-  data-aos-delay="3000"
-  onClick={() => setShowFilters(true)}
-  className="
-  fixed right-6 bottom-36 sm:bottom-15 -translate-y-1/2 z-40
+      <button
+        data-aos="fade-right"
+        data-aos-delay="3000"
+        onClick={() => setShowFilters(true)}
+        className="
+  fixed right-6 bottom-36 sm:bottom-36 -translate-y-1/2 z-40
   bg-gradient-to-r from-blue-400 to-indigo-600
   text-white
   p-3 rounded-full
@@ -220,9 +220,9 @@ export default function Products() {
   border border-indigo-400
   cursor-pointer
   "
->
-  <VscFilterFilled size={30} />
-</button>
+      >
+        <VscFilterFilled size={30} />
+      </button>
 
       {/* Filter Drawer */}
       <FilterSection open={showFilters} setOpen={setShowFilters} />
