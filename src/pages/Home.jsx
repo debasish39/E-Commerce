@@ -45,7 +45,7 @@ export default function Home() {
   }
 
   return (
-    <div className="relative min-h-screen text-gray-800 overflow-hidden transition-opacity duration-500">
+    <div className="relative min-h-screen text-gray-800 overflow-hidden  duration-500">
 
       <div data-aos="fade-up">
         <Carousel />

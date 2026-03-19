@@ -64,7 +64,7 @@ const Carousel = () => {
     }
 
     addToCart(item);
-    toast.success(`${item.title} added to cart 🛒`);
+    toast.success("Add to cart success 🛒");
   };
 
   return (
@@ -72,9 +72,6 @@ const Carousel = () => {
     <div className="relative w-full py-1 overflow-hidden">
 
       {/* HEADER */}
-
-
-
 
       <div className="w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
         {loading ? (
@@ -94,7 +91,7 @@ const Carousel = () => {
 
             effect="coverflow"
             centeredSlides
-slidesPerView={1}
+            slidesPerView={1}
             autoplay={{
               delay: 3000,
               disableOnInteraction: false,
@@ -129,30 +126,20 @@ slidesPerView={1}
 
                 <SwiperSlide key={item.id}>
 
-                 <div
-className="
+                  <div
+                    className="
 relative
 grid lg:grid-cols-2 gap-3 items-center
-
-
-backdrop-blur-2xl
-
-border border-indigo-200/60
-
-shadow-[0_20px_60px_rgba(0,0,0,0.15)]
-
-
-
 px-6 sm:p-6 sm:py-9
 w-full h-full
-
+    bg-transparent
 overflow-hidden
 "
->
-{/* Glow background */}
-{/* <div className="absolute -top-20 -left-20 w-[260px] h-[260px] bg-blue-400/30 blur-[120px] rounded-full"></div> */}
+                  >
+                    {/* Glow background */}
+                    {/* <div className="absolute -top-20 -left-20 w-[260px] h-[260px] bg-blue-400/30 blur-[120px] rounded-full"></div> */}
 
-{/* <div className="absolute bottom-[-80px] right-[-80px] w-[260px] h-[260px] bg-indigo-400/30 blur-[120px] rounded-full"></div> */}
+                    {/* <div className="absolute bottom-[-80px] right-[-80px] w-[260px] h-[260px] bg-indigo-400/30 blur-[120px] rounded-full"></div> */}
                     {/* IMAGE */}
                     <div
                       className="flex justify-center"
@@ -175,8 +162,8 @@ overflow-hidden
                       data-swiper-parallax="-100"
                     >
                       <h1
-className="sm:text-3xl lg:text-5xl font-extrabold cursor-pointer bg-gradient-to-r from-blue-700 via-indigo-600 to-purple-600 text-transparent bg-clip-text"
->
+                        className="sm:text-3xl lg:text-5xl font-extrabold cursor-pointer bg-gradient-to-r from-blue-700 via-indigo-600 to-purple-600 text-transparent bg-clip-text"
+                      >
                         {item.title}
                       </h1>
 
@@ -189,21 +176,21 @@ className="sm:text-3xl lg:text-5xl font-extrabold cursor-pointer bg-gradient-to-
                         ))}
                       </div>
 
-                     <p className="text-2xl sm:text-3xl font-bold text-blue-600">
-  ₹{item.price}
-</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-blue-600">
+                        ₹{item.price}
+                      </p>
 
 
- <div className="flex flex-row flex-wrap gap-4 pt-4 justify-center items-center lg:justify-start mb-6">
+                      <div className="flex flex-row flex-wrap gap-4 pt-4 justify-center items-center lg:justify-start mb-6">
 
-  {/* Add to Cart */}
-  <button
-    onClick={() =>
-      alreadyInCart
-        ? navigate("/cart")
-        : handleAddToCart(item)
-    }
-    className={`
+                        {/* Add to Cart */}
+                        <button
+                          onClick={() =>
+                            alreadyInCart
+                              ? navigate("/cart")
+                              : handleAddToCart(item)
+                          }
+                          className={`
     relative flex items-center gap-3 justify-center
     px-6 py-3
     rounded-xl
@@ -214,31 +201,30 @@ className="sm:text-3xl lg:text-5xl font-extrabold cursor-pointer bg-gradient-to-
     hover:scale-105
     shadow-md
     cursor-pointer
-    ${
-      alreadyInCart
-        ? "bg-green-500/20 text-green-600 border border-green-400/40 hover:bg-green-500/30"
-        : "bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white hover:shadow-lg hover:shadow-indigo-500/30"
-    }
+    ${alreadyInCart
+                              ? "bg-green-500/20 text-green-600 border border-green-400/40 hover:bg-green-500/30"
+                              : "bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white hover:shadow-lg hover:shadow-indigo-500/30"
+                            }
     `}
-  >
-    <FaShoppingCart size={18} />
+                        >
+                          <FaShoppingCart size={18} />
 
-    {/* Mobile */}
-    <span className="sm:hidden text-sm">
-      {alreadyInCart ? "Cart" : "Add"}
-    </span>
+                          {/* Mobile */}
+                          <span className="sm:hidden text-sm">
+                            {alreadyInCart ? "Cart" : "Add"}
+                          </span>
 
-    {/* Desktop */}
-    <span className="hidden sm:inline">
-      {alreadyInCart ? "View Cart" : "Add to Cart"}
-    </span>
-  </button>
+                          {/* Desktop */}
+                          <span className="hidden sm:inline">
+                            {alreadyInCart ? "View Cart" : "Add to Cart"}
+                          </span>
+                        </button>
 
 
-  {/* View Product */}
-  <button
-    onClick={() => navigate(`/products/${item.id}`)}
-    className="
+                        {/* View Product */}
+                        <button
+                          onClick={() => navigate(`/products/${item.id}`)}
+                          className="
     flex items-center gap-2
     px-6 py-3
     rounded-xl
@@ -254,17 +240,17 @@ className="sm:text-3xl lg:text-5xl font-extrabold cursor-pointer bg-gradient-to-
     transition-all duration-300
     shadow-sm
     "
-  >
-    <AiOutlineEye size={18} />
+                        >
+                          <AiOutlineEye size={18} />
 
-    {/* Mobile */}
-    <span className="sm:hidden">View</span>
+                          {/* Mobile */}
+                          <span className="sm:hidden">View</span>
 
-    {/* Desktop */}
-    <span className="hidden sm:inline">View Product</span>
-  </button>
+                          {/* Desktop */}
+                          <span className="hidden sm:inline">View Product</span>
+                        </button>
 
-</div>
+                      </div>
 
                     </div>
 

@@ -32,7 +32,7 @@ const Footer = lazy(() => import("./components/Footer"));
 const ProtectedRoute = lazy(() => import("./components/ProtectedRoute"));
 const NotFound = lazy(() => import("./components/NotFound"));
 const ScrollToTop = lazy(() => import("./components/scrollToTop"));
-// const Particles = lazy(() => import("./components/Particles"));
+const Particles = lazy(() => import("./components/Particles"));
 const ScrollProgressBar = lazy(() =>
   import("./components/ScrollProgressBar")
 );
@@ -84,24 +84,24 @@ const AppWrapper = () => {
       }
     });
   };
-const onLocationChange = async (lat, lon) => {
-  try {
-    const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
+  const onLocationChange = async (lat, lon) => {
+    try {
+      const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
 
-    const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=${apiKey}`;
+      const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=${apiKey}`;
 
-    const response = await axios.get(url);
+      const response = await axios.get(url);
 
-    const newLocation = response.data.features[0]?.properties;
+      const newLocation = response.data.features[0]?.properties;
 
-    setLocationData(newLocation);
+      setLocationData(newLocation);
 
-    localStorage.setItem("userLocation", JSON.stringify(newLocation));
+      localStorage.setItem("userLocation", JSON.stringify(newLocation));
 
-  } catch (error) {
-    console.error("Manual location update failed", error);
-  }
-};
+    } catch (error) {
+      console.error("Manual location update failed", error);
+    }
+  };
   /* ================= Initial Effects ================= */
   useEffect(() => {
     getLocation();
@@ -123,7 +123,7 @@ const onLocationChange = async (lat, lon) => {
     <>
       {/* ================= Toast System ================= */}
       <Toaster
-        
+
         position="top-right"
         richColors
         closeButton
@@ -131,8 +131,8 @@ const onLocationChange = async (lat, lon) => {
           duration: 4000,
 
           classNames: {
-           toast:
-"bg-white/80 backdrop-blur-xl text-gray-800 border border-blue-200 rounded-xl shadow-lg px-4 py-1",
+            toast:
+              "bg-white/80 backdrop-blur-xl text-gray-800 border border-blue-200 rounded-xl shadow-lg px-4 py-1",
 
             success:
               "border-green-400/40 shadow-[0_0_25px_rgba(34,197,94,0.5)]",
@@ -157,7 +157,7 @@ const onLocationChange = async (lat, lon) => {
         <ScrollProgressBar />
 
         {/* ================= Background Wrapper ================= */}
-     <div className="relative min-h-screen w-full overflow-hidden text-gray-800">
+        <div className="relative min-h-screen w-full overflow-hidden text-gray-800">
 
           {/* Base Gradient */}
           <div className="absolute inset-0 -z-30 bg-gradient-to-br from-gray-100 via-gray-200 to-blue-100" />
@@ -172,32 +172,32 @@ const onLocationChange = async (lat, lon) => {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,_rgba(255,255,255,0.05)_1px,_transparent_0)] bg-[length:40px_40px] opacity-10 -z-20" />
 
           {/* Particles */}
-          {/* <div className="absolute inset-0 -z-10">
+          <div className="absolute inset-0 -z-10">
             <Particles
-          particleColors={[
-  "#2563eb",
-  "#60a5fa",
-  "#93c5fd",
-  "#3b82f6",
-  "#1d4ed8",
-]}
+              particleColors={[
+                "#2563eb",
+                "#60a5fa",
+                "#93c5fd",
+                "#3b82f6",
+                "#1d4ed8",
+              ]}
               particleCount={990}
-              particleSpread={9}
+              particleSpread={6}
               speed={0.3}
               particleBaseSize={180}
               moveParticlesOnHover
               alphaParticles
 
             />
-          </div> */}
+          </div>
 
           {/* ================= Main Content ================= */}
           <div className="relative z-10">
 
-          <Navbar
-  location={locationData}
-  onLocationChange={onLocationChange}
-/>
+            <Navbar
+              location={locationData}
+              onLocationChange={onLocationChange}
+            />
             <div className="pt-12" />
 
             <Routes>
@@ -236,11 +236,11 @@ const onLocationChange = async (lat, lon) => {
                 path="/cart"
                 element={
                   <ProtectedRoute>
-                   <Cart
-  location={locationData}
-  getLocation={getLocation}
-  onLocationChange={onLocationChange}
-/>
+                    <Cart
+                      location={locationData}
+                      getLocation={getLocation}
+                      onLocationChange={onLocationChange}
+                    />
                   </ProtectedRoute>
                 }
               />

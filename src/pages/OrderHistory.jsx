@@ -276,7 +276,6 @@ doc.setTextColor(0, 0, 0);
 
   return (
     <div className="min-h-screen px-4 py-12 
-  bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 
   flex flex-col items-center">
 
      <h1
@@ -291,7 +290,7 @@ doc.setTextColor(0, 0, 0);
       {orders.length === 0 ? (
         <p className="text-gray-500">No previous orders found.</p>
       ) : (
-        <div className="w-full max-w-6xl space-y-6">
+        <div className="w-full max-w-6xl space-y-3">
 
           {orders.map((order,index) => {
             const subtotal = order.items.reduce(
@@ -316,7 +315,7 @@ doc.setTextColor(0, 0, 0);
   data-aos-duration="700"
   data-aos-easing="ease-out-cubic"
   className="group rounded-2xl border border-gray-200 
-  bg-white shadow-sm hover:shadow-xl 
+  bg-white/60 shadow-sm hover:shadow-xl 
   hover:-translate-y-[2px]
   transition-all duration-300 p-6"
 >
@@ -361,7 +360,7 @@ doc.setTextColor(0, 0, 0);
                 </div>
 
                 {/* ITEMS */}
-                <div className="mt-5 space-y-3">
+                <div className="mt-3 space-y-1">
                   {order.items.map((item, idx) => (
                     <div
                       key={idx}
@@ -378,7 +377,7 @@ doc.setTextColor(0, 0, 0);
                 </div>
 
                 {/* TOTAL */}
-                <div className="mt-4 text-sm space-y-1 text-gray-600">
+                <div className="mt-2 text-sm space-y-1 text-gray-600">
 
                   <div className="flex justify-between">
                     <span>Subtotal</span>
@@ -390,7 +389,7 @@ doc.setTextColor(0, 0, 0);
                     <span>₹5.00</span>
                   </div>
 
-                  <div className="border-t pt-2 flex justify-between font-semibold text-gray-800">
+                  <div className="border-t pt-1 flex justify-between font-semibold text-gray-800">
                     <span>Grand Total</span>
                     <span className="text-indigo-600">
                       ₹{grandTotal.toFixed(2)}
@@ -399,7 +398,7 @@ doc.setTextColor(0, 0, 0);
                 </div>
 
                 {/* BUTTON */}
-                <div className="mt-6 flex justify-end">
+                <div className="mt-1 flex justify-end">
                   <button
                     onClick={() => generateInvoice(order)}
                     className="flex items-center gap-2 
