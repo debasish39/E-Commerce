@@ -229,19 +229,18 @@ export default function SignIn() {
         }
     };
     const handleGoogle = () =>
-        signIn.authenticateWithblueirect({
+        signIn.authenticateWithRedirect({
             strategy: "oauth_google",
-            blueirectUrl: "/sso-callback",
-            blueirectUrlComplete: "/",
+            redirectUrl: "/sso-callback",
+            redirectUrlComplete: "/",
         });
 
     const handleGithub = () =>
-        signIn.authenticateWithblueirect({
+        signIn.authenticateWithRedirect({
             strategy: "oauth_github",
-            blueirectUrl: "/sso-callback",
-            blueirectUrlComplete: "/",
+            redirectUrl: "/sso-callback",
+            redirectUrlComplete: "/",
         });
-
     return (
         <AuthLayout title="Welcome Back">
 
@@ -426,12 +425,12 @@ shadow-lg shadow-indigo-500/30 cursor-pointer
 
                                 <div className="flex justify-center">
 
-                                  <InputOtp
-  length={6}
-  value={otpValue}
-  onValueChange={handleOtpChange}
-  classNames={{
-    input: `
+                                    <InputOtp
+                                        length={6}
+                                        value={otpValue}
+                                        onValueChange={handleOtpChange}
+                                        classNames={{
+                                            input: `
       w-12 h-12 sm:w-14 sm:h-14
       text-lg font-semibold text-center
       bg-black/50
@@ -442,8 +441,8 @@ shadow-lg shadow-indigo-500/30 cursor-pointer
       focus:ring-2 focus:ring-indigo-500/40
       transition
     `,
-  }}
-/>
+                                        }}
+                                    />
 
                                 </div>
 

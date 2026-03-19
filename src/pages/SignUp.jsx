@@ -1,4 +1,4 @@
-import { useSignUp } from "@clerk/clerk-react";
+import { useSignUp, useSignIn } from "@clerk/clerk-react";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
@@ -7,8 +7,8 @@ import { FaGithub } from "react-icons/fa";
 import { toast } from "sonner";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 export default function SignUp() {
-  const { signUp, isLoaded } = useSignUp();
-  const navigate = useNavigate();
+const { signUp } = useSignUp();
+const { signIn, isLoaded } = useSignIn();  const navigate = useNavigate();
 const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
     firstName: "",
@@ -90,27 +90,25 @@ const validatePassword = (password) => {
 };
   /* ================= GOOGLE ================= */
 
-  const handleGoogle = async () => {
-    if (!isLoaded) return;
+const handleGoogle = async () => {
+  if (!isLoaded) return;
 
-    await signUp.authenticateWithRedirect({
-      strategy: "oauth_google",
-      redirectUrl: "/sso-callback",
-      redirectUrlComplete: "/",
-    });
-  };
+  await signIn.authenticateWithRedirect({
+    strategy: "oauth_google",
+    redirectUrl: "/sso-callback",
+    redirectUrlComplete: "/",
+  });
+};
 
-  /* ================= GITHUB ================= */
+const handleGithub = async () => {
+  if (!isLoaded) return;
 
-  const handleGithub = async () => {
-    if (!isLoaded) return;
-
-    await signUp.authenticateWithRedirect({
-      strategy: "oauth_github",
-      redirectUrl: "/sso-callback",
-      redirectUrlComplete: "/",
-    });
-  };
+  await signIn.authenticateWithRedirect({
+    strategy: "oauth_github",
+    redirectUrl: "/sso-callback",
+    redirectUrlComplete: "/",
+  });
+};
 
   return (
     <AuthLayout title="Create Account">
