@@ -10,7 +10,7 @@ import SignUpPage from "./pages/SignUp";
 import SsoCallback from "./pages/SsoCallback";
 import VerifySignIn from "./pages/VerifySignIn";
 import ProfilePage from "./pages/ProfilePage";
-
+import Offline from "./pages/Offline";
 /* ===========================
    Lazy Loaded Pages
 =========================== */
@@ -43,6 +43,19 @@ const ScrollProgressBar = lazy(() =>
 const AppWrapper = () => {
   const [locationData, setLocationData] = useState(null);
   const location = useLocation();
+const [isOnline, setIsOnline] = useState(navigator.onLine);
+useEffect(() => {
+  const handleOnline = () => setIsOnline(true);
+  const handleOffline = () => setIsOnline(false);
+
+  window.addEventListener("online", handleOnline);
+  window.addEventListener("offline", handleOffline);
+
+  return () => {
+    window.removeEventListener("online", handleOnline);
+    window.removeEventListener("offline", handleOffline);
+  };
+}, []);
 
   /* ================= Tawk Chat ================= */
   useEffect(() => {
@@ -118,7 +131,9 @@ const AppWrapper = () => {
     location.pathname === "/contact" ||
     location.pathname === "/cart" ||
     location.pathname === "/wishlist";
-
+if (!isOnline) {
+  return <Offline />;
+}
   return (
     <>
       {/* ================= Toast System ================= */}
