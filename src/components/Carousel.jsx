@@ -84,26 +84,26 @@ const Carousel = () => {
 
         ) : (
 
-          <Swiper
+         <Swiper
             initialSlide={initialSlideIndex >= 0 ? initialSlideIndex : 0}
 
-            modules={[Navigation, Pagination, Autoplay, EffectCoverflow, Parallax]}
+            modules={[Navigation, Pagination, Autoplay]}
 
             effect="coverflow"
-            centeredSlides
-            slidesPerView={1}
+            
+slidesPerView={1}
             autoplay={{
               delay: 3000,
               disableOnInteraction: false,
             }}
 
-            coverflowEffect={{
-              // rotate: 10,
-              stretch: 0,
-              // depth: 250,
-              modifier: 1.5,
-              // slideShadows: true,
-            }}
+            // coverflowEffect={{
+            //   // rotate: 10,
+            //   stretch: 0,
+            //   // depth: 250,
+            //   modifier: 1.5,
+            //   // slideShadows: true,
+            // }}
 
             parallax={true}
 
@@ -115,6 +115,7 @@ const Carousel = () => {
           // className="py-10"
 
           >
+
 
             {orderedData.map((item) => {
 
