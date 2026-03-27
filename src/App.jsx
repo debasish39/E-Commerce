@@ -196,7 +196,7 @@ if (!isOnline) {
                 "#3b82f6",
                 "#1d4ed8",
               ]}
-              particleCount={990}
+              particleCount={105}
               particleSpread={6}
               speed={0.3}
               particleBaseSize={180}
