@@ -57,14 +57,14 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-white text-gray-700 pt-10 border-t-4 border-blue-500 shadow-[0_-5px_25px_rgba(0,0,0,0.08)]">
-      <div className="max-w-full px-9 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
+    <footer className="bg-white/50 text-gray-700 pt-10 border-t-1 border-indigo-500 shadow-[9px_9px_18px_indigo]">
+      <div className="max-w-full sm:px-9 px-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-10">
         
         {/* Logo Section */}
         <div>
           <Link to="/">
             <h1
-              className="text-blue-600 text-3xl font-bold mb-3"
+              className="text-indigo-600 text-xl sm:text-2xl font-bold mb-3"
               style={{ fontFamily: "'Pacifico', cursive" }}
             >
               E-Shop
@@ -114,7 +114,7 @@ const Footer = () => {
             </li>
 
             <li>
-              <Link to="/contact" className="hover:text-blue-600 transition">
+              <Link to="/shipping" className="hover:text-blue-600 transition">
                 Shipping & Returns
               </Link>
             </li>
@@ -139,6 +139,39 @@ const Footer = () => {
           </ul>
         </div>
 
+        {/* Legal Section */}
+        <div>
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            Legal
+          </h3>
+
+          <ul className="text-sm space-y-2">
+            <li>
+              <Link to="/terms" className="hover:text-blue-600 transition">
+                Terms & Conditions
+              </Link>
+            </li>
+
+            <li>
+              <Link to="/privacy" className="hover:text-blue-600 transition">
+                Privacy Policy
+              </Link>
+            </li>
+
+            <li>
+              <Link to="/refund" className="hover:text-blue-600 transition">
+                Refund Policy
+              </Link>
+            </li>
+
+            <li>
+              <Link to="/shipping" className="hover:text-blue-600 transition">
+                Shipping Policy
+              </Link>
+            </li>
+          </ul>
+        </div>
+
         {/* Social Media */}
         <div>
           <h3 className="text-xl font-semibold text-gray-800 mb-4">
@@ -152,7 +185,6 @@ const Footer = () => {
           <div className="flex space-x-4 text-xl">
             <a
               href="https://facebook.com"
-              aria-label="Facebook"
               className="hover:text-blue-600 transition"
             >
               <FaFacebook />
@@ -160,7 +192,6 @@ const Footer = () => {
 
             <a
               href="https://instagram.com"
-              aria-label="Instagram"
               className="hover:text-blue-600 transition"
             >
               <FaInstagram />
@@ -168,7 +199,6 @@ const Footer = () => {
 
             <a
               href="https://twitter.com"
-              aria-label="Twitter"
               className="hover:text-blue-600 transition"
             >
               <FaTwitter />
@@ -176,7 +206,6 @@ const Footer = () => {
 
             <a
               href="https://linkedin.com"
-              aria-label="Linkedin"
               className="hover:text-blue-600 transition"
             >
               <FaLinkedin />
@@ -194,25 +223,19 @@ const Footer = () => {
             Get special offers and new product alerts.
           </p>
 
-          <form
-            className="mt-4 flex"
-            onSubmit={handleSubscribe}
-            noValidate
-          >
+          <form className="mt-4 flex" onSubmit={handleSubscribe}>
             <input
               type="email"
-              name="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Your email address"
-              className="w-full p-2 rounded-l-md bg-gray-100 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
+              className="w-full p-2 rounded-l-md bg-gray-100 focus:outline-none border border-gray-300 focus:ring-1 focus:ring-blue-500"
             />
 
             <button
               type="submit"
               disabled={loading}
-              className="bg-blue-600 text-white px-4 rounded-r-md hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer"
+              className="bg-blue-600 text-white px-4 rounded-r-md hover:bg-blue-700 transition"
             >
               {loading ? "Sending..." : "Subscribe"}
             </button>
@@ -220,14 +243,12 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Footer Bottom */}
+      {/* Bottom */}
       <div className="mt-10 border-t border-gray-200 pt-5 text-center text-sm pb-3 text-gray-500">
         <p>
           &copy; {new Date().getFullYear()}{" "}
-          <span className="text-blue-600 font-semibold">
-            E-Shop
-          </span>
-          . All rights reserved.
+          <span className="text-blue-600 font-semibold">E-Shop</span>. All rights
+          reserved.
         </p>
       </div>
     </footer>

@@ -24,6 +24,7 @@ const WishlistPage = lazy(() => import("./pages/WishlistPage"));
 const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
 const OrderHistory = lazy(() => import("./pages/OrderHistory"));
 const Verify = lazy(() => import("./pages/verify"));
+const LegalPage = lazy(() => import("./pages/LegalPage.jsx"));
 /* ===========================
    Lazy Loaded Components
 =========================== */
@@ -43,19 +44,19 @@ const ScrollProgressBar = lazy(() =>
 const AppWrapper = () => {
   const [locationData, setLocationData] = useState(null);
   const location = useLocation();
-const [isOnline, setIsOnline] = useState(navigator.onLine);
-useEffect(() => {
-  const handleOnline = () => setIsOnline(true);
-  const handleOffline = () => setIsOnline(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
 
-  window.addEventListener("online", handleOnline);
-  window.addEventListener("offline", handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
-  return () => {
-    window.removeEventListener("online", handleOnline);
-    window.removeEventListener("offline", handleOffline);
-  };
-}, []);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   /* ================= Tawk Chat ================= */
   useEffect(() => {
@@ -131,9 +132,9 @@ useEffect(() => {
     location.pathname === "/contact" ||
     location.pathname === "/cart" ||
     location.pathname === "/wishlist";
-if (!isOnline) {
-  return <Offline />;
-}
+  if (!isOnline) {
+    return <Offline />;
+  }
   return (
     <>
       {/* ================= Toast System ================= */}
@@ -259,8 +260,7 @@ if (!isOnline) {
                   </ProtectedRoute>
                 }
               />
-
-              <Route path="*" element={<NotFound />} />
+    <Route path="/:type" element={<LegalPage />} />
             </Routes>
 
             {!hideFooter && <Footer />}
