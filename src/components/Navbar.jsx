@@ -312,13 +312,13 @@ export default function Navbar({ location, onLocationChange }) {
                 onChange={handleSearchChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Search products..."
-                className="bg-white border border-gray-300
+                className="bg-white/60 border border-gray-300
 
       text-gray-800 placeholder-gray-400
 
       rounded-lg pl-4 pr-12 py-2 text-sm
 
-      focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+      focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500
 
       transition-all duration-300 w-56 focus:w-60"
               />
@@ -427,7 +427,7 @@ export default function Navbar({ location, onLocationChange }) {
                 onChange={handleSearchChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Search products..."
-                className="w-52 focus:w-55 bg-white/80 border border-gray-300
+                className="w-52 focus:w-55 bg-white/60 border border-gray-300
 
       text-gray-800 placeholder-gray-400
 

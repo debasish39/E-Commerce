@@ -3,7 +3,7 @@ import { getData } from "../context/DataContext";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
-
+import { FaRupeeSign } from "react-icons/fa";
 import { toast } from "sonner";
 import { FaStar, FaShoppingCart } from "react-icons/fa";
 import { AiOutlineEye } from "react-icons/ai";
@@ -84,14 +84,14 @@ const Carousel = () => {
 
         ) : (
 
-         <Swiper
+          <Swiper
             initialSlide={initialSlideIndex >= 0 ? initialSlideIndex : 0}
 
             modules={[Navigation, Pagination, Autoplay]}
 
             effect="coverflow"
-            
-slidesPerView={1}
+
+            slidesPerView={1}
             autoplay={{
               delay: 3000,
               disableOnInteraction: false,
@@ -163,9 +163,7 @@ overflow-hidden
                       data-swiper-parallax="-100"
                     >
                       <h1
-                        className="sm:text-3xl lg:text-5xl font-extrabold cursor-pointer bg-gradient-to-r from-blue-700 via-indigo-600 to-purple-600 text-transparent bg-clip-text"
-                      >
-                        {item.title}
+className="sm:text-3xl  font-extrabold cursor-pointer bg-gradient-to-r from-blue-700 via-indigo-600 to-purple-600 text-transparent bg-clip-text">           {item.title}
                       </h1>
 
                       <p className="hidden sm:block text-gray-600 max-w-xl">
@@ -177,8 +175,9 @@ overflow-hidden
                         ))}
                       </div>
 
-                      <p className="text-2xl sm:text-3xl font-bold text-blue-600">
-                        ₹{item.price}
+                      <p className="flex items-center  text-2xl sm:text-3xl font-bold text-blue-600">
+                        <FaRupeeSign />
+                        {item.price}
                       </p>
 
 

@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { useUser } from "@clerk/clerk-react";
-
+import { FaRupeeSign } from "react-icons/fa";
 export default function ProductCard({ product }) {
   const navigate = useNavigate();
   const { addToCart, cartItem } = useCart();
@@ -147,9 +147,10 @@ export default function ProductCard({ product }) {
 
         <p className="text-xs text-gray-500">by {product.brand}</p>
 
-        <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">
-          ₹{product.price}
-        </p>
+       <p className="flex items-center justify-center  text-lg sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">
+  <FaRupeeSign className="text-blue-600" />
+  {product.price}
+</p>
       </div>
 
       {/* Add to Cart */}
