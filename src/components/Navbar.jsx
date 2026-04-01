@@ -541,10 +541,10 @@ export default function Navbar({ location, onLocationChange }) {
 
                   {/* INPUT CONTAINER */}
                   <div
-                    className="flex items-center gap-2 w-full
+                    className="flex items-center gap-1 w-full
   px-2 h-9 
 
-  rounded-lg border border-gray-300 bg-white
+  rounded-lg border border-indigo-600 bg-white
 
   focus-within:ring-2 focus-within:ring-indigo-500
   focus-within:border-indigo-500
@@ -555,7 +555,7 @@ export default function Navbar({ location, onLocationChange }) {
 
                     <input
                       type="text"
-                      placeholder="Search city, area or pincode"
+                      placeholder="Search city or pincode"
                       value={area}
                       onChange={(e) => setArea(e.target.value)}
                       className="flex-1 bg-transparent text-sm
@@ -566,11 +566,11 @@ export default function Navbar({ location, onLocationChange }) {
                   {/* BUTTON INSIDE */}
                   <button
                     onClick={handleAreaSearch}
-                    className="absolute right-1 top-1/2 -translate-y-1/2
+                    className="absolute right-0 top-1/2 -translate-y-1/2
 
-  flex items-center justify-center gap-1.5
+  flex items-center justify-center gap-1
 
-  h-9 px-3 rounded-md
+  h-9 px-3 rounded-md border border-indigo-600
   text-white text-sm font-medium
 
   bg-gradient-to-r from-blue-500 via-indigo-500 to-indigo-600
@@ -580,7 +580,7 @@ export default function Navbar({ location, onLocationChange }) {
 
   hover:scale-[1.03] active:scale-[0.96]
 
-  transition-all duration-300"
+  transition-all duration-300 cursor-pointer"
                   >
                     <Search size={16} />
                     <span>Search</span>

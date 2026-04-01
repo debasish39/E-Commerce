@@ -1,7 +1,7 @@
 import React from "react";
 import { useUser } from "@clerk/clerk-react";
 import { Navigate, useLocation } from "react-router-dom";
-
+import Spinner from "./Spinner";
 export default function ProtectedRoute({ children }) {
   const { user, isLoaded } = useUser();
   const location = useLocation();
@@ -9,7 +9,7 @@ export default function ProtectedRoute({ children }) {
   if (!isLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center text-white">
-        Loading...
+        <Spinner />
       </div>
     );
   }

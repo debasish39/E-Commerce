@@ -13,8 +13,12 @@ export default function Category() {
 
   const settings = {
     dots: false,
+    swipe: true,
+    swipeToSlide: true,
+    draggable: true,
+    touchMove: true,
     infinite: true,
-    speed: 9000,
+    speed: 12000,
     slidesToShow: 5,
     slidesToScroll: 1,
     autoplay: true,
@@ -41,8 +45,8 @@ export default function Category() {
       </h2>
 
       <p className="text-gray-600 mb-6 text-sm sm:text-base">
-  Discover categories that match your vibe.
-</p>
+        Discover categories that match your vibe.
+      </p>
 
       {/* FULL WIDTH SLIDER */}
       <div className="w-full px-2 sm:px-6">
@@ -57,7 +61,7 @@ export default function Category() {
                 onClick={() =>
                   navigate(`/category/${encodeURIComponent(item.name)}`)
                 }
-              className="
+                className="
 group cursor-pointer
 rounded-2xl
 border border-blue-100
@@ -92,8 +96,8 @@ shadow-blue-100
 
 
                 {/* CATEGORY NAME */}
-           <p
-  className="
+                <p
+                  className="
   mt-4
   text-xs sm:text-sm
   font-semibold
@@ -105,7 +109,7 @@ shadow-blue-100
   transition-all duration-300
   drop-shadow-[0_2px_6px_rgba(59,130,246,0.35)]
 "
->
+                >
                   {item.name.replace(/-/g, " ")}
                 </p>
 
