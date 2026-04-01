@@ -12,15 +12,15 @@ import "aos/dist/aos.css";
 
 export default function Products() {
 
-  const {
-    data,
-    fetchAllProducts,
-    search,
-    brand,
-    category,
-    priceRange,
-  } = getData();
-
+const {
+  filteredData,
+  fetchAllProducts,
+  search,
+  brand,
+  category,
+  priceRange,
+} = getData();
+const filteredProducts=filteredData;
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
@@ -43,23 +43,23 @@ export default function Products() {
     setPage(1);
   }, [search, brand, category, priceRange]);
 
-  const filteredProducts = data
-    .filter((product) =>
-      product.title.toLowerCase().includes(search.toLowerCase())
-    )
-    .filter(
-      (product) =>
-        category === "ALL" || category === "All" || product.category === category
-    )
-    .filter(
-      (product) =>
-        brand === "ALL" || brand === "All" || product.brand === brand
-    )
-    .filter(
-      (product) =>
-        product.price >= priceRange[0] &&
-        product.price <= priceRange[1]
-    );
+  // const filteredProducts = data
+  //   .filter((product) =>
+  //     product.title.toLowerCase().includes(search.toLowerCase())
+  //   )
+  //   .filter(
+  //     (product) =>
+  //       category === "ALL" || category === "All" || product.category === category
+  //   )
+  //   .filter(
+  //     (product) =>
+  //       brand === "ALL" || brand === "All" || product.brand === brand
+  //   )
+  //   .filter(
+  //     (product) =>
+  //       product.price >= priceRange[0] &&
+  //       product.price <= priceRange[1]
+  //   );
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
