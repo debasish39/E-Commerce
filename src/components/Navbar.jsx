@@ -537,19 +537,19 @@ export default function Navbar({ location, onLocationChange }) {
               <ModalBody className="space-y-4 py-4">
 
                 {/* SEARCH */}
-                <div className="flex items-center gap-2 w-full flex-nowrap">
+                <div className="w-full relative">
 
-                  {/* INPUT */}
+                  {/* INPUT CONTAINER */}
                   <div
-                    className="flex items-center gap-2 flex-1
-    px-4 h-11
+                    className="flex items-center gap-2 w-full
+  px-4 h-11 pr-12
 
-    rounded-lg border border-gray-300 bg-white
+  rounded-lg border border-gray-300 bg-white
 
-    focus-within:ring-2 focus-within:ring-indigo-500
-    focus-within:border-indigo-500
+  focus-within:ring-2 focus-within:ring-indigo-500
+  focus-within:border-indigo-500
 
-    transition"
+  transition"
                   >
                     <MapPin size={16} className="text-gray-400 shrink-0" />
 
@@ -559,16 +559,17 @@ export default function Navbar({ location, onLocationChange }) {
                       value={area}
                       onChange={(e) => setArea(e.target.value)}
                       className="flex-1 bg-transparent text-sm
-      outline-none placeholder-gray-400"
+    outline-none placeholder-gray-400"
                     />
                   </div>
 
-                  {/* BUTTON */}
+                  {/* BUTTON INSIDE */}
                   <button
                     onClick={handleAreaSearch}
-                    className="group relative h-11 px-5 rounded-lg
+                    className="absolute right-1 top-1/2 -translate-y-1/2
 
-    text-white font-medium text-sm
+    h-9 px-3 rounded-md
+    text-white text-sm font-medium
 
     bg-gradient-to-r from-blue-500 via-indigo-500 to-indigo-600
 
@@ -577,14 +578,9 @@ export default function Navbar({ location, onLocationChange }) {
 
     hover:scale-[1.03] active:scale-[0.96]
 
-    transition-all duration-300 overflow-hidden whitespace-nowrap cursor-pointer shrink-0"
+    transition-all duration-300"
                   >
-                    {/* Shine */}
-                    <span className="absolute inset-0 opacity-0 group-hover:opacity-100
-    bg-gradient-to-r from-transparent via-white/20 to-transparent
-    transition duration-500"></span>
-
-                    Search
+                    <Search size={16} />
                   </button>
 
                 </div>
@@ -618,7 +614,7 @@ export default function Navbar({ location, onLocationChange }) {
                     className="transition-transform duration-300 group-hover:scale-110"
                   />
 
-                  Detect My Location
+                  Use Current Location
 
                   {/* Subtle Shine */}
                   <span className="absolute inset-0 opacity-0 group-hover:opacity-100
