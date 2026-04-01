@@ -80,37 +80,48 @@ export default function Navbar({ location, onLocationChange }) {
       toast.error("Something went wrong");
     }
   };
-  const handleVoiceSearch = () => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+const handleVoiceSearch = () => {
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    if (!SpeechRecognition) {
-      alert("Speech recognition not supported in this browser");
-      return;
-    }
+  if (!SpeechRecognition) {
+    toast.error("Speech recognition not supported");
+    return;
+  }
 
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.lang = "en-US"; // Change to hi-IN if needed
-    recognition.interimResults = false;
+  const recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.lang = "en-US";
+  recognition.interimResults = false;
 
-    setIsListening(true);
-    recognition.start();
+  const listeningToast = toast.loading("🎤 Listening... Speak now");
 
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setSearch(transcript);
-      navigate("/products");
-    };
+  setIsListening(true);
+  recognition.start();
 
-    recognition.onend = () => {
-      setIsListening(false);
-    };
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
 
-    recognition.onerror = () => {
-      setIsListening(false);
-    };
+    setSearch(transcript);
+
+    toast.dismiss(listeningToast);
+    toast.success(`Searching for: "${transcript}"`);
+
+    navigate("/products");
   };
+
+  recognition.onend = () => {
+    setIsListening(false);
+    toast.dismiss(listeningToast);
+  };
+
+  recognition.onerror = () => {
+    setIsListening(false);
+
+    toast.dismiss(listeningToast);
+    toast.error("Voice not recognized. Try again.");
+  };
+};
   useEffect(() => {
     let lastScrollY = window.scrollY;
 
@@ -326,7 +337,7 @@ export default function Navbar({ location, onLocationChange }) {
               {/* MIC */}
               <button
                 onClick={handleVoiceSearch}
-                className={`absolute right-3 transition-all duration-300 ${isListening
+                className={`absolute right-3 transition-all duration-300 cursor-pointer ${isListening
                     ? "text-indigo-600 animate-pulse scale-110"
                     : "text-gray-400 hover:text-indigo-600"
                   }`}

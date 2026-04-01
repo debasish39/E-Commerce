@@ -45,6 +45,7 @@ const AppWrapper = () => {
   const [locationData, setLocationData] = useState(null);
   const location = useLocation();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -126,7 +127,18 @@ const AppWrapper = () => {
       easing: "ease-in-out",
     });
   }, []);
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = ""; 
+    };
 
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
   /* ================= Hide Footer Logic ================= */
   const hideFooter =
     location.pathname === "/contact" ||
@@ -228,8 +240,14 @@ const AppWrapper = () => {
               <Route path="/category/:category" element={<CategoryProduct />} />
               <Route path="/order-success" element={<OrderSuccess />} />
               <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/order-history" element={<OrderHistory />} />
-
+              <Route
+                path="/order-history"
+                element={
+                  <ProtectedRoute>
+                    <OrderHistory />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/wishlist"
                 element={
@@ -260,7 +278,7 @@ const AppWrapper = () => {
                   </ProtectedRoute>
                 }
               />
-    <Route path="/:type" element={<LegalPage />} />
+              <Route path="/:type" element={<LegalPage />} />
             </Routes>
 
             {!hideFooter && <Footer />}
