@@ -542,7 +542,7 @@ export default function Navbar({ location, onLocationChange }) {
                   {/* INPUT CONTAINER */}
                   <div
                     className="flex items-center gap-2 w-full
-  px-4 h-11 pr-12
+  px-2 h-9 
 
   rounded-lg border border-gray-300 bg-white
 
@@ -551,7 +551,7 @@ export default function Navbar({ location, onLocationChange }) {
 
   transition"
                   >
-                    <MapPin size={16} className="text-gray-400 shrink-0" />
+                    <MapPin size={18} className="text-gray-400 shrink-0" />
 
                     <input
                       type="text"
@@ -568,19 +568,22 @@ export default function Navbar({ location, onLocationChange }) {
                     onClick={handleAreaSearch}
                     className="absolute right-1 top-1/2 -translate-y-1/2
 
-    h-9 px-3 rounded-md
-    text-white text-sm font-medium
+  flex items-center justify-center gap-1.5
 
-    bg-gradient-to-r from-blue-500 via-indigo-500 to-indigo-600
+  h-9 px-3 rounded-md
+  text-white text-sm font-medium
 
-    shadow-md shadow-indigo-500/20
-    hover:shadow-indigo-500/40
+  bg-gradient-to-r from-blue-500 via-indigo-500 to-indigo-600
 
-    hover:scale-[1.03] active:scale-[0.96]
+  shadow-md shadow-indigo-500/20
+  hover:shadow-indigo-500/40
 
-    transition-all duration-300"
+  hover:scale-[1.03] active:scale-[0.96]
+
+  transition-all duration-300"
                   >
                     <Search size={16} />
+                    <span>Search</span>
                   </button>
 
                 </div>
