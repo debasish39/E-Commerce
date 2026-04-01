@@ -80,48 +80,48 @@ export default function Navbar({ location, onLocationChange }) {
       toast.error("Something went wrong");
     }
   };
-const handleVoiceSearch = () => {
-  const SpeechRecognition =
-    window.SpeechRecognition || window.webkitSpeechRecognition;
+  const handleVoiceSearch = () => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  if (!SpeechRecognition) {
-    toast.error("Speech recognition not supported");
-    return;
-  }
+    if (!SpeechRecognition) {
+      toast.error("Speech recognition not supported");
+      return;
+    }
 
-  const recognition = new SpeechRecognition();
-  recognition.continuous = false;
-  recognition.lang = "en-US";
-  recognition.interimResults = false;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
 
-  const listeningToast = toast.loading("🎤 Listening... Speak now");
+    const listeningToast = toast.loading("🎤 Listening... Speak now");
 
-  setIsListening(true);
-  recognition.start();
+    setIsListening(true);
+    recognition.start();
 
-  recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript;
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
 
-    setSearch(transcript);
+      setSearch(transcript);
 
-    toast.dismiss(listeningToast);
-    toast.success(`Searching for: "${transcript}"`);
+      toast.dismiss(listeningToast);
+      toast.success(`Searching for: "${transcript}"`);
 
-    navigate("/products");
+      navigate("/products");
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+      toast.dismiss(listeningToast);
+    };
+
+    recognition.onerror = () => {
+      setIsListening(false);
+
+      toast.dismiss(listeningToast);
+      toast.error("Voice not recognized. Try again.");
+    };
   };
-
-  recognition.onend = () => {
-    setIsListening(false);
-    toast.dismiss(listeningToast);
-  };
-
-  recognition.onerror = () => {
-    setIsListening(false);
-
-    toast.dismiss(listeningToast);
-    toast.error("Voice not recognized. Try again.");
-  };
-};
   useEffect(() => {
     let lastScrollY = window.scrollY;
 
@@ -338,8 +338,8 @@ const handleVoiceSearch = () => {
               <button
                 onClick={handleVoiceSearch}
                 className={`absolute right-3 transition-all duration-300 cursor-pointer ${isListening
-                    ? "text-indigo-600 animate-pulse scale-110"
-                    : "text-gray-400 hover:text-indigo-600"
+                  ? "text-indigo-600 animate-pulse scale-110"
+                  : "text-gray-400 hover:text-indigo-600"
                   }`}
               >
                 {isListening ? <MicOff size={20} /> : <Mic size={20} />}
@@ -455,8 +455,8 @@ const handleVoiceSearch = () => {
               <button
                 onClick={handleVoiceSearch}
                 className={`absolute right-3 top-1/2 -translate-y-1/2 transition-all duration-300 cursor-pointer ${isListening
-                    ? "text-indigo-600 animate-pulse scale-110"
-                    : "text-gray-400 hover:text-indigo-600"
+                  ? "text-indigo-600 animate-pulse scale-110"
+                  : "text-gray-400 hover:text-indigo-600"
                   }`}
               >
                 {isListening ? <MicOff size={20} /> : <Mic size={20} />}
@@ -537,11 +537,11 @@ const handleVoiceSearch = () => {
               <ModalBody className="space-y-4 py-4">
 
                 {/* SEARCH */}
-               <div className="flex items-center gap-2 w-full">
+                <div className="flex items-center gap-2 w-full flex-nowrap">
 
-  {/* INPUT */}
-  <div
-    className="flex items-center gap-2 flex-1
+                  {/* INPUT */}
+                  <div
+                    className="flex items-center gap-2 flex-1
     px-4 h-11
 
     rounded-lg border border-gray-300 bg-white
@@ -550,23 +550,23 @@ const handleVoiceSearch = () => {
     focus-within:border-indigo-500
 
     transition"
-  >
-    <MapPin size={16} className="text-gray-400" />
+                  >
+                    <MapPin size={16} className="text-gray-400 shrink-0" />
 
-    <input
-      type="text"
-      placeholder="Search city, area or pincode"
-      value={area}
-      onChange={(e) => setArea(e.target.value)}
-      className="flex-1 bg-transparent text-sm
-      outline-none placeholder-gray-400 focus:ring-indigo-300"
-    />
-  </div>
+                    <input
+                      type="text"
+                      placeholder="Search city, area or pincode"
+                      value={area}
+                      onChange={(e) => setArea(e.target.value)}
+                      className="flex-1 bg-transparent text-sm
+      outline-none placeholder-gray-400"
+                    />
+                  </div>
 
-  {/* BUTTON */}
-  <button
-    onClick={handleAreaSearch}
-    className="group relative h-11 px-5 rounded-lg
+                  {/* BUTTON */}
+                  <button
+                    onClick={handleAreaSearch}
+                    className="group relative h-11 px-5 rounded-lg
 
     text-white font-medium text-sm
 
@@ -577,19 +577,17 @@ const handleVoiceSearch = () => {
 
     hover:scale-[1.03] active:scale-[0.96]
 
-    transition-all duration-300 overflow-hidden whitespace-nowrap cursor-pointer"
-  >
-
-    {/* Shine */}
-    <span className="absolute inset-0 opacity-0 group-hover:opacity-100
+    transition-all duration-300 overflow-hidden whitespace-nowrap cursor-pointer shrink-0"
+                  >
+                    {/* Shine */}
+                    <span className="absolute inset-0 opacity-0 group-hover:opacity-100
     bg-gradient-to-r from-transparent via-white/20 to-transparent
     transition duration-500"></span>
 
-    Search
-  </button>
+                    Search
+                  </button>
 
-</div>
-
+                </div>
                 {/* DETECT LOCATION */}
                 <button
                   onClick={() => {
@@ -731,8 +729,8 @@ const handleVoiceSearch = () => {
 
       </aside>
       {/* ================= MOBILE BOTTOM NAVBAR ================= */}
-     <div
-  className={`sm:hidden fixed bottom-0 left-1/2 -translate-x-1/2
+      <div
+        className={`sm:hidden fixed bottom-0 left-1/2 -translate-x-1/2
   w-full max-w-md z-50
 
   bg-white/90 border border-gray-200
@@ -742,44 +740,44 @@ const handleVoiceSearch = () => {
 
   transition-transform duration-300 ease-in-out
   ${showBottomNav ? "translate-y-0" : "translate-y-24"}`}
->
-       <div className="flex justify-between items-center px-4 py-2.5">
+      >
+        <div className="flex justify-between items-center px-4 py-2.5">
 
-  {/* Home */}
-  <NavLink
-    to="/"
-    className={({ isActive }) =>
-      `flex flex-col items-center text-xs transition-all duration-300
+          {/* Home */}
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              `flex flex-col items-center text-xs transition-all duration-300
       ${isActive
-        ? "text-indigo-600 scale-105"
-        : "text-gray-500 hover:text-indigo-600"
-      }`
-    }
-  >
-    <Home className="h-5 w-5 mb-1" />
-    Home
-  </NavLink>
+                ? "text-indigo-600 scale-105"
+                : "text-gray-500 hover:text-indigo-600"
+              }`
+            }
+          >
+            <Home className="h-5 w-5 mb-1" />
+            Home
+          </NavLink>
 
-  {/* Products */}
-  <NavLink
-    to="/products"
-    className={({ isActive }) =>
-      `flex flex-col items-center text-xs transition-all duration-300
+          {/* Products */}
+          <NavLink
+            to="/products"
+            className={({ isActive }) =>
+              `flex flex-col items-center text-xs transition-all duration-300
       ${isActive
-        ? "text-indigo-600 scale-105"
-        : "text-gray-500 hover:text-indigo-600"
-      }`
-    }
-  >
-    <Package className="h-5 w-5 mb-1" />
-    Products
-  </NavLink>
+                ? "text-indigo-600 scale-105"
+                : "text-gray-500 hover:text-indigo-600"
+              }`
+            }
+          >
+            <Package className="h-5 w-5 mb-1" />
+            Products
+          </NavLink>
 
-  {/* FLOATING CART */}
-  <NavLink
-    to="/cart"
-    className={({ isActive }) =>
-      `relative -mt-7 flex items-center justify-center
+          {/* FLOATING CART */}
+          <NavLink
+            to="/cart"
+            className={({ isActive }) =>
+              `relative -mt-7 flex items-center justify-center
       h-14 w-14 rounded-full
 
       bg-gradient-to-r from-blue-500 via-indigo-500 to-indigo-600
@@ -788,87 +786,87 @@ const handleVoiceSearch = () => {
 
       transition-all duration-300
       ${isActive ? "scale-110" : "hover:scale-105"}`
-    }
-  >
-    <ShoppingCart className="h-6 w-6 text-white" />
+            }
+          >
+            <ShoppingCart className="h-6 w-6 text-white" />
 
-    {/* BADGE */}
-    <span
-      className={`absolute -top-1 -right-1
+            {/* BADGE */}
+            <span
+              className={`absolute -top-1 -right-1
       min-w-[18px] h-5 px-1 text-[10px]
       rounded-full flex items-center justify-center
       shadow-sm
       ${cartItem.length > 0
-        ? "bg-white text-indigo-600"
-        : "bg-gray-300 text-gray-600"
-      }`}
-    >
-      {cartItem.length}
-    </span>
-  </NavLink>
+                  ? "bg-white text-indigo-600"
+                  : "bg-gray-300 text-gray-600"
+                }`}
+            >
+              {cartItem.length}
+            </span>
+          </NavLink>
 
-  {/* Wishlist */}
-  <NavLink
-    to="/wishlist"
-    className={({ isActive }) =>
-      `relative flex flex-col items-center text-xs transition-all duration-300
+          {/* Wishlist */}
+          <NavLink
+            to="/wishlist"
+            className={({ isActive }) =>
+              `relative flex flex-col items-center text-xs transition-all duration-300
       ${isActive
-        ? "text-indigo-600 scale-105"
-        : "text-gray-500 hover:text-indigo-600"
-      }`
-    }
-  >
-    <div className="relative">
-      <AiOutlineHeart className="h-5 w-5 mb-1" />
+                ? "text-indigo-600 scale-105"
+                : "text-gray-500 hover:text-indigo-600"
+              }`
+            }
+          >
+            <div className="relative">
+              <AiOutlineHeart className="h-5 w-5 mb-1" />
 
-      <span
-        className={`absolute -top-2 -right-3
+              <span
+                className={`absolute -top-2 -right-3
         min-w-[18px] h-5 px-1 text-[10px]
         rounded-full flex items-center justify-center
         shadow-sm
         ${wishlist.length > 0
-          ? "bg-indigo-600 text-white"
-          : "bg-gray-300 text-gray-600"
-        }`}
-      >
-        {wishlist.length}
-      </span>
-    </div>
+                    ? "bg-indigo-600 text-white"
+                    : "bg-gray-300 text-gray-600"
+                  }`}
+              >
+                {wishlist.length}
+              </span>
+            </div>
 
-    Wishlist
-  </NavLink>
+            Wishlist
+          </NavLink>
 
-  {/* Account */}
-  <div className="flex flex-col items-center text-xs text-gray-500">
+          {/* Account */}
+          <div className="flex flex-col items-center text-xs text-gray-500">
 
-    <SignedOut>
-      <button
-        onClick={() => navigate("/sign-in")}
-        className="flex flex-col items-center gap-1 hover:text-indigo-600 transition"
-      >
-        <FaRegUserCircle className="h-5 w-5 mb-1" />
-        Account
-      </button>
-    </SignedOut>
+            <SignedOut>
+              <button
+                onClick={() => navigate("/sign-in")}
+                className="flex flex-col items-center gap-1 hover:text-indigo-600 transition"
+              >
+                <FaRegUserCircle className="h-5 w-5 mb-1" />
+                Account
+              </button>
+            </SignedOut>
 
-    <SignedIn>
-      <div className="flex flex-col items-center">
-        {user && (
-          <img
-            src={user.imageUrl}
-            alt="profile"
-            onClick={() => navigate("/profile")}
-            className="h-8 w-8 rounded-full
+            <SignedIn>
+              <div className="flex flex-col items-center">
+                {user && (
+                  <img
+                    src={user.imageUrl}
+                    alt="profile"
+                    onClick={() => navigate("/profile")}
+                    className="h-8 w-8 rounded-full
             ring-2 ring-indigo-500 cursor-pointer"
-          />
-        )}
-        <span className="text-[11px] mt-1">Profile</span>
-      </div>
-    </SignedIn>
+                  />
+                )}
+                <span className="text-[11px] mt-1">Profile</span>
+              </div>
+            </SignedIn>
 
-  </div>
+          </div>
 
-</div>
+        </div>
       </div>
 
 
