@@ -37,20 +37,15 @@ return ( <AuthLayout title="Verify Your Email"> <div className="flex justify-cen
     <div
       className="
       w-full max-w-md
-      bg-white/5 backdrop-blur-xl
-      border border-indigo-400/20
       rounded-3xl
-      shadow-[0_20px_50px_rgba(79,70,229,0.25)]
       p-6 sm:p-8
-      space-y-6
+      space-y-3
     "
     >
 
       {/* Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-xl sm:text-2xl font-semibold text-white">
-          Enter Verification Code
-        </h2>
+   
 
         <p className="text-gray-400 text-sm">
           We sent a 6-digit code to your email.

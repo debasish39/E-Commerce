@@ -3,13 +3,18 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
 import { FcGoogle } from "react-icons/fc";
-import { FaGithub } from "react-icons/fa";
+import { FaGithub, FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "sonner";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+
 export default function SignUp() {
-const { signUp } = useSignUp();
-const { signIn, isLoaded } = useSignIn();  const navigate = useNavigate();
-const [showPassword, setShowPassword] = useState(false);
+  const { signUp, isLoaded: signUpLoaded } = useSignUp();
+  const { signIn, isLoaded: signInLoaded } = useSignIn();
+
+  const navigate = useNavigate();
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -17,309 +22,190 @@ const [showPassword, setShowPassword] = useState(false);
     password: "",
   });
 
-  const [loading, setLoading] = useState(false);
+  /* ================= VALIDATION ================= */
 
-  /* ================= PASSWORD SIGNUP ================= */
+  const validateEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  /* ================= SIGNUP ================= */
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!form.firstName.trim()) {
-    toast.error("First name is required");
-    return;
-  }
+    if (!signUpLoaded) {
+      toast.error("System not ready. Try again.");
+      return;
+    }
 
-  if (!form.lastName.trim()) {
-    toast.error("Last name is required");
-    return;
-  }
+    if (!form.firstName.trim()) return toast.error("First name is required");
+    if (!form.lastName.trim()) return toast.error("Last name is required");
+    if (!form.email) return toast.error("Email is required");
+    if (!validateEmail(form.email))
+      return toast.error("Enter a valid email");
+    if (!form.password) return toast.error("Password is required");
 
-  if (!form.email) {
-    toast.error("Email is required");
-    return;
-  }
+    setLoading(true);
 
-  if (!validateEmail(form.email)) {
-    toast.error("Enter a valid email");
-    return;
-  }
+    try {
+      const res = await signUp.create({
+        firstName: form.firstName,
+        lastName: form.lastName,
+        emailAddress: form.email,
+        password: form.password,
+      });
 
-  if (!form.password) {
-    toast.error("Password is required");
-    return;
-  }
+      // 🔥 Handle Clerk status properly
+      if (res.status === "complete") {
+        toast.success("Account created successfully 🎉");
+        navigate("/");
+      } else {
+        await signUp.prepareEmailAddressVerification({
+          strategy: "email_code",
+        });
 
-  if (!validatePassword(form.password)) {
-    toast.error("Password must be at least 6 characters");
-    return;
-  }
+        toast.success("Verification code sent 📩");
+        navigate("/verify");
+      }
+    } catch (err) {
+      console.error("Signup error:", err);
+      toast.error(err.errors?.[0]?.message || "Signup failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  if (!isLoaded) return;
-
-  setLoading(true);
-
-  try {
-
-    await signUp.create({
-      firstName: form.firstName,
-      lastName: form.lastName,
-      emailAddress: form.email,
-      password: form.password,
-    });
-
-    await signUp.prepareEmailAddressVerification({
-      strategy: "email_code",
-    });
-
-    toast.success("Verification code sent 📩");
-    navigate("/verify");
-
-  } catch (err) {
-    toast.error(err.errors?.[0]?.message || "Signup failed");
-  } finally {
-    setLoading(false);
-  }
-};
-const validateEmail = (email) => {
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return regex.test(email);
-};
-
-const validatePassword = (password) => {
-  return password.length >= 6;
-};
   /* ================= GOOGLE ================= */
 
-const handleGoogle = async () => {
-  if (!isLoaded) return;
+  const handleGoogle = async () => {
+    if (!signInLoaded) return;
 
-  await signIn.authenticateWithRedirect({
-    strategy: "oauth_google",
-    redirectUrl: "/sso-callback",
-    redirectUrlComplete: "/",
-  });
-};
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy: "oauth_google",
+        redirectUrl: "/sso-callback",
+        redirectUrlComplete: "/",
+      });
+    } catch (err) {
+      console.error(err);
+      toast.error("Google sign-in failed");
+    }
+  };
 
-const handleGithub = async () => {
-  if (!isLoaded) return;
+  /* ================= GITHUB ================= */
 
-  await signIn.authenticateWithRedirect({
-    strategy: "oauth_github",
-    redirectUrl: "/sso-callback",
-    redirectUrlComplete: "/",
-  });
-};
+  const handleGithub = async () => {
+    if (!signInLoaded) return;
+
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy: "oauth_github",
+        redirectUrl: "/sso-callback",
+        redirectUrlComplete: "/",
+      });
+    } catch (err) {
+      console.error(err);
+      toast.error("GitHub sign-in failed");
+    }
+  };
 
   return (
     <AuthLayout title="Create Account">
-
-      <div className="space-y-1">
-
+      <div className="space-y-3">
         {/* ===== SOCIAL LOGIN ===== */}
 
-        <div className="space-y-3">
+        <button
+          onClick={handleGoogle}
+          type="button"
+          className="w-full flex items-center justify-center gap-3 py-3 rounded-2xl bg-black/10 hover:bg-black/20 transition"
+        >
+          <FcGoogle size={20} />
+          Continue with Google
+        </button>
 
-          <button
-            onClick={handleGoogle}
-            type="button"
-            className="
-            w-full
-            flex items-center justify-center gap-3
-            py-3
-            rounded-2xl
-            bg-black/10
-            text-black hover:bg-black/20 cursor-pointer 
-            font-medium
-            hover:scale-[1.02]
-            transition
-            "
-          >
-            <FcGoogle size={20}/>
-            Continue with Google
-          </button>
+        <button
+          onClick={handleGithub}
+          type="button"
+          className="w-full flex items-center justify-center gap-3 py-3 rounded-2xl border border-indigo-300 bg-black/10 hover:bg-black/20 transition"
+        >
+          <FaGithub size={20} />
+          Continue with GitHub
+        </button>
 
-          <button
-            onClick={handleGithub}
-            type="button"
-            className="
-            w-full
-            flex items-center justify-center gap-3
-            py-3
-            rounded-2xl
-            border border-indigo-300
-            bg-black/10
-            hover:bg-black/20 cursor-pointer
-            transition
-            "
-          >
-            <FaGithub size={20}/>
-            Continue with GitHub
-          </button>
-
+        {/* Divider */}
+        <div className="flex items-center gap-3 text-sm">
+          <div className="flex-1 h-px bg-black/30" />
+          <span>OR</span>
+          <div className="flex-1 h-px bg-black/30" />
         </div>
 
-        {/* ===== DIVIDER ===== */}
-
-        <div className="flex items-center gap-3 text-gray-400 text-sm">
-          <div className="flex-1 h-px bg-black/30"/>
-    <span className="text-black">OR</span>
-          <div className="flex-1 h-px bg-black/30"/>
-        </div>
-
-        {/* ===== SIGNUP FORM ===== */}
+        {/* ===== FORM ===== */}
 
         <form onSubmit={handleSubmit} className="space-y-3">
-
-          {/* Name Row */}
-
           <div className="grid grid-cols-2 gap-3">
-
             <input
               placeholder="First name"
-            className="
-w-full
-p-3
-rounded-xl
-bg-white/5
-border border-indigo-300
-focus:border-indigo-500
-focus:ring-2 focus:ring-indigo-500/30
-outline-none
-transition
-"
-              onChange={(e)=>
-                setForm({...form, firstName:e.target.value})
+              onChange={(e) =>
+                setForm({ ...form, firstName: e.target.value })
               }
+              className="p-3 rounded-xl border"
             />
 
             <input
               placeholder="Last name"
-              className="
-w-full
-p-3
-rounded-xl
-bg-white/5
-border border-indigo-300
-focus:border-indigo-500
-focus:ring-2 focus:ring-indigo-500/30
-outline-none
-transition
-"
-              onChange={(e)=>
-                setForm({...form, lastName:e.target.value})
+              onChange={(e) =>
+                setForm({ ...form, lastName: e.target.value })
               }
+              className="p-3 rounded-xl border"
             />
-
           </div>
-
-          {/* Email */}
 
           <input
             type="email"
-            required
-            placeholder="Email address"
-          className="
-w-full
-p-3
-rounded-xl
-bg-white/5
-border border-indigo-300
-focus:border-indigo-500
-focus:ring-2 focus:ring-indigo-500/30
-outline-none
-transition
-"
-            onChange={(e)=>
-              setForm({...form, email:e.target.value})
+            placeholder="Email"
+            onChange={(e) =>
+              setForm({ ...form, email: e.target.value })
             }
+            className="p-3 rounded-xl border w-full"
           />
 
-          {/* Password */}
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              onChange={(e) =>
+                setForm({ ...form, password: e.target.value })
+              }
+              className="p-3 rounded-xl border w-full"
+            />
 
-         <div className="relative">
-
-  <input
-    type={showPassword ? "text" : "password"}
-    placeholder="Password"
-   className="
-w-full
-p-3
-rounded-xl
-bg-white/5
-border border-indigo-400
-focus:border-indigo-500
-focus:ring-2 focus:ring-indigo-500/30
-outline-none
-transition
-"
-    onChange={(e)=>
-      setForm({...form, password:e.target.value})
-    }
-  />
-
-  <button
-    type="button"
-    onClick={() => setShowPassword(!showPassword)}
-    className="
-    absolute
-    right-3
-    top-1/2
-    -translate-y-1/2
-    text-gray-400
-    hover:text-gray-600 cursor-pointer
-    transition
-    "
-  >
-    {showPassword ? <FaEyeSlash/> : <FaEye/>}
-  </button>
-
-</div>
-
-          {/* Submit Button */}
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2"
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="
-            w-full
-            py-3
-            rounded-2xl
-bg-gradient-to-r from-blue-600 to-indigo-600
-shadow-indigo-500/30            text-white
-            font-medium
-            hover:scale-[1.02]
-            transition
-            shadow-lg cursor-pointer"
+            className="w-full py-3 rounded-2xl bg-blue-600 text-white"
           >
-            {loading ? "Creating Account..." : "Create Account"}
+            {loading ? "Creating..." : "Create Account"}
           </button>
-
         </form>
 
-        {/* ===== SIGN IN LINK ===== */}
+        {/* SIGN IN LINK */}
 
-        <div className="pt-4 border-t border-indigo-300 text-center text-sm">
-
-          <span className="text-gray-400">
-            Already have an account?{" "}
-          </span>
-
-          <Link
-            to="/sign-in"
-            className="
-            
-            font-medium
-           text-indigo-400 hover:text-indigo-300
-            transition
-            "
-          >
+        <div className="text-center text-sm pt-4">
+          Already have an account?{" "}
+          <Link to="/sign-in" className="text-blue-600">
             Sign In
           </Link>
-
         </div>
-
       </div>
-
     </AuthLayout>
   );
 }

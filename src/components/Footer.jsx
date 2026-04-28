@@ -147,25 +147,25 @@ const Footer = () => {
 
           <ul className="text-sm space-y-2">
             <li>
-              <Link to="/terms" className="hover:text-blue-600 transition">
+              <Link to="/legal/terms" className="hover:text-blue-600 transition">
                 Terms & Conditions
               </Link>
             </li>
 
             <li>
-              <Link to="/privacy" className="hover:text-blue-600 transition">
+              <Link to="/legal/privacy" className="hover:text-blue-600 transition">
                 Privacy Policy
               </Link>
             </li>
 
             <li>
-              <Link to="/refund" className="hover:text-blue-600 transition">
+              <Link to="/legal/refund" className="hover:text-blue-600 transition">
                 Refund Policy
               </Link>
             </li>
 
             <li>
-              <Link to="/shipping" className="hover:text-blue-600 transition">
+              <Link to="/legal/shipping" className="hover:text-blue-600 transition">
                 Shipping Policy
               </Link>
             </li>

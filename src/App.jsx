@@ -229,6 +229,9 @@ const AppWrapper = () => {
             <div className="pt-12" />
 
             <Routes>
+             <Route path="/legal/:type" element={<LegalPage />} />
+
+  <Route path="*" element={<NotFound />} />
               <Route path="/verify" element={<Verify />} />
               <Route path="/sign-in/*" element={<SignInPage />} />
               <Route path="/verify-signin" element={<VerifySignIn />} />
@@ -278,7 +281,6 @@ const AppWrapper = () => {
                   </ProtectedRoute>
                 }
               />
-              <Route path="/:type" element={<LegalPage />} />
             </Routes>
 
             {!hideFooter && <Footer />}
