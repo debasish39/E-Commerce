@@ -11,6 +11,7 @@ import SsoCallback from "./pages/SsoCallback";
 import VerifySignIn from "./pages/VerifySignIn";
 import ProfilePage from "./pages/ProfilePage";
 import Offline from "./pages/Offline";
+import TrackOrder from "./pages/TrackOrder";
 /* ===========================
    Lazy Loaded Pages
 =========================== */
@@ -281,9 +282,17 @@ const AppWrapper = () => {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/track-order"
+                element={
+                  <ProtectedRoute>
+                    <TrackOrder />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
 
-            {!hideFooter && <Footer />}
+            {/* {!hideFooter && <Footer />} */}
           </div>
         </div>
       </Suspense>

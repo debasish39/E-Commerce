@@ -21,8 +21,9 @@ import {
   Button,
   useDisclosure,
 } from "@heroui/react";
-import { FaRegUserCircle, FaUser } from "react-icons/fa";
+import { FaRegUserCircle, FaUser,FaBox } from "react-icons/fa";
 import { HiMenuAlt1, HiMenuAlt3 } from "react-icons/hi";
+import { BsBox2 } from "react-icons/bs";
 import { AiOutlineHeart } from "react-icons/ai";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
 import { useCart } from "../context/CartContext";
@@ -185,13 +186,9 @@ export default function Navbar({ location, onLocationChange }) {
   };
 
   const navLinks = [
+  
     {
-      name: "Home",
-      path: "/",
-      icon: <Home className="h-4 w-4 text-indigo-500" />,
-    },
-    {
-      name: "Products",
+      name: "Collections",
       path: "/products",
       icon: <Package className="h-4 w-4 text-indigo-500" />,
     },
@@ -204,6 +201,12 @@ export default function Navbar({ location, onLocationChange }) {
       name: "Orders",
       path: "/order-history",
       icon: <ShoppingBag className="h-4 w-4 text-indigo-500" />,
+    },
+      {
+      name: "Track Order",
+      path: "/track-order",
+      icon: <BsBox2  className="h-4 w-4 text-indigo-800" />,
+
     },
   ];
 
@@ -286,7 +289,7 @@ export default function Navbar({ location, onLocationChange }) {
             {/* LOGO */}
             <Link
               to="/"
-              className="text-2xl sm:text-3xl font-bold
+              className=" text-2xl sm:text-3xl font-bold
 
     bg-gradient-to-r from-indigo-500 to-blue-500
     bg-clip-text text-transparent
@@ -719,7 +722,25 @@ export default function Navbar({ location, onLocationChange }) {
                 />
                 <span>Contact</span>
               </NavLink>
+ <NavLink
+                to="/track-order"
+                onClick={() => setIsMobileNavOpen(false)}
+                className={({ isActive }) =>
+                  `group flex items-center gap-3 w-full px-4 py-3 rounded-xl
+            transition-all duration-200
 
+            ${isActive
+                    ? "bg-indigo-50 text-indigo-600 font-semibold shadow-sm"
+                    : "text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
+                  }`
+                }
+              >
+                <BsBox2
+                  size={18}
+                  className="transition-transform duration-200 group-hover:translate-x-1"
+                />
+                <span>Track Order</span>
+              </NavLink>
             </div>
 
           </div>

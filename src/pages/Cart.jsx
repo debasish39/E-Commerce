@@ -51,27 +51,29 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
   const [selectedItem, setSelectedItem] = React.useState(null);
   const [address, setAddress] = React.useState({
     name: "",
+    email: "",   // ✅ ADD THIS
     street: "",
     state: "",
     postcode: "",
     country: "",
   });
   useEffect(() => {
-    if (location) {
-      setAddress({
-        name: user?.fullName || "",
-        street:
-          location.city ||
-          location.town ||
-          location.village ||
-          location.county ||
-          "",
-        state: location.state || "",
-        postcode: location.postcode || "",
-        country: location.country || "",
-      });
-    }
-  }, [location, user]);
+  if (location) {
+    setAddress({
+      name: user?.fullName || "",
+      email: user?.primaryEmailAddress?.emailAddress || "",
+      street:
+        location.city ||
+        location.town ||
+        location.village ||
+        location.county ||
+        "",
+      state: location.state || "",
+      postcode: location.postcode || "",
+      country: location.country || "",
+    });
+  }
+}, [location, user]);
   const [paymentType, setPaymentType] = React.useState(null);
   const BACKEND_URL = "https://eshop-backend-y0e7.onrender.com";
   // const calculatePrice = (price) => {
@@ -116,7 +118,7 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
     const newOrder = {
       userId: user.id,   // unique user id from Clerk
       user: address.name || user.fullName || "Guest",
-
+      email: address.email || "",
       phone: `+91 ${phone}`,
 
       deliveryAddress: {
@@ -139,7 +141,10 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
         quantity: item.quantity
       }))
     };
-
+if (!address.email || !address.email.includes("@")) {
+  toast.error("Please enter a valid email");
+  return;
+}
     try {
 
       const res = await fetch(`${BACKEND_URL}/api/save-order`, {
@@ -697,7 +702,28 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
       transition"
                   />
                 </div>
+{/* EMAIL */}
+<div className="relative">
+  <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
 
+  <input
+    type="email"
+    placeholder="Email Address"
+    value={address.email || ""}
+    onChange={(e) =>
+      setAddress({ ...address, email: e.target.value })
+    }
+    className="w-full pl-10 pr-3 py-3 rounded-lg
+      border border-gray-300 bg-white
+
+      text-gray-800 placeholder-gray-400
+
+      focus:outline-none
+      focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
+
+      transition"
+  />
+</div>
                 {/* ADDRESS */}
                 <div className="relative">
                   <FaMapMarkerAlt className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
