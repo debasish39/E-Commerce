@@ -160,7 +160,39 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
   /* ── email validation indicator ── */
   const emailValid = address.email && address.email.includes('@');
   const emailTouched = address.email.length > 0;
+const validateDelivery = () => {
+  if (!address.name.trim()) {
+    toast.error("Full Name is required");
+    return false;
+  }
 
+  if (!address.email || !address.email.includes("@")) {
+    toast.error("Valid Email is required");
+    return false;
+  }
+
+  if (!address.phone || address.phone.length !== 10) {
+    toast.error("Valid 10-digit Phone Number is required");
+    return false;
+  }
+
+  if (!address.street.trim()) {
+    toast.error("Street Address is required");
+    return false;
+  }
+
+  if (!address.state.trim()) {
+    toast.error("State is required");
+    return false;
+  }
+
+  if (!address.country.trim()) {
+    toast.error("Country is required");
+    return false;
+  }
+
+  return true;
+};
   return (
     <>
       <style>{`
@@ -286,7 +318,7 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
         .check-in { animation:checkIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both; }
       `}</style>
 
-      <div className="cart-root min-h-screen relative overflow-x-hidden"
+      <div className="cart-root min-h-screen mb-9 sm:mb-0 relative overflow-x-hidden"
         style={{ background:"linear-gradient(135deg,#eef2ff 0%,#f0f4ff 40%,#ffffff 100%)" }}>
 
         <div className="blob pointer-events-none fixed -top-32 -left-32 w-96 h-96 opacity-30 blur-3xl"
@@ -433,7 +465,7 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
                       </div>
                       <div className="relative">
                         <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-300" size={13}/>
-                        <input className="f-input" type="text" placeholder="e.g. Arjun Sharma"
+                        <input className="f-input" type="text" placeholder="e.g. Bom Bhole"
                           value={address.name} onChange={e => setAddress({...address, name:e.target.value})}/>
                       </div>
                     </div>
@@ -455,7 +487,7 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
                         <FaEnvelope className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-300" size={13}/>
                         <input
                           className={`f-input ${emailTouched && !emailValid ? "error" : emailTouched && emailValid ? "valid" : ""}`}
-                          type="email" placeholder="e.g. arjun@gmail.com"
+                          type="email" placeholder="e.g. eshopcustomerinfo@gmail.com"
                           value={address.email}
                           onChange={e => setAddress({...address, email:e.target.value})}/>
                         {emailTouched && emailValid && (
@@ -473,7 +505,7 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
                     <div>
                       <div className="flex items-center gap-2 mb-1.5">
                         <label className="text-xs font-semibold text-slate-600">Phone Number</label>
-                        <span className="opt-badge">Optional</span>
+                        <span className="req-badge">Required</span>
                       </div>
                       <div className="flex items-center f-input-bare pr-0 pl-0 overflow-hidden">
                         <span className="px-3 text-indigo-400 text-sm font-bold flex-shrink-0 border-r border-indigo-100 mr-1">+91</span>
@@ -483,7 +515,7 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
                           value={address.phone}
                           onInput={e => { e.target.value = e.target.value.replace(/[^0-9]/g,'').slice(0,10); }}
                           onChange={e => setAddress({...address, phone: e.target.value.replace(/[^0-9]/g,'').slice(0,10)})}
-                          className="flex-1 py-3 px-3 bg-transparent text-slate-800 placeholder-indigo-200 focus:outline-none text-sm"/>
+                          className="flex-1 py-1 px-1 bg-transparent text-slate-800 placeholder-indigo-200 focus:outline-none text-sm"/>
                       </div>
                     </div>
 
@@ -516,7 +548,7 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
                       <div>
                         <div className="flex items-center gap-1.5 mb-1.5">
                           <label className="text-xs font-semibold text-slate-600">Post Code</label>
-                          <span className="opt-badge">Optional</span>
+                          <span className="req-badge">Required</span>
                         </div>
                         <input className="f-input-bare" type="text" placeholder="e.g. 400001"
                           value={address.postcode} onChange={e => setAddress({...address, postcode:e.target.value})}/>
@@ -551,7 +583,11 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
                     <button onClick={() => setStep(1)} className="btn-secondary flex-1 py-4 text-sm">
                       <IoArrowBack size={15}/> Back
                     </button>
-                    <button onClick={() => canProceedStep2 && setStep(3)} disabled={!canProceedStep2}
+                    <button onClick={() => {
+  if (validateDelivery()) {
+    setStep(3);
+  }
+}}
                       className="btn-primary flex-[2] py-4 text-sm">
                       <span className="relative z-10">Continue to Payment</span>
                       <IoArrowForward size={15} className="relative z-10"/>
