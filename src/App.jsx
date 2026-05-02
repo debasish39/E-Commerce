@@ -13,7 +13,7 @@ import ProfilePage from "./pages/ProfilePage";
 import Offline from "./pages/Offline";
 import TrackOrder from "./pages/TrackOrder";
 /* ===========================
-Lazy Loaded Pages
+   Lazy Loaded Pages
 =========================== */
 const Home = lazy(() => import("./pages/Home"));
 const Contact = lazy(() => import("./pages/Contact"));
@@ -27,7 +27,7 @@ const OrderHistory = lazy(() => import("./pages/OrderHistory"));
 const Verify = lazy(() => import("./pages/verify"));
 const LegalPage = lazy(() => import("./pages/LegalPage.jsx"));
 /* ===========================
-Lazy Loaded Components
+   Lazy Loaded Components
 =========================== */
 const Navbar = lazy(() => import("./components/Navbar"));
 const Footer = lazy(() => import("./components/Footer"));
@@ -36,288 +36,281 @@ const NotFound = lazy(() => import("./components/NotFound"));
 const ScrollToTop = lazy(() => import("./components/scrollToTop"));
 const Particles = lazy(() => import("./components/Particles"));
 const ScrollProgressBar = lazy(() =>
-import("./components/ScrollProgressBar")
+  import("./components/ScrollProgressBar")
 );
 
 /* ===========================
-App Wrapper
+   App Wrapper
 =========================== */
 const AppWrapper = () => {
-const [locationData, setLocationData] = useState(null);
-const location = useLocation();
-const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [locationData, setLocationData] = useState(null);
+  const location = useLocation();
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
-useEffect(() => {
-const handleOnline = () => setIsOnline(true);
-const handleOffline = () => setIsOnline(false);
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
 
-window.addEventListener("online", handleOnline);  
-window.addEventListener("offline", handleOffline);  
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
-return () => {  
-  window.removeEventListener("online", handleOnline);  
-  window.removeEventListener("offline", handleOffline);  
-};
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
-}, []);
+  /* ================= Tawk Chat ================= */
+  useEffect(() => {
+    if (window.Tawk_API) return;
 
-/* ================= Tawk Chat ================= */
-useEffect(() => {
-if (window.Tawk_API) return;
+    window.Tawk_API = window.Tawk_API || {};
+    window.Tawk_LoadStart = new Date();
 
-window.Tawk_API = window.Tawk_API || {};  
-window.Tawk_LoadStart = new Date();  
+    const script = document.createElement("script");
+    script.async = true;
 
-const script = document.createElement("script");  
-script.async = true;  
+    // YOUR TAWK SCRIPT URL
+    script.src = "https://embed.tawk.to/69084ab76435f2194e4f2aa9/1j9467o9s";
 
-// YOUR TAWK SCRIPT URL  
-script.src = "https://embed.tawk.to/69084ab76435f2194e4f2aa9/1j9467o9s";  
+    script.charset = "UTF-8";
+    script.setAttribute("crossorigin", "*");
 
-script.charset = "UTF-8";  
-script.setAttribute("crossorigin", "*");  
+    document.body.appendChild(script);
 
-document.body.appendChild(script);  
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+  /* ================= Get User Location ================= */
+  const getLocation = async () => {
+    if (!navigator.geolocation) return;
 
-return () => {  
-  document.body.removeChild(script);  
-};
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      try {
+        const { latitude, longitude } = pos.coords;
+        const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
 
-}, []);
-/* ================= Get User Location ================= */
-const getLocation = async () => {
-if (!navigator.geolocation) return;
+        const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${apiKey}`;
+        const response = await axios.get(url);
 
-navigator.geolocation.getCurrentPosition(async (pos) => {  
-  try {  
-    const { latitude, longitude } = pos.coords;  
-    const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;  
+        setLocationData(response.data.features[0]?.properties || null);
+      } catch (error) {
+        console.error("Location fetch failed", error);
+      }
+    });
+  };
+  const onLocationChange = async (lat, lon) => {
+    try {
+      const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
 
-    const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${apiKey}`;  
-    const response = await axios.get(url);  
+      const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=${apiKey}`;
 
-    setLocationData(response.data.features[0]?.properties || null);  
-  } catch (error) {  
-    console.error("Location fetch failed", error);  
-  }  
-});
+      const response = await axios.get(url);
 
-};
-const onLocationChange = async (lat, lon) => {
-try {
-const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
+      const newLocation = response.data.features[0]?.properties;
 
-const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=${apiKey}`;  
+      setLocationData(newLocation);
 
-  const response = await axios.get(url);  
+      localStorage.setItem("userLocation", JSON.stringify(newLocation));
 
-  const newLocation = response.data.features[0]?.properties;  
+    } catch (error) {
+      console.error("Manual location update failed", error);
+    }
+  };
+  /* ================= Initial Effects ================= */
+  useEffect(() => {
+    getLocation();
 
-  setLocationData(newLocation);  
+    AOS.init({
+      duration: 300,
+      once: false,
+      easing: "ease-in-out",
+    });
+  }, []);
+  // useEffect(() => {
+  //   const handleBeforeUnload = (e) => {
+  //     e.preventDefault();
+  //     e.returnValue = ""; 
+  //   };
 
-  localStorage.setItem("userLocation", JSON.stringify(newLocation));  
+  //   window.addEventListener("beforeunload", handleBeforeUnload);
 
-} catch (error) {  
-  console.error("Manual location update failed", error);  
-}
+  //   return () => {
+  //     window.removeEventListener("beforeunload", handleBeforeUnload);
+  //   };
+  // }, []);
+  /* ================= Hide Footer Logic ================= */
+  const hideFooter =
+    location.pathname === "/contact" ||
+    location.pathname === "/cart" ||
+    location.pathname === "/wishlist";
+  if (!isOnline) {
+    return <Offline />;
+  }
+  return (
+    <>
+      {/* ================= Toast System ================= */}
+      <Toaster
 
-};
-/* ================= Initial Effects ================= */
-useEffect(() => {
-getLocation();
+        position="top-right"
+        richColors
+        closeButton
+        toastOptions={{
+          duration: 4000,
 
-AOS.init({  
-  duration: 300,  
-  once: false,  
-  easing: "ease-in-out",  
-});
+          classNames: {
+            toast:
+              "bg-white/80 backdrop-blur-xl text-gray-800 border border-blue-200 rounded-xl shadow-lg px-4 py-1",
 
-}, []);
-// useEffect(() => {
-//   const handleBeforeUnload = (e) => {
-//     e.preventDefault();
-//     e.returnValue = "";
-//   };
+            success:
+              "border-green-400/40 shadow-[0_0_25px_rgba(34,197,94,0.5)]",
 
-//   window.addEventListener("beforeunload", handleBeforeUnload);
+            error:
+              "border-red-400/40 shadow-[0_0_25px_rgba(239,68,68,0.5)]",
 
-//   return () => {
-//     window.removeEventListener("beforeunload", handleBeforeUnload);
-//   };
-// }, []);
-/* ================= Hide Footer Logic ================= /
-const hideFooter =
-location.pathname === "/contact" ||
-location.pathname === "/cart" ||
-location.pathname === "/wishlist";
-if (!isOnline) {
-return <Offline />;
-}
-return (
-<>
-{/ ================= Toast System ================= */}
-<Toaster
+            warning:
+              "border-yellow-400/40 shadow-[0_0_25px_rgba(250,204,21,0.5)]",
 
-position="top-right"  
-    richColors  
-    closeButton  
-    toastOptions={{  
-      duration: 4000,  
+            description: "text-gray-300 text-xs",
 
-      classNames: {  
-        toast:  
-          "bg-white/80 backdrop-blur-xl text-gray-800 border border-blue-200 rounded-xl shadow-lg px-4 py-1",  
+            actionButton:
+              "bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-3 py-1 rounded-md",
 
-        success:  
-          "border-green-400/40 shadow-[0_0_25px_rgba(34,197,94,0.5)]",  
+            cancelButton:
+              "bg-white/10 text-white text-xs px-3 py-1 rounded-md",
+          },
+        }}
+      />
+      <Suspense fallback={<Spinner />}>
+        <ScrollProgressBar />
 
-        error:  
-          "border-red-400/40 shadow-[0_0_25px_rgba(239,68,68,0.5)]",  
+        {/* ================= Background Wrapper ================= */}
+        <div className="relative min-h-screen w-full overflow-hidden text-gray-800">
 
-        warning:  
-          "border-yellow-400/40 shadow-[0_0_25px_rgba(250,204,21,0.5)]",  
+          {/* Base Gradient */}
+          <div className="absolute inset-0 -z-30 bg-gradient-to-br from-gray-100 via-gray-200 to-blue-100" />
 
-        description: "text-gray-300 text-xs",  
+          {/* Glow Accent 1 */}
+          <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-blue-400/30 blur-[180px] rounded-full animate-pulse -z-20" />
 
-        actionButton:  
-          "bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-3 py-1 rounded-md",  
+          {/* Glow Accent 2 */}
+          <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-blue-300/30 blur-[200px] rounded-full animate-[float_12s_ease-in-out_infinite] -z-20" />
 
-        cancelButton:  
-          "bg-white/10 text-white text-xs px-3 py-1 rounded-md",  
-      },  
-    }}  
-  />  
-  <Suspense fallback={<Spinner />}>  
-    <ScrollProgressBar />  
+          {/* Noise Overlay */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,_rgba(255,255,255,0.05)_1px,_transparent_0)] bg-[length:40px_40px] opacity-10 -z-20" />
 
-    {/* ================= Background Wrapper ================= */}  
-    <div className="relative min-h-screen w-full overflow-hidden text-gray-800">  
+          {/* Particles */}
+          <div className="absolute inset-0 -z-10">
+            <Particles
+              particleColors={[
+                "#2563eb",
+                "#60a5fa",
+                "#93c5fd",
+                "#3b82f6",
+                "#1d4ed8",
+              ]}
+              particleCount={105}
+              particleSpread={6}
+              speed={0.3}
+              particleBaseSize={180}
+              moveParticlesOnHover
+              alphaParticles
 
-      {/* Base Gradient */}  
-      <div className="absolute inset-0 -z-30 bg-gradient-to-br from-gray-100 via-gray-200 to-blue-100" />  
+            />
+          </div>
 
-      {/* Glow Accent 1 */}  
-      <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-blue-400/30 blur-[180px] rounded-full animate-pulse -z-20" />  
+          {/* ================= Main Content ================= */}
+          <div className="relative z-10">
 
-      {/* Glow Accent 2 */}  
-      <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-blue-300/30 blur-[200px] rounded-full animate-[float_12s_ease-in-out_infinite] -z-20" />  
+            <Navbar
+              location={locationData}
+              onLocationChange={onLocationChange}
+            />
+            <div className="pt-12" />
 
-      {/* Noise Overlay */}  
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,_rgba(255,255,255,0.05)_1px,_transparent_0)] bg-[length:40px_40px] opacity-10 -z-20" />  
+            <Routes>
+             <Route path="/legal/:type" element={<LegalPage />} />
 
-      {/* Particles */}  
-      <div className="absolute inset-0 -z-10">  
-        <Particles  
-          particleColors={[  
-            "#2563eb",  
-            "#60a5fa",  
-            "#93c5fd",  
-            "#3b82f6",  
-            "#1d4ed8",  
-          ]}  
-          particleCount={105}  
-          particleSpread={6}  
-          speed={0.3}  
-          particleBaseSize={180}  
-          moveParticlesOnHover  
-          alphaParticles  
+  <Route path="*" element={<NotFound />} />
+              <Route path="/verify" element={<Verify />} />
+              <Route path="/sign-in/*" element={<SignInPage />} />
+              <Route path="/verify-signin" element={<VerifySignIn />} />
+              <Route path="/sign-up/*" element={<SignUpPage />} />
+              <Route path="/sso-callback" element={<SsoCallback />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/products/:id" element={<SingleProduct />} />
+              <Route path="/category/:category" element={<CategoryProduct />} />
+              <Route path="/order-success" element={<OrderSuccess />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route
+                path="/order-history"
+                element={
+                  <ProtectedRoute>
+                    <OrderHistory />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/wishlist"
+                element={
+                  <ProtectedRoute>
+                    <WishlistPage />
+                  </ProtectedRoute>
+                }
+              />
 
-        />  
-      </div>  
+              <Route
+                path="/contact"
+                element={
+                  <ProtectedRoute>
+                    <Contact />
+                  </ProtectedRoute>
+                }
+              />
 
-      {/* ================= Main Content ================= */}  
-      <div className="relative z-10">  
+              <Route
+                path="/cart"
+                element={
+                  <ProtectedRoute>
+                    <Cart
+                      location={locationData}
+                      getLocation={getLocation}
+                      onLocationChange={onLocationChange}
+                    />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/track-order"
+                element={
+                  <ProtectedRoute>
+                    <TrackOrder />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
 
-        <Navbar  
-          location={locationData}  
-          onLocationChange={onLocationChange}  
-        />  
-        <div className="pt-12" />  
-
-        <Routes>  
-         <Route path="/legal/:type" element={<LegalPage />} />
-
-<Route path="" element={<NotFound />} />
-<Route path="/verify" element={<Verify />} />
-<Route path="/sign-in/" element={<SignInPage />} />
-<Route path="/verify-signin" element={<VerifySignIn />} />
-<Route path="/sign-up/*" element={<SignUpPage />} />
-<Route path="/sso-callback" element={<SsoCallback />} />
-<Route path="/" element={<Home />} />
-<Route path="/products" element={<Products />} />
-<Route path="/products/:id" element={<SingleProduct />} />
-<Route path="/category/:category" element={<CategoryProduct />} />
-<Route path="/order-success" element={<OrderSuccess />} />
-<Route path="/profile" element={<ProfilePage />} />
-<Route
-path="/order-history"
-element={
-<ProtectedRoute>
-<OrderHistory />
-</ProtectedRoute>
-}
-/>
-<Route
-path="/wishlist"
-element={
-<ProtectedRoute>
-<WishlistPage />
-</ProtectedRoute>
-}
-/>
-
-<Route  
-            path="/contact"  
-            element={  
-              <ProtectedRoute>  
-                <Contact />  
-              </ProtectedRoute>  
-            }  
-          />  
-
-          <Route  
-            path="/cart"  
-            element={  
-              <ProtectedRoute>  
-                <Cart  
-                  location={locationData}  
-                  getLocation={getLocation}  
-                  onLocationChange={onLocationChange}  
-                />  
-              </ProtectedRoute>  
-            }  
-          />  
-          <Route  
-            path="/track-order"  
-            element={  
-              <ProtectedRoute>  
-                <TrackOrder />  
-              </ProtectedRoute>  
-            }  
-          />  
-        </Routes>  
-
-        {!hideFooter && <Footer />}  
-      </div>  
-    </div>  
-  </Suspense>  
-</>
-
-);
+            {!hideFooter && <Footer />}
+          </div>
+        </div>
+      </Suspense>
+    </>
+  );
 };
 
 /* ===========================
-Root App
+   Root App
 =========================== */
 export default function App() {
-return (
-<BrowserRouter>
-<Suspense fallback={null}>
-<ScrollToTop />
-</Suspense>
+  return (
+    <BrowserRouter>
+      <Suspense fallback={null}>
+        <ScrollToTop />
+      </Suspense>
 
-<AppWrapper />  
-</BrowserRouter>
-
-);
+      <AppWrapper />
+    </BrowserRouter>
+  );
 }
