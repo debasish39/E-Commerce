@@ -292,7 +292,7 @@ const AppWrapper = () => {
               />
             </Routes>
 
-            {/* {!hideFooter && <Footer />} */}
+            {!hideFooter && <Footer />}
           </div>
         </div>
       </Suspense>
