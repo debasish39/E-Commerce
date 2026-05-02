@@ -1,9 +1,10 @@
 import React, { useEffect, useState, Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import axios from "axios";
-import { Toaster } from "sonner";
+import { Toaster, toast } from "sonner";
 import AOS from "aos";
 import "aos/dist/aos.css";
+
 import Spinner from "./components/Spinner";
 import SignInPage from "./pages/SignIn";
 import SignUpPage from "./pages/SignUp";
@@ -12,6 +13,7 @@ import VerifySignIn from "./pages/VerifySignIn";
 import ProfilePage from "./pages/ProfilePage";
 import Offline from "./pages/Offline";
 import TrackOrder from "./pages/TrackOrder";
+
 /* ===========================
    Lazy Loaded Pages
 =========================== */
@@ -26,6 +28,7 @@ const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
 const OrderHistory = lazy(() => import("./pages/OrderHistory"));
 const Verify = lazy(() => import("./pages/verify"));
 const LegalPage = lazy(() => import("./pages/LegalPage.jsx"));
+
 /* ===========================
    Lazy Loaded Components
 =========================== */
@@ -47,6 +50,11 @@ const AppWrapper = () => {
   const location = useLocation();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
+  // ✅ PWA STATES
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstall, setShowInstall] = useState(false);
+
+  /* ================= Online/Offline ================= */
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -60,6 +68,70 @@ const AppWrapper = () => {
     };
   }, []);
 
+  /* ================= PWA INSTALL CAPTURE ================= */
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+
+      setTimeout(() => {
+        setShowInstall(true);
+      }, 4000);
+    };
+
+    window.addEventListener("beforeinstallprompt", handler);
+
+    return () =>
+      window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  /* ================= SHOW INSTALL TOAST ================= */
+  useEffect(() => {
+    if (!showInstall || !deferredPrompt) return;
+
+    if (location.pathname !== "/") return;
+
+    const isMobile = /Android|iPhone/i.test(navigator.userAgent);
+    if (!isMobile) return;
+
+    const lastShown = localStorage.getItem("pwa_prompt_time");
+    const now = Date.now();
+
+    if (lastShown && now - lastShown < 7 * 24 * 60 * 60 * 1000) return;
+
+    toast("Install this app 🚀", {
+      description: "Add to home screen for faster experience",
+      action: {
+        label: "Install",
+        onClick: async () => {
+          deferredPrompt.prompt();
+
+          const choice = await deferredPrompt.userChoice;
+
+          if (choice.outcome === "accepted") {
+            console.log("PWA installed");
+          }
+
+          setShowInstall(false);
+        },
+      },
+    });
+
+    localStorage.setItem("pwa_prompt_time", now);
+  }, [showInstall, deferredPrompt, location.pathname]);
+
+  /* ================= INSTALL SUCCESS ================= */
+  useEffect(() => {
+    const handleInstalled = () => {
+      toast.success("App installed successfully 🎉");
+    };
+
+    window.addEventListener("appinstalled", handleInstalled);
+
+    return () =>
+      window.removeEventListener("appinstalled", handleInstalled);
+  }, []);
+
   /* ================= Tawk Chat ================= */
   useEffect(() => {
     if (window.Tawk_API) return;
@@ -69,10 +141,7 @@ const AppWrapper = () => {
 
     const script = document.createElement("script");
     script.async = true;
-
-    // YOUR TAWK SCRIPT URL
     script.src = "https://embed.tawk.to/69084ab76435f2194e4f2aa9/1j9467o9s";
-
     script.charset = "UTF-8";
     script.setAttribute("crossorigin", "*");
 
@@ -82,7 +151,8 @@ const AppWrapper = () => {
       document.body.removeChild(script);
     };
   }, []);
-  /* ================= Get User Location ================= */
+
+  /* ================= LOCATION ================= */
   const getLocation = async () => {
     if (!navigator.geolocation) return;
 
@@ -100,25 +170,24 @@ const AppWrapper = () => {
       }
     });
   };
+
   const onLocationChange = async (lat, lon) => {
     try {
       const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
 
       const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=${apiKey}`;
-
       const response = await axios.get(url);
 
       const newLocation = response.data.features[0]?.properties;
 
       setLocationData(newLocation);
-
       localStorage.setItem("userLocation", JSON.stringify(newLocation));
-
     } catch (error) {
       console.error("Manual location update failed", error);
     }
   };
-  /* ================= Initial Effects ================= */
+
+  /* ================= INIT ================= */
   useEffect(() => {
     getLocation();
 
@@ -128,101 +197,41 @@ const AppWrapper = () => {
       easing: "ease-in-out",
     });
   }, []);
-  // useEffect(() => {
-  //   const handleBeforeUnload = (e) => {
-  //     e.preventDefault();
-  //     e.returnValue = ""; 
-  //   };
 
-  //   window.addEventListener("beforeunload", handleBeforeUnload);
-
-  //   return () => {
-  //     window.removeEventListener("beforeunload", handleBeforeUnload);
-  //   };
-  // }, []);
-  /* ================= Hide Footer Logic ================= */
+  /* ================= UI LOGIC ================= */
   const hideFooter =
     location.pathname === "/contact" ||
     location.pathname === "/cart" ||
     location.pathname === "/wishlist";
-  if (!isOnline) {
-    return <Offline />;
-  }
+
+  if (!isOnline) return <Offline />;
+
   return (
     <>
-      {/* ================= Toast System ================= */}
       <Toaster
-
         position="top-right"
         richColors
         closeButton
         toastOptions={{
           duration: 4000,
-
           classNames: {
             toast:
               "bg-white/80 backdrop-blur-xl text-gray-800 border border-blue-200 rounded-xl shadow-lg px-4 py-1",
-
-            success:
-              "border-green-400/40 shadow-[0_0_25px_rgba(34,197,94,0.5)]",
-
-            error:
-              "border-red-400/40 shadow-[0_0_25px_rgba(239,68,68,0.5)]",
-
-            warning:
-              "border-yellow-400/40 shadow-[0_0_25px_rgba(250,204,21,0.5)]",
-
-            description: "text-gray-300 text-xs",
-
-            actionButton:
-              "bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-3 py-1 rounded-md",
-
-            cancelButton:
-              "bg-white/10 text-white text-xs px-3 py-1 rounded-md",
           },
         }}
       />
+
       <Suspense fallback={<Spinner />}>
         <ScrollProgressBar />
 
-        {/* ================= Background Wrapper ================= */}
         <div className="relative min-h-screen w-full overflow-hidden text-gray-800">
-
-          {/* Base Gradient */}
           <div className="absolute inset-0 -z-30 bg-gradient-to-br from-gray-100 via-gray-200 to-blue-100" />
 
-          {/* Glow Accent 1 */}
-          <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-blue-400/30 blur-[180px] rounded-full animate-pulse -z-20" />
-
-          {/* Glow Accent 2 */}
-          <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-blue-300/30 blur-[200px] rounded-full animate-[float_12s_ease-in-out_infinite] -z-20" />
-
-          {/* Noise Overlay */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,_rgba(255,255,255,0.05)_1px,_transparent_0)] bg-[length:40px_40px] opacity-10 -z-20" />
-
-          {/* Particles */}
           <div className="absolute inset-0 -z-10">
-            <Particles
-              particleColors={[
-                "#2563eb",
-                "#60a5fa",
-                "#93c5fd",
-                "#3b82f6",
-                "#1d4ed8",
-              ]}
-              particleCount={105}
-              particleSpread={6}
-              speed={0.3}
-              particleBaseSize={180}
-              moveParticlesOnHover
-              alphaParticles
-
-            />
+            <Particles particleColors={["#2563eb"]} particleCount={80} />
           </div>
 
-          {/* ================= Main Content ================= */}
           <div className="relative z-10">
-
             <Navbar
               location={locationData}
               onLocationChange={onLocationChange}
@@ -230,66 +239,18 @@ const AppWrapper = () => {
             <div className="pt-12" />
 
             <Routes>
-             <Route path="/legal/:type" element={<LegalPage />} />
-
-  <Route path="*" element={<NotFound />} />
-              <Route path="/verify" element={<Verify />} />
-              <Route path="/sign-in/*" element={<SignInPage />} />
-              <Route path="/verify-signin" element={<VerifySignIn />} />
-              <Route path="/sign-up/*" element={<SignUpPage />} />
-              <Route path="/sso-callback" element={<SsoCallback />} />
+              <Route path="/legal/:type" element={<LegalPage />} />
+              <Route path="*" element={<NotFound />} />
               <Route path="/" element={<Home />} />
               <Route path="/products" element={<Products />} />
               <Route path="/products/:id" element={<SingleProduct />} />
               <Route path="/category/:category" element={<CategoryProduct />} />
               <Route path="/order-success" element={<OrderSuccess />} />
               <Route path="/profile" element={<ProfilePage />} />
-              <Route
-                path="/order-history"
-                element={
-                  <ProtectedRoute>
-                    <OrderHistory />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/wishlist"
-                element={
-                  <ProtectedRoute>
-                    <WishlistPage />
-                  </ProtectedRoute>
-                }
-              />
-
-              <Route
-                path="/contact"
-                element={
-                  <ProtectedRoute>
-                    <Contact />
-                  </ProtectedRoute>
-                }
-              />
-
-              <Route
-                path="/cart"
-                element={
-                  <ProtectedRoute>
-                    <Cart
-                      location={locationData}
-                      getLocation={getLocation}
-                      onLocationChange={onLocationChange}
-                    />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/track-order"
-                element={
-                  <ProtectedRoute>
-                    <TrackOrder />
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="/verify" element={<Verify />} />
+              <Route path="/sign-in/*" element={<SignInPage />} />
+              <Route path="/sign-up/*" element={<SignUpPage />} />
+              <Route path="/track-order" element={<TrackOrder />} />
             </Routes>
 
             {!hideFooter && <Footer />}
@@ -313,4 +274,4 @@ export default function App() {
       <AppWrapper />
     </BrowserRouter>
   );
-}
+     }
