@@ -7,7 +7,9 @@ import MidBanner from "../components/MidBanner";
 import Features from "../components/Features";
 import Category from "../components/Category";
 import Loading from "../assets/Loading4.webm";
-
+import RandomProducts from "../components/RandomProducts";
+import TrendingProducts from "../components/TrendingProducts";
+import PeopleAlsoView from "../components/PeopleAlsoView";
 export default function Home() {
   const [loading, setLoading] = useState(true);
 
@@ -54,7 +56,15 @@ export default function Home() {
       <div data-aos="fade-right">
         <Category />
       </div>
-
+<div data-aos="fade-left">
+        <RandomProducts />
+      </div>
+      <div data-aos="fade-right">
+        <TrendingProducts />
+      </div>
+      <div data-aos="fade-left">
+        <PeopleAlsoView />
+      </div>
       <div data-aos="zoom-in">
         <MidBanner />
       </div>

@@ -1,128 +1,175 @@
 import React from "react";
-import Slider from "react-slick";
 import { useNavigate } from "react-router-dom";
-
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay } from "swiper/modules";
+import "swiper/css";
+import { AiOutlineArrowRight } from "react-icons/ai";
 import { categoryOnlyData } from "./catagorydata";
 
-export default function Category() {
+const ACCENTS = [
+  { from: "#2874f0", to: "#60a5fa" },
+  { from: "#f43f5e", to: "#fb7185" },
+  { from: "#10b981", to: "#34d399" },
+  { from: "#f59e0b", to: "#fbbf24" },
+  { from: "#8b5cf6", to: "#a78bfa" },
+  { from: "#06b6d4", to: "#22d3ee" },
+];
 
+export default function Category() {
   const navigate = useNavigate();
 
-  const settings = {
-    dots: false,
-    swipe: true,
-    swipeToSlide: true,
-    draggable: true,
-    touchMove: true,
-    infinite: true,
-    speed: 12000,
-    slidesToShow: 5,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 2000,
-    cssEase: "ease-in",
-
-    responsive: [
-      { breakpoint: 1280, settings: { slidesToShow: 4 } },
-      { breakpoint: 1024, settings: { slidesToShow: 3 } },
-      { breakpoint: 768, settings: { slidesToShow: 3 } },
-      { breakpoint: 480, settings: { slidesToShow: 2 } },
-    ],
-  };
-
   return (
+    <div className="w-full py-12">
 
-    <div className="py-6 text-center w-full">
+      {/* HEADER */}
+      <div className="text-center mb-10 px-4">
 
-      {/* TITLE */}
-      <h2 className="text-3xl sm:text-4xl font-bold mb-1 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-400">
+        {/* Badge */}
+        <div className="
+          inline-flex items-center gap-2
+          px-4 py-1.5 rounded-full
+          text-xs font-semibold
+          bg-indigo-50 text-indigo-600 border border-indigo-200
+          mb-4
+        ">
+          🔥 Trending Categories
+        </div>
 
-        <span className="text-white">🏷️</span> Shop by Category
+        {/* Title */}
+        <h2 className="
+          text-xl sm:text-5xl font-bold
+          bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500
+          bg-clip-text text-transparent
+        ">
+          Explore What’s Hot
+        </h2>
 
-      </h2>
-
-      <p className="text-gray-600 mb-6 text-sm sm:text-base">
-        Discover categories that match your vibe.
-      </p>
-
-      {/* FULL WIDTH SLIDER */}
-      <div className="w-full px-2 sm:px-6">
-
-        <Slider {...settings}>
-
-          {categoryOnlyData.map((item) => (
-
-            <div key={item.name} className="px-2">
-
-              <div
-                onClick={() =>
-                  navigate(`/category/${encodeURIComponent(item.name)}`)
-                }
-                className="
-group cursor-pointer
-rounded-2xl
-border border-blue-100
-hover:border-blue-400
-shadow-md hover:shadow-[0_10px_30px_rgba(59,130,246,0.35)]
-transition-all duration-300
-flex flex-col items-center
-p-4
-text-center
-bg-white
-"
-              >
-
-                {/* IMAGE */}
-                <div className="relative w-full h-24 sm:h-28 flex items-center justify-center overflow-hidden">
-
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="
-h-full object-contain
-transform group-hover:scale-110
-transition-transform duration-500
-drop-shadow-[0_10px_25px_rgba(59,130,246,0.25)]
-border-blue-100 border
-rounded-lg
-shadow-blue-100
-"
-                  />
-
-                </div>
-
-
-                {/* CATEGORY NAME */}
-                <p
-                  className="
-  mt-4
-  text-xs sm:text-sm
-  font-semibold
-  uppercase
-  tracking-wider
-  bg-gradient-to-r from-blue-600 to-blue-400
-  bg-clip-text text-transparent
-  group-hover:from-blue-700 group-hover:to-blue-500
-  transition-all duration-300
-  drop-shadow-[0_2px_6px_rgba(59,130,246,0.35)]
-"
-                >
-                  {item.name.replace(/-/g, " ")}
-                </p>
-
-              </div>
-
-            </div>
-
-          ))}
-
-        </Slider>
+        {/* Subtitle */}
+        <p className="text-gray-500 text-sm sm:text-base mt-3">
+          Discover trending collections curated just for you
+        </p>
 
       </div>
 
+      {/* SWIPER */}
+      <div className="px-4 sm:px-6">
+        <Swiper
+          modules={[Autoplay]}
+          spaceBetween={16}
+          slidesPerView={2}
+          loop
+          speed={600}
+          autoplay={{
+            delay: 2500,
+            disableOnInteraction: false,
+          }}
+          breakpoints={{
+            480: { slidesPerView: 2 },
+            768: { slidesPerView: 3 },
+            1024: { slidesPerView: 4 },
+            1280: { slidesPerView: 5 },
+          }}
+        >
+          {categoryOnlyData.map((item, idx) => {
+            const accent = ACCENTS[idx % ACCENTS.length];
+            const name = item.name.replace(/-/g, " ");
+
+            return (
+              <SwiperSlide key={item.name}>
+                <div
+                  onClick={() => navigate(`/category/${item.name}`)}
+                  className="
+      group relative overflow-hidden
+      rounded-2xl p-5
+      cursor-pointer
+      transition-all duration-500
+      hover:-translate-y-2 hover:shadow-xl
+      bg-white/69 backdrop-blur-lg
+      border border-gray-100
+    "
+                >
+
+                  {/* Subtle hover gradient overlay */}
+                  <div
+                    className="
+        absolute inset-0 rounded-2xl
+        opacity-0 group-hover:opacity-100
+        transition duration-500
+      "
+                    style={{
+                      background: `linear-gradient(135deg, ${accent.from}12, ${accent.to}12)`
+                    }}
+                  />
+
+                  {/* IMAGE */}
+                  <div className="relative flex justify-center mb-4">
+
+                    {/* controlled glow */}
+                    <div
+                      className="
+          absolute w-16 h-16 rounded-full blur-xl
+          opacity-40 group-hover:opacity-70 transition
+        "
+                      style={{
+                        background: `radial-gradient(circle, ${accent.from}50, transparent)`
+                      }}
+                    />
+
+                    <img
+                      src={item.image}
+                      alt={name}
+                      className="
+          relative z-10
+          h-[90px] sm:h-[110px]
+          object-contain
+          transition-all duration-500
+          group-hover:scale-101 rounded-lg
+        "
+                    />
+                  </div>
+
+                  {/* CATEGORY NAME */}
+                  <p className="
+      text-xs font-semibold uppercase tracking-wide
+      text-gray-700 text-center
+      group-hover:text-indigo-600
+      transition
+    ">
+                    {name}
+                  </p>
+
+                  {/* CTA */}
+                  <div className="
+      mt-2 flex items-center justify-center gap-1
+      text-[11px] font-medium
+      text-indigo-500
+      opacity-0 group-hover:opacity-100
+      transition duration-300
+    ">
+                    Shop Now
+                    <span className="transform group-hover:translate-x-1 transition">
+                      <AiOutlineArrowRight size={12} />
+                    </span>
+                  </div>
+
+                  {/* Bottom Accent Line (clean highlight) */}
+                  <div
+                    className="
+        absolute bottom-0 left-0 right-0 h-[3px]
+        opacity-40 group-hover:opacity-100
+        transition
+      "
+                    style={{
+                      background: `linear-gradient(90deg, transparent, ${accent.from}, ${accent.to}, transparent)`
+                    }}
+                  />
+
+                </div>
+              </SwiperSlide>
+            );
+          })}
+        </Swiper>
+      </div>
     </div>
   );
 }
