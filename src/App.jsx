@@ -1,9 +1,10 @@
 import React, { useEffect, useState, Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import axios from "axios";
-import { Toaster } from "sonner";
+import { Toaster, toast } from "sonner";
 import AOS from "aos";
 import "aos/dist/aos.css";
+
 import Spinner from "./components/Spinner";
 import SignInPage from "./pages/SignIn";
 import SignUpPage from "./pages/SignUp";
@@ -12,9 +13,10 @@ import VerifySignIn from "./pages/VerifySignIn";
 import ProfilePage from "./pages/ProfilePage";
 import Offline from "./pages/Offline";
 import TrackOrder from "./pages/TrackOrder";
+
 /* ===========================
-Lazy Loaded Pages
-=========================== /
+   Lazy Loaded Pages
+=========================== */
 const Home = lazy(() => import("./pages/Home"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Cart = lazy(() => import("./pages/Cart"));
@@ -26,8 +28,9 @@ const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
 const OrderHistory = lazy(() => import("./pages/OrderHistory"));
 const Verify = lazy(() => import("./pages/verify"));
 const LegalPage = lazy(() => import("./pages/LegalPage.jsx"));
-/ ===========================
-Lazy Loaded Components
+
+/* ===========================
+   Lazy Loaded Components
 =========================== */
 const Navbar = lazy(() => import("./components/Navbar"));
 const Footer = lazy(() => import("./components/Footer"));
@@ -36,125 +39,175 @@ const NotFound = lazy(() => import("./components/NotFound"));
 const ScrollToTop = lazy(() => import("./components/scrollToTop"));
 const Particles = lazy(() => import("./components/Particles"));
 const ScrollProgressBar = lazy(() =>
-import("./components/ScrollProgressBar")
+  import("./components/ScrollProgressBar")
 );
 
 /* ===========================
-App Wrapper
+   App Wrapper
 =========================== */
 const AppWrapper = () => {
-const [locationData, setLocationData] = useState(null);
-const location = useLocation();
-const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [locationData, setLocationData] = useState(null);
+  const location = useLocation();
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
-useEffect(() => {
-const handleOnline = () => setIsOnline(true);
-const handleOffline = () => setIsOnline(false);
+  // ✅ PWA STATES
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstall, setShowInstall] = useState(false);
 
-window.addEventListener("online", handleOnline);  
-window.addEventListener("offline", handleOffline);  
+  /* ================= Online/Offline ================= */
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
 
-return () => {  
-  window.removeEventListener("online", handleOnline);  
-  window.removeEventListener("offline", handleOffline);  
-};
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
-}, []);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
-/* ================= Tawk Chat ================= */
-useEffect(() => {
-if (window.Tawk_API) return;
+  /* ================= PWA INSTALL CAPTURE ================= */
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
 
-window.Tawk_API = window.Tawk_API || {};  
-window.Tawk_LoadStart = new Date();  
+      setTimeout(() => {
+        setShowInstall(true);
+      }, 9000);
+    };
 
-const script = document.createElement("script");  
-script.async = true;  
+    window.addEventListener("beforeinstallprompt", handler);
 
-// YOUR TAWK SCRIPT URL  
-script.src = "https://embed.tawk.to/69084ab76435f2194e4f2aa9/1j9467o9s";  
+    return () =>
+      window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
 
-script.charset = "UTF-8";  
-script.setAttribute("crossorigin", "*");  
+  /* ================= SHOW INSTALL TOAST ================= */
+  useEffect(() => {
+    if (!showInstall || !deferredPrompt) return;
 
-document.body.appendChild(script);  
+    if (location.pathname !== "/") return;
 
-return () => {  
-  document.body.removeChild(script);  
-};
+    const isMobile = /Android|iPhone/i.test(navigator.userAgent);
+    if (!isMobile) return;
 
-}, []);
-/* ================= Get User Location ================= */
-const getLocation = async () => {
-if (!navigator.geolocation) return;
+    const lastShown = localStorage.getItem("pwa_prompt_time");
+    const now = Date.now();
 
-navigator.geolocation.getCurrentPosition(async (pos) => {  
-  try {  
-    const { latitude, longitude } = pos.coords;  
-    const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;  
+    if (lastShown && now - lastShown < 7 * 24 * 60 * 60 * 1000) return;
 
-    const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${apiKey}`;  
-    const response = await axios.get(url);  
+    toast("Install this app 🚀", {
+      description: "Add to home screen for faster experience",
+      action: {
+        label: "Install",
+        onClick: async () => {
+          deferredPrompt.prompt();
 
-    setLocationData(response.data.features[0]?.properties || null);  
-  } catch (error) {  
-    console.error("Location fetch failed", error);  
-  }  
-});
+          const choice = await deferredPrompt.userChoice;
 
-};
-const onLocationChange = async (lat, lon) => {
-try {
-const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
+          if (choice.outcome === "accepted") {
+            console.log("PWA installed");
+          }
 
-const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=${apiKey}`;  
+          setShowInstall(false);
+        },
+      },
+    });
 
-  const response = await axios.get(url);  
+    localStorage.setItem("pwa_prompt_time", now);
+  }, [showInstall, deferredPrompt, location.pathname]);
 
-  const newLocation = response.data.features[0]?.properties;  
+  /* ================= INSTALL SUCCESS ================= */
+  useEffect(() => {
+    const handleInstalled = () => {
+      toast.success("App installed successfully 🎉");
+    };
 
-  setLocationData(newLocation);  
+    window.addEventListener("appinstalled", handleInstalled);
 
-  localStorage.setItem("userLocation", JSON.stringify(newLocation));  
+    return () =>
+      window.removeEventListener("appinstalled", handleInstalled);
+  }, []);
 
-} catch (error) {  
-  console.error("Manual location update failed", error);  
-}
+  /* ================= Tawk Chat ================= */
+  useEffect(() => {
+    if (window.Tawk_API) return;
 
-};
-/* ================= Initial Effects ================= */
-useEffect(() => {
-getLocation();
+    window.Tawk_API = window.Tawk_API || {};
+    window.Tawk_LoadStart = new Date();
 
-AOS.init({  
-  duration: 300,  
-  once: false,  
-  easing: "ease-in-out",  
-});
+    const script = document.createElement("script");
+    script.async = true;
+    script.src = "https://embed.tawk.to/69084ab76435f2194e4f2aa9/1j9467o9s";
+    script.charset = "UTF-8";
+    script.setAttribute("crossorigin", "*");
 
-}, []);
-// useEffect(() => {
-//   const handleBeforeUnload = (e) => {
-//     e.preventDefault();
-//     e.returnValue = "";
-//   };
+    document.body.appendChild(script);
 
-//   window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
-//   return () => {
-//     window.removeEventListener("beforeunload", handleBeforeUnload);
-//   };
-// }, []);
-/* ================= Hide Footer Logic ================= /
-const hideFooter =
-location.pathname === "/contact" ||
-location.pathname === "/cart" ||
-location.pathname === "/wishlist";
-if (!isOnline) {
-return <Offline />;
-}
-return (
-<>
+  /* ================= LOCATION ================= */
+  const getLocation = async () => {
+    if (!navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      try {
+        const { latitude, longitude } = pos.coords;
+        const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
+
+        const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${apiKey}`;
+        const response = await axios.get(url);
+
+        setLocationData(response.data.features[0]?.properties || null);
+      } catch (error) {
+        console.error("Location fetch failed", error);
+      }
+    });
+  };
+
+  const onLocationChange = async (lat, lon) => {
+    try {
+      const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
+
+      const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=${apiKey}`;
+      const response = await axios.get(url);
+
+      const newLocation = response.data.features[0]?.properties;
+
+      setLocationData(newLocation);
+      localStorage.setItem("userLocation", JSON.stringify(newLocation));
+    } catch (error) {
+      console.error("Manual location update failed", error);
+    }
+  };
+
+  /* ================= INIT ================= */
+  useEffect(() => {
+    getLocation();
+
+    AOS.init({
+      duration: 300,
+      once: false,
+      easing: "ease-in-out",
+    });
+  }, []);
+
+  /* ================= UI LOGIC ================= */
+  const hideFooter =
+    location.pathname === "/contact" ||
+    location.pathname === "/cart" ||
+    location.pathname === "/wishlist";
+
+  if (!isOnline) return <Offline />;
+
+  return (
+    <>
 {/ ================= Toast System ================= */}
 <Toaster
 
@@ -302,22 +355,19 @@ element={
     </div>  
   </Suspense>  
 </>
-
-);
+  );
 };
 
 /* ===========================
-Root App
+   Root App
 =========================== */
 export default function App() {
-return (
-<BrowserRouter>
-<Suspense fallback={null}>
-<ScrollToTop />
-</Suspense>
-
-<AppWrapper />  
-</BrowserRouter>
-
-);
-}
+  return (
+    <BrowserRouter>
+      <Suspense fallback={null}>
+        <ScrollToTop />
+      </Suspense>
+      <AppWrapper />
+    </BrowserRouter>
+  );
+      }
