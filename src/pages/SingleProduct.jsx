@@ -1,611 +1,518 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Breadcrums from "../components/Breadcrums";
 import Loading from "../assets/Loading4.webm";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/wishlistContext";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
-  FaShoppingCart,
-  FaHeart,
-  FaRegHeart,
-  FaStar,
-  FaStarHalfAlt,
-  FaRegStar,
-  FaTag,
-  FaTruck,
-  FaUndoAlt,
-  FaIndustry,
-  FaListAlt,
-  FaRupeeSign,
+  FaShoppingCart, FaHeart, FaRegHeart,
+  FaStar, FaStarHalfAlt, FaRegStar,
+  FaTag, FaTruck, FaUndoAlt,
+  FaIndustry, FaListAlt, FaRupeeSign,
+  FaCheckCircle, FaShieldAlt,
 } from "react-icons/fa";
 import { SlActionRedo } from "react-icons/sl";
-import AOS from "aos";
-import "aos/dist/aos.css";
-import { Tooltip } from "react-tooltip";
-import "react-tooltip/dist/react-tooltip.css";
+import { AiOutlineZoomIn } from "react-icons/ai";
 import ProductCard from "../components/ProductCard";
 import { useUser } from "@clerk/clerk-react";
+
 export default function SingleProduct() {
-  const { id } = useParams();
-
-  const [product, setProduct] = useState(null);
-  const [quantity, setQuantity] = useState(1);
-  const [relatedProducts, setRelatedProducts] = useState([]);
+  const { id }       = useParams();
+  const navigate     = useNavigate();
   const { isSignedIn } = useUser();
-  const navigate = useNavigate();
-  // ✅ Persist selected image per product
-  const [selectedImage, setSelectedImage] = useState(() => {
-    const saved = localStorage.getItem(`selectedImage_${id}`);
-    return saved ? saved : null;
-  });
 
-  const { addToCart, cartItem } = useCart();
+  const [product,         setProduct]         = useState(null);
+  const [quantity,        setQuantity]         = useState(1);
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [selectedImage,   setSelectedImage]   = useState(() =>
+    localStorage.getItem(`selectedImage_${id}`) || null
+  );
+  const [imgZoomed, setImgZoomed] = useState(false);
+
+  const { addToCart, cartItem }               = useCart();
   const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
 
-  /* ================= Fetch Product ================= */
+  /* ── fetch product ── */
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetch = async () => {
       try {
-        const res = await axios.get(
-          `https://dummyjson.com/products/${id}`
-        );
+        const res = await axios.get(`https://dummyjson.com/products/${id}`);
         setProduct(res.data);
-
-        const savedImage = localStorage.getItem(
-          `selectedImage_${id}`
-        );
-
-        if (savedImage) {
-          setSelectedImage(savedImage);
-        } else {
-          setSelectedImage(res.data.thumbnail);
-        }
-      } catch (error) {
-        console.error(error);
-      }
+        const saved = localStorage.getItem(`selectedImage_${id}`);
+        setSelectedImage(saved || res.data.thumbnail);
+      } catch (e) { console.error(e); }
     };
-
-    fetchProduct();
+    fetch();
   }, [id]);
-  useEffect(() => {
-    const fetchRelated = async () => {
-      if (!product?.category) return;
 
+  /* ── fetch related ── */
+  useEffect(() => {
+    if (!product?.category) return;
+    const fetch = async () => {
       try {
-        const res = await axios.get(
-          `https://dummyjson.com/products/category/${product.category}`
+        const res = await axios.get(`https://dummyjson.com/products/category/${product.category}`);
+        setRelatedProducts(
+          res.data.products
+            .filter(i => i.id !== product.id)
+            .slice(0, 6)
+            .map(i => ({ ...i, price: calculatePrice(i.price) }))
         );
-
-        const filtered = res.data.products
-          .filter((item) => item.id !== product.id)
-          .slice(0, 6)
-          .map((item) => ({
-            ...item,
-            price: calculatePrice(item.price),
-          }));
-
-        setRelatedProducts(filtered);
-      } catch (error) {
-        console.error(error);
-      }
+      } catch (e) { console.error(e); }
     };
-
-    fetchRelated();
+    fetch();
   }, [product]);
-  useEffect(() => {
-    AOS.init({
-      duration: 800,
-      once: false,
-    });
-  }, []);
+
   const calculatePrice = (price) => {
-    let finalPrice;
-
-    if (price <= 50) {
-      finalPrice = price + 69;
-    }
-    else if (price <= 100) {
-      finalPrice = price + 99;
-    }
-    else if (price <= 300) {
-      finalPrice = price + 199;
-    }
-    else if (price <= 800) {
-      finalPrice = price + 299;
-    }
-    else if (price <= 2000) {
-      finalPrice = price + 499;
-    }
-    else {
-      finalPrice = price + 599;
-    }
-
-    return Math.round(finalPrice / 10) * 10;
+    let fp;
+    if      (price <= 50)   fp = price + 69;
+    else if (price <= 100)  fp = price + 99;
+    else if (price <= 300)  fp = price + 199;
+    else if (price <= 800)  fp = price + 299;
+    else if (price <= 2000) fp = price + 499;
+    else                    fp = price + 599;
+    return Math.round(fp / 10) * 10;
   };
-  const isWishlisted = wishlist.some(
-    (item) => String(item.productId) === String(product?.id)
-  );
+
+  const isWishlisted = wishlist.some(i => String(i.productId) === String(product?.id));
+  const isInCart     = cartItem.some(i => String(i.productId) === String(product?.id));
+
   const handleAddToCart = () => {
-
     if (!product) return;
-
-    if (!isSignedIn) {
-      toast.error("Please login first");
-      navigate("/sign-in");
-      return;
-    }
-
-    const alreadyInCart = cartItem.some(
-      (item) => String(item.productId) === String(product.id)
-    );
-
-    if (alreadyInCart) {
-      navigate("/cart");
-      return;
-    }
-
-    if (product.stock <= 0) {
-      toast.error("Out of Stock");
-      return;
-    }
-
-    addToCart({
-      ...product,
-      price: calculatePrice(product.price),
-      quantity,
-    });
-
+    if (!isSignedIn) { toast.error("Please login first"); navigate("/sign-in"); return; }
+    if (isInCart)    { navigate("/cart"); return; }
+    if (product.stock <= 0) { toast.error("Out of Stock"); return; }
+    addToCart({ ...product, price: calculatePrice(product.price), quantity });
+    toast.success("Added to cart 🛒");
   };
-  /* ================= Wishlist ================= */
+
   const handleWishlist = () => {
-
     if (!product) return;
-
-    if (!isSignedIn) {
-      toast.error("Please login first");
-      navigate("/sign-in");
-      return;
-    }
-
+    if (!isSignedIn) { toast.error("Please login first"); navigate("/sign-in"); return; }
     if (isWishlisted) {
-
       removeFromWishlist(String(product.id));
-
-      toast("Removed from Wishlist 💔", {
-        description: product.title,
-      });
-
+      toast("Removed from wishlist 💔", { description: product.title });
     } else {
-
-      addToWishlist({
-        ...product,
-        price: calculatePrice(product.price),
-      });
-
-      toast.success("Added to Wishlist ❤️", {
-        description: product.title,
-      });
-
+      addToWishlist({ ...product, price: calculatePrice(product.price) });
+      toast.success("Added to wishlist ❤️", { description: product.title });
     }
-
   };
-  /* ================= Share ================= */
+
   const handleShare = async () => {
-    const shareData = {
-      title: product.title,
-      text: product.description,
-      url: window.location.href,
-    };
-
+    const data = { title: product.title, text: product.description, url: window.location.href };
     try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(shareData.url);
-        toast.success("Link copied 🔗");
-      }
-    } catch (error) {
-      console.error(error);
-    }
+      if (navigator.share) await navigator.share(data);
+      else { await navigator.clipboard.writeText(data.url); toast.success("Link copied 🔗"); }
+    } catch (e) { console.error(e); }
   };
 
-  /* ================= Rating Stars ================= */
-  const renderRatingStars = () => {
-    const stars = [];
-    const rating = product?.rating || 0;
-
-    for (let i = 1; i <= 5; i++) {
-      if (rating >= i)
-        stars.push(<FaStar key={i} className="text-yellow-400" />);
-      else if (rating >= i - 0.5)
-        stars.push(
-          <FaStarHalfAlt key={i} className="text-yellow-400" />
-        );
-      else
-        stars.push(
-          <FaRegStar key={i} className="text-yellow-400" />
-        );
-    }
-
-    return stars;
-  };
-
-  /* ================= Loading ================= */
-  if (!product) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <video muted autoPlay loop className="w-40 opacity-80">
-          <source src={Loading} type="video/webm" />
-        </video>
-      </div>
+  const renderStars = () => {
+    const r = product?.rating || 0;
+    return [1,2,3,4,5].map(i =>
+      r >= i   ? <FaStar     key={i} size={14} style={{ color:"#fbbf24" }}/> :
+      r >= i-.5? <FaStarHalfAlt key={i} size={14} style={{ color:"#fbbf24" }}/> :
+                 <FaRegStar  key={i} size={14} style={{ color:"#e5e7eb" }}/>
     );
-  }
+  };
 
-  /* ================= UI ================= */
+  /* ── loading ── */
+  if (!product) return (
+    <div className="flex items-center justify-center h-screen"
+      style={{ background:"linear-gradient(135deg,#eef2ff,#f0f4ff,#ffffff)" }}>
+      <video muted autoPlay loop className="w-36 opacity-80">
+        <source src={Loading} type="video/webm"/>
+      </video>
+    </div>
+  );
+
+  const finalPrice    = calculatePrice(product.price);
+  const originalPrice = Math.round(finalPrice / (1 - product.discountPercentage / 100));
+
   return (
     <>
-      <div className="relative min-h-screen py-9 sm:py-3 px-4 sm:px-6 lg:px-10 text-gray-600 overflow-hidden">
-        <Breadcrums title={product.title} />
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 py-6">
+        :root {
+          --ind:  #4f46e5;
+          --blue: #2563eb;
+          --lt:   #eef2ff;
+        }
 
-          {/* LEFT COLUMN */}
-          <div data-aos="fade-right" className="flex flex-col items-center">
+        .sp-root * { font-family:'DM Sans',sans-serif; }
+        .sp-serif  { font-family:'Playfair Display',serif; }
 
-            <div className="
-  relative w-full max-w-xl
-  bg-white/5 backdrop-blur-2xl
-  border border-indigo-400/20
-  rounded-3xl
-  p-8
-  shadow-[0_20px_60px_rgba(79,70,229,0.25)]
-  overflow-hidden
-  ">
+        /* page background */
+        .sp-bg {
+          background:linear-gradient(135deg,#eef2ff 0%,#f0f4ff 40%,#ffffff 100%);
+          min-height:100vh; position:relative; overflow-x:hidden;
+        }
 
-              {/* Gradient Glow Background */}
-              <div className="
-    absolute inset-0
-    bg-gradient-to-br
-    from-indigo-500/10
-    via-blue-500/5
-    to-purple-500/10
-    pointer-events-none
-    " />
+        /* blobs */
+        @keyframes blobDrift {
+          0%,100%{transform:translate(0,0) scale(1);border-radius:60% 40% 55% 45%/50% 60% 40% 50%;}
+          40%{transform:translate(20px,-16px) scale(1.05);}
+          70%{transform:translate(-12px,12px) scale(0.96);}
+        }
+        .blob1{animation:blobDrift 10s ease-in-out infinite;}
+        .blob2{animation:blobDrift 13s ease-in-out infinite reverse;}
 
-              {/* Action Buttons */}
-              <div className="absolute top-6 right-6 flex flex-col gap-3 z-10">
+        /* animations */
+        @keyframes fadeRight {
+          from{opacity:0;transform:translateX(-24px);}
+          to{opacity:1;transform:translateX(0);}
+        }
+        @keyframes fadeLeft {
+          from{opacity:0;transform:translateX(24px);}
+          to{opacity:1;transform:translateX(0);}
+        }
+        @keyframes fadeUp {
+          from{opacity:0;transform:translateY(20px);}
+          to{opacity:1;transform:translateY(0);}
+        }
+        @keyframes shimmer {
+          0%{background-position:-200% center;}
+          100%{background-position:200% center;}
+        }
+        @keyframes heartBeat {
+          0%,100%{transform:scale(1);}
+          30%{transform:scale(1.35);}
+          60%{transform:scale(0.88);}
+        }
+        @keyframes pulse-ring {
+          0%{transform:scale(1);opacity:0.6;}
+          100%{transform:scale(1.6);opacity:0;}
+        }
 
-                <button
-                  onClick={handleWishlist}
-                  className={`
-        w-11 h-11
-        rounded-full
-        flex items-center justify-center
-        backdrop-blur-xl
-        bg-black/5
-        border border-black/5
-        shadow-lg
-        transition-all duration-300
-        hover:scale-110
-        hover:bg-indigo-500/20
-        cursor-pointer
-        ${isWishlisted ? "text-pink-500" : "text-black/50"}
-        `}
-                >
-                  {isWishlisted ? <FaHeart size={18} /> : <FaRegHeart size={18} />}
-                </button>
+        .fade-right { animation:fadeRight 0.65s cubic-bezier(0.22,1,0.36,1) both; }
+        .fade-left  { animation:fadeLeft  0.65s cubic-bezier(0.22,1,0.36,1) both 0.1s; }
+        .fade-up    { animation:fadeUp    0.55s cubic-bezier(0.22,1,0.36,1) both; }
 
-                <button
-                  onClick={handleShare}
-                  className="
-       w-11 h-11
-        rounded-full
-        flex items-center justify-center
-        backdrop-blur-xl
-        bg-black/5
-        border border-black/5
-        shadow-lg
-        transition-all duration-300
-        hover:scale-110
-        hover:bg-indigo-500/20
-        cursor-pointer
-        "
-                >
-                  <SlActionRedo size={18} />
-                </button>
+        /* image zone */
+        .img-main-wrap {
+          background:rgba(255,255,255,0.88);
+          backdrop-filter:blur(18px);
+          border:1px solid rgba(99,102,241,0.14);
+          border-radius:28px;
+          overflow:hidden;
+          box-shadow:0 20px 60px rgba(79,70,229,0.12);
+          transition:box-shadow 0.3s;
+        }
+        .img-main-wrap:hover { box-shadow:0 28px 80px rgba(79,70,229,0.2); }
 
-              </div>
+        .img-main {
+          width:100%; max-height:440px; object-fit:contain;
+          transition:transform 0.55s cubic-bezier(0.22,1,0.36,1);
+          cursor:zoom-in;
+        }
+        .img-main:hover { transform:scale(1.07); }
 
-              {/* Discount Badge */}
-              <div className="
-    absolute top-6 left-6
-    bg-gradient-to-r from-indigo-600 to-purple-600
-    text-white
-    text-xs
-    font-semibold
-    px-4 py-1.5
-    rounded-full
-    shadow-lg
-    flex items-center gap-1
-    ">
-                <FaTag />
-                {Math.round(product.discountPercentage)}% OFF
-              </div>
+        /* thumbnails */
+        .thumb {
+          width:68px; height:68px; border-radius:14px;
+          overflow:hidden; cursor:pointer; flex-shrink:0;
+          border:2px solid transparent;
+          transition:all 0.22s;
+          background:rgba(255,255,255,0.85);
+        }
+        .thumb:hover { border-color:rgba(99,102,241,0.4); transform:translateY(-2px); }
+        .thumb.active { border-color:#6366f1; box-shadow:0 4px 16px rgba(99,102,241,0.3); }
 
-              {/* Main Image */}
-              <img
-                src={selectedImage}
-                alt={product.title}
-                loading="lazy"
-                className="
-      w-full max-h-[420px]
-      object-contain
-      mx-auto
-      transition-transform duration-700
-      hover:scale-110
-      "
-              />
+        /* action icon buttons */
+        .action-btn {
+          width:40px; height:40px; border-radius:50%;
+          display:flex; align-items:center; justify-content:center;
+          background:rgba(255,255,255,0.9);
+          border:1px solid rgba(99,102,241,0.14);
+          box-shadow:0 2px 10px rgba(0,0,0,0.07);
+          cursor:pointer;
+          transition:all 0.22s;
+        }
+        .action-btn:hover { transform:scale(1.1); box-shadow:0 6px 20px rgba(79,70,229,0.2); }
 
-            </div>
+        /* discount badge */
+        .discount-badge {
+          background:linear-gradient(135deg,#4f46e5,#2563eb);
+          color:white; font-size:11px; font-weight:700;
+          padding:4px 12px; border-radius:999px;
+          box-shadow:0 4px 14px rgba(79,70,229,0.38);
+          display:inline-flex; align-items:center; gap:5px;
+          letter-spacing:0.03em;
+        }
 
-            {/* Thumbnails */}
-            <div className="
-  flex gap-4 mt-8
-  overflow-x-auto
-  scrollbar-hide
-  ">
+        /* stock badge */
+        .stock-in  { background:#f0fdf4; border:1px solid #86efac; color:#16a34a; }
+        .stock-out { background:#fff1f2; border:1px solid #fca5a5; color:#ef4444; }
 
-              {product.images?.map((img, idx) => (
+        /* price */
+        .price-main {
+          font-family:'Playfair Display',serif;
+          font-size:2.6rem; font-weight:800; line-height:1;
+          background:linear-gradient(135deg,#4f46e5,#2563eb);
+          -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+          background-clip:text;
+        }
 
-                <div
-                  key={idx}
-                  onClick={() => {
-                    setSelectedImage(img);
-                    localStorage.setItem(`selectedImage_${id}`, img);
-                  }}
-                  className={`
-        relative
-        w-20 h-20
-        rounded-2xl
-        overflow-hidden
-        cursor-pointer
-        transition-all duration-300
-        flex-shrink-0
-border-1
-        ${selectedImage === img
-                      ? "ring-1 ring-indigo-500  shadow-lg shadow-indigo-500/30 "
-                      : "opacity-70 hover:opacity-100 "
-                    }
-        `}
-                >
+        /* cart btn */
+        .btn-cart {
+          width:100%; display:flex; align-items:center; justify-content:center; gap:9px;
+          padding:14px 24px; border-radius:16px;
+          font-size:15px; font-weight:700;
+          position:relative; overflow:hidden;
+          border:none; cursor:pointer;
+          transition:transform 0.22s, box-shadow 0.22s;
+        }
+        .btn-cart.add {
+          background:linear-gradient(135deg,#4f46e5,#2563eb);
+          background-size:200% 100%;
+          color:white;
+        }
+        .btn-cart.add:hover { transform:translateY(-2px); box-shadow:0 14px 36px rgba(79,70,229,0.42); }
+        .btn-cart.add::after {
+          content:''; position:absolute; inset:0; border-radius:inherit;
+          background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,0.18) 50%,transparent 65%);
+          background-size:200% 100%;
+          animation:shimmer 2.4s infinite;
+        }
+        .btn-cart.incart {
+          background:#f0f4ff;
+          border:1.5px solid rgba(99,102,241,0.25);
+          color:#4f46e5;
+        }
+        .btn-cart.incart:hover { background:#e0e7ff; transform:translateY(-1px); }
 
-                  <img
-                    src={img}
-                    alt="thumbnail"
-                    className="w-full h-full object-cover"
-                  />
+        /* wishlist btn large */
+        .btn-wish {
+          width:52px; height:52px; border-radius:14px;
+          display:flex; align-items:center; justify-content:center;
+          background:#fff0f3;
+          border:1.5px solid rgba(244,63,94,0.2);
+          cursor:pointer; flex-shrink:0;
+          transition:all 0.22s;
+        }
+        .btn-wish:hover { background:#ffe4e6; border-color:rgba(244,63,94,0.45); transform:scale(1.05); }
+        .btn-wish.active { background:#ffe4e6; border-color:rgba(244,63,94,0.4); }
 
+        /* trust badges */
+        .trust-chip {
+          display:flex; align-items:center; gap:8px;
+          background:rgba(255,255,255,0.7);
+          border:1px solid rgba(99,102,241,0.1);
+          border-radius:12px;
+          padding:10px 14px;
+          font-size:12px; font-weight:600; color:#374151;
+          transition:border-color 0.2s, background 0.2s;
+        }
+        .trust-chip:hover { background:white; border-color:rgba(99,102,241,0.25); }
+
+        /* spec row */
+        .spec-row {
+          display:flex; justify-content:space-between; align-items:center;
+          padding:9px 0; border-bottom:1px solid rgba(99,102,241,0.08);
+          font-size:13px;
+        }
+        .spec-row:last-child { border-bottom:none; }
+
+        /* related heading */
+        .related-heading {
+          font-family:'Playfair Display',serif;
+          font-size:1.8rem; font-weight:700; color:#1e1b4b;
+        }
+
+        /* zoom modal */
+        .zoom-overlay {
+          position:fixed; inset:0; z-index:9999;
+          background:rgba(10,10,30,0.85); backdrop-filter:blur(12px);
+          display:flex; align-items:center; justify-content:center;
+          cursor:zoom-out;
+        }
+        .zoom-img { max-width:90vw; max-height:90vh; object-fit:contain; border-radius:16px; }
+      `}</style>
+
+      <div className="sp-root sp-bg">
+
+        {/* blobs */}
+        <div className="blob1 pointer-events-none fixed -top-28 -left-28 w-96 h-96 opacity-25 blur-3xl"
+          style={{ background:"radial-gradient(circle,#c7d2fe,transparent)" }}/>
+        <div className="blob2 pointer-events-none fixed -bottom-24 -right-24 w-80 h-80 opacity-20 blur-3xl"
+          style={{ background:"radial-gradient(circle,#bfdbfe,transparent)" }}/>
+        <div className="pointer-events-none fixed inset-0 opacity-[0.025]"
+          style={{ backgroundImage:"radial-gradient(circle,#4f46e5 1px,transparent 1px)", backgroundSize:"28px 28px" }}/>
+
+        <div className="relative z-10 max-w-6xl mx-auto px-5 pt-6 pb-16">
+
+          <Breadcrums title={product.title}/>
+
+          {/* ══ MAIN GRID ══ */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mt-6">
+
+            {/* ── LEFT: IMAGE ── */}
+            <div className="fade-right flex flex-col gap-5">
+
+              {/* main image card */}
+              <div className="img-main-wrap relative">
+
+                {/* top-left discount badge */}
+                <div className="absolute top-5 left-5 z-10">
+                  <span className="discount-badge">
+                    <FaTag size={10}/> {Math.round(product.discountPercentage)}% OFF
+                  </span>
                 </div>
 
-              ))}
+                {/* top-right action buttons */}
+                <div className="absolute top-5 right-5 z-10 flex flex-col gap-2">
+                  <button className={`action-btn ${isWishlisted?"":"" }`} onClick={handleWishlist}
+                    style={{ color: isWishlisted ? "#f43f5e" : "#9ca3af" }}>
+                    {isWishlisted ? <FaHeart size={15}/> : <FaRegHeart size={15}/>}
+                  </button>
+                  <button className="action-btn" onClick={handleShare} style={{ color:"#6366f1" }}>
+                    <SlActionRedo size={15}/>
+                  </button>
+                  <button className="action-btn" onClick={() => setImgZoomed(true)} style={{ color:"#6366f1" }}>
+                    <AiOutlineZoomIn size={16}/>
+                  </button>
+                </div>
 
+                {/* main image */}
+                <div className="p-8 flex items-center justify-center" style={{ minHeight:360 }}>
+                  <img
+                    src={selectedImage}
+                    alt={product.title}
+                    loading="lazy"
+                    className="img-main"
+                    onClick={() => setImgZoomed(true)}
+                  />
+                </div>
+              </div>
+
+              {/* thumbnails */}
+              <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth:"none" }}>
+                {product.images?.map((img, i) => (
+                  <div key={i}
+                    className={`thumb ${selectedImage===img?"active":""}`}
+                    onClick={() => { setSelectedImage(img); localStorage.setItem(`selectedImage_${id}`, img); }}>
+                    <img src={img} alt="" className="w-full h-full object-cover"/>
+                  </div>
+                ))}
+              </div>
             </div>
 
-          </div>
+            {/* ── RIGHT: INFO ── */}
+            <div className="fade-left flex flex-col gap-5">
 
-          {/* RIGHT COLUMN */}
-          <div className="flex flex-col justify-center space-y-6">
-            <h1 className="text-xl sm:text-3xl md:text-4xl font-extrabold">
-              {product.title}
-            </h1>
+              {/* category + brand */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="flex items-center gap-1.5 text-xs font-semibold text-indigo-500 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full">
+                  <FaListAlt size={10}/>{product.category}
+                </span>
+                <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-3 py-1 rounded-full">
+                  <FaIndustry size={10}/>{product.brand}
+                </span>
+                <span className={`text-xs font-semibold px-3 py-1 rounded-full ${product.stock > 0 ? "stock-in":"stock-out"}`}>
+                  {product.stock > 0 ? `✓ In Stock (${product.stock})` : "Out of Stock"}
+                </span>
+              </div>
 
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <FaIndustry /> {product.brand}
-              <span>/</span>
-              <FaListAlt /> {product.category}
-            </div>
+              {/* title */}
+              <h1 className="sp-serif text-2xl sm:text-3xl md:text-4xl font-bold text-indigo-950 leading-tight">
+                {product.title}
+              </h1>
 
-            <p className="text-gray-500">
-              {product.description}
-            </p>
+              {/* stars */}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-0.5">{renderStars()}</div>
+                <span className="text-sm font-semibold text-slate-600">{product.rating?.toFixed(1)}</span>
+                <span className="text-xs text-slate-400">· {product.reviews?.length || 0} reviews</span>
+              </div>
 
-            <div className="flex items-center gap-3">
-              <h2 className="text-3xl font-bold text-indigo-500 flex items-center gap-1">
-                <FaRupeeSign />{calculatePrice(product.price)}
-              </h2>
+              {/* price block */}
+              <div className="flex items-end gap-4">
+                <div className="flex items-baseline gap-1">
+                  <FaRupeeSign size={18} style={{ color:"#4f46e5", marginBottom:4 }}/>
+                  <span className="price-main">{finalPrice.toLocaleString("en-IN")}</span>
+                </div>
+                <div className="flex flex-col pb-1">
+                  <span className="text-slate-400 text-sm line-through leading-none">
+                    ₹{originalPrice.toLocaleString("en-IN")}
+                  </span>
+                  <span className="text-green-600 text-xs font-bold mt-0.5">
+                    You save ₹{(originalPrice-finalPrice).toLocaleString("en-IN")}
+                  </span>
+                </div>
+              </div>
 
-              <span className="text-gray-400 line-through">
-                ₹
-                {Math.round(
-                  calculatePrice(product.price) / (1 - product.discountPercentage / 100)
-                )}
-              </span>
-            </div>
+              {/* description */}
+              <p className="text-slate-500 text-sm leading-relaxed">{product.description}</p>
 
-            <div className="flex items-center gap-1">
-              {renderRatingStars()}
-              <span className="ml-2 text-gray-400 text-sm">
-                ({product.rating})
-              </span>
-            </div>
+              {/* specs mini */}
+              <div className="bg-white/70 backdrop-blur border border-indigo-100 rounded-2xl px-4 py-1">
+                {[
+                  { label:"SKU",          value: product.sku || "N/A" },
+                  { label:"Availability", value: product.availabilityStatus || (product.stock>0?"In Stock":"Out of Stock") },
+                  { label:"Minimum Order",value: `${product.minimumOrderQuantity || 1} unit(s)` },
+                  { label:"Return Policy",value: product.returnPolicy || "7-Day Return" },
+                ].map(({ label, value }) => (
+                  <div key={label} className="spec-row">
+                    <span className="text-slate-400 font-medium">{label}</span>
+                    <span className="font-semibold text-slate-700 text-right max-w-[55%] truncate">{value}</span>
+                  </div>
+                ))}
+              </div>
 
-            {/* QUANTITY SELECTOR */}
-            {/* <div className="flex items-center gap-4">
+              {/* CTA row */}
+              <div className="flex gap-3 items-stretch">
+                <button className={`btn-cart ${isInCart?"incart":"add"} flex-1`} onClick={handleAddToCart}>
+                  <FaShoppingCart size={16} className="relative z-10"/>
+                  <span className="relative z-10">{isInCart ? "Go to Cart" : "Add to Cart"}</span>
+                </button>
+                <button className={`btn-wish ${isWishlisted?"active":""}`} onClick={handleWishlist}>
+                  {isWishlisted
+                    ? <FaHeart  size={18} style={{ color:"#f43f5e" }}/>
+                    : <FaRegHeart size={18} style={{ color:"#f43f5e" }}/>}
+                </button>
+              </div>
 
-      <span className="text-sm font-medium text-gray-700">
-        Quantity
-      </span>
-
-      <div className="
-      flex items-center
-      border border-indigo-400/30
-      rounded-xl
-      overflow-hidden
-      ">
-
-        <button
-          onClick={() => setQuantity(Math.max(1, quantity - 1))}
-          className="
-          px-3 py-2
-          bg-white/5
-          hover:bg-indigo-500/20
-          transition
-          "
-        >
-          -
-        </button>
-
-        <span className="px-4">{quantity}</span>
-
-        <button
-          onClick={() => setQuantity(quantity + 1)}
-          className="
-          px-3 py-2
-          bg-white/5
-          hover:bg-indigo-500/20
-          transition
-          "
-        >
-          +
-        </button>
-
-      </div>
-      </div> */}
-            <button
-              onClick={handleAddToCart}
-              className={`
-  group relative overflow-hidden
-cursor-pointer
-  w-full sm:w-auto
-  flex items-center justify-center gap-2
-
-  px-4 sm:px-7
-  py-2.5 sm:py-3.5
-
-  text-sm sm:text-base font-semibold
-
-  rounded-xl sm:rounded-2xl
-
-  backdrop-blur-xl border
-
-  transition-all duration-300 ease-out
-
-  active:scale-95
-  hover:scale-[1.05]
-
-  focus:outline-none
-
-  shadow-md hover:shadow-xl active:shadow-xl
-
-  ${cartItem.some((item) => String(item.productId) === String(product.id))
-                  ? "bg-green-400/10 border-green-400/40 text-green-400 hover:bg-green-500/20 active:bg-green-500/20"
-                  : "bg-indigo-900/10 border-indigo-400/40 text-white hover:bg-indigo-500/20 active:bg-indigo-500/20"
-                }
-`}
-            >
-
-              {/* Gradient Border */}
-              <span
-                className="
-  absolute inset-0 rounded-xl sm:rounded-2xl
-  border border-transparent
-  bg-gradient-to-r from-blue-500/40 via-indigo-500/40 to-purple-500/40
-  opacity-0 
-  group-hover:opacity-100 
-  group-active:opacity-100   /* ✅ MOBILE */
-  transition duration-500
-"
-              />
-
-              {/* Shine Sweep */}
-              <span
-                className="
-  absolute inset-0
-  bg-gradient-to-r
-  from-transparent via-white/25 to-transparent
-
-  translate-x-[-150%]
-  group-hover:translate-x-[150%]
-  group-active:translate-x-[150%]  /* ✅ MOBILE */
-
-  transition-transform duration-700
-"
-              />
-
-              {/* Icon */}
-              <FaShoppingCart
-                className="
-  relative z-10
-  text-sm sm:text-base
-  transition-transform duration-300
-
-  group-hover:-translate-y-1 group-hover:scale-110
-  group-active:-translate-y-1 group-active:scale-110  /* ✅ MOBILE */
-"
-              />
-
-              {/* Text */}
-              <span className="relative z-10 whitespace-nowrap">
-                {cartItem.some((item) => String(item.productId) === String(product.id))
-                  ? "Buy Now"
-                  : "Add to Cart"}
-              </span>
-
-              {/* Glow */}
-              <span
-                className={`
-  absolute inset-0
-  rounded-xl sm:rounded-2xl
-
-  opacity-0 
-  group-hover:opacity-100 
-  group-active:opacity-100   /* ✅ MOBILE */
-
-  blur-xl transition duration-300
-
-  ${cartItem.some((item) => String(item.productId) === String(product.id))
-                    ? "bg-green-600"
-                    : "bg-indigo-900"
-                  }
-`}
-              />
-
-            </button>
-            <div className="mt-6 text-sm text-gray-500 space-y-2 border-t border-gray-600 pt-4">
-              <p className="flex items-center gap-2">
-                <FaTruck className="text-green-500" />
-                Free Delivery above ₹500
-              </p>
-              <p className="flex items-center gap-2">
-                <FaUndoAlt className="text-blue-500" />
-                7-Day Replacement
-              </p>
+              {/* trust badges */}
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { icon:<FaTruck    size={14} style={{ color:"#10b981" }}/>, text:"Free Delivery ₹500+" },
+                  { icon:<FaUndoAlt  size={13} style={{ color:"#2563eb" }}/>, text:"7-Day Returns" },
+                  { icon:<FaShieldAlt size={13} style={{ color:"#6366f1" }}/>, text:"Secure Payments" },
+                  { icon:<FaCheckCircle size={13} style={{ color:"#f59e0b" }}/>, text:"Genuine Product" },
+                ].map(({ icon, text }) => (
+                  <div key={text} className="trust-chip">
+                    {icon}<span>{text}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
+
+          {/* ══ RELATED PRODUCTS ══ */}
+          {relatedProducts.length > 0 && (
+            <div className="mt-6 fade-up">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="h-px flex-1" style={{ background:"linear-gradient(90deg,rgba(99,102,241,0.25),transparent)" }}/>
+                <h2 className="related-heading">Related Products</h2>
+                <div className="h-px flex-1" style={{ background:"linear-gradient(90deg,transparent,rgba(99,102,241,0.25))" }}/>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1">
+                {relatedProducts.map(item => (
+                  <ProductCard key={item.id} product={item}/>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-        <div className="max-w-6xl mx-auto mt-9" data-aos="fade-up">
 
-          <h2 className="text-2xl font-bold mb-3">
-            Related Products
-          </h2>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-
-            {relatedProducts.map((item) => (
-              <ProductCard
-                key={item.id}
-                product={item}
-              />
-            ))}
-
+        {/* ══ ZOOM MODAL ══ */}
+        {imgZoomed && (
+          <div className="zoom-overlay" onClick={() => setImgZoomed(false)}>
+            <img src={selectedImage} alt={product.title} className="zoom-img" onClick={e => e.stopPropagation()}/>
           </div>
-
-        </div>
+        )}
       </div>
-
     </>
   );
 }

@@ -4,6 +4,7 @@ import axios from "axios";
 import { Toaster } from "sonner";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import { Alert, Button } from "@heroui/react";
 import Spinner from "./components/Spinner";
 import SignInPage from "./pages/SignIn";
 import SignUpPage from "./pages/SignUp";
@@ -46,7 +47,8 @@ const AppWrapper = () => {
   const [locationData, setLocationData] = useState(null);
   const location = useLocation();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstall, setShowInstall] = useState(false);
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -59,7 +61,47 @@ const AppWrapper = () => {
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
 
+      setTimeout(() => {
+        // 📱 mobile only
+        const isMobile = /Android|iPhone/i.test(navigator.userAgent);
+
+        // ✅ Already installed → don't show
+        const isStandalone =
+          window.matchMedia("(display-mode: standalone)").matches ||
+          window.navigator.standalone === true;
+
+        if (!isMobile || isStandalone) return;
+        // 🧠 show only once every 7 days
+        const last = localStorage.getItem("pwa_banner_time");
+        const now = Date.now();
+
+        if (last && now - last < 7 * 24 * 60 * 60 * 1000) return;
+
+        setShowInstall(true);
+        localStorage.setItem("pwa_banner_time", now);
+      }, 9000);
+    };
+
+    window.addEventListener("beforeinstallprompt", handler);
+
+    return () =>
+      window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+  useEffect(() => {
+    const installed = () => {
+      setShowInstall(false);
+    };
+
+    window.addEventListener("appinstalled", installed);
+
+    return () =>
+      window.removeEventListener("appinstalled", installed);
+  }, []);
   /* ================= Tawk Chat ================= */
   useEffect(() => {
     if (window.Tawk_API) return;
@@ -82,6 +124,19 @@ const AppWrapper = () => {
       document.body.removeChild(script);
     };
   }, []);
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+
+    const choice = await deferredPrompt.userChoice;
+
+    if (choice.outcome === "accepted") {
+      console.log("Installed");
+    }
+
+    setShowInstall(false);
+  };
   /* ================= Get User Location ================= */
   const getLocation = async () => {
     if (!navigator.geolocation) return;
@@ -222,7 +277,57 @@ const AppWrapper = () => {
 
           {/* ================= Main Content ================= */}
           <div className="relative z-10">
+            {showInstall && location.pathname === "/" && (
+              <div
+                data-aos="fade-up"
+                data-aos-duration="600"
+                className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4"
+              >
+                <div className="relative overflow-hidden rounded-2xl border border-blue-300/20 bg-white/70 backdrop-blur-2xl shadow-[0_10px_40px_rgba(37,99,235,0.25)]">
 
+                  {/* Glow effect */}
+                  <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-400/30 blur-3xl rounded-full" />
+                  <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-400/30 blur-3xl rounded-full" />
+
+                  <Alert
+                    color="primary"
+                    variant="flat"
+                    radius="lg"
+                    className="bg-transparent border-none shadow-none"
+                    endContent={
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-3 py-1 rounded-lg shadow-md hover:scale-105 transition"
+                          onClick={handleInstall}
+                        >
+                          Install
+                        </Button>
+
+                        <Button
+                          size="sm"
+                          variant="light"
+                          className="text-gray-600 hover:text-black transition"
+                          onClick={() => setShowInstall(false)}
+                        >
+                          ✕
+                        </Button>
+                      </div>
+                    }
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-gray-800 text-sm">
+                        Install App 🚀
+                      </span>
+
+                      <span className="text-xs text-gray-500">
+                        Faster checkout • Offline access • Better performance
+                      </span>
+                    </div>
+                  </Alert>
+                </div>
+              </div>
+            )}
             <Navbar
               location={locationData}
               onLocationChange={onLocationChange}
@@ -230,9 +335,9 @@ const AppWrapper = () => {
             <div className="pt-12" />
 
             <Routes>
-             <Route path="/legal/:type" element={<LegalPage />} />
+              <Route path="/legal/:type" element={<LegalPage />} />
 
-  <Route path="*" element={<NotFound />} />
+              <Route path="*" element={<NotFound />} />
               <Route path="/verify" element={<Verify />} />
               <Route path="/sign-in/*" element={<SignInPage />} />
               <Route path="/verify-signin" element={<VerifySignIn />} />
