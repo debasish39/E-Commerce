@@ -14,7 +14,7 @@ import Offline from "./pages/Offline";
 import TrackOrder from "./pages/TrackOrder";
 /* ===========================
 Lazy Loaded Pages
-=========================== /
+=========================== */
 const Home = lazy(() => import("./pages/Home"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Cart = lazy(() => import("./pages/Cart"));
@@ -26,7 +26,7 @@ const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
 const OrderHistory = lazy(() => import("./pages/OrderHistory"));
 const Verify = lazy(() => import("./pages/verify"));
 const LegalPage = lazy(() => import("./pages/LegalPage.jsx"));
-/ ===========================
+/* ===========================
 Lazy Loaded Components
 =========================== */
 const Navbar = lazy(() => import("./components/Navbar"));
