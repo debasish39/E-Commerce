@@ -13,6 +13,7 @@ import VerifySignIn from "./pages/VerifySignIn";
 import ProfilePage from "./pages/ProfilePage";
 import Offline from "./pages/Offline";
 import TrackOrder from "./pages/TrackOrder";
+// import CategoryFilter from "./pages/CategoryFilter";
 /* ===========================
    Lazy Loaded Pages
 =========================== */
@@ -352,6 +353,7 @@ const AppWrapper = () => {
               <Route path="/category/:category" element={<CategoryProduct />} />
               <Route path="/order-success" element={<OrderSuccess />} />
               <Route path="/profile" element={<ProfilePage />} />
+              {/* <Route path="/category-filter" element={<CategoryFilter />} /> */}
               <Route
                 path="/order-history"
                 element={

@@ -636,7 +636,8 @@ export default function Navbar({ location, onLocationChange }) {
 
         {/* nav links */}
         <nav className="px-4 pt-4 space-y-0.5">
-          {[{ name: "Home", path: "/", icon: <Home size={14} /> }, ...NAV_LINKS].map(({ name, path, icon }) => (
+          {[{ name: "Home", path: "/", icon: <Home size={14} /> }, { name: "Orders", path: "/order-history", icon: <ShoppingBag size={14} /> },
+          { name: "Track Order", path: "/track-order", icon: <BsBox2 size={14} /> },].map(({ name, path, icon }) => (
             <NavLink key={path} to={path} onClick={() => setMobileOpen(false)}
               className={({ isActive }) => `nb-dlink ${isActive ? "dact" : ""}`}>
               <span style={{ color: "#6366f1" }}>{icon}</span>{name}
@@ -680,7 +681,7 @@ export default function Navbar({ location, onLocationChange }) {
           </NavLink>
 
           <NavLink to="/products" className={({ isActive }) => `nb-blink ${isActive ? "bact" : ""}`}>
-            <Package size={19} /> Products
+            <Package size={19} /> Collections
           </NavLink>
 
           {/* floating cart */}
