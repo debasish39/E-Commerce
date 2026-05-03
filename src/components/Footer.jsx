@@ -11,37 +11,30 @@ import { toast } from "sonner";
 const Footer = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [focused, setFocused] = useState(false);
 
   const accessKey = import.meta.env.VITE_WEB3FORMS_SUB_ACCESS_KEY;
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
-
     if (!/\S+@\S+\.\S+/.test(email)) {
       toast.error("Please enter a valid email address");
       return;
     }
-
     setLoading(true);
-
     try {
       const response = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
           access_key: accessKey,
           name: "Newsletter Subscriber",
-          email: email,
+          email,
           subject: "New Newsletter Subscription",
           message: `User subscribed with email: ${email}`,
         }),
       });
-
       const result = await response.json();
-
       if (result.success) {
         toast.success("🎉 You are subscribed successfully!");
         setEmail("");
@@ -56,105 +49,495 @@ const Footer = () => {
     }
   };
 
+  const links = [
+    { to: "/contact", label: "Contact" },
+    { to: "/track-order", label: "Track Order" },
+    { to: "/legal/privacy", label: "Privacy Policy" },
+    { to: "/legal/terms", label: "Terms & Conditions" },
+  ];
+
+  const socials = [
+    { icon: FaFacebook, label: "Facebook" },
+    { icon: FaInstagram, label: "Instagram" },
+    { icon: FaTwitter, label: "Twitter" },
+    { icon: FaLinkedin, label: "LinkedIn" },
+  ];
+
   return (
-   <footer className="bg-white/60 backdrop-blur-xl border-t border-indigo-300 shadow-[0_0_10px_rgba(0,0,0,0.1)] text-gray-700">
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Outfit:wght@300;400;500;600&display=swap');
 
-  <div className="max-w-7xl mx-auto px-5 py-9 sm:py-9 flex flex-col md:flex-row justify-between gap-3.6 sm:gap-10">
+        .ft-root {
+          --c-bg:     white;
+          --c-surface: white;
+          --c-glass:   rgba(255,255,255,0.035);
+          --c-border:  rgba(99,120,255,0.13);
+          --c-indigo:  #4f5fff;
+          --c-blue:    #3b8bff;
+          --c-accent:  #7c9fff;
+          --c-text:    #d4dbf5;
+          --c-muted:   #566090;
+          --grad:      linear-gradient(135deg, #4f5fff 0%, #3b8bff 100%);
+          font-family: 'Outfit', sans-serif;
+          position: relative;
+          background: var(--c-bg);
+          overflow: hidden;
+          color: var(--c-text);
+        }
 
-    {/* LEFT */}
-    <div>
-      <h1 className="text-indigo-600 text-xl font-bold mb-2"style={{ fontFamily: "'Pacific', sans-serif" }}>
-        E-Shop
-      </h1>
+        /* ── atmospheric orbs ── */
+        .ft-orb {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(80px);
+          pointer-events: none;
+          z-index: 0;
+        }
+        .ft-orb-1 {
+          width: 380px; height: 380px;
+          top: -140px; left: -80px;
+          background: radial-gradient(circle, rgba(79,95,255,0.14) 0%, transparent 65%);
+          animation: ftOrb1 9s ease-in-out infinite alternate;
+        }
+        .ft-orb-2 {
+          width: 300px; height: 300px;
+          bottom: -80px; right: -60px;
+          background: radial-gradient(circle, rgba(59,139,255,0.12) 0%, transparent 65%);
+          animation: ftOrb2 11s ease-in-out infinite alternate;
+        }
+        @keyframes ftOrb1 { from { transform: translate(0,0); } to { transform: translate(20px, 15px); } }
+        @keyframes ftOrb2 { from { transform: translate(0,0); } to { transform: translate(-15px, -10px); } }
 
-      <p className="text-sm text-gray-500 max-w-xs">
-        Premium electronics & gadgets for your everyday needs.
-      </p>
-         <div className=" mt-3 flex gap-4 text-lg items-center">
-      <a href="#" className="hover:text-indigo-600 transition">
-        <FaFacebook />
-      </a>
+        /* noise texture */
+        .ft-noise {
+          position: absolute;
+          inset: 0;
+          opacity: 0.022;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+          pointer-events: none;
+          z-index: 0;
+        }
 
-      <a href="#" className="hover:text-indigo-600 transition">
-        <FaInstagram />
-      </a>
+        /* shimmer top border */
+        .ft-top-line {
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent 0%, var(--c-indigo) 30%, var(--c-blue) 60%, transparent 100%);
+          background-size: 200% 100%;
+          animation: ftLine 4s linear infinite;
+          z-index: 5;
+        }
+        @keyframes ftLine {
+          0%   { background-position: -100% 0; }
+          100% { background-position: 200% 0; }
+        }
 
-      <a href="#" className="hover:text-indigo-600 transition">
-        <FaTwitter />
-      </a>
+        /* dot grid */
+        .ft-dots {
+          position: absolute;
+          inset: 0;
+          background-image: radial-gradient(circle, rgba(79,95,255,0.06) 1px, transparent 1px);
+          background-size: 28px 28px;
+          pointer-events: none;
+          z-index: 0;
+        }
 
-      <a href="#" className="hover:text-indigo-600 transition">
-        <FaLinkedin />
-      </a>
-    </div>
-    </div>
+        /* ── inner layout ── */
+        .ft-inner {
+          position: relative;
+          z-index: 1;
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 56px 40px 40px;
+          display: grid;
+          grid-template-columns: 1.4fr 1fr 1.6fr;
+          gap: 48px;
+          align-items: start;
+        }
+        @media (max-width: 900px) {
+          .ft-inner { grid-template-columns: 1fr 1fr; gap: 36px; padding: 44px 28px 32px; }
+        }
+        @media (max-width: 580px) {
+          .ft-inner { grid-template-columns: 1fr; gap: 32px; padding: 40px 20px 28px; }
+        }
 
-    {/* CENTER LINKS */}
-    <div className="flex mt-3 sm:mt-0 flex-col gap-1.5 text-sm">
-      <Link to="/contact" className="hover:text-indigo-600 transition">
-        Contact
-      </Link>
+        /* ── brand col ── */
+        .ft-brand-name {
+          font-family: 'Syne', sans-serif;
+          font-size: 1.7rem;
+          font-weight: 800;
+          letter-spacing: -0.02em;
+          background: linear-gradient(135deg, indigo 0%, var(--c-blue) 50%, var(--c-accent) 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          margin-bottom: 10px;
+          display: inline-block;
+        }
 
-      <Link to="/track-order" className="hover:text-indigo-600 transition">
-        Track Order
-      </Link>
+        .ft-tagline {
+          font-size: 13px;
+          line-height: 1.65;
+          color: var(--c-muted);
+          max-width: 220px;
+          font-weight: 300;
+          margin-bottom: 20px;
+        }
 
-      <Link to="/legal/privacy" className="hover:text-indigo-600 transition">
-        Privacy Policy
-      </Link>
+        /* social row */
+        .ft-socials {
+          display: flex;
+          gap: 10px;
+        }
 
-      <Link to="/legal/terms" className="hover:text-indigo-600 transition">
-        Terms & Conditions
-      </Link>
-    </div>
+        .ft-social-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 36px; height: 36px;
+          border-radius: 10px;
+          background: var(--c-glass);
+          border: 1px solid var(--c-border);
+          color: var(--c-muted);
+          font-size: 15px;
+          text-decoration: none;
+          transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+          position: relative;
+          overflow: hidden;
+        }
+        .ft-social-btn::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: var(--grad);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+        .ft-social-btn:hover::before { opacity: 1; }
+        .ft-social-btn:hover {
+          color: white;
+          border-color: transparent;
+          transform: translateY(-3px) scale(1.08);
+          box-shadow: 0 6px 20px rgba(79,95,255,0.35);
+        }
+        .ft-social-btn svg { position: relative; z-index: 1; }
 
-    {/* NEWSLETTER */}
-    <div className="w-full mt-3 sm:mt-0 max-w-sm">
-      <h3 className="text-sm font-semibold text-indigo-600 mb-2 uppercase tracking-wide">
-        Stay Updated
-      </h3>
+        /* ── links col ── */
+        .ft-links-title {
+          font-family: 'Syne', sans-serif;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--c-indigo);
+          margin-bottom: 16px;
+        }
 
-      <p className="text-xs text-gray-500 mb-3">
-        Get offers & product updates
-      </p>
+        .ft-links {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
 
-      <form onSubmit={handleSubscribe} className="flex">
+        .ft-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 7px 0;
+          font-size: 13.5px;
+          color: var(--c-muted);
+          text-decoration: none;
+          font-weight: 400;
+          transition: all 0.25s ease;
+          position: relative;
+          width: fit-content;
+        }
+        .ft-link::after {
+          content: '';
+          position: absolute;
+          bottom: 5px; left: 0;
+          width: 0; height: 1px;
+          background: var(--grad);
+          transition: width 0.3s ease;
+          border-radius: 1px;
+        }
+        .ft-link:hover { color: var(--c-accent); }
+        .ft-link:hover::after { width: 100%; }
 
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter your email"
-          className="flex-1 px-3 py-2 text-sm rounded-l-xl 
-          bg-white/70 backdrop-blur border border-indigo-200 
-          focus:outline-none focus:ring-2 focus:ring-indigo-400"
-        />
+        .ft-link-arrow {
+          font-size: 10px;
+          opacity: 0;
+          transform: translateX(-4px);
+          transition: all 0.25s ease;
+        }
+        .ft-link:hover .ft-link-arrow {
+          opacity: 1;
+          transform: translateX(0);
+        }
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-4 py-2 text-sm font-semibold text-white 
-          bg-gradient-to-r from-indigo-500 to-blue-500 
-          rounded-r-xl hover:scale-105 transition"
-        >
-          {loading ? "..." : "Join"}
-        </button>
+        /* ── newsletter col ── */
+        .ft-nl-title {
+          font-family: 'Syne', sans-serif;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--c-indigo);
+          margin-bottom: 6px;
+        }
 
-      </form>
-    </div>
+        .ft-nl-sub {
+          font-size: 13px;
+          color: var(--c-muted);
+          font-weight: 300;
+          margin-bottom: 18px;
+          line-height: 1.5;
+        }
 
-    {/* SOCIAL */}
- 
+        /* input wrapper with animated border */
+        .ft-form {
+          display: flex;
+          border-radius: 14px;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid var(--c-border);
+          overflow: hidden;
+          transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .ft-form.focused {
+          border-color: rgba(79,95,255,0.45);
+          box-shadow: 0 0 0 3px rgba(79,95,255,0.1), 0 4px 20px rgba(79,95,255,0.08);
+        }
 
-  </div>
+        .ft-input {
+          flex: 1;
+          padding: 12px 16px;
+          font-size: 13px;
+          font-family: 'Outfit', sans-serif;
+          background: transparent;
+          border: none;
+          outline: none;
+          color: var(--c-text);
+        }
+        .ft-input::placeholder { color: var(--c-muted); }
 
-  {/* BOTTOM */}
-  <div className="border-t border-indigo-100 text-center text-xs text-gray-500 py-4">
-    © {new Date().getFullYear()}{" "}
-    <span className="text-indigo-600 font-semibold">E-Shop</span>. All rights reserved.
-  </div>
+        .ft-submit {
+          padding: 11px 20px;
+          font-family: 'Outfit', sans-serif;
+          font-size: 13px;
+          font-weight: 600;
+          color: white;
+          background: var(--grad);
+          border: none;
+          cursor: pointer;
+          position: relative;
+          overflow: hidden;
+          transition: all 0.3s ease;
+          min-width: 70px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+        }
+        .ft-submit::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, #6366f1 0%, #60a5fa 100%);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+        .ft-submit:hover::before { opacity: 1; }
+        .ft-submit:hover { box-shadow: 0 4px 16px rgba(79,95,255,0.4); }
+        .ft-submit:active { transform: scale(0.97); }
+        .ft-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+        .ft-submit span { position: relative; z-index: 1; }
 
-</footer>
+        /* loading dots */
+        .ft-dots-loading {
+          display: flex; gap: 3px; align-items: center;
+          position: relative; z-index: 1;
+        }
+        .ft-dots-loading span {
+          width: 4px; height: 4px; border-radius: 50%;
+          background: white; animation: dotBounce 1.2s ease-in-out infinite;
+        }
+        .ft-dots-loading span:nth-child(2) { animation-delay: 0.2s; }
+        .ft-dots-loading span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes dotBounce {
+          0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+          40%            { transform: scale(1);   opacity: 1;   }
+        }
+
+        /* trust badges */
+        .ft-badges {
+          display: flex;
+          gap: 8px;
+          margin-top: 14px;
+          flex-wrap: wrap;
+        }
+        .ft-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          padding: 4px 10px;
+          border-radius: 100px;
+          background: rgba(79,95,255,0.07);
+          border: 1px solid rgba(79,95,255,0.15);
+          font-size: 10.5px;
+          color: var(--c-muted);
+          font-weight: 500;
+        }
+        .ft-badge-dot {
+          width: 4px; height: 4px;
+          border-radius: 50%;
+          background: var(--c-indigo);
+        }
+
+        /* ── bottom bar ── */
+        .ft-bottom {
+          position: relative;
+          z-index: 1;
+          border-top: 1px solid rgba(99,120,255,0.1);
+          padding: 18px 40px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 10px;
+        }
+        @media (max-width: 580px) {
+          .ft-bottom { padding: 16px 20px; justify-content: center; text-align: center; }
+        }
+
+        .ft-copy {
+          font-size: 12px;
+          color: var(--c-muted);
+          font-weight: 300;
+        }
+        .ft-copy strong {
+          font-weight: 600;
+          background: linear-gradient(135deg, #818cf8, #60a5fa);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .ft-made {
+          font-size: 11px;
+          color: rgba(86,96,144,0.6);
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+        .ft-heart {
+          color: #f87171;
+          animation: heartbeat 1.8s ease-in-out infinite;
+          font-size: 12px;
+        }
+        @keyframes heartbeat {
+          0%, 100% { transform: scale(1); }
+          20%       { transform: scale(1.2); }
+          40%       { transform: scale(1); }
+          60%       { transform: scale(1.1); }
+        }
+      `}</style>
+
+      <footer className="ft-root">
+        {/* atmosphere */}
+        <div className="ft-orb ft-orb-1" />
+        <div className="ft-orb ft-orb-2" />
+        <div className="ft-noise" />
+        <div className="ft-top-line" />
+        <div className="ft-dots" />
+
+        {/* main grid */}
+        <div className="ft-inner">
+
+          {/* ── BRAND ── */}
+          <div>
+            <div className="ft-brand-name text-violet-900">E-Shop</div>
+            <p className="ft-tagline">
+              Premium electronics & gadgets curated for your everyday life.
+            </p>
+            <div className="ft-socials">
+              {[
+                { Icon: FaFacebook },
+                { Icon: FaInstagram },
+                { Icon: FaTwitter },
+                { Icon: FaLinkedin },
+              ].map(({ Icon }, i) => (
+                <a key={i} href="#" className="ft-social-btn" aria-label="social">
+                  <Icon />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* ── LINKS ── */}
+          <div>
+            <div className="ft-links-title">Quick Links</div>
+            <nav className="ft-links">
+              {links.map(({ to, label }) => (
+                <Link key={to} to={to} className="ft-link">
+                  <span className="ft-link-arrow">→</span>
+                  {label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          {/* ── NEWSLETTER ── */}
+          <div>
+            <div className="ft-nl-title">Stay in the Loop</div>
+            <p className="ft-nl-sub">
+              Exclusive deals & product drops delivered straight to your inbox.
+            </p>
+
+            <form
+              onSubmit={handleSubscribe}
+              className={`ft-form${focused ? " focused" : ""}`}
+            >
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+                placeholder="your@email.com"
+                className="ft-input"
+              />
+              <button type="submit" disabled={loading} className="ft-submit">
+                {loading ? (
+                  <div className="ft-dots-loading">
+                    <span /><span /><span />
+                  </div>
+                ) : (
+                  <span>Join</span>
+                )}
+              </button>
+            </form>
+
+            <div className="ft-badges">
+              <span className="ft-badge"><span className="ft-badge-dot" />No spam</span>
+              <span className="ft-badge"><span className="ft-badge-dot" />Unsubscribe anytime</span>
+            </div>
+          </div>
+
+        </div>
+
+        {/* bottom bar */}
+        <div className="ft-bottom">
+          <p className="ft-copy">
+            © {new Date().getFullYear()} <strong>E-Shop</strong>. All rights reserved.
+          </p>
+          <p className="ft-made">
+            Built with <span className="ft-heart">♥</span> for great experiences
+          </p>
+        </div>
+      </footer>
+    </>
   );
 };
 

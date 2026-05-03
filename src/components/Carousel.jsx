@@ -323,10 +323,10 @@ const Carousel = () => {
               }}
               onSlideChange={(s) => setActiveIdx(s.realIndex)}
               className="fk-swiper"
-               onTouchStart={(swiper) => swiper.autoplay.stop()}
-  onTouchEnd={(swiper) => {
-    setTimeout(() => swiper.autoplay.start(), 3000);
-  }}
+              onTouchStart={(swiper) => swiper.autoplay.stop()}
+              onTouchEnd={(swiper) => {
+                setTimeout(() => swiper.autoplay.start(), 3000);
+              }}
             >
               {orderedData.map((item, idx) => {
                 const inCart = cartItem.some(c => String(c.productId) === String(item.id));
@@ -340,7 +340,7 @@ const Carousel = () => {
                 return (
                   <SwiperSlide key={item.id}>
                     <div className="relative w-full min-h-[15px] sm:min-h-[400px] overflow-hidden"
-                     >
+                    >
 
                       {/* Decorative blur circles */}
                       <div className="absolute -top-16 -right-16 w-72 h-72 rounded-full bg-white/20 blur-3xl pointer-events-none" />
@@ -429,18 +429,17 @@ const Carousel = () => {
                             </span>
                           </p>
 
-                        {/* CTA buttons */}
-<div className="flex gap-3 pt-2 w-full">
-  
-  <button
-    onClick={() => (inCart ? navigate("/cart") : handleAddToCart(item))}
-    className={`flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold text-sm 
+                          {/* CTA buttons */}
+                          <div className="flex gap-3 pt-2 w-full">
+
+                            <button
+                              onClick={() => (inCart ? navigate("/cart") : handleAddToCart(item))}
+                              className={`flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold text-sm 
     transition-all duration-300 
-    ${
-      inCart
-        ? "bg-blue-600 hover:bg-blue-700"
-        : "bg-indigo-600 hover:bg-indigo-700"
-    }
+    ${inCart
+                                  ? "bg-blue-600 hover:bg-blue-700"
+                                  : "bg-indigo-600 hover:bg-indigo-700"
+                                }
     text-white
     shadow-[0_10px_25px_rgba(37,99,235,0.4)]
     hover:shadow-[0_15px_40px_rgba(37,99,235,0.7)]
@@ -448,19 +447,19 @@ const Carousel = () => {
     active:scale-95
     focus:ring-2 focus:ring-blue-400 focus:outline-none
     relative overflow-hidden`}
-  >
-    <span className="absolute inset-0 bg-white/10 opacity-0 hover:opacity-100 transition duration-300 blur-md"></span>
+                            >
+                              <span className="absolute inset-0 bg-white/10 opacity-0 hover:opacity-100 transition duration-300 blur-md"></span>
 
-    <FaShoppingCart size={16} />
-    <span className="sm:hidden">{inCart ? "Cart" : "Add"}</span>
-    <span className="hidden sm:inline">
-      {inCart ? "Go to Cart" : "Add to Cart"}
-    </span>
-  </button>
+                              <FaShoppingCart size={16} />
+                              <span className="sm:hidden">{inCart ? "Cart" : "Add"}</span>
+                              <span className="hidden sm:inline">
+                                {inCart ? "Go to Cart" : "Add to Cart"}
+                              </span>
+                            </button>
 
-  <button
-    onClick={() => navigate(`/products/${item.id}`)}
-    className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold text-sm 
+                            <button
+                              onClick={() => navigate(`/products/${item.id}`)}
+                              className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold text-sm 
     bg-white text-indigo-700 border border-indigo-200
     transition-all duration-300
     shadow-[0_10px_25px_rgba(99,102,241,0.25)]
@@ -470,15 +469,15 @@ const Carousel = () => {
     active:scale-95
     focus:ring-2 focus:ring-indigo-300 focus:outline-none
     relative overflow-hidden"
-  >
-    <span className="absolute inset-0 bg-indigo-500/10 opacity-0 hover:opacity-100 transition duration-300 blur-md"></span>
+                            >
+                              <span className="absolute inset-0 bg-indigo-500/10 opacity-0 hover:opacity-100 transition duration-300 blur-md"></span>
 
-    <AiOutlineEye size={16} />
-    <span className="sm:hidden">View</span>
-    <span className="hidden sm:inline">View Details</span>
-  </button>
+                              <AiOutlineEye size={16} />
+                              <span className="sm:hidden">View</span>
+                              <span className="hidden sm:inline">View Details</span>
+                            </button>
 
-</div>
+                          </div>
                         </div>
 
                         {/* ── IMAGE PANEL ── */}
