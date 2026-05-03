@@ -177,7 +177,7 @@ export default function ProductCard({ product }) {
       <div className="pc-root pc-card" data-aos="zoom-in-up">
 
         {/* ── IMAGE ── */}
-        <div className="relative h-35 sm:h-52 overflow-hidden"
+        <div className="relative h-30 sm:h-52 overflow-hidden"
           style={{ background:"#f8faff" }}
           onClick={() => navigate(`/products/${product.id}`)}>
 
@@ -223,7 +223,7 @@ export default function ProductCard({ product }) {
         </div>
 
         {/* ── INFO ── */}
-        <div className="px-4 pt-3 pb-4">
+        <div className="px-4 pt-1 pb-3">
 
           <h2
             className="text-sm sm:text-base font-semibold text-indigo-950 hover:text-indigo-600 transition-colors line-clamp-2 leading-snug cursor-pointer mb-0.5"

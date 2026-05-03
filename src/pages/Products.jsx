@@ -128,7 +128,7 @@ const filteredProducts=filteredData;
         {/* Products */}
         {loading ? (
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1 sm:gap-2">
 
             {Array(12)
               .fill(0)

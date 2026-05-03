@@ -9,7 +9,16 @@ import {
 import { MdPayments, MdLocalShipping } from "react-icons/md";
 import { BsBoxSeam } from "react-icons/bs";
 import { useUser } from "@clerk/clerk-react";
-
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+} from "@heroui/react";
+import { FaTimes } from "react-icons/fa";
+import { FaFilter, FaUserCircle } from "react-icons/fa";
 /* ── status config ── */
 const STATUS_CFG = {
   Placed:    { bg:"#fef3c7", border:"#fbbf24", text:"#b45309", icon:<FaReceipt   size={11}/>, dot:"#f59e0b" },
@@ -25,7 +34,11 @@ const OrderHistory = () => {
   const [loading, setLoading]       = useState(true);
   const [expanded, setExpanded]     = useState({});
   const [downloading, setDownloading] = useState({});
-
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [dateFilter, setDateFilter] = useState("All");
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortOption, setSortOption] = useState("latest");
   useEffect(() => {
     if (!user) return;
     const fetch = async () => {
@@ -126,7 +139,7 @@ const OrderHistory = () => {
       /* footer */
       doc.setFontSize(10); doc.setTextColor(120,120,120);
       doc.text("Thank you for shopping with EShop ❤️",centerX,pageHeight-25,{align:"center"});
-      doc.text("For support: djproject963@gmail.com",centerX,pageHeight-18,{align:"center"});
+      doc.text("For support:eshopcustomerinfo@gmail.com",centerX,pageHeight-18,{align:"center"});
       doc.text("Generated automatically by EShop © 2026",centerX,pageHeight-12,{align:"center"});
       doc.save(`EShop-Invoice-${order._id}.pdf`);
     } finally {
@@ -140,7 +153,38 @@ const OrderHistory = () => {
   const formatTime = (d) => d
     ? new Date(d).toLocaleTimeString("en-IN",{ hour:"2-digit",minute:"2-digit" })
     : "";
+const filteredOrders = orders
+  .filter((order) => {
+    // ✅ STATUS
+    if (statusFilter !== "All" && order.status !== statusFilter) return false;
 
+    // ✅ DATE
+    if (dateFilter !== "All") {
+      const orderDate = new Date(order.createdAt);
+      const now = new Date();
+      const diff = now - orderDate;
+
+      if (dateFilter === "7days" && diff > 7 * 24 * 60 * 60 * 1000) return false;
+      if (dateFilter === "30days" && diff > 30 * 24 * 60 * 60 * 1000) return false;
+    }
+
+    // ✅ SEARCH (product title)
+    if (searchQuery) {
+      const match = order.items.some((item) =>
+        item.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      if (!match) return false;
+    }
+
+    return true;
+  })
+  .sort((a, b) => {
+    if (sortOption === "latest") return new Date(b.createdAt) - new Date(a.createdAt);
+    if (sortOption === "oldest") return new Date(a.createdAt) - new Date(b.createdAt);
+    if (sortOption === "priceHigh") return b.total - a.total;
+    if (sortOption === "priceLow") return a.total - b.total;
+    return 0;
+  });
   return (
     <>
       <style>{`
@@ -287,21 +331,47 @@ const OrderHistory = () => {
         <div className="pointer-events-none fixed inset-0 opacity-[0.025]"
           style={{ backgroundImage:"radial-gradient(circle,#4f46e5 1px,transparent 1px)", backgroundSize:"28px 28px" }}/>
 
-        <div className="relative z-10 max-w-4xl mx-auto px-5 py-12">
+        <div className="relative z-10 max-w-4xl mx-auto px-5 py-9">
 
           {/* ── HEADER ── */}
-          <div className="page-enter text-center mb-10">
-            <div className="inline-flex items-center gap-2 bg-white/70 backdrop-blur border border-indigo-100 rounded-full px-4 py-1.5 text-xs font-semibold text-indigo-500 tracking-widest uppercase mb-4 shadow-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse inline-block"/>
-              My Account
-            </div>
-            <h1 className="oh-serif text-4xl sm:text-5xl font-bold text-indigo-950 leading-tight mb-2">
-              Order History
-            </h1>
-            <p className="text-slate-400 text-sm font-normal max-w-md mx-auto">
-              Track and manage all your past purchases in one place
-            </p>
-          </div>
+      <div className="page-enter flex flex-row items-center justify-between gap-4 mb-6">
+
+  {/* LEFT SIDE (Title + subtitle) */}
+  <div className="text-left">
+
+    {/* Tag */}
+    <div className="inline-flex items-center gap-2 bg-white/70 backdrop-blur 
+    border border-indigo-100 rounded-full px-3 py-1 text-[10px] font-semibold 
+    text-indigo-500 tracking-widest uppercase mb-2 shadow-sm">
+      <FaUserCircle size={10} />
+      My Account
+    </div>
+
+    {/* Title */}
+    <h1 className="oh-serif text-xl sm:text-4xl font-bold text-indigo-950 leading-tight">
+      Order History
+    </h1>
+
+    {/* Subtitle */}
+    <p className="text-slate-400 text-xs sm:text-sm mt-1">
+      Track and manage all your past purchases
+    </p>
+  </div>
+
+  {/* RIGHT SIDE (Filter Button) */}
+  <div className="flex justify-end">
+    <button
+      onClick={() => setShowFilterModal(true)}
+      className="flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold 
+      rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white 
+      shadow-md hover:scale-105 transition"
+    >
+      <FaFilter size={12} />
+      Filters
+    </button>
+  </div>
+
+</div>
 
           {/* ── STATS BAR ── */}
           {!loading && orders.length > 0 && (
@@ -365,7 +435,7 @@ const OrderHistory = () => {
           {/* ── ORDER CARDS ── */}
           {!loading && orders.length > 0 && (
             <div className="space-y-4">
-              {orders.map((order, idx) => {
+              {filteredOrders.map((order, idx) => {
                 const subtotal   = order.items.reduce((s,i)=>s+i.price*i.quantity,0);
                 const grandTotal = subtotal + 5;
                 const isExp      = !!expanded[order._id];
@@ -514,6 +584,179 @@ const OrderHistory = () => {
 
         </div>
       </div>
+   <Modal
+  isOpen={showFilterModal}
+  onClose={() => setShowFilterModal(false)}
+  hideCloseButton
+  placement="center"
+  backdrop="blur"
+  classNames={{
+    base: "bg-indigo-300/20 backdrop-blur-sm",
+    backdrop: "bg-indigo-900/30 backdrop-blur-md",
+  }}
+>
+  <ModalContent
+    className="mx-auto mb-0 mt-auto rounded-t-3xl p-0
+    bg-gradient-to-br from-white/90 via-indigo-50/70 to-blue-50/80
+    backdrop-blur-2xl border border-indigo-200/30
+    shadow-[0_-10px_40px_rgba(79,70,229,0.25)] max-w-md"
+  >
+    {(onClose) => (
+      <>
+        {/* HEADER */}
+    <ModalHeader className="relative flex items-center justify-center pt-4">
+
+  {/* Handle */}
+  <div className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-indigo-200 rounded-full" />
+
+  {/* Title */}
+  <h2 className="text-lg font-bold text-indigo-900">
+    Filter Orders
+  </h2>
+
+  {/* Close Button */}
+  <button
+    onClick={onClose}
+    className="absolute right-4 top-3 w-8 h-8 flex items-center justify-center 
+    rounded-full bg-white/70 backdrop-blur border border-indigo-200 
+    text-indigo-600 cursor-pointer hover:bg-indigo-100 transition"
+  >
+    <FaTimes size={12} />
+  </button>
+
+</ModalHeader>
+
+        {/* BODY */}
+        <ModalBody className="space-y-5 px-5 pb-4">
+
+        
+          {/* SEARCH */}
+          <div>
+            <p className="text-xs font-semibold text-indigo-400 mb-2 uppercase">
+              Search Product
+            </p>
+
+            <input
+              type="text"
+              placeholder="Search product name..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-2 rounded-xl border border-indigo-200
+              bg-white/70 backdrop-blur text-sm outline-none
+              focus:ring-2 focus:ring-indigo-400"
+            />
+          </div>
+  {/* STATUS */}
+          <div>
+            <p className="text-xs font-semibold text-indigo-400 mb-2 uppercase">
+              Status
+            </p>
+
+            <div className="flex flex-wrap gap-2">
+              {["All","Placed","Confirmed","Processing","Shipped","Delivered","Cancelled"].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(status)}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-full transition
+                    ${
+                      statusFilter === status
+                        ? "bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow"
+                        : "bg-white/70 text-indigo-600 border border-indigo-200"
+                    }`}
+                >
+                  {status}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* SORT */}
+          <div>
+            <p className="text-xs font-semibold text-indigo-400 mb-2 uppercase">
+              Sort By
+            </p>
+
+            <div className="flex flex-wrap gap-2">
+              {[
+                { label: "Latest", value: "latest" },
+                { label: "Oldest", value: "oldest" },
+                { label: "Price High", value: "priceHigh" },
+                { label: "Price Low", value: "priceLow" },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setSortOption(opt.value)}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-full
+                    ${
+                      sortOption === opt.value
+                        ? "bg-gradient-to-r from-indigo-500 to-blue-500 text-white"
+                        : "bg-white/70 text-indigo-600 border border-indigo-200"
+                    }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* DATE */}
+          <div>
+            <p className="text-xs font-semibold text-indigo-400 mb-2 uppercase">
+              Date
+            </p>
+
+            <div className="flex flex-wrap gap-2">
+              {[
+                { label: "All Time", value: "All" },
+                { label: "Last 7 Days", value: "7days" },
+                { label: "Last 30 Days", value: "30days" },
+              ].map((item) => (
+                <button
+                  key={item.value}
+                  onClick={() => setDateFilter(item.value)}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-full
+                    ${
+                      dateFilter === item.value
+                        ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white"
+                        : "bg-white/70 text-blue-600 border border-blue-200"
+                    }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+        </ModalBody>
+
+        {/* FOOTER */}
+        <ModalFooter className="px-5 pb-5">
+
+          <Button
+            variant="bordered"
+            className="flex-1 border-indigo-200 text-indigo-600"
+            onPress={() => {
+              setStatusFilter("All");
+              setDateFilter("All");
+              setSearchQuery("");
+              setSortOption("latest");
+            }}
+          >
+            Reset
+          </Button>
+
+          <Button
+            className="flex-1 bg-gradient-to-r from-indigo-500 to-blue-600 text-white"
+            onPress={onClose}
+          >
+            Apply
+          </Button>
+
+        </ModalFooter>
+      </>
+    )}
+  </ModalContent>
+</Modal>
     </>
   );
 };

@@ -57,201 +57,104 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-white/50 text-gray-700 pt-10 border-t-1 border-indigo-500 shadow-[9px_9px_18px_indigo]">
-      <div className="max-w-full sm:px-9 px-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-10">
-        
-        {/* Logo Section */}
-        <div>
-          <Link to="/">
-            <h1
-              className="text-indigo-600 text-xl sm:text-2xl font-bold mb-3"
-              style={{ fontFamily: "'Pacifico', cursive" }}
-            >
-              E-Shop
-            </h1>
-          </Link>
+   <footer className="bg-white/60 backdrop-blur-xl border-t border-indigo-300 shadow-[0_0_10px_rgba(0,0,0,0.1)] text-gray-700">
 
-          <p className="text-sm">
-            Powering your world with top-notch electronics and gadgets.
-          </p>
+  <div className="max-w-7xl mx-auto px-5 py-9 sm:py-9 flex flex-col md:flex-row justify-between gap-3.6 sm:gap-10">
 
-          <p className="mt-2 text-sm">
-            EATM, Baniatangi, Khurdha, Odisha
-          </p>
+    {/* LEFT */}
+    <div>
+      <h1 className="text-indigo-600 text-xl font-bold mb-2"style={{ fontFamily: "'Pacific', sans-serif" }}>
+        E-Shop
+      </h1>
 
-          <p className="text-sm">
-            Email:
-            <a
-              href="mailto:djproject963@gmail.com"
-              className="text-blue-500 ml-1 hover:underline"
-            >
-              djproject963@gmail.com
-            </a>
-          </p>
+      <p className="text-sm text-gray-500 max-w-xs">
+        Premium electronics & gadgets for your everyday needs.
+      </p>
+         <div className=" mt-3 flex gap-4 text-lg items-center">
+      <a href="#" className="hover:text-indigo-600 transition">
+        <FaFacebook />
+      </a>
 
-          <p className="text-sm">
-            Phone:
-            <a
-              href="tel:+916370195243"
-              className="text-blue-500 ml-1 hover:underline"
-            >
-              +91 6370195243
-            </a>
-          </p>
-        </div>
+      <a href="#" className="hover:text-indigo-600 transition">
+        <FaInstagram />
+      </a>
 
-        {/* Customer Service */}
-        <div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">
-            Customer Service
-          </h3>
+      <a href="#" className="hover:text-indigo-600 transition">
+        <FaTwitter />
+      </a>
 
-          <ul className="text-sm space-y-2">
-            <li>
-              <Link to="/contact" className="hover:text-blue-600 transition">
-                Contact Us
-              </Link>
-            </li>
+      <a href="#" className="hover:text-indigo-600 transition">
+        <FaLinkedin />
+      </a>
+    </div>
+    </div>
 
-            <li>
-              <Link to="/shipping" className="hover:text-blue-600 transition">
-                Shipping & Returns
-              </Link>
-            </li>
+    {/* CENTER LINKS */}
+    <div className="flex mt-3 sm:mt-0 flex-col gap-1.5 text-sm">
+      <Link to="/contact" className="hover:text-indigo-600 transition">
+        Contact
+      </Link>
 
-            <li>
-              <Link to="/contact" className="hover:text-blue-600 transition">
-                FAQs
-              </Link>
-            </li>
+      <Link to="/track-order" className="hover:text-indigo-600 transition">
+        Track Order
+      </Link>
 
-            <li>
-              <Link to="/contact" className="hover:text-blue-600 transition">
-                Order Tracking
-              </Link>
-            </li>
+      <Link to="/legal/privacy" className="hover:text-indigo-600 transition">
+        Privacy Policy
+      </Link>
 
-            <li>
-              <Link to="/contact" className="hover:text-blue-600 transition">
-                Support Center
-              </Link>
-            </li>
-          </ul>
-        </div>
+      <Link to="/legal/terms" className="hover:text-indigo-600 transition">
+        Terms & Conditions
+      </Link>
+    </div>
 
-        {/* Legal Section */}
-        <div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">
-            Legal
-          </h3>
+    {/* NEWSLETTER */}
+    <div className="w-full mt-3 sm:mt-0 max-w-sm">
+      <h3 className="text-sm font-semibold text-indigo-600 mb-2 uppercase tracking-wide">
+        Stay Updated
+      </h3>
 
-          <ul className="text-sm space-y-2">
-            <li>
-              <Link to="/legal/terms" className="hover:text-blue-600 transition">
-                Terms & Conditions
-              </Link>
-            </li>
+      <p className="text-xs text-gray-500 mb-3">
+        Get offers & product updates
+      </p>
 
-            <li>
-              <Link to="/legal/privacy" className="hover:text-blue-600 transition">
-                Privacy Policy
-              </Link>
-            </li>
+      <form onSubmit={handleSubscribe} className="flex">
 
-            <li>
-              <Link to="/legal/refund" className="hover:text-blue-600 transition">
-                Refund Policy
-              </Link>
-            </li>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Enter your email"
+          className="flex-1 px-3 py-2 text-sm rounded-l-xl 
+          bg-white/70 backdrop-blur border border-indigo-200 
+          focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        />
 
-            <li>
-              <Link to="/legal/shipping" className="hover:text-blue-600 transition">
-                Shipping Policy
-              </Link>
-            </li>
-          </ul>
-        </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="px-4 py-2 text-sm font-semibold text-white 
+          bg-gradient-to-r from-indigo-500 to-blue-500 
+          rounded-r-xl hover:scale-105 transition"
+        >
+          {loading ? "..." : "Join"}
+        </button>
 
-        {/* Social Media */}
-        <div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">
-            Follow Us
-          </h3>
+      </form>
+    </div>
 
-          <p className="text-sm mb-2">
-            Stay connected on social media
-          </p>
+    {/* SOCIAL */}
+ 
 
-          <div className="flex space-x-4 text-xl">
-            <a
-              href="https://facebook.com"
-              className="hover:text-blue-600 transition"
-            >
-              <FaFacebook />
-            </a>
+  </div>
 
-            <a
-              href="https://instagram.com"
-              className="hover:text-blue-600 transition"
-            >
-              <FaInstagram />
-            </a>
+  {/* BOTTOM */}
+  <div className="border-t border-indigo-100 text-center text-xs text-gray-500 py-4">
+    © {new Date().getFullYear()}{" "}
+    <span className="text-indigo-600 font-semibold">E-Shop</span>. All rights reserved.
+  </div>
 
-            <a
-              href="https://twitter.com"
-              className="hover:text-blue-600 transition"
-            >
-              <FaTwitter />
-            </a>
-
-            <a
-              href="https://linkedin.com"
-              className="hover:text-blue-600 transition"
-            >
-              <FaLinkedin />
-            </a>
-          </div>
-        </div>
-
-        {/* Newsletter */}
-        <div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">
-            Stay Updated
-          </h3>
-
-          <p className="text-sm mb-2">
-            Get special offers and new product alerts.
-          </p>
-
-          <form className="mt-4 flex" onSubmit={handleSubscribe}>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Your email address"
-              className="w-full p-2 rounded-l-md bg-gray-100 focus:outline-none border border-gray-300 focus:ring-1 focus:ring-blue-500"
-            />
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-blue-600 text-white px-4 rounded-r-md hover:bg-blue-700 transition"
-            >
-              {loading ? "Sending..." : "Subscribe"}
-            </button>
-          </form>
-        </div>
-      </div>
-
-      {/* Bottom */}
-      <div className="mt-10 border-t border-gray-200 pt-5 text-center text-sm pb-3 text-gray-500">
-        <p>
-          &copy; {new Date().getFullYear()}{" "}
-          <span className="text-blue-600 font-semibold">E-Shop</span>. All rights
-          reserved.
-        </p>
-      </div>
-    </footer>
+</footer>
   );
 };
 
