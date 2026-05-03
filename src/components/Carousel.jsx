@@ -429,26 +429,56 @@ const Carousel = () => {
                             </span>
                           </p>
 
-                          {/* CTA buttons */}
-                          <div className="flex gap-6 sm:gap-3 pt-1 justify-around lg:justify-start flex-wrap">
-                            <button
-                              onClick={() => inCart ? navigate("/cart") : handleAddToCart(item)}
-                              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-sm shadow-md cursor-pointer relative z-10 ${inCart ? "incart-btn" : "add-btn"}`}
-                            >
-                              <FaShoppingCart size={14} />
-                              <span className="sm:hidden">{inCart ? "Cart" : "Add"}</span>
-                              <span className="hidden sm:inline">{inCart ? "Go to Cart" : "Add to Cart"}</span>
-                            </button>
-                            <button
-                              onClick={() => navigate(`/products/${item.id}`)}
-                              className="view-btn flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-sm shadow-md cursor-pointer"
-                            >
-                              <AiOutlineEye size={16} />
-                              <span className="sm:hidden">View</span>
-                              <span className="hidden sm:inline">View Details</span>
-                            </button>
-                          </div>
+                        {/* CTA buttons */}
+<div className="flex gap-3 pt-2 w-full">
+  
+  <button
+    onClick={() => (inCart ? navigate("/cart") : handleAddToCart(item))}
+    className={`flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold text-sm 
+    transition-all duration-300 
+    ${
+      inCart
+        ? "bg-blue-600 hover:bg-blue-700"
+        : "bg-indigo-600 hover:bg-indigo-700"
+    }
+    text-white
+    shadow-[0_10px_25px_rgba(37,99,235,0.4)]
+    hover:shadow-[0_15px_40px_rgba(37,99,235,0.7)]
+    hover:-translate-y-1
+    active:scale-95
+    focus:ring-2 focus:ring-blue-400 focus:outline-none
+    relative overflow-hidden`}
+  >
+    <span className="absolute inset-0 bg-white/10 opacity-0 hover:opacity-100 transition duration-300 blur-md"></span>
 
+    <FaShoppingCart size={16} />
+    <span className="sm:hidden">{inCart ? "Cart" : "Add"}</span>
+    <span className="hidden sm:inline">
+      {inCart ? "Go to Cart" : "Add to Cart"}
+    </span>
+  </button>
+
+  <button
+    onClick={() => navigate(`/products/${item.id}`)}
+    className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold text-sm 
+    bg-white text-indigo-700 border border-indigo-200
+    transition-all duration-300
+    shadow-[0_10px_25px_rgba(99,102,241,0.25)]
+    hover:shadow-[0_15px_40px_rgba(99,102,241,0.6)]
+    hover:bg-indigo-600 hover:text-white
+    hover:-translate-y-1
+    active:scale-95
+    focus:ring-2 focus:ring-indigo-300 focus:outline-none
+    relative overflow-hidden"
+  >
+    <span className="absolute inset-0 bg-indigo-500/10 opacity-0 hover:opacity-100 transition duration-300 blur-md"></span>
+
+    <AiOutlineEye size={16} />
+    <span className="sm:hidden">View</span>
+    <span className="hidden sm:inline">View Details</span>
+  </button>
+
+</div>
                         </div>
 
                         {/* ── IMAGE PANEL ── */}

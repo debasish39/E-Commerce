@@ -75,12 +75,13 @@ const AppWrapper = () => {
         if (isStandalone) return;
 
         // 🧠 show only once per day
-        const last = localStorage.getItem("pwa_banner_time");
+        const last = Number(localStorage.getItem("pwa_banner_time"));
         const now = Date.now();
 
-        if (last && now - last < 1 * 24 * 60 * 60 * 1000) return;
+        if (last && now - last < 60 * 60 * 1000) return;
+
         setShowInstall(true);
-        localStorage.setItem("pwa_banner_time", now);
+        localStorage.setItem("pwa_banner_time", now.toString());
       }, 9000);
     };
 
