@@ -473,7 +473,7 @@ const Carousel = () => {
                       </div>
 
                       {/* ── STATS STRIP ── */}
-                      <div className="relative z-10 border-t border-white/40 bg-white/35 backdrop-blur-sm px-6 sm:px-14 py-2.5 w-full max-w-7xl mx-auto flex items-center gap-6 overflow-x-auto"
+                      <div className="hidden sm:flex relative z-10 border-t border-white/40 bg-white/35 backdrop-blur-sm px-6 sm:px-14 py-2.5 w-full max-w-7xl mx-auto items-center gap-6 overflow-x-auto"
                         style={{ scrollbarWidth: "none" }}>
                         {[
                           { icon: "⭐", text: `${item.rating?.toFixed(1) || "4.2"} Rating` },

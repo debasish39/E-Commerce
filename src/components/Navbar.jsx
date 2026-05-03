@@ -313,7 +313,7 @@ export default function Navbar({ location, onLocationChange }) {
       )}
 
       {/* ════ NAVBAR ════ */}
-      <header className={`nb fixed top-0 left-0 right-0 z-40 nb-bar ${scrolled ? "sc" : ""} bg-indigo-950/20 `}
+      <header className={`nb fixed top-0 left-0 right-0 z-40 nb-bar ${scrolled ? "sc" : ""} bg-indigo-900 border border-violet-900 shadow-lg`}
         style={{ transform: showNav ? "translateY(0)" : "translateY(-100%)", transition: "transform 0.3s ease,background 0.3s,box-shadow 0.3s" }}>
 
         {/* top color bar */}

@@ -67,21 +67,18 @@ const AppWrapper = () => {
       setDeferredPrompt(e);
 
       setTimeout(() => {
-        // 📱 mobile only
-        const isMobile = /Android|iPhone/i.test(navigator.userAgent);
-
         // ✅ Already installed → don't show
         const isStandalone =
           window.matchMedia("(display-mode: standalone)").matches ||
           window.navigator.standalone === true;
 
-        if (!isMobile || isStandalone) return;
-        // 🧠 show only once every 7 days
+        if (isStandalone) return;
+
+        // 🧠 show only once per day
         const last = localStorage.getItem("pwa_banner_time");
         const now = Date.now();
 
-        if (last && now - last < 7 * 24 * 60 * 60 * 1000) return;
-
+        if (last && now - last < 1 * 24 * 60 * 60 * 1000) return;
         setShowInstall(true);
         localStorage.setItem("pwa_banner_time", now);
       }, 9000);
@@ -280,51 +277,56 @@ const AppWrapper = () => {
             {showInstall && location.pathname === "/" && (
               <div
                 data-aos="fade-up"
-                data-aos-duration="600"
+                data-aos-duration="700"
                 className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4"
               >
-                <div className="relative overflow-hidden rounded-2xl border border-blue-300/20 bg-white/70 backdrop-blur-2xl shadow-[0_10px_40px_rgba(37,99,235,0.25)]">
+                <div className="relative overflow-hidden rounded-2xl border border-blue-200/20 bg-white/60 backdrop-blur-3xl shadow-[0_20px_60px_rgba(37,99,235,0.35)]">
 
-                  {/* Glow effect */}
-                  <div className="absolute -top-10 -left-10 w-40 h-40 bg-blue-400/30 blur-3xl rounded-full" />
-                  <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-400/30 blur-3xl rounded-full" />
+                  {/* Animated Glow Background */}
+                  <div className="absolute -top-16 -left-16 w-56 h-56 bg-blue-400/30 blur-[120px] rounded-full animate-pulse" />
+                  <div className="absolute -bottom-16 -right-16 w-56 h-56 bg-indigo-400/30 blur-[140px] rounded-full animate-[float_8s_ease-in-out_infinite]" />
 
-                  <Alert
-                    color="primary"
-                    variant="flat"
-                    radius="lg"
-                    className="bg-transparent border-none shadow-none"
-                    endContent={
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-3 py-1 rounded-lg shadow-md hover:scale-105 transition"
-                          onClick={handleInstall}
-                        >
-                          Install
-                        </Button>
+                  {/* Gradient Border Effect */}
+                  <div className="absolute inset-0 rounded-2xl border border-transparent bg-gradient-to-r from-blue-400/20 via-indigo-400/20 to-blue-400/20 pointer-events-none" />
 
-                        <Button
-                          size="sm"
-                          variant="light"
-                          className="text-gray-600 hover:text-black transition"
-                          onClick={() => setShowInstall(false)}
-                        >
-                          ✕
-                        </Button>
-                      </div>
-                    }
-                  >
+                  {/* Content */}
+                  <div className="relative z-10 flex items-center justify-between gap-4 px-5 py-4">
+
+                    {/* Left Content */}
                     <div className="flex flex-col">
-                      <span className="font-semibold text-gray-800 text-sm">
+                      <span className="font-semibold text-gray-800 text-sm tracking-wide">
                         Install App 🚀
                       </span>
 
                       <span className="text-xs text-gray-500">
-                        Faster checkout • Offline access • Better performance
+                        Faster checkout • Offline access • Smooth experience
                       </span>
                     </div>
-                  </Alert>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2">
+
+                      <button
+                        onClick={handleInstall}
+                        className="px-4 py-1.5 text-xs font-medium rounded-lg 
+            bg-gradient-to-r from-blue-500 to-indigo-600 text-white 
+            shadow-lg hover:scale-105 hover:shadow-blue-500/40 
+            transition-all duration-300"
+                      >
+                        Install
+                      </button>
+
+                      <button
+                        onClick={() => setShowInstall(false)}
+                        className="w-7 h-7 flex items-center justify-center rounded-full 
+            bg-white/40 backdrop-blur-md text-gray-600 hover:text-black 
+            hover:bg-white/70 transition"
+                      >
+                        ✕
+                      </button>
+
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
