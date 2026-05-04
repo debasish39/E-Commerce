@@ -194,7 +194,7 @@ export default function ProfilePage() {
           border-radius: 28px;
           border: 1px solid rgba(79,70,229,0.10);
           box-shadow: var(--p-shadow-card);
-          padding: 32px;
+          padding: 18px;
           position: relative;
           overflow: hidden;
           margin-bottom: 20px;

@@ -353,7 +353,7 @@ const AppWrapper = () => {
               <Route path="/category/:category" element={<CategoryProduct />} />
               <Route path="/order-success" element={<OrderSuccess />} />
               <Route path="/profile" element={<ProfilePage />} />
-              {/* <Route path="/category-filter" element={<CategoryFilter />} /> */}
+              {/* <Route path="/category-filter" element={<CategoryFilter />} />  Q  */}
               <Route
                 path="/order-history"
                 element={

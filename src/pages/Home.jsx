@@ -21,30 +21,30 @@ export default function Home() {
       offset: 40,
     });
 
-    const timeout = setTimeout(() => {
-      setLoading(false);
-      AOS.refresh();
-    }, 900);
+    // const timeout = setTimeout(() => {
+    //   setLoading(false);
+    //   AOS.refresh();
+    // }, 900);
 
-    return () => clearTimeout(timeout);
+    return () => clearTimeout();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-100">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-32 h-32 sm:w-48 sm:h-48 object-contain"
-        >
-          <source src={Loading} type="video/webm" />
-          Your browser does not support the video tag.
-        </video>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="flex justify-center items-center min-h-screen bg-gray-100">
+  //       <video
+  //         autoPlay
+  //         loop
+  //         muted
+  //         playsInline
+  //         className="w-32 h-32 sm:w-48 sm:h-48 object-contain"
+  //       >
+  //         <source src={Loading} type="video/webm" />
+  //         Your browser does not support the video tag.
+  //       </video>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="relative min-h-screen text-gray-800 overflow-hidden  duration-500">
