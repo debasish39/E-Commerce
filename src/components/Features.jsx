@@ -25,14 +25,9 @@ const Features = () => {
 
   return (
     <section className="relative py-20 px-6 sm:px-10 bg-transparent">
-
-    
-
       <div className="max-w-7xl mx-auto relative z-10">
-
         {/* Title */}
         <div className="text-center mb-14">
-
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-800">
             Why Shop With{" "}
             <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
@@ -42,12 +37,10 @@ const Features = () => {
           </h2>
 
           <p className="mt-3 text-gray-600 max-w-xl mx-auto">
-  We deliver quality products with secure payments, fast shipping,
-  and dedicated customer support.
-</p>
-
+            We deliver quality products with secure payments, fast shipping,
+            and dedicated customer support.
+          </p>
         </div>
-
         {/* Mobile Slider */}
         <div className="sm:hidden">
           <Slider {...settings}>
@@ -76,7 +69,7 @@ const FeatureCard = ({ feature }) => {
 
   return (
     <div
-    className="
+      className="
 group relative p-6 rounded-3xl text-center
 border border-blue-100
 bg-white
@@ -89,7 +82,7 @@ hover:border-blue-400
     >
 
       {/* hover glow */}
-<div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-500/0 via-blue-500/15 to-transparent opacity-0 group-hover:opacity-100 blur-xl transition-all duration-500" />
+      <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-500/0 via-blue-500/15 to-transparent opacity-0 group-hover:opacity-100 blur-xl transition-all duration-500" />
 
       {/* icon container */}
       <div
@@ -102,13 +95,13 @@ group-hover:scale-110 transition-transform duration-500
         <Icon size={26} />
       </div>
 
-     <h3 className="text-lg font-semibold text-gray-800">
-  {feature.text}
-</h3>
+      <h3 className="text-lg font-semibold text-gray-800">
+        {feature.text}
+      </h3>
 
-    <p className="mt-1 text-sm text-gray-600">
-  {feature.subtext}
-</p>
+      <p className="mt-1 text-sm text-gray-600">
+        {feature.subtext}
+      </p>
 
     </div>
   );
