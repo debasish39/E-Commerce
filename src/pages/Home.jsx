@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
@@ -6,12 +6,11 @@ import Carousel from "../components/Carousel";
 import MidBanner from "../components/MidBanner";
 import Features from "../components/Features";
 import Category from "../components/Category";
-import Loading from "../assets/Loading4.webm";
 import RandomProducts from "../components/RandomProducts";
 import TrendingProducts from "../components/TrendingProducts";
 import PeopleAlsoView from "../components/PeopleAlsoView";
+
 export default function Home() {
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     AOS.init({
@@ -21,33 +20,11 @@ export default function Home() {
       offset: 40,
     });
 
-    // const timeout = setTimeout(() => {
-    //   setLoading(false);
-    //   AOS.refresh();
-    // }, 900);
-
-    return () => clearTimeout();
+    return () => {};
   }, []);
 
-  // if (loading) {
-  //   return (
-  //     <div className="flex justify-center items-center min-h-screen bg-gray-100">
-  //       <video
-  //         autoPlay
-  //         loop
-  //         muted
-  //         playsInline
-  //         className="w-32 h-32 sm:w-48 sm:h-48 object-contain"
-  //       >
-  //         <source src={Loading} type="video/webm" />
-  //         Your browser does not support the video tag.
-  //       </video>
-  //     </div>
-  //   );
-  // }
-
   return (
-    <div className="relative min-h-screen text-gray-800 overflow-hidden  duration-500">
+    <div className="relative min-h-screen text-gray-800 overflow-hidden duration-500">
 
       <div data-aos="fade-up">
         <Carousel />
@@ -56,15 +33,19 @@ export default function Home() {
       <div data-aos="fade-right">
         <Category />
       </div>
-<div data-aos="fade-left">
+
+      <div data-aos="fade-left">
         <RandomProducts />
       </div>
+
       <div data-aos="fade-right">
         <TrendingProducts />
       </div>
+
       <div data-aos="fade-left">
         <PeopleAlsoView />
       </div>
+
       <div data-aos="zoom-in">
         <MidBanner />
       </div>

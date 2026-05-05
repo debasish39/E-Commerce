@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import "swiper/css";
 import { AiOutlineArrowRight } from "react-icons/ai";
 import { categoryOnlyData } from "./catagorydata";
-
+import AOS from "aos";
+import "aos/dist/aos.css";
 const ACCENTS = [
   { from: "#2874f0", to: "#60a5fa" },
   { from: "#f43f5e", to: "#fb7185" },
@@ -17,21 +18,74 @@ const ACCENTS = [
 
 export default function Category() {
   const navigate = useNavigate();
+const [loading, setLoading] = useState(true);
+useEffect(() => {
+  AOS.init({
+    duration: 100,
+    easing: "ease-in-out",
+    once: true, // important (performance + clean UX)
+  });
 
+  AOS.refresh();
+}, []);
+useEffect(() => {
+
+
+  // simulate loading (replace with real API later)
+  const timer = setTimeout(() => {
+    setLoading(false);
+    
+  }, 300);
+
+  return () => clearTimeout(timer);
+}, []);
+if (loading) {
   return (
-    <div className="w-full py-12">
+    <div className="w-full py-3 px-4 sm:px-6 animate-pulse">
+
+      {/* Header skeleton */}
+      <div className="text-center mb-4 space-y-2">
+        <div className="h-6 w-40 mx-auto bg-indigo-200 rounded-full" />
+        <div className="h-8 w-64 mx-auto bg-gray-300 rounded" />
+        <div className="h-4 w-52 mx-auto bg-gray-200 rounded" />
+      </div>
+
+      {/* Cards skeleton */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {[...Array(6)].map((_, i) => (
+          <div
+            key={i}
+            className="rounded-2xl p-5 bg-white border border-gray-100"
+          >
+            <div className="flex justify-center mb-4">
+              <div className="w-[90px] h-[90px] bg-gray-200 rounded-lg" />
+            </div>
+
+            <div className="h-4 w-20 mx-auto bg-gray-300 rounded mb-2" />
+            <div className="h-3 w-16 mx-auto bg-gray-200 rounded" />
+          </div>
+        ))}
+      </div>
+
+    </div>
+  );
+}
+  return (
+    <div className="w-full py-3">
 
       {/* HEADER */}
-      <div className="text-center mb-10 px-4">
-
+<div
+  className="text-center mb-1 px-4"
+  data-aos="fade-up"
+  data-aos-duration="600"
+>
         {/* Badge */}
         <div className="
           inline-flex items-center gap-2
           px-4 py-1.5 rounded-full
           text-xs font-semibold
           bg-indigo-50 text-indigo-600 border border-indigo-200
-          mb-4
-        ">
+          mb-2">
           🔥 Trending Categories
         </div>
 
@@ -45,7 +99,7 @@ export default function Category() {
         </h2>
 
         {/* Subtitle */}
-        <p className="text-gray-500 text-sm sm:text-base mt-3">
+        <p className="text-gray-500 text-sm sm:text-base mt-1">
           Discover trending collections curated just for you
         </p>
 
@@ -81,12 +135,15 @@ export default function Category() {
                   className="
       group relative overflow-hidden
       rounded-2xl p-5
-      cursor-pointer
+      cursor-pointer 
       transition-all duration-500
       hover:-translate-y-2 hover:shadow-xl
       bg-white/69 backdrop-blur-lg
       border border-gray-100
     "
+    data-aos="zoom-in"
+  data-aos-delay={idx * 80}
+  data-aos-duration="500"
                 >
 
                   {/* Subtle hover gradient overlay */}
@@ -119,6 +176,7 @@ export default function Category() {
                       src={item.image}
                       alt={name}
                       className="
+                      lazyload
           relative z-10
           h-[90px] sm:h-[110px]
           object-contain
