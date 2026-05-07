@@ -435,7 +435,7 @@ export default function SignIn() {
               <label className="form-label">Email Address</label>
               <input
                 type="email"
-                placeholder="you@example.com"
+                placeholder="eshopcustomerinfo@gmail.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 className={`form-input ${emailError?"error":""}`}

@@ -55,45 +55,39 @@ export default function SignUp() {
     setErrors({ ...errors, [name]: validateField(name, value) });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!signUpLoaded) { toast.error("System not ready. Try again."); return; }
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const newErrors = {
-      firstName: validateField("firstName", form.firstName),
-      lastName:  validateField("lastName", form.lastName),
-      email:     validateField("email", form.email),
-      password:  validateField("password", form.password),
-    };
-    setErrors(newErrors);
-    setTouched({ firstName: true, lastName: true, email: true, password: true });
+  if (!signUpLoaded) {
+    toast.error("System not ready");
+    return;
+  }
 
-    if (Object.values(newErrors).some(e => e)) return;
+  setLoading(true);
 
-    setLoading(true);
-    try {
-      const res = await signUp.create({
-        firstName: form.firstName,
-        lastName: form.lastName,
-        emailAddress: form.email,
-        password: form.password,
-      });
+  try {
+    await signUp.create({
+      firstName: form.firstName,
+      lastName: form.lastName,
+      emailAddress: form.email,
+      password: form.password,
+    });
 
-      if (res.status === "complete") {
-        toast.success("Account created successfully 🎉");
-        navigate("/");
-      } else {
-        await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
-        toast.success("Verification code sent 📩");
-        navigate("/verify");
-      }
-    } catch (err) {
-      console.error("Signup error:", err);
-      toast.error(err.errors?.[0]?.message || "Signup failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Send verification email immediately
+    await signUp.prepareEmailAddressVerification({
+      strategy: "email_code",
+    });
+
+    toast.success("Verification code sent 📩");
+
+    navigate("/verify");
+  } catch (err) {
+    console.error(err);
+    toast.error(err.errors?.[0]?.message || "Signup failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleGoogle = async () => {
     if (!signInLoaded) return;
@@ -336,7 +330,7 @@ export default function SignUp() {
               <input
                 type="text"
                 name="firstName"
-                placeholder="John"
+                placeholder="Bom"
                 value={form.firstName}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -357,7 +351,7 @@ export default function SignUp() {
               <input
                 type="text"
                 name="lastName"
-                placeholder="Doe"
+                placeholder="Bhole"
                 value={form.lastName}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -380,7 +374,7 @@ export default function SignUp() {
             <input
               type="email"
               name="email"
-              placeholder="you@example.com"
+              placeholder="e.g. eshopcustomerinfo@gmail.com"
               value={form.email}
               onChange={handleChange}
               onBlur={handleBlur}
