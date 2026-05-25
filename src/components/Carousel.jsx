@@ -91,7 +91,7 @@ useEffect(() => {
     e?.stopPropagation();
     if(!isSignedIn){ toast.error("Please login first"); setTimeout(()=>navigate("/sign-in"),300); return; }
     if(cartItem.some(c=>String(c.productId)===String(item.id))){
-      toast.info("Already in cart 🛒"); setTimeout(()=>navigate("/cart"),300); return;
+      toast.info("Already in cart 🛒"); setTimeout(()=>navigate("/cart"),100); return;
     }
     addToCart(item); toast.success("Added to cart 🛒");
   },[isSignedIn,cartItem,addToCart,navigate]);
@@ -102,47 +102,47 @@ useEffect(() => {
     initialSlide,
     slidesPerView:1,
     loop:true,
-    autoplay:{delay:3800,disableOnInteraction:true},
+    autoplay:{disableOnInteraction:true},
     pagination:{clickable:true},
     onTouchStart:sw=>sw.autoplay.stop(),
-    onTouchEnd:sw=>setTimeout(()=>sw.autoplay.start(),3000),
+    onTouchEnd:sw=>setTimeout(()=>sw.autoplay.start(),3900),
   };
-if (!data || data.length === 0) {
-  return (
-    <div className="w-full h-[420px] px-4 py-4 animate-pulse">
+// if (!data || data.length === 0) {
+//   return (
+//     <div className="w-full h-[420px] px-4 py-4 animate-pulse">
 
-      {/* Offer bar skeleton */}
-      <div className="h-12 w-full rounded-lg bg-indigo-200 mb-4" />
+//       {/* Offer bar skeleton */}
+//       <div className="h-12 w-full rounded-lg bg-indigo-200 mb-4" />
 
-      <div className="grid md:grid-cols-2 gap-6 items-center h-full">
+//       <div className="grid md:grid-cols-2 gap-6 items-center h-full">
 
-        {/* LEFT SIDE */}
-        <div className="space-y-4">
-          <div className="h-5 w-40 bg-indigo-200 rounded" />
-          <div className="h-8 w-3/4 bg-gray-300 rounded" />
-          <div className="h-4 w-full bg-gray-200 rounded" />
-          <div className="h-4 w-5/6 bg-gray-200 rounded" />
+//         {/* LEFT SIDE */}
+//         <div className="space-y-4">
+//           <div className="h-5 w-40 bg-indigo-200 rounded" />
+//           <div className="h-8 w-3/4 bg-gray-300 rounded" />
+//           <div className="h-4 w-full bg-gray-200 rounded" />
+//           <div className="h-4 w-5/6 bg-gray-200 rounded" />
 
-          <div className="flex gap-2">
-            <div className="h-6 w-16 bg-gray-300 rounded" />
-            <div className="h-6 w-20 bg-gray-200 rounded" />
-          </div>
+//           <div className="flex gap-2">
+//             <div className="h-6 w-16 bg-gray-300 rounded" />
+//             <div className="h-6 w-20 bg-gray-200 rounded" />
+//           </div>
 
-          <div className="flex gap-3 mt-3">
-            <div className="h-10 w-36 bg-indigo-300 rounded-lg" />
-            <div className="h-10 w-24 bg-gray-200 rounded-lg" />
-          </div>
-        </div>
+//           <div className="flex gap-3 mt-3">
+//             <div className="h-10 w-36 bg-indigo-300 rounded-lg" />
+//             <div className="h-10 w-24 bg-gray-200 rounded-lg" />
+//           </div>
+//         </div>
 
-        {/* RIGHT SIDE IMAGE */}
-        <div className="flex justify-center">
-          <div className="w-[260px] h-[260px] bg-gray-200 rounded-xl" />
-        </div>
+//         {/* RIGHT SIDE IMAGE */}
+//         <div className="flex justify-center">
+//           <div className="w-[260px] h-[260px] bg-gray-200 rounded-xl" />
+//         </div>
 
-      </div>
-    </div>
-  );
-}
+//       </div>
+//     </div>
+//   );
+// }
   return (
     <div className="cw-root">
 

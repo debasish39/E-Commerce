@@ -338,7 +338,22 @@
 .cw-ds-strip-item:hover{color:rgba(255,255,255,.9);}
 .cw-ds-strip-dot{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.25);flex-shrink:0;}
 
-
+.swiper {
+    margin-left: 30px;
+    margin-right: 3px;
+    position: relative;
+    overflow: hidden;
+    list-style: none;
+    padding: 0;
+    z-index: 1;
+    display: block;
+}
+@media(max-width:767px){
+  .swiper {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
 /* ══════════════════════════════════════════════
    MOBILE CAROUSEL  < 768 px
    Style: Stacked card — product image top (large),
