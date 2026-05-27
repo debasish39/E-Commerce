@@ -39,18 +39,47 @@ const OrderHistory = () => {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState("latest");
-  useEffect(() => {
-    if (!user) return;
-    const fetch = async () => {
-      try {
-        const res  = await window.fetch(`https://eshop-backend-y0e7.onrender.com/api/orders/${user.id}`);
-        const data = await res.json();
-        if (Array.isArray(data)) setOrders(data);
-      } catch (e) { console.error(e); }
-      finally { setLoading(false); }
-    };
-    fetch();
-  }, [user]);
+ useEffect(() => {
+
+  if (!user) return;
+
+  const fetchOrders = async () => {
+
+    try {
+
+      const res = await fetch(
+
+        `https://eshop-backend-y0e7.onrender.com/api/orders/${user.id}`
+
+      );
+
+      const data = await res.json();
+
+      console.log(data);
+
+      if (data.success) {
+
+        setOrders(
+          data.orders || []
+        );
+
+      }
+
+    } catch (error) {
+
+      console.error(error);
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  };
+
+  fetchOrders();
+
+}, [user]);
 
   const toggleExpand = (id) => setExpanded(p => ({ ...p, [id]: !p[id] }));
 
