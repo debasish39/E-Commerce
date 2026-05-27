@@ -68,7 +68,8 @@ export default function Carousel() {
   const { isSignedIn }              = useUser();
   const navigate                    = useNavigate();
   // const [loading, setLoading]       = useState(true);
-  const countdown                   = useCountdown();
+  const countdown = useCountdown();
+  // console.log("Carousel data:", data);
 useEffect(() => {
   if (!data || data.length === 0) {
     fetchAllProducts();
@@ -84,9 +85,23 @@ useEffect(() => {
   //   else setLoading(false);
   // },[]);
 
-  const orderedData  = data||[];
-  const initialSlide = Math.max(0,orderedData.findIndex(d=>d.id===83));
+const orderedData = data || [];
 
+/*
+  Move product id=83 to first position
+*/
+
+const product83Index = orderedData.findIndex(
+  (item) => item.id === 83
+);
+
+let reorderedData = [...orderedData];
+
+if (product83Index !== -1) {
+  const [product83] = reorderedData.splice(product83Index, 1);
+
+  reorderedData.unshift(product83);
+}
   const handleCart = useCallback((item,e)=>{
     e?.stopPropagation();
     if(!isSignedIn){ toast.error("Please login first"); setTimeout(()=>navigate("/sign-in"),300); return; }
@@ -99,7 +114,7 @@ useEffect(() => {
   const inCart = item => cartItem.some(c=>String(c.productId)===String(item.id));
 
   const SWIPER_COMMON = {
-    initialSlide,
+    
     slidesPerView:1,
     loop:true,
     autoplay:{disableOnInteraction:true},
@@ -209,7 +224,7 @@ useEffect(() => {
           navigation
           className="cw-desk-swiper"
         >
-          {orderedData.map((item,idx)=>{
+          {reorderedData.map((item,idx)=>{
             const badge   = BADGES[idx%BADGES.length];
             const accent  = ACCENTS[idx%ACCENTS.length];
             const {pct,original} = getDiscount(item.price,idx);
@@ -345,7 +360,7 @@ useEffect(() => {
           className="cw-mob-swiper"
           style={{paddingBottom:36}}
         >
-          {orderedData.map((item,idx)=>{
+          {reorderedData.map((item,idx)=>{
             const badge  = BADGES[idx%BADGES.length];
             const accent = ACCENTS[idx%ACCENTS.length];
             const {pct,original} = getDiscount(item.price,idx);
