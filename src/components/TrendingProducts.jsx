@@ -25,7 +25,7 @@ export default function TrendingProducts() {
   if (!trending.length) return null;
 
   return (
-    <section className="max-w-7xl mx-auto px-1.5 sm:px-6 py-8">
+    <section className="max-w-7xl mx-auto px-1.5 sm:px-4 py-8">
 
       {/* HEADER */}
       <div

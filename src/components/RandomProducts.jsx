@@ -26,7 +26,7 @@ useEffect(() => {
   if (!randomItems.length) return null;
 
   return (
-    <section className="max-w-7xl mx-auto px-2 sm:px-6 py-3">
+    <section className="max-w-7xl mx-auto px-2 sm:px-4 py-3">
 
       {/* HEADER */}
       <div

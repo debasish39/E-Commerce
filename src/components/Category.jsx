@@ -106,7 +106,7 @@ if (loading) {
       </div>
 
       {/* SWIPER */}
-      <div className="px-4 sm:px-6">
+      <div className="px-4 sm:px-6 sm:mx-auto">
         <Swiper
           modules={[Autoplay]}
           spaceBetween={16}

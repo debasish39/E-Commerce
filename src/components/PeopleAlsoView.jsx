@@ -45,7 +45,7 @@ export default function PeopleAlsoView({ currentProduct }) {
     if (!related.length) return null;
 
     return (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 py-6 rounded-xl">
+        <section className="max-w-7xl mx-auto px-4 sm:px-4 py-6 rounded-xl">
 
             {/* HEADER */}
             <div className="flex items-center justify-between mb-4">
