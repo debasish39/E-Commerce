@@ -8,38 +8,63 @@ const BACKEND_URL = "https://eshop-backend-y0e7.onrender.com";
 
 export const WishlistProvider = ({ children }) => {
 
-  const { user } = useUser();
-  const [wishlist, setWishlist] = useState([]);
+const {user,isLoaded} = useUser(); 
+const [wishlist, setWishlist] = useState([]);
 
   /* ==========================
      LOAD WISHLIST FROM DB
   ========================== */
 
-  useEffect(() => {
+ useEffect(() => {
 
-    if (!user?.id) return;
+  if (!isLoaded || !user?.id)
+    return;
 
-    const fetchWishlist = async () => {
+  const fetchWishlist = async () => {
 
-      try {
+    try {
 
-        const res = await fetch(`${BACKEND_URL}/api/wishlist/${user.id}`);
-        const data = await res.json();
+      const res = await fetch(
 
-        setWishlist(data?.items || []);
+        `${BACKEND_URL}/api/wishlist/${user.id}`
 
-      } catch (error) {
+      );
 
-        console.error("Wishlist fetch error:", error);
+      const data =
+        await res.json();
 
-      }
+      console.log(
+        "WISHLIST:",
+        data
+      );
 
-    };
+      setWishlist(
 
-    fetchWishlist();
+        data.items ||
 
-  }, [user?.id]);
+        data.wishlist?.items ||
 
+        []
+
+      );
+
+    } catch (error) {
+
+      console.error(
+
+        "Wishlist fetch error:",
+
+        error
+
+      );
+
+    }
+
+  };
+
+  fetchWishlist();
+
+}, [user?.id, isLoaded]);
 const addToWishlist = async (product) => {
 
   if (!user?.id) {

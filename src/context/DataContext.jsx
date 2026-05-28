@@ -46,7 +46,6 @@ export const DataProvider = ({ children }) => {
       }));
 
       setData(productsData);
-      console.log(productsData);
 
     } catch (error) {
       console.error(error);
@@ -62,11 +61,7 @@ export const DataProvider = ({ children }) => {
 
   const categoryOnlyData = useMemo(() => getUniqueCategory(data, "category"), [data]);
   const brandOnlyData = useMemo(() => getUniqueCategory(data, "brand"), [data]);
-console.log("All Categories:");
-console.log(categoryOnlyData);
 
-console.log("All Brands:");
-console.log(brandOnlyData);
   const handleCategoryChange = (e) => setCategory(e.target.value);
   const handleBrandChange = (e) => setBrand(e.target.value);
   const filteredData = useMemo(() => {
@@ -110,13 +105,6 @@ console.log(brandOnlyData);
 
     return temp;
   }, [data, search, category, brand, priceRange, sort]);
-  console.log("Filtered Products:");
-console.log(filteredData);
-
-console.log("Filtered Product Names:");
-console.log(
-  filteredData.map((item) => item.title)
-);
   return (
     <DataContext.Provider
       value={{

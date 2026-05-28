@@ -23,7 +23,6 @@ export default function FilterSection({ open, setOpen }) {
   const [openCategory, setOpenCategory] = useState(true);
   const [openBrand, setOpenBrand] = useState(true);
 console.log("FilterSection Rendered");
-console.log(category, brand, priceRange);
   return (
     <>
       <style>{`

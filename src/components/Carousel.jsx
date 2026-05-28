@@ -316,8 +316,8 @@ if (product83Index !== -1) {
                       background:accent.l,filter:"blur(36px)",
                       zIndex:0,pointerEvents:"none",
                     }}/>
-                    <div className="cw-ds-ribbon">
-                      <FaFire size={9}/> {pct}% OFF
+                    <div className="cw-ds-ribbon sm:mr-12 rounded-2xl">
+                      <FaFire size={12}/> {pct}% OFF
                     </div>
                     <img
                       src={item.thumbnail} alt={item.title}

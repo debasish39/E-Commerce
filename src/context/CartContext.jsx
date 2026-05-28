@@ -8,8 +8,9 @@ const BACKEND_URL = "https://eshop-backend-y0e7.onrender.com";
 
 export default function CartProvider({ children }) {
 
-const { user, isSignedIn } = useUser();
+const { user, isSignedIn, isLoaded } = useUser();
   const [cartItem, setCartItem] = useState([]);
+  
 // const calculatePrice = (price) => {
 //   let finalPrice;
 
@@ -38,31 +39,60 @@ const { user, isSignedIn } = useUser();
      LOAD CART FROM DATABASE
   ========================== */
 
-  useEffect(() => {
+useEffect(() => {
 
-    if (!user) return;
+  if (!isLoaded || !user)
+    return;
 
-    const fetchCart = async () => {
-      try {
+  const fetchCart = async () => {
 
-        const res = await fetch(`${BACKEND_URL}/api/cart/${user.id}`);
-        const data = await res.json();
+    try {
 
-        if (data?.items) {
-          setCartItem(data.items);
-        }
+      const res = await fetch(
 
-      } catch (error) {
+        `${BACKEND_URL}/api/cart/${user.id}`
 
-        console.error("Cart fetch error:", error);
+      );
+
+      const data =
+        await res.json();
+
+      console.log(
+        "FETCH CART:",
+        data
+      );
+
+      if (data.success) {
+
+        setCartItem(
+
+          data.items ||
+
+          data.cart?.items ||
+
+          []
+
+        );
 
       }
-    };
 
-    fetchCart();
+    } catch (error) {
 
-  }, [user]);
+      console.error(
 
+        "Cart fetch error:",
+
+        error
+
+      );
+
+    }
+
+  };
+
+  fetchCart();
+
+}, [user, isLoaded]);
   /* ==========================
      ADD TO CART
   ========================== */
@@ -72,7 +102,7 @@ const { user, isSignedIn } = useUser();
   if (!isSignedIn) {
 
     toast.error("Please login first");
-    navigate("/sign-in");
+    // navigate("/sign-in");
 
     return;
   }
