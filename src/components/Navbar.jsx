@@ -318,7 +318,7 @@ export default function Navbar({ location, onLocationChange }) {
 
         {/* top color bar */}
 
-        <div className="max-w-7xl mx-auto px-4 h-13 flex items-center justify-between gap-3 " >
+        <div className="max-w-8xl mx-auto px-6 h-13 flex items-center justify-between gap-3 " >
 
           {/* LOGO + LOCATION */}
           <div className="flex items-center gap-6 flex-shrink-0">
