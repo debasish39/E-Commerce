@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
 import successAnimation from "../assets/success.json";
-
+import successmusic from "../assets/successmusic.mp3";
 /* ── injected styles ── */
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
@@ -284,7 +284,16 @@ export default function OrderSuccess() {
       document.head.appendChild(el);
     }
   }, []);
+useEffect(() => {
+  const audio = new Audio(successmusic);
 
+  audio.volume = 0.7;
+
+  audio.play().catch((err) => {
+    console.log("Audio autoplay blocked:", err);
+  });
+
+}, []);
   /* spawn confetti */
   useEffect(() => {
     const pieces = Array.from({ length: 32 }, (_, i) => ({
