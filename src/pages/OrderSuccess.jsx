@@ -260,15 +260,15 @@ const CSS = `
 
 /* confetti colours matching app theme */
 const CONFETTI_COLORS = [
-  "#4f46e5","#6366f1","#2563eb","#60a5fa",
-  "#a5b4fc","#c7d2fe","#fb923c","#fde68a",
+  "#4f46e5", "#6366f1", "#2563eb", "#60a5fa",
+  "#a5b4fc", "#c7d2fe", "#fb923c", "#fde68a",
 ];
 
 const STEPS = [
-  { icon:"✅", label:"Confirmed", state:"done",    delay:".85s" },
-  { icon:"📦", label:"Packing",   state:"active",  delay:"1s"   },
-  { icon:"🚚", label:"Shipping",  state:"pending", delay:""     },
-  { icon:"🏠", label:"Delivered", state:"pending", delay:""     },
+  { icon: "✅", label: "Confirmed", state: "done", delay: ".85s" },
+  { icon: "📦", label: "Packing", state: "active", delay: "1s" },
+  { icon: "🚚", label: "Shipping", state: "pending", delay: "" },
+  { icon: "🏠", label: "Delivered", state: "pending", delay: "" },
 ];
 
 export default function OrderSuccess() {
@@ -284,16 +284,16 @@ export default function OrderSuccess() {
       document.head.appendChild(el);
     }
   }, []);
-useEffect(() => {
-  const audio = new Audio(successmusic);
+  useEffect(() => {
+    const audio = new Audio(successmusic);
 
-  audio.volume = 0.7;
+    audio.volume = 0.7;
 
-  audio.play().catch((err) => {
-    console.log("Audio autoplay blocked:", err);
-  });
+    audio.play().catch((err) => {
+      console.log("Audio autoplay blocked:", err);
+    });
 
-}, []);
+  }, []);
   /* spawn confetti */
   useEffect(() => {
     const pieces = Array.from({ length: 32 }, (_, i) => ({
@@ -331,12 +331,12 @@ useEffect(() => {
 
         {/* Lottie */}
         <div className="os-lottie">
-          <Lottie animationData={successAnimation} autoplay loop={false}/>
+          <Lottie animationData={successAnimation} autoplay loop={false} />
         </div>
 
         {/* Badge */}
         <div className="os-badge">
-          <span className="os-badge-dot"/> Order Confirmed
+          <span className="os-badge-dot" /> Order Confirmed
         </div>
 
         {/* Heading */}
@@ -353,9 +353,9 @@ useEffect(() => {
         {/* Info strip */}
         <div className="os-strip">
           {[
-            { icon:"📦", label:"Estimated",  val:"5–7 Days"  },
-            { icon:"🔒", label:"Payment",    val:"Secured"   },
-            { icon:"↩️",  label:"Returns",   val:"10 Days"   },
+            { icon: "📦", label: "Estimated", val: "5–7 Days" },
+            { icon: "🔒", label: "Payment", val: "Secured" },
+            { icon: "↩️", label: "Returns", val: "10 Days" },
           ].map(s => (
             <div className="os-strip-item" key={s.label}>
               <span className="os-strip-icon">{s.icon}</span>
@@ -368,13 +368,13 @@ useEffect(() => {
         {/* Progress tracker */}
         <div className="os-tracker">
           <div className="os-tracker-steps">
-            <div className="os-tracker-line"/>
-            <div className="os-tracker-fill"/>
+            <div className="os-tracker-line" />
+            <div className="os-tracker-fill" />
             {STEPS.map(s => (
               <div key={s.label} className={`os-step ${s.state}`}>
                 <div
                   className="os-step-circle"
-                  style={s.state==="done" ? { "--delay": s.delay } : {}}
+                  style={s.state === "done" ? { "--delay": s.delay } : {}}
                 >
                   {s.icon}
                 </div>
@@ -398,7 +398,7 @@ useEffect(() => {
         <p className="os-foot">
           Need help? <span
             onClick={() => navigate("/contact")}
-            style={{color:"#4f46e5",fontWeight:700,cursor:"pointer",textDecoration:"underline",textDecorationStyle:"dotted"}}
+            style={{ color: "#4f46e5", fontWeight: 700, cursor: "pointer", textDecoration: "underline", textDecorationStyle: "dotted" }}
           >Contact Support</span>
         </p>
       </div>
