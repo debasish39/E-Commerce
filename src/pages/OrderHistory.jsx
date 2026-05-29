@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { jsPDF } from "jspdf";
+import { toast } from "sonner";
 import Logo from "../assets/logo.png";
 import {
   FaDownload, FaBoxOpen, FaCheckCircle, FaTruck,
   FaShoppingBag, FaRupeeSign, FaClock, FaReceipt,
   FaChevronDown, FaChevronUp, FaTimes, FaFilter, FaUserCircle,
-  FaEye, FaArrowRight, FaPhone, FaMapPin, FaCalendarAlt,
+  FaPhoneAlt, FaMapPin, FaCalendarAlt, FaExclamationTriangle,
+  FaMapMarkerAlt, FaBarcode,
 } from "react-icons/fa";
 import { MdPayments, MdLocalShipping, MdVerifiedUser } from "react-icons/md";
 import { BsBoxSeam } from "react-icons/bs";
@@ -28,6 +30,7 @@ const STATUS_CFG = {
     icon: <FaReceipt size={11} />,
     dot: "#f59e0b",
     gradient: "from-amber-400 to-amber-600",
+    canCancel: true,
   },
   Confirmed: {
     bg: "#eff6ff",
@@ -36,22 +39,7 @@ const STATUS_CFG = {
     icon: <FaCheckCircle size={11} />,
     dot: "#3b82f6",
     gradient: "from-blue-400 to-blue-600",
-  },
-  Shipped: {
-    bg: "#f5f3ff",
-    border: "#a78bfa",
-    text: "#6d28d9",
-    icon: <FaTruck size={11} />,
-    dot: "#8b5cf6",
-    gradient: "from-purple-400 to-purple-600",
-  },
-  Delivered: {
-    bg: "#f0fdf4",
-    border: "#6ee7b7",
-    text: "#065f46",
-    icon: <FaCheckCircle size={11} />,
-    dot: "#10b981",
-    gradient: "from-green-400 to-green-600",
+    canCancel: true,
   },
   Processing: {
     bg: "#eef2ff",
@@ -60,6 +48,34 @@ const STATUS_CFG = {
     icon: <BsBoxSeam size={11} />,
     dot: "#6366f1",
     gradient: "from-indigo-400 to-indigo-600",
+    canCancel: true,
+  },
+  Shipped: {
+    bg: "#f5f3ff",
+    border: "#a78bfa",
+    text: "#6d28d9",
+    icon: <FaTruck size={11} />,
+    dot: "#8b5cf6",
+    gradient: "from-purple-400 to-purple-600",
+    canCancel: false,
+  },
+  Delivered: {
+    bg: "#f0fdf4",
+    border: "#6ee7b7",
+    text: "#065f46",
+    icon: <FaCheckCircle size={11} />,
+    dot: "#10b981",
+    gradient: "from-green-400 to-green-600",
+    canCancel: false,
+  },
+  Cancelled: {
+    bg: "#fef2f2",
+    border: "#fca5a5",
+    text: "#7c2d12",
+    icon: <FaTimes size={11} />,
+    dot: "#dc2626",
+    gradient: "from-red-400 to-red-600",
+    canCancel: false,
   },
 };
 
@@ -74,6 +90,9 @@ const OrderHistory = () => {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState("latest");
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancellingOrderId, setCancellingOrderId] = useState(null);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -99,368 +118,364 @@ const OrderHistory = () => {
 
   const toggleExpand = (id) => setExpanded((p) => ({ ...p, [id]: !p[id] }));
 
- const generateInvoice = (order) => {
-  setDownloading((p) => ({ ...p, [order._id]: true }));
+  // ── CANCEL ORDER ──
+  const handleCancelOrder = async () => {
+    if (!cancellingOrderId) return;
 
-  try {
-    const doc = new jsPDF("p", "mm", "a4");
-
-    // =============================
-    // CONFIG
-    // =============================
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-
-    const margin = 15;
-
-    const colors = {
-      primary: [99, 102, 241], // Indigo
-      dark: [17, 24, 39],
-      gray: [107, 114, 128],
-      light: [243, 244, 246],
-      border: [229, 231, 235],
-      success: [16, 185, 129],
-      warning: [245, 158, 11],
-      danger: [239, 68, 68],
-    };
-
-    const formatCurrency = (value) => `₹${value.toFixed(2)}`;
-
-    const orderDate = order.createdAt
-      ? new Date(order.createdAt).toLocaleString("en-IN", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "N/A";
-
-    // =============================
-    // HEADER
-    // =============================
-    doc.setFillColor(...colors.primary);
-    doc.rect(0, 0, pageWidth, 42, "F");
-
-    // Logo
+    setCancelling(true);
     try {
-      doc.addImage(Logo, "PNG", pageWidth - 42, 8, 20, 20);
-    } catch {}
+      const res = await fetch(
+        `https://eshop-backend-y0e7.onrender.com/api/order/cancel/${cancellingOrderId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
-    // Brand
-    doc.setTextColor(255, 255, 255);
+      const data = await res.json();
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(24);
-    doc.text("EShop", margin, 18);
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.text("Premium Online Shopping Experience", margin, 26);
-
-    doc.setFontSize(8);
-    doc.text("https://eshop.debasish.xyz", margin, 32);
-    doc.text("support@eshop.com", margin, 36);
-
-    // =============================
-    // INVOICE TITLE
-    // =============================
-    let y = 55;
-
-    doc.setTextColor(...colors.dark);
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
-    doc.text("INVOICE", margin, y);
-
-    // Invoice info card
-    doc.setDrawColor(...colors.border);
-    doc.setFillColor(250, 250, 250);
-    doc.roundedRect(pageWidth - 85, 48, 70, 32, 3, 3, "FD");
-
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "bold");
-
-    doc.text("Invoice No:", pageWidth - 80, 56);
-    doc.text("Order ID:", pageWidth - 80, 63);
-    doc.text("Order Date:", pageWidth - 80, 70);
-
-    doc.setFont("helvetica", "normal");
-
-    doc.text(
-      `INV-${order._id.slice(-6).toUpperCase()}`,
-      pageWidth - 35,
-      56,
-      { align: "right" }
-    );
-
-    doc.text(
-      order._id.slice(-8).toUpperCase(),
-      pageWidth - 35,
-      63,
-      { align: "right" }
-    );
-
-    doc.text(orderDate, pageWidth - 35, 70, {
-      align: "right",
-    });
-
-    // =============================
-    // PAYMENT BADGE
-    // =============================
-    const paymentColor =
-      order.paymentMethod === "COD"
-        ? colors.warning
-        : colors.success;
-
-    doc.setFillColor(...paymentColor);
-    doc.roundedRect(pageWidth - 55, 84, 40, 9, 3, 3, "F");
-
-    doc.setTextColor(255, 255, 255);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
-
-    doc.text(
-      order.paymentMethod || "COD",
-      pageWidth - 35,
-      90,
-      { align: "center" }
-    );
-
-    // =============================
-    // BILLING SECTION
-    // =============================
-    y = 105;
-
-    doc.setTextColor(...colors.dark);
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.text("Billing Information", margin, y);
-
-    doc.setDrawColor(...colors.border);
-    doc.setFillColor(255, 255, 255);
-
-    doc.roundedRect(margin, y + 5, pageWidth - margin * 2, 38, 3, 3, "FD");
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-
-    const billingLines = [
-      `Customer: ${order.user || "Guest User"}`,
-      `Phone: ${order.phone || "N/A"}`,
-      `Email: ${order.email || "N/A"}`,
-      `Address: ${order.deliveryAddress?.street || ""}`,
-      `${order.deliveryAddress?.state || ""} - ${
-        order.deliveryAddress?.postcode || ""
-      }`,
-      `${order.deliveryAddress?.country || ""}`,
-    ];
-
-    let infoY = y + 14;
-
-    billingLines.forEach((line) => {
-      if (line.trim()) {
-        doc.text(line, margin + 5, infoY);
-        infoY += 5.5;
-      }
-    });
-
-    // =============================
-    // ITEMS TABLE
-    // =============================
-    y = 160;
-
-    // Table header background
-    doc.setFillColor(...colors.primary);
-    doc.roundedRect(margin, y, pageWidth - margin * 2, 10, 2, 2, "F");
-
-    doc.setTextColor(255, 255, 255);
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-
-    doc.text("Product", margin + 5, y + 6.5);
-    doc.text("Qty", 115, y + 6.5);
-    doc.text("Price", 140, y + 6.5);
-    doc.text("Total", 175, y + 6.5);
-
-    y += 12;
-
-    // Table rows
-    doc.setTextColor(...colors.dark);
-
-    order.items.forEach((item, index) => {
-      if (y > pageHeight - 70) {
-        doc.addPage();
-        y = 30;
-      }
-
-      if (index % 2 === 0) {
-        doc.setFillColor(...colors.light);
-        doc.roundedRect(
-          margin,
-          y - 5,
-          pageWidth - margin * 2,
-          10,
-          1,
-          1,
-          "F"
+      if (data.success) {
+        setOrders((prevOrders) =>
+          prevOrders.map((o) =>
+            o._id === cancellingOrderId ? { ...o, status: "Cancelled" } : o
+          )
         );
+        setShowCancelModal(false);
+        setCancellingOrderId(null);
+      } else {
+        toast.error("Failed to cancel order. Please try again.");
       }
+    } catch (error) {
+      console.error("Cancel order error:", error);
+      toast.error("Error cancelling order");
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  const generateInvoice = (order) => {
+    setDownloading((p) => ({ ...p, [order._id]: true }));
+
+    try {
+      const doc = new jsPDF("p", "mm", "a4");
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      const margin = 15;
+
+      const colors = {
+        primary: [99, 102, 241],
+        dark: [17, 24, 39],
+        gray: [107, 114, 128],
+        light: [243, 244, 246],
+        border: [229, 231, 235],
+        success: [16, 185, 129],
+        warning: [245, 158, 11],
+        danger: [239, 68, 68],
+      };
+
+      const formatCurrency = (value) => `₹${value.toFixed(2)}`;
+
+      const orderDate = order.createdAt
+        ? new Date(order.createdAt).toLocaleString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "N/A";
+
+      // ── HEADER ──
+      doc.setFillColor(...colors.primary);
+      doc.rect(0, 0, pageWidth, 42, "F");
+
+      try {
+        doc.addImage(Logo, "PNG", pageWidth - 42, 8, 20, 20);
+      } catch {}
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(24);
+      doc.text("EShop", margin, 18);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.text("Premium Online Shopping Experience", margin, 26);
+
+      doc.setFontSize(8);
+      doc.text("https://eshop.debasish.xyz", margin, 32);
+      doc.text("support@eshop.com", margin, 36);
+
+      // ── INVOICE TITLE ──
+      let y = 55;
+
+      doc.setTextColor(...colors.dark);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(22);
+      doc.text("INVOICE", margin, y);
+
+      // Invoice info card
+      doc.setDrawColor(...colors.border);
+      doc.setFillColor(250, 250, 250);
+      doc.roundedRect(pageWidth - 85, 48, 70, 32, 3, 3, "FD");
+
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+
+      doc.text("Invoice No:", pageWidth - 80, 56);
+      doc.text("Order ID:", pageWidth - 80, 63);
+      doc.text("Order Date:", pageWidth - 80, 70);
+
+      doc.setFont("helvetica", "normal");
+
+      doc.text(
+        `INV-${order._id.slice(-6).toUpperCase()}`,
+        pageWidth - 35,
+        56,
+        { align: "right" }
+      );
+
+      doc.text(
+        order._id.slice(-8).toUpperCase(),
+        pageWidth - 35,
+        63,
+        { align: "right" }
+      );
+
+      doc.text(orderDate, pageWidth - 35, 70, {
+        align: "right",
+      });
+
+      // ── PAYMENT BADGE ──
+      const paymentColor =
+        order.paymentMethod === "COD"
+          ? colors.warning
+          : colors.success;
+
+      doc.setFillColor(...paymentColor);
+      doc.roundedRect(pageWidth - 55, 84, 40, 9, 3, 3, "F");
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+
+      doc.text(
+        order.paymentMethod || "COD",
+        pageWidth - 35,
+        90,
+        { align: "center" }
+      );
+
+      // ── BILLING SECTION ──
+      y = 105;
+
+      doc.setTextColor(...colors.dark);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text("Billing Information", margin, y);
+
+      doc.setDrawColor(...colors.border);
+      doc.setFillColor(255, 255, 255);
+
+      doc.roundedRect(margin, y + 5, pageWidth - margin * 2, 38, 3, 3, "FD");
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+
+      const billingLines = [
+        `Customer: ${order.user || "Guest User"}`,
+        `Phone: ${order.phone || "N/A"}`,
+        `Email: ${order.email || "N/A"}`,
+        `Address: ${order.deliveryAddress?.street || ""}`,
+        `${order.deliveryAddress?.state || ""} - ${
+          order.deliveryAddress?.postcode || ""
+        }`,
+        `${order.deliveryAddress?.country || ""}`,
+      ];
+
+      let infoY = y + 14;
+
+      billingLines.forEach((line) => {
+        if (line.trim()) {
+          doc.text(line, margin + 5, infoY);
+          infoY += 5.5;
+        }
+      });
+
+      // ── ITEMS TABLE ──
+      y = 160;
+
+      doc.setFillColor(...colors.primary);
+      doc.roundedRect(margin, y, pageWidth - margin * 2, 10, 2, 2, "F");
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+
+      doc.text("Product", margin + 5, y + 6.5);
+      doc.text("Qty", 115, y + 6.5);
+      doc.text("Price", 140, y + 6.5);
+      doc.text("Total", 175, y + 6.5);
+
+      y += 12;
+
+      doc.setTextColor(...colors.dark);
+
+      order.items.forEach((item, index) => {
+        if (y > pageHeight - 70) {
+          doc.addPage();
+          y = 30;
+        }
+
+        if (index % 2 === 0) {
+          doc.setFillColor(...colors.light);
+          doc.roundedRect(
+            margin,
+            y - 5,
+            pageWidth - margin * 2,
+            10,
+            1,
+            1,
+            "F"
+          );
+        }
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+
+        doc.text(`${index + 1}. ${item.title}`, margin + 5, y);
+        doc.text(`${item.quantity}`, 118, y);
+        doc.text(formatCurrency(item.price), 140, y);
+        doc.text(
+          formatCurrency(item.price * item.quantity),
+          175,
+          y
+        );
+
+        y += 10;
+      });
+
+      // ── TOTAL SECTION ──
+      const subtotal = order.items.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
+
+      const shipping = 0;
+      const handling = 5;
+      const grandTotal = subtotal + shipping + handling;
+
+      y += 10;
+
+      doc.setFillColor(249, 250, 251);
+      doc.roundedRect(pageWidth - 85, y, 70, 42, 3, 3, "F");
+
+      doc.setTextColor(...colors.dark);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+
+      doc.text("Payment Summary", pageWidth - 80, y + 8);
 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
 
-      doc.text(`${index + 1}. ${item.title}`, margin + 5, y);
+      doc.text("Subtotal", pageWidth - 80, y + 18);
+      doc.text(formatCurrency(subtotal), pageWidth - 20, y + 18, {
+        align: "right",
+      });
 
-      doc.text(`${item.quantity}`, 118, y);
+      doc.text("Shipping", pageWidth - 80, y + 25);
+      doc.text("FREE", pageWidth - 20, y + 25, {
+        align: "right",
+      });
 
-      doc.text(formatCurrency(item.price), 140, y);
+      doc.text("Handling", pageWidth - 80, y + 32);
+      doc.text(formatCurrency(handling), pageWidth - 20, y + 32, {
+        align: "right",
+      });
+
+      doc.setDrawColor(...colors.border);
+      doc.line(pageWidth - 80, y + 35, pageWidth - 20, y + 35);
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+
+      doc.setTextColor(...colors.success);
+
+      doc.text("Grand Total", pageWidth - 80, y + 41);
+      doc.text(formatCurrency(grandTotal), pageWidth - 20, y + 41, {
+        align: "right",
+      });
+
+      // ── STATUS SECTION ──
+      doc.setTextColor(...colors.dark);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+
+      doc.text("Order Information", margin, y + 10);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
 
       doc.text(
-        formatCurrency(item.price * item.quantity),
-        175,
-        y
+        `Order Status: ${order.status || "Placed"}`,
+        margin,
+        y + 20
       );
 
-      y += 10;
-    });
+      doc.text(
+        `Payment Status: ${order.paymentStatus || "Pending"}`,
+        margin,
+        y + 27
+      );
 
-    // =============================
-    // TOTAL SECTION
-    // =============================
-    const subtotal = order.items.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
+      doc.text(
+        `Payment Method: ${order.paymentMethod || "COD"}`,
+        margin,
+        y + 34
+      );
 
-    const shipping = 0;
-    const handling = 5;
-    const grandTotal = subtotal + shipping + handling;
+      // ── FOOTER ──
+      doc.setDrawColor(...colors.border);
+      doc.line(margin, pageHeight - 28, pageWidth - margin, pageHeight - 28);
 
-    y += 10;
+      doc.setTextColor(...colors.gray);
 
-    // Summary card
-    doc.setFillColor(249, 250, 251);
-    doc.roundedRect(pageWidth - 85, y, 70, 42, 3, 3, "F");
+      doc.setFontSize(8);
 
-    doc.setTextColor(...colors.dark);
+      doc.text(
+        "Thank you for shopping with EShop.",
+        pageWidth / 2,
+        pageHeight - 20,
+        { align: "center" }
+      );
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
+      doc.text(
+        "This is a computer-generated invoice and does not require a signature.",
+        pageWidth / 2,
+        pageHeight - 15,
+        { align: "center" }
+      );
 
-    doc.text("Payment Summary", pageWidth - 80, y + 8);
+      doc.text(
+        "© 2026 EShop • support@eshop.com • www.eshop.com",
+        pageWidth / 2,
+        pageHeight - 9,
+        { align: "center" }
+      );
 
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-
-    doc.text("Subtotal", pageWidth - 80, y + 18);
-    doc.text(formatCurrency(subtotal), pageWidth - 20, y + 18, {
-      align: "right",
-    });
-
-    doc.text("Shipping", pageWidth - 80, y + 25);
-    doc.text("FREE", pageWidth - 20, y + 25, {
-      align: "right",
-    });
-
-    doc.text("Handling", pageWidth - 80, y + 32);
-    doc.text(formatCurrency(handling), pageWidth - 20, y + 32, {
-      align: "right",
-    });
-
-    // Divider
-    doc.setDrawColor(...colors.border);
-    doc.line(pageWidth - 80, y + 35, pageWidth - 20, y + 35);
-
-    // Grand total
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-
-    doc.setTextColor(...colors.success);
-
-    doc.text("Grand Total", pageWidth - 80, y + 41);
-
-    doc.text(formatCurrency(grandTotal), pageWidth - 20, y + 41, {
-      align: "right",
-    });
-
-    // =============================
-    // STATUS SECTION
-    // =============================
-    doc.setTextColor(...colors.dark);
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-
-    doc.text("Order Information", margin, y + 10);
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-
-    doc.text(
-      `Order Status: ${order.status || "Placed"}`,
-      margin,
-      y + 20
-    );
-
-    doc.text(
-      `Payment Status: ${order.paymentStatus || "Pending"}`,
-      margin,
-      y + 27
-    );
-
-    doc.text(
-      `Payment Method: ${order.paymentMethod || "COD"}`,
-      margin,
-      y + 34
-    );
-
-    // =============================
-    // FOOTER
-    // =============================
-    doc.setDrawColor(...colors.border);
-    doc.line(margin, pageHeight - 28, pageWidth - margin, pageHeight - 28);
-
-    doc.setTextColor(...colors.gray);
-
-    doc.setFontSize(8);
-
-    doc.text(
-      "Thank you for shopping with EShop.",
-      pageWidth / 2,
-      pageHeight - 20,
-      { align: "center" }
-    );
-
-    doc.text(
-      "This is a computer-generated invoice and does not require a signature.",
-      pageWidth / 2,
-      pageHeight - 15,
-      { align: "center" }
-    );
-
-    doc.text(
-      "© 2026 EShop • support@eshop.com • www.eshop.com",
-      pageWidth / 2,
-      pageHeight - 9,
-      { align: "center" }
-    );
-
-    // =============================
-    // SAVE
-    // =============================
-    doc.save(`Invoice-${order._id.slice(-6)}.pdf`);
-  } finally {
-    setTimeout(() => {
-      setDownloading((p) => ({
-        ...p,
-        [order._id]: false,
-      }));
-    }, 1200);
-  }
-};
+      doc.save(`Invoice-${order._id.slice(-6)}.pdf`);
+    } finally {
+      setTimeout(() => {
+        setDownloading((p) => ({
+          ...p,
+          [order._id]: false,
+        }));
+      }, 1200);
+    }
+  };
 
   const formatDate = (d) =>
     d
@@ -516,101 +531,50 @@ const OrderHistory = () => {
           --lt: #eef2ff;
         }
 
-        .oh-root * {
-          font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        .oh-serif {
-          font-family: 'Playfair Display', serif;
-        }
+        .oh-root * { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .oh-serif { font-family: 'Playfair Display', serif; }
 
         @keyframes fadeUp {
-          from {
-            opacity: 0;
-            transform: translateY(24px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(24px); }
+          to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translateX(-18px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
+          from { opacity: 0; transform: translateX(-18px); }
+          to { opacity: 1; transform: translateX(0); }
         }
 
         @keyframes blobDrift {
-          0%, 100% {
-            transform: translate(0, 0) scale(1);
-            border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%;
-          }
-          40% {
-            transform: translate(20px, -18px) scale(1.05);
-          }
-          70% {
-            transform: translate(-12px, 12px) scale(0.96);
-          }
+          0%, 100% { transform: translate(0, 0) scale(1); border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%; }
+          40% { transform: translate(20px, -18px) scale(1.05); }
+          70% { transform: translate(-12px, 12px) scale(0.96); }
         }
 
         @keyframes shimmer {
-          0% {
-            background-position: -200% center;
-          }
-          100% {
-            background-position: 200% center;
-          }
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
         }
 
         @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
+          to { transform: rotate(360deg); }
         }
 
         @keyframes expandIn {
-          from {
-            opacity: 0;
-            transform: translateY(-6px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(-6px); }
+          to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes skeletonPulse {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.4;
-          }
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
         }
 
-        .blob1 {
-          animation: blobDrift 10s ease-in-out infinite;
-        }
-        .blob2 {
-          animation: blobDrift 13s ease-in-out infinite reverse;
-        }
-        .page-enter {
-          animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
-        }
-        .card-enter {
-          animation: slideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-        }
-        .expand-in {
-          animation: expandIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
-        }
+        .blob1 { animation: blobDrift 10s ease-in-out infinite; }
+        .blob2 { animation: blobDrift 13s ease-in-out infinite reverse; }
+        .page-enter { animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        .card-enter { animation: slideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+        .expand-in { animation: expandIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-        /* ── ORDER CARD ── */
         .oh-card {
           background: rgba(255, 255, 255, 0.92);
           backdrop-filter: blur(16px);
@@ -627,7 +591,6 @@ const OrderHistory = () => {
           border-color: rgba(99, 102, 241, 0.35);
         }
 
-        /* ── ITEM ROW ── */
         .item-row {
           display: flex;
           align-items: center;
@@ -638,9 +601,7 @@ const OrderHistory = () => {
           transition: all 0.2s;
         }
 
-        .item-row:last-child {
-          border-bottom: none;
-        }
+        .item-row:last-child { border-bottom: none; }
 
         .item-row:hover {
           background: rgba(238, 242, 255, 0.6);
@@ -649,7 +610,6 @@ const OrderHistory = () => {
           padding-right: 8px;
         }
 
-        /* ── BILL ROW ── */
         .bill-row {
           display: flex;
           justify-content: space-between;
@@ -658,7 +618,6 @@ const OrderHistory = () => {
           padding: 5px 0;
         }
 
-        /* ── DOWNLOAD BUTTON ── */
         .dl-btn {
           display: flex;
           align-items: center;
@@ -683,9 +642,7 @@ const OrderHistory = () => {
           box-shadow: 0 8px 28px rgba(79, 70, 229, 0.42);
         }
 
-        .dl-btn:active {
-          transform: scale(0.96);
-        }
+        .dl-btn:active { transform: scale(0.96); }
 
         .dl-btn::after {
           content: '';
@@ -711,7 +668,6 @@ const OrderHistory = () => {
           animation: spin 0.7s linear infinite;
         }
 
-        /* ── EXPAND BUTTON ── */
         .expand-btn {
           display: flex;
           align-items: center;
@@ -732,7 +688,53 @@ const OrderHistory = () => {
           box-shadow: 0 6px 20px rgba(79, 70, 229, 0.36);
         }
 
-        /* ── SKELETON ── */
+        .track-btn {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 12.5px;
+          font-weight: 700;
+          color: white;
+          background: linear-gradient(135deg, #10b981, #059669);
+          border: none;
+          border-radius: 12px;
+          padding: 8px 16px;
+          cursor: pointer;
+          transition: all 0.24s;
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .track-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .cancel-btn {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 12.5px;
+          font-weight: 700;
+          color: white;
+          background: linear-gradient(135deg, #ef4444, #dc2626);
+          border: none;
+          border-radius: 12px;
+          padding: 8px 16px;
+          cursor: pointer;
+          transition: all 0.24s;
+          box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .cancel-btn:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .cancel-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
         .skel {
           background: linear-gradient(90deg, #e0e7ff 25%, #c7d2fe 50%, #e0e7ff 75%);
           background-size: 200% 100%;
@@ -740,7 +742,6 @@ const OrderHistory = () => {
           border-radius: 12px;
         }
 
-        /* ── EMPTY STATE ── */
         .empty-icon {
           width: 80px;
           height: 80px;
@@ -752,7 +753,6 @@ const OrderHistory = () => {
           justify-content: center;
         }
 
-        /* ── STAT CARD ── */
         .stat-card {
           background: rgba(255, 255, 255, 0.9);
           border: 1.5px solid rgba(99, 102, 241, 0.15);
@@ -765,6 +765,14 @@ const OrderHistory = () => {
           border-color: rgba(99, 102, 241, 0.35);
           box-shadow: 0 8px 24px rgba(99, 70, 229, 0.12);
           transform: translateY(-2px);
+        }
+
+        .order-id-box {
+          background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(37, 99, 235, 0.1));
+          border: 1.5px solid rgba(99, 102, 241, 0.2);
+          border-radius: 12px;
+          padding: 12px;
+          font-family: 'Courier New', monospace;
         }
       `}</style>
 
@@ -888,12 +896,8 @@ const OrderHistory = () => {
               </div>
               <h2 className="oh-serif text-3xl font-bold text-indigo-950 mb-3">No orders yet</h2>
               <p className="text-slate-400 text-sm max-w-sm mb-8">
-                Start shopping to see your orders here. Every purchase will be tracked and
-                organized for easy access.
+                Start shopping to see your orders here. Every purchase will be tracked and organized for easy access.
               </p>
-              <button className="px-8 py-3 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold shadow-lg hover:shadow-xl transition">
-                Start Shopping
-              </button>
             </div>
           )}
 
@@ -907,7 +911,16 @@ const OrderHistory = () => {
                 const isExp = !!expanded[order._id];
                 const isDL = !!downloading[order._id];
                 const statusCfg = STATUS_CFG[order.status] || STATUS_CFG.Placed;
+                const canCancelOrder = statusCfg.canCancel && order.status !== "Cancelled";
+// check if order is older than 7 days
+const orderDate = new Date(order.createdAt);
+const currentDate = new Date();
 
+const diffTime = currentDate - orderDate;
+
+const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+const isCancelExpired = diffDays > 7;
                 return (
                   <div
                     key={order._id}
@@ -989,6 +1002,32 @@ const OrderHistory = () => {
                           </div>
                         </div>
 
+                        {/* ORDER ID BOX */}
+                        <div className="order-id-box">
+                          <div className="flex items-center gap-2 justify-between">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <FaBarcode size={13} style={{ color: "#4f46e5" }} />
+                              <div className="min-w-0">
+                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                                  Order ID
+                                </p>
+                                <p className="text-sm font-bold text-indigo-600 break-all">
+                                  {order._id}
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(order._id);
+                                toast.success("Order ID copied!");
+                              }}
+                              className="px-2 py-1 rounded-lg bg-indigo-500 text-white text-xs font-bold hover:bg-indigo-600 transition flex-shrink-0"
+                            >
+                              Copy
+                            </button>
+                          </div>
+                        </div>
+
                         {/* DELIVERY ADDRESS */}
                         {order.deliveryAddress?.street && (
                           <div className="flex items-start gap-3 bg-indigo-50/50 border border-indigo-200/50 rounded-2xl px-4 py-3">
@@ -1018,7 +1057,7 @@ const OrderHistory = () => {
                           </div>
                           {order.phone && (
                             <div className="flex items-center gap-2 text-slate-500">
-                              <FaPhone size={11} style={{ color: "#6366f1" }} />
+                              <FaPhoneAlt size={11} style={{ color: "#6366f1" }} />
                               <span className="font-medium">{order.phone}</span>
                             </div>
                           )}
@@ -1117,6 +1156,14 @@ const OrderHistory = () => {
                           </button>
 
                           <button
+                            className="track-btn"
+                            onClick={() => window.location.href = `/track-order?id=${order._id}`}
+                          >
+                            <FaMapMarkerAlt size={11} />
+                            Track
+                          </button>
+
+                          <button
                             className={`dl-btn ${isDL ? "loading" : ""}`}
                             onClick={() => !isDL && generateInvoice(order)}
                             disabled={isDL}
@@ -1128,6 +1175,33 @@ const OrderHistory = () => {
                             )}
                             <span className="relative z-10">{isDL ? "Generating…" : "Invoice"}</span>
                           </button>
+{canCancelOrder && !isCancelExpired && (
+  <button
+    className="cancel-btn"
+    onClick={() => {
+      setCancellingOrderId(order._id);
+      setShowCancelModal(true);
+    }}
+  >
+    <FaTimes size={11} />
+    Cancel
+  </button>
+)}
+
+{isCancelExpired && order.status !== "Cancelled" && (
+  <div
+    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold"
+    style={{
+      background: "#fef2f2",
+      color: "#dc2626",
+      border: "1px solid #fecaca",
+    }}
+  >
+    <FaExclamationTriangle size={11} />
+    Cancellation period expired
+  </div>
+)}
+
                         </div>
                       </div>
 
@@ -1165,6 +1239,60 @@ const OrderHistory = () => {
         </div>
       </div>
 
+      {/* ── CANCEL ORDER CONFIRMATION MODAL ── */}
+      <Modal
+        isOpen={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        hideCloseButton
+        backdrop="blur"
+        size="sm"
+      >
+        <ModalContent className="rounded-2xl bg-white shadow-2xl border border-indigo-100">
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex items-center gap-3 pt-6 pb-2">
+                <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+                  <FaExclamationTriangle size={16} style={{ color: "#dc2626" }} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-indigo-950">Cancel Order?</h2>
+                </div>
+              </ModalHeader>
+
+              <ModalBody className="py-4">
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Are you sure you want to cancel this order? This action cannot be undone, and you will receive a refund according to our refund policy.
+                </p>
+                <div className="mt-4 p-3 rounded-lg bg-amber-50 border border-amber-200">
+                  <p className="text-xs font-semibold text-amber-800 mb-1">⏰ Refund Timeline</p>
+                  <p className="text-xs text-amber-700">
+                    Refunds are processed within 5-7 business days after cancellation approval.
+                  </p>
+                </div>
+              </ModalBody>
+
+              <ModalFooter className="gap-2 pb-6">
+                <Button
+                  className="border-2 border-indigo-200 text-indigo-600 font-bold rounded-xl"
+                  variant="bordered"
+                  onPress={onClose}
+                >
+                  Keep Order
+                </Button>
+
+                <Button
+                  className="bg-gradient-to-r from-red-500 to-red-600 text-white font-bold shadow-lg rounded-xl"
+                  onPress={handleCancelOrder}
+                  disabled={cancelling}
+                >
+                  {cancelling ? "Cancelling..." : "Yes, Cancel Order"}
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
       {/* ── FILTER MODAL ── */}
       <Modal
         isOpen={showFilterModal}
@@ -1180,7 +1308,6 @@ const OrderHistory = () => {
         <ModalContent className="rounded-t-3xl bg-gradient-to-br from-white via-indigo-50 to-blue-50 border-t border-indigo-200/50 shadow-2xl">
           {(onClose) => (
             <>
-              {/* HEADER */}
               <ModalHeader className="relative flex flex-col items-center pt-5 pb-2">
                 <div className="w-10 h-1.5 bg-gradient-to-r from-indigo-300 to-blue-300 rounded-full mb-3" />
                 <h2 className="text-xl font-bold text-indigo-950">Filter Orders</h2>
@@ -1192,9 +1319,7 @@ const OrderHistory = () => {
                 </button>
               </ModalHeader>
 
-              {/* BODY */}
               <ModalBody className="space-y-6 px-6 pb-4">
-                {/* SEARCH */}
                 <div>
                   <p className="text-xs font-bold text-indigo-500 mb-3 uppercase tracking-wider">
                     🔍 Search Product
@@ -1208,7 +1333,6 @@ const OrderHistory = () => {
                   />
                 </div>
 
-                {/* STATUS */}
                 <div>
                   <p className="text-xs font-bold text-indigo-500 mb-3 uppercase tracking-wider">
                     📊 Order Status
@@ -1232,7 +1356,6 @@ const OrderHistory = () => {
                   </div>
                 </div>
 
-                {/* SORT */}
                 <div>
                   <p className="text-xs font-bold text-indigo-500 mb-3 uppercase tracking-wider">
                     🔀 Sort By
@@ -1259,7 +1382,6 @@ const OrderHistory = () => {
                   </div>
                 </div>
 
-                {/* DATE */}
                 <div>
                   <p className="text-xs font-bold text-indigo-500 mb-3 uppercase tracking-wider">
                     📅 Date Range
@@ -1286,7 +1408,6 @@ const OrderHistory = () => {
                 </div>
               </ModalBody>
 
-              {/* FOOTER */}
               <ModalFooter className="px-6 pb-6 gap-3">
                 <Button
                   className="flex-1 border-2 border-indigo-200 bg-white text-indigo-600 font-bold text-sm hover:bg-indigo-50"
