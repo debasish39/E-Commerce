@@ -284,16 +284,16 @@ export default function OrderSuccess() {
       document.head.appendChild(el);
     }
   }, []);
-  useEffect(() => {
-    const audio = new Audio(successmusic);
+  // useEffect(() => {
+  //   const audio = new Audio(successmusic);
 
-    audio.volume = 0.7;
+  //   audio.volume = 0.7;
 
-    audio.play().catch((err) => {
-      console.log("Audio autoplay blocked:", err);
-    });
+  //   audio.play().catch((err) => {
+  //     console.log("Audio autoplay blocked:", err);
+  //   });
 
-  }, []);
+  // }, []);
   /* spawn confetti */
   useEffect(() => {
     const pieces = Array.from({ length: 32 }, (_, i) => ({

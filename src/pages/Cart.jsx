@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import emptyCart from '../assets/empty-cart.png';
 import { toast } from 'sonner';
 import razorpayLogo from '../assets/razorpay.png';
-import codLogo from '../assets/cod.png';
+import successmusic from "../assets/successmusic.mp3";
 import {
   Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
   Button, useDisclosure,
@@ -59,45 +59,101 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
   const BACKEND_URL = 'https://eshop-backend-y0e7.onrender.com';
 
   /* ── completeOrder — email required, phone optional ── */
-  const completeOrder = async (method = 'Razorpay') => {
-    if (!user) { toast.error('Please login before placing an order'); return; }
-    if (!address.email?.includes('@')) { toast.error('Please enter a valid email address'); return; }
 
-    const order = {
-      userId: user.id,
-      user:   address.name || user.fullName || 'Guest',
-      email:  address.email,
-      phone:  address.phone ? `+91 ${address.phone}` : '',
-      deliveryAddress: {
-        street:   address.street,
-        state:    address.state,
-        postcode: address.postcode,
-        country:  address.country,
-      },
-      total:         Number(totalAmount),
-      paymentMethod: method,
-      paymentStatus: method === 'COD' ? 'Pending' : 'Paid',
-      status:        'Processing',
-      items:         cartItem.map(i => ({ title: i.title, price: Number(i.price), quantity: i.quantity })),
-    };
 
-    try {
-      const res  = await fetch(`${BACKEND_URL}/api/save-order`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(order),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Order failed');
-    } catch { toast.error('Failed to place order'); return; }
+const completeOrder = async (method = 'Razorpay') => {
+  // validation
+  if (!user) {
+    toast.error('Please login before placing an order');
+    return;
+  }
 
-    method === 'COD'
-      ? toast.success('Order placed (Cash on Delivery)')
-      : toast.success('Payment Successful 🎉');
+  if (!address.email?.includes('@')) {
+    toast.error('Please enter a valid email address');
+    return;
+  }
 
-    await clearCart();
-    navigate('/order-success');
+  // order payload
+  const order = {
+    userId: user.id,
+    user: address.name || user.fullName || 'Guest',
+    email: address.email,
+    phone: address.phone ? `+91 ${address.phone}` : '',
+    deliveryAddress: {
+      street: address.street,
+      state: address.state,
+      postcode: address.postcode,
+      country: address.country,
+    },
+    total: Number(totalAmount),
+    paymentMethod: method,
+    paymentStatus: method === 'COD' ? 'Pending' : 'Paid',
+    status: 'Processing',
+    items: cartItem.map(i => ({
+      title: i.title,
+      price: Number(i.price),
+      quantity: i.quantity
+    })),
   };
+
+  try {
+    // save order
+    const res = await fetch(`${BACKEND_URL}/api/save-order`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(order),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || 'Order failed');
+    }
+
+    // success toast
+    if (method === 'COD') {
+      toast.success('Order placed (Cash on Delivery)');
+    } else {
+      toast.success('Payment Successful 🎉');
+    }
+
+    // 🔊 PLAY SUCCESS SOUND
+    try {
+      const audio = new Audio(successmusic);
+
+      audio.preload = "auto";
+      audio.volume = 0.7;
+
+      // reset position
+      audio.currentTime = 0;
+
+      // attempt playback
+      await audio.play();
+
+      // optional cleanup
+      audio.onended = () => {
+        audio.pause();
+      };
+
+    } catch (audioError) {
+      console.log('Audio playback blocked:', audioError);
+    }
+
+    // clear cart
+    await clearCart();
+
+    // small delay for UX
+    setTimeout(() => {
+      navigate('/order-success');
+    }, 300);
+
+  } catch (err) {
+    console.error(err);
+    toast.error('Failed to place order');
+  }
+};
 
   /* ── Razorpay — no phone required ── */
   const handleRazorpayPayment = async () => {
