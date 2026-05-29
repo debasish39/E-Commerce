@@ -276,12 +276,12 @@ const AppWrapper = () => {
 
           {/* ================= Main Content ================= */}
           <div className="relative z-10">
-            {showInstall && location.pathname === "/" && (
-              <div
-                data-aos="fade-up"
-                data-aos-duration="700"
-                className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4"
-              >
+           {showInstall && location.pathname === "/" && (
+  <div
+    data-aos="fade-down"
+    data-aos-duration="700"
+    className="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4"
+  >
                 <div className="relative overflow-hidden rounded-2xl border border-blue-200/20 bg-white/60 backdrop-blur-3xl shadow-[0_20px_60px_rgba(37,99,235,0.35)]">
 
                   {/* Animated Glow Background */}
