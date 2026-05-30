@@ -21,10 +21,10 @@ import LocationMap from "../components/LocationMap";
 import { toast } from "sonner";
 
 const NAV_LINKS = [
-  { name: "Collections", path: "/products", icon: <Package size={14} /> },
-  { name: "Contact", path: "/contact", icon: <Phone size={14} /> },
-  { name: "Orders", path: "/order-history", icon: <ShoppingBag size={14} /> },
-  { name: "Track Order", path: "/track-order", icon: <BsBox2 size={14} /> },
+  { name: "Collections", path: "/products", icon: "🛍️" },
+  { name: "Contact", path: "/contact", icon: "📞" },
+  { name: "Orders", path: "/order-history", icon: "📦" },
+  { name: "Track Order", path: "/track-order", icon: "🚚" },
 ];
 
 export default function Navbar({ location, onLocationChange }) {
@@ -337,7 +337,7 @@ export default function Navbar({ location, onLocationChange }) {
               E-Shop
             </Link>
             <button className=" hidden sm:flex justify-center items-center gap-1 border border-violet-300 bg-black/5 rounded-md px-1.5 py-1 text-sm" onClick={e => { e.stopPropagation(); onOpen(); }}>
-              <MapPin size={14} style={{ color: "#6366f1", flexShrink: 0 }} />
+              <span style={{ color: "#6366f1", flexShrink: 0 }}>📍</span>
               <span className="loc-txt text-xs">{locationLabel}</span>
               <ChevronDown size={15} style={{ color: "#6366f1", flexShrink: 0 }} />
             </button>
@@ -357,10 +357,14 @@ export default function Navbar({ location, onLocationChange }) {
   ">
 
               {/* LEFT ICON */}
-              <Search
-                size={15}
-                className="absolute left-3 text-indigo-300"
-              />
+             <span
+  className="absolute left-3"
+  style={{
+    fontSize: "15px",
+  }}
+>
+  🔍
+</span>
 
               {/* INPUT */}
               <input
@@ -390,7 +394,7 @@ export default function Navbar({ location, onLocationChange }) {
                     : "text-indigo-300 hover:text-indigo-500"}
       `}
               >
-                {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+                {isListening ? <span>🔇</span> : <span>🎤</span>}
               </button>
 
             </div>
@@ -408,19 +412,19 @@ export default function Navbar({ location, onLocationChange }) {
             <div className="w-px h-5 mx-2" style={{ background: "rgba(99,102,241,0.15)" }} />
 
             <Link to="/cart" className="nb-ibtn">
-              <ShoppingCart size={15} />
+              <span>🛒</span>
               {cartItem.length > 0 && <span className="nb-badge">{cartItem.length}</span>}
             </Link>
 
             <Link to="/wishlist" className="nb-ibtn ml-1">
-              <AiOutlineHeart size={16} />
+              <span>❤️</span>
               {wishlist.length > 0 && <span className="nb-badge">{wishlist.length}</span>}
             </Link>
 
             <div className="ml-1">
               <SignedOut>
                 <button onClick={() => navigate("/sign-in")} className="nb-ibtn">
-                  <FaRegUserCircle size={15} />
+                  <span>👤</span>
                 </button>
               </SignedOut>
               <SignedIn>
@@ -450,10 +454,14 @@ export default function Navbar({ location, onLocationChange }) {
   ">
 
               {/* LEFT SEARCH ICON */}
-              <Search
-                size={14}
-                className="absolute left-3 text-indigo-300"
-              />
+           <span
+  className="absolute left-3"
+  style={{
+    fontSize: "15px",
+  }}
+>
+  🔍
+</span>
 
               {/* INPUT */}
               <input
@@ -487,7 +495,7 @@ export default function Navbar({ location, onLocationChange }) {
                     : "text-indigo-300"}
       `}
               >
-                {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+                {isListening ? <span>🔇</span> :<span>🎤</span>}
               </button>
 
             </div>
@@ -526,7 +534,7 @@ export default function Navbar({ location, onLocationChange }) {
               style={{ borderColor: "rgba(99,102,241,0.1)" }}>
               <div className="w-11 h-11 rounded-xl flex items-center justify-center"
                 style={{ background: "linear-gradient(135deg,#eef2ff,#e0e7ff)", border: "1px solid rgba(99,102,241,0.2)" }}>
-                <MapPin size={18} style={{ color: "#6366f1" }} />
+                <span>📍</span>
               </div>
               <h2 className="font-bold text-base text-indigo-950" style={{ fontFamily: "'Syne',sans-serif" }}>
                 Set Delivery Location
@@ -536,7 +544,7 @@ export default function Navbar({ location, onLocationChange }) {
             <ModalBody className="py-5 space-y-3">
               <div className="flex gap-2">
                 <div className="flex-1 relative flex items-center">
-                  <MapPin size={13} className="absolute left-3 pointer-events-none" style={{ color: "#a5b4fc" }} />
+                  <span className="absolute left-3 pointer-events-none" style={{ color: "#a5b4fc" }}>📍</span>
                   <input type="text" placeholder="City, area or pincode"
                     value={area} onChange={e => setArea(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && handleAreaSearch()}
@@ -605,7 +613,7 @@ export default function Navbar({ location, onLocationChange }) {
             <SignedOut>
               <button onClick={() => { navigate("/sign-in"); setMobileOpen(false); }}
                 className="w-3 h-3 rounded-xl flex items-center justify-center nb-ibtn">
-                <FaRegUserCircle size={15} />
+                <span>👤</span>
               </button>
             </SignedOut>
             <SignedIn>
@@ -628,7 +636,7 @@ export default function Navbar({ location, onLocationChange }) {
           <button onClick={() => { onOpen(); setMobileOpen(false); }}
             className="nb-loc w-full flex text-left px-3 py-2.5 rounded-xl text-sm cursor-pointer"
             style={{ maxWidth: "100%" }}>
-            <MapPin size={13} style={{ color: "#6366f1", flexShrink: 0 }} />
+            <span>📍</span>
             <span className="truncate flex-1 text-xs">{locationLabel}</span>
             <ChevronDown size={11} style={{ color: "#c7d2fe", flexShrink: 0 }} />
           </button>
@@ -636,8 +644,8 @@ export default function Navbar({ location, onLocationChange }) {
 
         {/* nav links */}
         <nav className="px-4 pt-4 space-y-0.5">
-          {[{ name: "Home", path: "/", icon: <Home size={14} /> }, { name: "Orders", path: "/order-history", icon: <ShoppingBag size={14} /> },
-          { name: "Track Order", path: "/track-order", icon: <BsBox2 size={14} /> },].map(({ name, path, icon }) => (
+          {[{ name: "Home", path: "/", icon: <span>🏠</span> }, { name: "Orders", path: "/order-history", icon: <span>🛒</span> },
+          { name: "Track Order", path: "/track-order", icon: <span>🚚</span> },].map(({ name, path, icon }) => (
             <NavLink key={path} to={path} onClick={() => setMobileOpen(false)}
               className={({ isActive }) => `nb-dlink ${isActive ? "dact" : ""}`}>
               <span style={{ color: "#6366f1" }}>{icon}</span>{name}
@@ -649,7 +657,7 @@ export default function Navbar({ location, onLocationChange }) {
         <div className="absolute bottom-6 left-4 right-4 flex gap-3">
           <Link to="/cart" onClick={() => setMobileOpen(false)}
             className="btn-primary flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white">
-            <ShoppingCart size={14} />
+            <span>🛒</span>
             <span className="relative z-10">Cart</span>
             {cartItem.length > 0 && (
               <span className="relative z-10 bg-white/25 px-1.5 py-0.5 rounded-full text-[10px] font-bold">
@@ -660,8 +668,7 @@ export default function Navbar({ location, onLocationChange }) {
           <Link to="/wishlist" onClick={() => setMobileOpen(false)}
             className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all"
             style={{ background: "#eef2ff", border: "1px solid rgba(99,102,241,0.2)", color: "#4f46e5" }}>
-            <AiOutlineHeart size={15} />
-            Wishlist
+<span>❤️</span>            Wishlist
             {wishlist.length > 0 && (
               <span className="bg-indigo-100 px-1.5 py-0.5 rounded-full text-[10px] font-bold text-indigo-600">
                 {wishlist.length}
@@ -677,52 +684,98 @@ export default function Navbar({ location, onLocationChange }) {
         <div className="flex items-end justify-around px-3 pt-2 pb-3 max-w-md mx-auto">
 
           <NavLink to="/" className={({ isActive }) => `nb-blink ${isActive ? "bact" : ""}`}>
-            <Home size={19} /> Home
+            <span  style={{ fontSize: "20px" }}>🏠</span> Home
           </NavLink>
 
-          <NavLink to="/products" className={({ isActive }) => `nb-blink ${isActive ? "bact" : ""}`}>
-            <Package size={19} /> Collections
-          </NavLink>
+        <NavLink
+  to="/products"
+  className={({ isActive }) =>
+    `nb-blink ${isActive ? "bact" : ""}`
+  }
+>
+  <span style={{ fontSize: "20px" }}>🛍️</span>
+  Collections
+</NavLink>
 
-          {/* floating cart */}
-          <NavLink to="/cart">
-            {({ isActive }) => (
-              <div className={`nb-cfloat relative ${isActive ? "scale-110" : ""}`}>
-                <ShoppingCart size={21} color="white" />
-                {cartItem.length > 0 && (
-                  <span className="nb-badge" style={{ top: -3, right: -3, border: "2px solid white" }}>
-                    {cartItem.length}
-                  </span>
-                )}
-              </div>
-            )}
-          </NavLink>
+{/* floating cart */}
+<NavLink to="/cart">
+  {({ isActive }) => (
+    <div
+      className={`nb-cfloat relative ${
+        isActive ? "scale-110" : ""
+      }`}
+    >
+      <span style={{ fontSize: "24px" }}>🛒</span>
 
-          <NavLink to="/wishlist" className={({ isActive }) => `nb-blink relative ${isActive ? "bact" : ""}`}>
-            <div className="relative">
-              <AiOutlineHeart size={20} />
-              {wishlist.length > 0 && (
-                <span className="nb-badge" style={{ top: -6, right: -8 }}>{wishlist.length}</span>
-              )}
-            </div>
-            Wishlist
-          </NavLink>
+      {cartItem.length > 0 && (
+        <span
+          className="nb-badge"
+          style={{
+            top: -3,
+            right: -3,
+            border: "2px solid white",
+          }}
+        >
+          {cartItem.length}
+        </span>
+      )}
+    </div>
+  )}
+</NavLink>
 
-          <div className="nb-blink">
-            <SignedOut>
-              <button onClick={() => navigate("/sign-in")} className="flex flex-col items-center gap-1">
-                <FaRegUserCircle size={19} /> Account
-              </button>
-            </SignedOut>
-            <SignedIn>
-              {user && (
-                <button onClick={() => navigate("/profile")} className="flex flex-col items-center gap-1">
-                  <img src={user.imageUrl} alt="p" className="w-7 h-7 rounded-full"
-                    style={{ boxShadow: "0 0 0 2px #6366f1" }} />
-                  <span>Profile</span>
-                </button>
-              )}
-            </SignedIn>
+<NavLink
+  to="/wishlist"
+  className={({ isActive }) =>
+    `nb-blink relative ${isActive ? "bact" : ""}`
+  }
+>
+  <div className="relative">
+    <span style={{ fontSize: "20px" }}>❤️</span>
+
+    {wishlist.length > 0 && (
+      <span
+        className="nb-badge"
+        style={{ top: -6, right: -8 }}
+      >
+        {wishlist.length}
+      </span>
+    )}
+  </div>
+
+  Wishlist
+</NavLink>
+
+<div className="nb-blink">
+  <SignedOut>
+    <button
+      onClick={() => navigate("/sign-in")}
+      className="flex flex-col items-center gap-1"
+    >
+      <span style={{ fontSize: "20px" }}>👤</span>
+      Account
+    </button>
+  </SignedOut>
+
+  <SignedIn>
+    {user && (
+      <button
+        onClick={() => navigate("/profile")}
+        className="flex flex-col items-center gap-1"
+      >
+        <img
+          src={user.imageUrl}
+          alt="p"
+          className="w-7 h-7 rounded-full"
+          style={{
+            boxShadow: "0 0 0 2px #6366f1",
+          }}
+        />
+
+        <span>Profile</span>
+      </button>
+    )}
+  </SignedIn>
+
           </div>
         </div>
       </div>

@@ -163,7 +163,7 @@ if (product83Index !== -1) {
 
         {/* ── OFFER BAR ── */}
         <div
-          className="w-full  px-4 py-2.5 flex items-center justify-between gap-4 flex-wrap  bg-gradient-to-br 
+          className="w-full  px-4 sm:px-18 py-2.5 flex items-center justify-between gap-4 flex-wrap  bg-gradient-to-br 
   from-indigo-600 
   via-blue-600
   to-purple-600
@@ -304,7 +304,7 @@ if (product83Index !== -1) {
                         <AiOutlineEye size={16}/> Details
                       </button>
                     </div>
-                  </div>
+                </div>
 
                   {/* ── RIGHT ── */}
                   <div className="cw-ds-right">
