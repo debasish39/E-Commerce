@@ -6,13 +6,29 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/wishlistContext";
 import { toast } from "sonner";
-import { useUser } from "@clerk/clerk-react";
 
 export default function ProductCard({ product }) {
   const navigate  = useNavigate();
+
+/* =====================================
+   JWT TOKEN
+===================================== */
+
+const token =
+  localStorage.getItem(
+    "token"
+  );
+
+/* =====================================
+   AUTH STATE
+===================================== */
+
+const isSignedIn =
+  !!token;
+
   const { addToCart, cartItem }                          = useCart();
   const { wishlist, addToWishlist, removeFromWishlist }  = useWishlist();
-  const { isSignedIn }                                   = useUser();
+ 
 
   // all images for this product (thumbnail + images array, deduped)
   const allImages = [
@@ -26,8 +42,8 @@ export default function ProductCard({ product }) {
   const [hovered,    setHovered]    = useState(false);
   const scrollTimer = useRef(null);
 
-  const isInCart = cartItem.some(i => String(i.productId) === String(product.id));
-  const isLiked  = wishlist.some(i => String(i.productId) === String(product.id));
+  const isInCart = cartItem.some(i => String(i.productId) === String(product._id));
+  const isLiked  = wishlist.some(i => String(i.productId) === String(product._id));
 
   // ── Auto-advance on hover ────────────────────────
   const startAutoScroll = useCallback(() => {
@@ -63,7 +79,7 @@ export default function ProductCard({ product }) {
     if (!isSignedIn) { toast.error("Please login first"); navigate("/sign-in"); return; }
     setHeartAnim(true);
     setTimeout(() => setHeartAnim(false), 500);
-    if (isLiked) { removeFromWishlist(String(product.id)); toast("Removed from wishlist 💔"); }
+    if (isLiked) { removeFromWishlist(String(product._id)); toast("Removed from wishlist 💔"); }
     else         { addToWishlist(product); toast.success("Added to wishlist ❤️"); }
   };
 
@@ -259,7 +275,7 @@ export default function ProductCard({ product }) {
         <div
           className="relative overflow-hidden"
           style={{ height: "clamp(160px,18vw,220px)", background:"#f8faff" }}
-          onClick={() => navigate(`/products/${product.id}`)}
+          onClick={() => navigate(`/products/${product._id}`)}
         >
           {/* sliding track */}
           <div
@@ -290,7 +306,7 @@ export default function ProductCard({ product }) {
           <div className="pc-overlay">
             <button
               className="pc-quick-btn"
-              onClick={e => { e.stopPropagation(); navigate(`/products/${product.id}`); }}
+              onClick={e => { e.stopPropagation(); navigate(`/products/${product._id}`); }}
             >
               <AiOutlineEye size={13}/> Quick View
             </button>
@@ -352,7 +368,7 @@ export default function ProductCard({ product }) {
               overflow:"hidden", cursor:"pointer", marginBottom:2,
               transition:"color .18s",
             }}
-            onClick={() => navigate(`/products/${product.id}`)}
+            onClick={() => navigate(`/products/${product._id}`)}
             onMouseEnter={e => e.target.style.color="#4f46e5"}
             onMouseLeave={e => e.target.style.color="#1e1b4b"}
           >

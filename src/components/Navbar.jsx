@@ -1,34 +1,62 @@
 import React, { useState, useEffect } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
-  ShoppingCart, MapPin, ChevronDown,
-  Home, ShoppingBag, Package, Phone,
-  Search, Mic, MicOff, X,
+  Link,
+  NavLink,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
+import {
+  ShoppingCart,
+  MapPin,
+  ChevronDown,
+  Home,
+  ShoppingBag,
+  Package,
+  Search,
+  Mic,
+  X,
+  Heart,
+  User,
+  Truck,
+  LogOut,
+  LocateFixed,
+  MapPinned,
 } from "lucide-react";
 import {
-  Modal, ModalContent, ModalHeader,
-  ModalBody, useDisclosure,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  useDisclosure,
+  Dropdown,
+  Avatar,
 } from "@heroui/react";
+import {
+
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+
+
+} from "@heroui/react";
+import { Settings } from "lucide-react";
 import { FaRegUserCircle } from "react-icons/fa";
 import { HiMenuAlt1, HiMenuAlt3 } from "react-icons/hi";
 import { BsBox2 } from "react-icons/bs";
 import { AiOutlineHeart } from "react-icons/ai";
-import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/wishlistContext";
 import { getData } from "../context/DataContext";
 import LocationMap from "../components/LocationMap";
 import { toast } from "sonner";
-
+import AOS from "aos";
+import "aos/dist/aos.css";
 const NAV_LINKS = [
-  { name: "Collections", path: "/products", icon: "🛍️" },
-  { name: "Contact", path: "/contact", icon: "📞" },
-  { name: "Orders", path: "/order-history", icon: "📦" },
-  { name: "Track Order", path: "/track-order", icon: "🚚" },
+  { name: "Shop", path: "/products", icon: <ShoppingBag size={15} /> },
+
 ];
 
 export default function Navbar({ location, onLocationChange }) {
-  const { user } = useUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showNav, setShowNav] = useState(true);
@@ -38,7 +66,107 @@ export default function Navbar({ location, onLocationChange }) {
   const { cartItem } = useCart();
   const { wishlist } = useWishlist();
   const navigate = useNavigate();
+  const [searchOpen, setSearchOpen] = useState(false);
   const { search, setSearch } = getData();
+  const [recentSearches, setRecentSearches] = useState([]);
+  const routerLocation = useLocation();
+  /* =====================================
+     AUTH USER
+  ===================================== */
+
+  const [
+
+    authUser,
+
+    setAuthUser,
+
+  ] = useState(null);
+
+  /* =====================================
+     LOAD USER
+  ===================================== */
+
+  useEffect(() => {
+
+    const token =
+
+      localStorage.getItem(
+        "token"
+      );
+
+    if (!token)
+      return;
+
+    const fetchUser =
+      async () => {
+
+        try {
+
+          const res =
+            await fetch(
+
+              "https://eshop-backend-y0e7.onrender.com/api/auth/me",
+
+              {
+
+                headers: {
+
+                  Authorization:
+                    `Bearer ${token}`,
+
+                },
+
+              }
+
+            );
+
+          const data =
+            await res.json();
+
+          if (data.success) {
+
+            setAuthUser(
+              data.user
+            );
+
+          }
+
+        } catch (error) {
+
+          console.error(
+            error
+          );
+
+        }
+
+      };
+
+    fetchUser();
+
+  }, []);
+
+
+  /* =====================================
+     LOGOUT
+  ===================================== */
+
+  const logout =
+    () => {
+
+      localStorage.removeItem(
+        "token"
+      );
+
+      toast.success(
+        "Logged out"
+      );
+
+      window.location.href =
+        "/sign-in";
+
+    };
+
+
 
   useEffect(() => {
     let last = window.scrollY;
@@ -51,7 +179,16 @@ export default function Navbar({ location, onLocationChange }) {
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
+useEffect(() => {
 
+  AOS.init({
+    duration: 700,
+    easing: "ease-out-cubic",
+    once: false,
+    mirror: true,
+  });
+
+}, []);
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
@@ -71,7 +208,63 @@ export default function Navbar({ location, onLocationChange }) {
     rec.onend = () => { setIsListening(false); toast.dismiss(tid); };
     rec.onerror = () => { setIsListening(false); toast.dismiss(tid); toast.error("Not recognized."); };
   };
+  useEffect(() => {
 
+  const handleKeyDown = (e) => {
+
+    // CMD + K (Mac)
+    // CTRL + K (Windows)
+
+    if (
+      (e.metaKey || e.ctrlKey) &&
+      e.key.toLowerCase() === "k"
+    ) {
+
+      e.preventDefault();
+
+      setSearchOpen(true);
+
+    }
+
+    // ESC CLOSE
+
+    if (e.key === "Escape") {
+
+      setSearchOpen(false);
+
+    }
+
+  };
+
+  window.addEventListener(
+    "keydown",
+    handleKeyDown
+  );
+
+  return () => {
+
+    window.removeEventListener(
+      "keydown",
+      handleKeyDown
+    );
+
+  };
+
+}, []);
+  const handleSearchSubmit = (query) => {
+    if (!query.trim()) return;
+
+    setRecentSearches((prev) => {
+      const filtered = prev.filter((s) => s !== query);
+
+      return [query, ...filtered].slice(0, 5);
+    });
+
+    setSearch(query);
+    setSearchOpen(false);
+
+    navigate("/products");
+  };
   const handleAreaSearch = async () => {
     if (!area) { toast.warning("Please enter a location"); return; }
     const tid = toast.loading("Searching location…");
@@ -96,7 +289,15 @@ export default function Navbar({ location, onLocationChange }) {
   const locationLabel = location
     ? `${location.village || location.town || location.city || location.suburb || location.county || ""}, ${location.state || ""}`
     : "Set Location";
+useEffect(() => {
 
+  if (searchOpen) {
+
+    AOS.refresh();
+
+  }
+
+}, [searchOpen]);
   return (
     <>
       <style>{`
@@ -177,7 +378,167 @@ export default function Navbar({ location, onLocationChange }) {
           transform:translateY(-1px);
           box-shadow:0 4px 16px rgba(99,102,241,0.18);
         }
-
+     /* ════ SEARCH PAGE ════ */
+        .search-page {
+          position: fixed;
+          inset: 0;
+          z-index: 100;
+          background: linear-gradient(180deg, #f0f4ff 0%, #ffffff 100%);
+          animation: fadeInUp 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+ 
+        .search-page-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.3);
+          backdrop-filter: blur(4px);
+          z-index: 99;
+        }
+ 
+        .search-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 16px;
+          background: rgba(255, 255, 255, 0.9);
+          border-bottom: 1.5px solid rgba(99, 102, 241, 0.12);
+          position: relative;
+          z-index: 101;
+        }
+ 
+        .search-input-wrapper {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background: rgba(248, 250, 255, 0.9);
+          border: 1.5px solid rgba(99, 102, 241, 0.15);
+          border-radius: 16px;
+          padding: 0 14px;
+          transition: all 0.28s;
+        }
+ 
+        .search-input-wrapper:focus-within {
+          background: white;
+          border-color: #6366f1;
+          box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+        }
+ 
+        .search-input-wrapper input {
+          flex: 1;
+          height: 44px;
+          background: transparent;
+          border: none;
+          outline: none;
+          font-size: 15px;
+          color: #1e1b4b;
+          font-weight: 500;
+        }
+ 
+        .search-input-wrapper input::placeholder {
+          color: #cbd5e1;
+        }
+ 
+        .search-close-btn {
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(99, 102, 241, 0.1);
+          border: none;
+          cursor: pointer;
+          transition: all 0.28s;
+          color: var(--c-indigo);
+        }
+ 
+        .search-close-btn:hover {
+          background: rgba(99, 102, 241, 0.15);
+          transform: scale(1.05) rotate(90deg);
+        }
+ 
+        /* ════ SEARCH CONTENT ════ */
+        .search-content {
+          height: calc(100vh - 70px);
+          overflow-y: auto;
+          padding: 20px 16px;
+          position: relative;
+          z-index: 101;
+        }
+ 
+        .search-section {
+          margin-bottom: 28px;
+          animation: slideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+ 
+        .search-section:nth-child(1) { animation-delay: 0.05s; }
+        .search-section:nth-child(2) { animation-delay: 0.1s; }
+ 
+        .search-title {
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: #9ca3af;
+          margin-bottom: 12px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+ 
+        .search-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 14px;
+          border-radius: 14px;
+          background: rgba(255, 255, 255, 0.7);
+          border: 1.5px solid rgba(99, 102, 241, 0.1);
+          cursor: pointer;
+          transition: all 0.28s;
+          margin-bottom: 8px;
+        }
+ 
+        .search-item:hover {
+          background: rgba(255, 255, 255, 1);
+          border-color: rgba(99, 102, 241, 0.3);
+          transform: translateX(4px);
+          box-shadow: 0 8px 24px rgba(79, 70, 229, 0.1);
+        }
+ 
+        .search-item-icon {
+          font-size: 18px;
+          flex-shrink: 0;
+        }
+ 
+        .search-item-text {
+          flex: 1;
+          font-size: 14px;
+          font-weight: 600;
+          color: #1e1b4b;
+        }
+ 
+        .search-item-remove {
+          width: 28px;
+          height: 28px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(239, 68, 68, 0.1);
+          border: none;
+          cursor: pointer;
+          color: #ef4444;
+          transition: all 0.28s;
+          font-size: 12px;
+        }
+ 
+        .search-item-remove:hover {
+          background: rgba(239, 68, 68, 0.2);
+          transform: scale(1.1);
+        }
+ 
         /* ── badge ── */
         .nb-badge {
           position:absolute;top:-5px;right:-5px;
@@ -305,7 +666,616 @@ export default function Navbar({ location, onLocationChange }) {
           background:linear-gradient(90deg,#4f46e5,#3b82f6,#6366f1);
         }
       `}</style>
+      
 
+  {/* SEARCH PAGE */}
+{searchOpen && (
+  <>
+
+    {/* OVERLAY */}
+    <div
+      className="
+        fixed inset-0 z-[100]
+
+        bg-slate-950/30
+        backdrop-blur-md
+
+        transition-all duration-500
+      "
+
+      data-aos="fade"
+      onClick={() => setSearchOpen(false)}
+    />
+
+    {/* WRAPPER */}
+  <div
+  className="
+    fixed inset-0 z-[101]
+
+    flex items-start justify-center
+
+    pt-[7vh]
+    px-4
+  "
+
+  data-aos="fade-up"
+  data-aos-duration="500"
+  data-aos-easing="ease-out-cubic"
+>
+
+      {/* MODAL */}
+      <div
+        data-aos="zoom-in-up"
+        data-aos-duration="500"
+
+        className="
+          relative
+
+          w-full max-w-2xl
+
+          overflow-hidden
+
+          rounded-[36px]
+
+          border border-white/20
+
+          bg-white/20
+          backdrop-blur-[30px]
+
+          shadow-[0_40px_120px_rgba(15,23,42,0.35)]
+        "
+      >
+
+        {/* FLOATING LIGHTS */}
+        <div
+          className="
+            absolute
+
+            -top-24 -right-20
+
+            w-72 h-72
+
+            rounded-full
+
+            bg-indigo-500/20
+
+            blur-3xl
+
+            animate-pulse
+          "
+        />
+
+        <div
+          className="
+            absolute
+
+            -bottom-24 -left-20
+
+            w-72 h-72
+
+            rounded-full
+
+            bg-blue-500/10
+
+            blur-3xl
+
+            animate-pulse
+          "
+        />
+
+        {/* SHIMMER */}
+        <div
+          className="
+            absolute inset-0
+
+            opacity-40
+
+            bg-[linear-gradient(110deg,transparent,rgba(255,255,255,0.12),transparent)]
+
+            animate-[shimmer_3s_linear_infinite]
+
+            pointer-events-none
+          "
+        />
+
+        {/* HEADER */}
+        <div
+          data-aos="fade-down"
+          data-aos-delay="100"
+
+          className="
+            relative
+
+            flex items-center gap-4
+
+            px-6 py-5
+
+            border-b border-white/20
+          "
+        >
+
+          {/* ICON */}
+          <div
+            className="
+              w-12 h-12
+
+              rounded-2xl
+
+              flex items-center justify-center
+
+              bg-gradient-to-br
+              from-indigo-500
+              via-blue-500
+              to-violet-500
+
+              shadow-[0_12px_32px_rgba(79,70,229,0.30)]
+
+              animate-pulse
+            "
+          >
+
+            <Search
+              size={20}
+              className="text-white"
+            />
+
+          </div>
+
+          {/* INPUT */}
+          {/* INPUT */}
+<div className="flex-1 relative">
+
+  <input
+    type="text"
+    autoFocus
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    onKeyDown={(e) => {
+      if (e.key === "Enter") {
+        handleSearchSubmit(search);
+      }
+    }}
+    placeholder="Search products, brands, categories..."
+    className="
+      w-full
+
+      bg-transparent
+
+      pr-12
+
+      text-[16px]
+      font-semibold
+      text-white
+
+      placeholder:text-white/70
+
+      outline-none
+    "
+  />
+ {/* CLEAR BUTTON */}
+  {/*
+  {search && (
+
+    <button
+      onClick={() => setSearch("")}
+
+      className="
+        absolute right-0 top-1/2
+        -translate-y-1/2
+
+        w-9 h-9
+
+        rounded-xl
+
+        flex items-center justify-center
+        text-white
+        bg-gray-300
+        backdrop-blur-xl
+
+        border border-white/10
+
+        hover:bg-red-500
+        hover:border-red-400
+
+        hover:rotate-90
+        hover:scale-110
+
+        transition-all duration-300
+
+        group
+      "
+    >
+
+      <X
+        size={15}
+        className="
+          text-white/70
+
+          group-hover:text-white
+
+          transition
+        "
+      />
+
+    </button>
+
+  )} */}
+
+</div>
+
+          {/* SHORTCUT */}
+          <div
+            className="
+              hidden sm:flex items-center gap-1
+
+              rounded-xl
+
+              border border-white/30
+
+              bg-white/50
+              backdrop-blur-xl
+
+              px-3 py-1.5
+
+              text-[11px]
+              font-bold
+              text-indigo-500
+            "
+          >
+
+            <kbd>ESC</kbd>
+
+          </div>
+
+          {/* CLOSE */}
+          <button
+            onClick={() => setSearchOpen(false)}
+
+            className="
+              w-10 h-10
+
+              rounded-2xl
+
+              flex items-center justify-center
+
+              bg-white/60
+
+              hover:bg-white
+
+              transition-all duration-300
+              hover:rotate-90
+            "
+          >
+
+            <X
+              size={18}
+              className="text-slate-500"
+            />
+
+          </button>
+
+        </div>
+
+        {/* BODY */}
+        <div
+          className="
+            relative
+
+            max-h-[70vh]
+            overflow-y-auto
+
+            px-5 py-5
+          "
+        >
+
+          {/* VOICE SEARCH */}
+          <div
+            className="mb-8"
+
+            data-aos="fade-right"
+            data-aos-delay="250"
+          >
+
+            <div
+              className="
+                flex items-center gap-2
+
+                px-2 mb-4
+
+                text-[11px]
+                font-bold
+
+                uppercase tracking-[0.16em]
+
+                text-indigo-900
+              "
+            >
+
+              <Mic size={13} />
+
+              Voice Search
+
+            </div>
+
+            <button
+              onClick={handleVoiceSearch}
+
+              className={`
+                group
+
+                relative overflow-hidden
+
+                w-full
+
+                flex items-center gap-4
+
+                rounded-[28px]
+
+                border
+
+                px-5 py-5
+
+                transition-all duration-500
+
+                hover:-translate-y-1
+                hover:scale-[1.01]
+
+                ${
+                  isListening
+                    ? `
+                      border-indigo-300
+
+                      bg-gradient-to-r
+                      from-indigo-50/80
+                      to-blue-50/80
+
+                      shadow-[0_20px_50px_rgba(79,70,229,0.18)]
+                    `
+                    : `
+                      border-white/30
+
+                      bg-white/50
+
+                      hover:border-indigo-200
+                      hover:bg-white/70
+                    `
+                }
+              `}
+            >
+
+              {/* ICON */}
+              <div
+                className={`
+                  w-12 h-12
+
+                  rounded-2xl
+
+                  flex items-center justify-center
+
+                  transition-all duration-500
+
+                  ${
+                    isListening
+                      ? `
+                        bg-gradient-to-br
+                        from-indigo-500
+                        to-blue-500
+
+                        shadow-[0_12px_30px_rgba(79,70,229,0.28)]
+                      `
+                      : `
+                        bg-white
+                      `
+                  }
+                `}
+              >
+
+                <Mic
+                  size={18}
+                  className={
+                    isListening
+                      ? "text-white animate-pulse"
+                      : "text-slate-500"
+                  }
+                />
+
+              </div>
+
+              {/* TEXT */}
+              <div className="flex flex-col items-start">
+
+                <span
+                  className="
+                    text-sm
+                    font-semibold
+                    text-slate-800
+                  "
+                >
+                  {isListening
+                    ? "Listening..."
+                    : "Tap to speak"}
+                </span>
+
+                <span
+                  className="
+                    text-xs
+                    text-slate-500
+                  "
+                >
+                  Search using your voice
+                </span>
+
+              </div>
+
+            </button>
+
+          </div>
+
+          {/* RECENT SEARCHES */}
+          {recentSearches.length > 0 && (
+
+            <div
+              data-aos="fade-up"
+              data-aos-delay="350"
+            >
+
+              <div
+                className="
+                  flex items-center gap-2
+
+                  px-2 mb-4
+
+                  text-[11px]
+                  font-bold
+
+                  uppercase tracking-[0.16em]
+
+                  text-slate-500
+                "
+              >
+
+                <Search size={13} />
+
+                Recent Searches
+
+              </div>
+
+              <div className="space-y-3">
+
+                {recentSearches.map((item, idx) => (
+
+                  <button
+                    key={idx}
+
+                    data-aos="fade-up"
+                    data-aos-delay={idx * 80}
+
+                    onClick={() => handleSearchSubmit(item)}
+
+                    className="
+                      group
+
+                      relative overflow-hidden
+
+                      w-full
+
+                      flex items-center gap-4
+
+                      rounded-2xl
+
+                      border border-white/30
+
+                      bg-white/50
+
+                      px-4 py-4
+
+                      hover:border-indigo-200
+                      hover:bg-white/70
+
+                      hover:-translate-y-1
+                      hover:scale-[1.01]
+
+                      hover:shadow-[0_12px_32px_rgba(79,70,229,0.10)]
+
+                      transition-all duration-500
+                    "
+                  >
+
+                    {/* ICON */}
+                    <div
+                      className="
+                        w-11 h-11
+
+                        rounded-2xl
+
+                        flex items-center justify-center
+
+                        bg-white
+
+                        group-hover:bg-indigo-100
+
+                        transition-all duration-300
+                      "
+                    >
+
+                      <Search
+                        size={16}
+                        className="
+                          text-slate-500
+                          group-hover:text-indigo-500
+                        "
+                      />
+
+                    </div>
+
+                    {/* TEXT */}
+                    <div
+                      className="
+                        flex-1
+
+                        text-left
+
+                        text-sm
+                        font-semibold
+                        text-slate-700
+
+                        truncate
+                      "
+                    >
+                      {item}
+                    </div>
+
+                    {/* REMOVE */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+
+                        setRecentSearches((prev) =>
+                          prev.filter((s) => s !== item)
+                        );
+                      }}
+
+                      className="
+                        w-9 h-9
+
+                        rounded-xl
+
+                        flex items-center justify-center
+
+                        hover:bg-red-50
+
+                        transition-all duration-300
+                      "
+                    >
+
+                      <X
+                        size={14}
+                        className="
+                          text-slate-400
+                          hover:text-red-500
+                        "
+                      />
+
+                    </button>
+
+                  </button>
+
+                ))}
+
+              </div>
+
+            </div>
+
+          )}
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </>
+)}
       {/* overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-30 bg-indigo-950/20 backdrop-blur-sm"
@@ -322,23 +1292,19 @@ export default function Navbar({ location, onLocationChange }) {
 
           {/* LOGO + LOCATION */}
           <div className="flex items-center gap-6 flex-shrink-0">
-            <Link
-              to="/"
-              className="text-[24px]"
-              style={{
-                fontFamily: "'Pacifico', cursive",
-                background: "linear-gradient(135deg,#4f46e5,#2563eb)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                letterSpacing: "0.5px",
-                fontWeight: "700",
-              }}
-            >
-              E-Shop
-            </Link>
-            <button className=" hidden sm:flex justify-center items-center gap-1 border border-violet-300 bg-black/5 rounded-md px-1.5 py-1 text-sm" onClick={e => { e.stopPropagation(); onOpen(); }}>
-              <span style={{ color: "#6366f1", flexShrink: 0 }}>📍</span>
-              <span className="loc-txt text-xs">{locationLabel}</span>
+<Link to="/" className="flex items-center">
+  <img
+    src="/logo.png"
+    alt="Logo"
+    className="w-27 h-27 object-contain"
+  />
+</Link>
+            <button className="hidden sm:flex justify-center items-center gap-1 border border-violet-200 bg-white/50 rounded-md px-1.5 py-2 text-sm" onClick={e => { e.stopPropagation(); onOpen(); }}>
+              <span style={{ color: "#6366f1", flexShrink: 0 }}><MapPinned size={15}
+                className="text-indigo-500" /></span>
+              <span className="loc-txt text-xs truncate max-w-[90px] hidden sm:flex">
+                {locationLabel}
+              </span>
               <ChevronDown size={15} style={{ color: "#6366f1", flexShrink: 0 }} />
             </button>
           </div>
@@ -346,172 +1312,356 @@ export default function Navbar({ location, onLocationChange }) {
           {/* SEARCH (desktop) */}
           <div className="hidden md:flex flex-1 max-w-[500px]">
 
-            <div className="
-    relative flex items-center w-full
-    rounded-xl overflow-hidden
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="
+      w-full
+      flex items-center gap-3
+      rounded-xl
+      border border-indigo-100
+      bg-white/80
+      backdrop-blur
+      px-4 py-2
+      shadow-sm
+      hover:border-indigo-300
+      transition
+    "
+            >
+
+              <Search size={18} className="text-indigo-500" />
+
+              <span className="text-sm text-indigo-300">
+                Search products...
+              </span>
+
+            <div
+  className="
+    ml-auto
+
+    hidden lg:flex items-center gap-1
+
+    rounded-xl
+
     border border-indigo-100
-    bg-white/80 backdrop-blur
+
+    bg-white/80
+
+    px-2.5 py-1.5
+
+    text-[11px]
+    font-bold
+    text-indigo-400
+
     shadow-sm
-    focus-within:ring-2 focus-within:ring-indigo-300
-    transition
-  ">
-
-              {/* LEFT ICON */}
-             <span
-  className="absolute left-3"
-  style={{
-    fontSize: "15px",
-  }}
+  "
 >
-  🔍
-</span>
 
-              {/* INPUT */}
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && navigate("/products")}
-                placeholder="Search products…"
-                className="
-        w-full
-        pl-9 pr-10 py-2
-        text-sm text-gray-700
-        bg-transparent
-        outline-none
-        placeholder:text-indigo-300
-      "
-              />
+  <kbd
+    className="
+      font-sans
+      leading-none
+    "
+  >
+    ⌘
+  </kbd>
 
-              {/* RIGHT ICON (VOICE) */}
-              <button
-                onClick={handleVoiceSearch}
-                className={`
-        absolute right-3
-        transition-all
-        ${isListening
-                    ? "text-indigo-500 animate-pulse"
-                    : "text-indigo-300 hover:text-indigo-500"}
-      `}
-              >
-                {isListening ? <span>🔇</span> : <span>🎤</span>}
-              </button>
+  <kbd
+    className="
+      font-sans
+      leading-none
+    "
+  >
+    K
+  </kbd>
 
-            </div>
+</div>
+
+            </button>
+
           </div>
-
           {/* NAV LINKS + ICONS (desktop) */}
           <nav className="hidden md:flex items-center gap-0.5">
             {NAV_LINKS.map(({ name, path, icon }) => (
               <NavLink key={path} to={path}
-                className={({ isActive }) => `nb-link ${isActive ? "act" : ""}`}>
-                <span style={{ color: "#6366f1" }}>{icon}</span>{name}
+                className={({ isActive }) => `nb-link shadow-md border-indigo-300 ${isActive ? "act" : ""}`}>
+                <span style={{ color: "#6366f1" }} className="text-indigo-500 shadow-md">{icon}</span>{name}
               </NavLink>
             ))}
 
-            <div className="w-px h-5 mx-2" style={{ background: "rgba(99,102,241,0.15)" }} />
+            <div className="w-px h-5 mx-2 shadow-md" style={{ background: "rgba(99,102,241,0.15)" }} />
 
-            <Link to="/cart" className="nb-ibtn">
-              <span>🛒</span>
+            <Link to="/cart" className="nb-ibtn shadow-md">
+              <ShoppingCart
+                size={18}
+                className="text-indigo-500"
+              />
               {cartItem.length > 0 && <span className="nb-badge">{cartItem.length}</span>}
             </Link>
 
-            <Link to="/wishlist" className="nb-ibtn ml-1">
-              <span>❤️</span>
+            <Link to="/wishlist" className="nb-ibtn ml-1 shadow-md">
+              <Heart
+                size={18}
+                className="text-pink-500"
+              />
               {wishlist.length > 0 && <span className="nb-badge">{wishlist.length}</span>}
             </Link>
 
-            <div className="ml-1">
-              <SignedOut>
-                <button onClick={() => navigate("/sign-in")} className="nb-ibtn">
-                  <span>👤</span>
+            {/* ACCOUNT DROPDOWN */}
+
+            <div className="ml-2">
+
+              {!authUser ? (
+
+                <button
+                  onClick={() => navigate("/sign-in")}
+                  className="nb-ibtn"
+                >
+                  <User
+                    size={18}
+                    className="text-indigo-500"
+                  />
                 </button>
-              </SignedOut>
-              <SignedIn>
-                {user && (
-                  <button onClick={() => navigate("/profile")}
-                    className="w-8 h-8 rounded-xl overflow-hidden cursor-pointer"
-                    style={{ boxShadow: "0 0 0 2px #6366f1" }}>
-                    <img src={user.imageUrl} alt="profile" className="w-full h-full object-cover" />
-                  </button>
-                )}
-              </SignedIn>
+
+              ) : (
+
+                <Dropdown placement="bottom-end">
+
+                  <DropdownTrigger>
+
+                    <button
+                      className="
+        flex items-center gap-2
+
+        pl-1 pr-2 py-1
+
+        rounded-2xl
+
+        border border-indigo-100
+
+        bg-white/80
+        backdrop-blur-xl
+
+        hover:border-indigo-300
+        hover:shadow-lg
+
+        transition-all duration-200
+      "
+                    >
+
+                      <img
+                        src={authUser?.image}
+                        alt={authUser?.name}
+                        size="sm"
+                        className="
+    ring-2 ring-indigo-500
+    w-9 h-9
+    flex-shrink-0 rounded-2xl
+  "
+                      />
+
+                      <div className="hidden lg:flex flex-col text-left leading-tight">
+
+                        <span className="text-xs font-semibold text-gray-800">
+                          {authUser.name}
+                        </span>
+                      </div>
+                      <ChevronDown
+                        size={15}
+                        className="text-indigo-400"
+                      />
+
+                    </button>
+
+                  </DropdownTrigger>
+
+                  <DropdownMenu
+                    aria-label="Profile Actions"
+                    variant="flat"
+                    classNames={{
+                      base: `
+      min-w-[260px]
+
+      rounded-3xl
+
+      border border-indigo-100
+
+      bg-white/80
+      backdrop-blur-2xl
+
+      shadow-[0_24px_80px_rgba(79,70,229,0.18)]
+
+      p-2
+    `,
+                      list: "gap-1",
+                    }}
+                  >
+
+                    <DropdownItem
+                      key="profile"
+                      onPress={() => navigate("/profile")}
+                      startContent={
+                        <User
+                          size={16}
+                          className="text-indigo-400"
+                        />
+                      }
+                    >
+                      Profile
+                    </DropdownItem>
+
+                    <DropdownItem
+                      key="orders"
+                      onPress={() => navigate("/order-history")}
+                      startContent={
+                        <Package
+                          size={16}
+                          className="text-indigo-400"
+                        />
+                      }
+                    >
+                      Orders
+                    </DropdownItem>
+
+                    <DropdownItem
+                      key="track"
+                      onPress={() => navigate("/track-order")}
+                      startContent={
+                        <Truck
+                          size={16}
+                          className="text-indigo-400"
+                        />
+                      }
+                    >
+                      Track Order
+                    </DropdownItem>
+
+
+
+                    <DropdownItem
+                      key="logout"
+                      className="text-red-500"
+                      onPress={logout}
+                      startContent={
+                        <LogOut
+                          size={16}
+                          className="text-red-500"
+                        />
+                      }
+                    >
+                      Logout
+                    </DropdownItem>
+
+                  </DropdownMenu>
+
+                </Dropdown>
+
+              )}
+
             </div>
+
+
+
+
           </nav>
 
+
+
           {/* MOBILE RIGHT */}
-          <div className="sm:hidden flex items-center gap-2">
+          <div className="sm:hidden flex items-center gap-2 flex-1 justify-end">
 
-            {/* SEARCH BAR */}
-            <div className="
-    relative flex items-center flex-1
-    rounded-xl overflow-hidden
-    border border-indigo-100
-    bg-white/30 backdrop-blur
-    shadow-sm
-    focus-within:ring-2 focus-within:ring-indigo-300
-    transition
-  ">
+            {/* SEARCH INPUT */}
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="
+      flex items-center gap-2
+      flex-1 max-w-[170px]
+      px-3 py-2
 
-              {/* LEFT SEARCH ICON */}
-           <span
-  className="absolute left-3"
-  style={{
-    fontSize: "15px",
-  }}
->
-  🔍
-</span>
+      rounded-2xl
+      border border-white/40
 
-              {/* INPUT */}
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    navigate("/products");
-                    setMobileOpen(false);
-                  }
-                }}
-                placeholder="Search products…"
-                className="
-        w-full
-        pl-9 pr-10 py-2
-        text-sm text-gray-700
-        bg-transparent outline-none
-        placeholder:text-indigo-300
-      "
+      bg-white/60
+      backdrop-blur-xl
+
+      shadow-[0_4px_20px_rgba(79,70,229,0.08)]
+
+      transition-all shadow-md
+    "
+            >
+
+              <Search
+                size={15}
+                className="text-indigo-400"
               />
 
-              {/* VOICE ICON */}
-              <button
-                onClick={handleVoiceSearch}
-                className={`
-        absolute right-3
-        transition-all
-        ${isListening
-                    ? "text-indigo-500 animate-pulse"
-                    : "text-indigo-300"}
-      `}
+              <span
+                className="
+        text-xs
+        text-slate-400
+        truncate
+      "
               >
-                {isListening ? <span>🔇</span> :<span>🎤</span>}
-              </button>
+                Search products...
+              </span>
 
-            </div>
-
-            {/* MENU BUTTON */}
-            <button
+            </button>
+            <button className=" flex justify-center items-center gap-1 border border-violet-200 shadow-md bg-white/50 rounded-md px-1.5 py-2 text-sm" onClick={e => { e.stopPropagation(); onOpen(); }}>
+              <span style={{ color: "#6366f1", flexShrink: 0 }}><MapPinned size={15}
+                className="text-indigo-500" /></span>
+              <span className="loc-txt text-xs truncate max-w-[90px] hidden sm:flex">
+                {locationLabel}
+              </span>
+              <ChevronDown size={15} style={{ color: "#6366f1", flexShrink: 0 }} />
+            </button>
+            {/* CART */}
+            <Link
+              to="/cart"
               className="
       nb-ibtn
-      flex items-center justify-center
+      bg-white/60
+      backdrop-blur-xl
+      border border-white/40
+      shadow-md
     "
-              onClick={() => setMobileOpen(o => !o)}
             >
-              {mobileOpen
-                ? <HiMenuAlt3 size={18} style={{ color: "#6366f1" }} />
-                : <HiMenuAlt1 size={18} />}
-            </button>
+
+              <ShoppingCart
+                size={18}
+                className="text-indigo-500"
+              />
+
+              {cartItem.length > 0 && (
+                <span className="nb-badge">
+                  {cartItem.length}
+                </span>
+              )}
+
+            </Link>
+
+            {/* WISHLIST */}
+            <Link
+              to="/wishlist"
+              className="
+      nb-ibtn
+      bg-white/60
+      backdrop-blur-xl
+      border border-white/40
+      shadow-md
+    "
+            >
+
+              <Heart
+                size={18}
+                className="text-pink-500"
+              />
+
+              {wishlist.length > 0 && (
+                <span className="nb-badge">
+                  {wishlist.length}
+                </span>
+              )}
+
+            </Link>
 
           </div>
         </div>
@@ -534,17 +1684,92 @@ export default function Navbar({ location, onLocationChange }) {
               style={{ borderColor: "rgba(99,102,241,0.1)" }}>
               <div className="w-11 h-11 rounded-xl flex items-center justify-center"
                 style={{ background: "linear-gradient(135deg,#eef2ff,#e0e7ff)", border: "1px solid rgba(99,102,241,0.2)" }}>
-                <span>📍</span>
+                <LocateFixed
+                  size={15}
+                  className="text-indigo-500"
+                />
               </div>
               <h2 className="font-bold text-base text-indigo-950" style={{ fontFamily: "'Syne',sans-serif" }}>
                 Set Delivery Location
               </h2>
-              <p className="text-xs text-slate-400">Choose your address to check delivery availability</p>
+              <p className="text-xs text-slate-400">
+                Choose your address to check delivery availability
+              </p>
+
+              {/* CURRENT LOCATION */}
+              <div
+                className="
+    mt-3
+    w-full
+
+    flex items-start gap-3
+
+    rounded-2xl
+
+    bg-indigo-50/80
+    border border-indigo-100
+
+    px-4 py-3
+  "
+              >
+
+                <div
+                  className="
+      w-9 h-9
+      rounded-xl
+
+      flex items-center justify-center
+
+      bg-white
+      border border-indigo-100
+
+      flex-shrink-0
+    "
+                >
+
+                  <MapPinned
+                    size={16}
+                    className="text-indigo-500"
+                  />
+
+                </div>
+
+                <div className="min-w-0 flex-1 text-left">
+
+                  <p
+                    className="
+        text-[10px]
+        font-semibold
+        uppercase
+        tracking-wide
+        text-indigo-400
+      "
+                  >
+                    Current Location
+                  </p>
+
+                  <p
+                    className="
+        text-sm
+        font-semibold
+        text-slate-700
+        truncate
+      "
+                  >
+                    {locationLabel}
+                  </p>
+
+                </div>
+
+              </div>
             </ModalHeader>
             <ModalBody className="py-5 space-y-3">
               <div className="flex gap-2">
                 <div className="flex-1 relative flex items-center">
-                  <span className="absolute left-3 pointer-events-none" style={{ color: "#a5b4fc" }}>📍</span>
+                  <span className="absolute left-3 pointer-events-none" style={{ color: "#a5b4fc" }}><LocateFixed
+                    size={15}
+                    className="text-indigo-500"
+                  /></span>
                   <input type="text" placeholder="City, area or pincode"
                     value={area} onChange={e => setArea(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && handleAreaSearch()}
@@ -605,25 +1830,15 @@ export default function Navbar({ location, onLocationChange }) {
 
               style={{ fontFamily: "'Pacifico', cursive" }}
             >
-              E-Shop
+              EShop
             </Link>
 
           </div>
           <div className="flex items-center gap-2">
-            <SignedOut>
-              <button onClick={() => { navigate("/sign-in"); setMobileOpen(false); }}
-                className="w-3 h-3 rounded-xl flex items-center justify-center nb-ibtn">
-                <span>👤</span>
-              </button>
-            </SignedOut>
-            <SignedIn>
-              {user && (
-                <img src={user.imageUrl} alt="profile"
-                  onClick={() => { navigate("/profile"); setMobileOpen(false); }}
-                  className="w-8 h-8 rounded-lg cursor-pointer"
-                  style={{ boxShadow: "0 0 0 2px #6366f1" }} />
-              )}
-            </SignedIn>
+
+
+
+
             <button onClick={() => setMobileOpen(false)}
               className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer nb-ibtn">
               <X size={14} />
@@ -636,7 +1851,7 @@ export default function Navbar({ location, onLocationChange }) {
           <button onClick={() => { onOpen(); setMobileOpen(false); }}
             className="nb-loc w-full flex text-left px-3 py-2.5 rounded-xl text-sm cursor-pointer"
             style={{ maxWidth: "100%" }}>
-            <span>📍</span>
+            <span><MapPinned size={15} className="text-indigo-500" /></span>
             <span className="truncate flex-1 text-xs">{locationLabel}</span>
             <ChevronDown size={11} style={{ color: "#c7d2fe", flexShrink: 0 }} />
           </button>
@@ -644,8 +1859,8 @@ export default function Navbar({ location, onLocationChange }) {
 
         {/* nav links */}
         <nav className="px-4 pt-4 space-y-0.5">
-          {[{ name: "Home", path: "/", icon: <span>🏠</span> }, { name: "Orders", path: "/order-history", icon: <span>🛒</span> },
-          { name: "Track Order", path: "/track-order", icon: <span>🚚</span> },].map(({ name, path, icon }) => (
+          {[{ name: "Home", path: "/", icon: <Home size={16} /> }, { name: "Orders", path: "/order-history", icon: <ShoppingCart size={16} /> },
+          { name: "Track Order", path: "/track-order", icon: <Truck size={16} /> },].map(({ name, path, icon }) => (
             <NavLink key={path} to={path} onClick={() => setMobileOpen(false)}
               className={({ isActive }) => `nb-dlink ${isActive ? "dact" : ""}`}>
               <span style={{ color: "#6366f1" }}>{icon}</span>{name}
@@ -668,7 +1883,7 @@ export default function Navbar({ location, onLocationChange }) {
           <Link to="/wishlist" onClick={() => setMobileOpen(false)}
             className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all"
             style={{ background: "#eef2ff", border: "1px solid rgba(99,102,241,0.2)", color: "#4f46e5" }}>
-<span>❤️</span>            Wishlist
+            <span>❤️</span>            Wishlist
             {wishlist.length > 0 && (
               <span className="bg-indigo-100 px-1.5 py-0.5 rounded-full text-[10px] font-bold text-indigo-600">
                 {wishlist.length}
@@ -679,105 +1894,187 @@ export default function Navbar({ location, onLocationChange }) {
       </aside>
 
       {/* ════ BOTTOM NAV ════ */}
-      <div className={`sm:hidden nb nb-bottom fixed bottom-0 inset-x-0 z-40`}
-        style={{ transform: showNav ? "translateY(0)" : "translateY(100%)", transition: "transform 0.3s ease" }}>
-        <div className="flex items-end justify-around px-3 pt-2 pb-3 max-w-md mx-auto">
+      <div
+        className="
+    sm:hidden
+    fixed bottom-3 left-3 right-3
+    z-40
 
-          <NavLink to="/" className={({ isActive }) => `nb-blink ${isActive ? "bact" : ""}`}>
-            <span  style={{ fontSize: "20px" }}>🏠</span> Home
+    transition-all duration-300 ease-out
+  "
+        style={{
+          transform: showNav
+            ? "translateY(0)"
+            : "translateY(140%)",
+
+          opacity: showNav ? 1 : 0,
+
+          pointerEvents: showNav
+            ? "auto"
+            : "none",
+        }}
+      >
+        <div
+          className="
+      flex items-center justify-around
+
+      rounded-[28px]
+
+      bg-white/70
+      backdrop-blur-2xl
+
+      border border-white/40
+
+      shadow-[0_10px_40px_rgba(79,70,229,0.12)]
+
+      px-2 py-3
+    "
+        >
+
+          {/* HOME */}
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              `
+          flex flex-col items-center gap-1
+          text-[10px] font-semibold
+          transition-all
+
+          ${isActive
+                ? "text-indigo-600 scale-105"
+                : "text-slate-400"}
+        `
+            }
+          >
+            <Home size={20} />
+            Home
           </NavLink>
 
-        <NavLink
-  to="/products"
-  className={({ isActive }) =>
-    `nb-blink ${isActive ? "bact" : ""}`
-  }
->
-  <span style={{ fontSize: "20px" }}>🛍️</span>
-  Collections
-</NavLink>
+          {/* COLLECTION */}
+          <NavLink
+            to="/products"
+            className={({ isActive }) =>
+              `
+          flex flex-col items-center gap-1
+          text-[10px] font-semibold
+          transition-all
 
-{/* floating cart */}
-<NavLink to="/cart">
-  {({ isActive }) => (
-    <div
-      className={`nb-cfloat relative ${
-        isActive ? "scale-110" : ""
-      }`}
-    >
-      <span style={{ fontSize: "24px" }}>🛒</span>
+          ${isActive
+                ? "text-indigo-600 scale-105"
+                : "text-slate-400"}
+        `
+            }
+          >
+            <ShoppingBag size={20} />
+            Shop
+          </NavLink>
 
-      {cartItem.length > 0 && (
-        <span
-          className="nb-badge"
-          style={{
-            top: -3,
-            right: -3,
-            border: "2px solid white",
-          }}
-        >
-          {cartItem.length}
-        </span>
-      )}
-    </div>
-  )}
-</NavLink>
+          {/* ORDERS */}
+          <NavLink
+            to="/order-history"
+            className={({ isActive }) =>
+              `
+          flex flex-col items-center gap-1
+          text-[10px] font-semibold
+          transition-all
 
-<NavLink
-  to="/wishlist"
-  className={({ isActive }) =>
-    `nb-blink relative ${isActive ? "bact" : ""}`
-  }
->
-  <div className="relative">
-    <span style={{ fontSize: "20px" }}>❤️</span>
+          ${isActive
+                ? "text-indigo-600 scale-105"
+                : "text-slate-400"}
+        `
+            }
+          >
+            <Package size={20} />
+            Orders
+          </NavLink>
 
-    {wishlist.length > 0 && (
-      <span
-        className="nb-badge"
-        style={{ top: -6, right: -8 }}
-      >
-        {wishlist.length}
-      </span>
-    )}
-  </div>
+          {/* TRACK */}
+          <NavLink
+            to="/track-order"
+            className={({ isActive }) =>
+              `
+          flex flex-col items-center gap-1
+          text-[10px] font-semibold
+          transition-all
 
-  Wishlist
-</NavLink>
+          ${isActive
+                ? "text-indigo-600 scale-105"
+                : "text-slate-400"}
+        `
+            }
+          >
+            <MapPin size={20} />
+            Track
+          </NavLink>
 
-<div className="nb-blink">
-  <SignedOut>
-    <button
-      onClick={() => navigate("/sign-in")}
-      className="flex flex-col items-center gap-1"
-    >
-      <span style={{ fontSize: "20px" }}>👤</span>
-      Account
-    </button>
-  </SignedOut>
+          {/* PROFILE */}
+          <button
+            onClick={() =>
+              navigate(authUser ? "/profile" : "/sign-in")
+            }
+            className={`
+    flex flex-col items-center gap-1
+    text-[10px] font-semibold
+    transition-all duration-200
 
-  <SignedIn>
-    {user && (
-      <button
-        onClick={() => navigate("/profile")}
-        className="flex flex-col items-center gap-1"
-      >
-        <img
-          src={user.imageUrl}
-          alt="p"
-          className="w-7 h-7 rounded-full"
-          style={{
-            boxShadow: "0 0 0 2px #6366f1",
-          }}
-        />
+    ${routerLocation.pathname === "/profile"
+                ? "text-indigo-600 scale-105"
+                : "text-slate-400"
+              }
+  `}
+          >
 
-        <span>Profile</span>
-      </button>
-    )}
-  </SignedIn>
+            <div
+              className="
+      relative
 
-          </div>
+      w-8 h-8
+
+      rounded-2xl
+
+      flex items-center justify-center
+
+      bg-white/70
+      backdrop-blur-xl
+
+      border border-white/40
+
+      shadow-[0_4px_20px_rgba(79,70,229,0.08)]
+
+      overflow-hidden
+    "
+            >
+
+              {authUser?.image ? (
+
+                <img
+                  src={authUser.image}
+                  alt="profile"
+                  className="
+          w-full h-full
+          object-cover
+        "
+                />
+
+              ) : (
+
+                <User
+                  size={18}
+                  className="text-indigo-500"
+                />
+
+              )}
+
+            </div>
+
+            <span>
+              Profile
+            </span>
+
+          </button>
+
         </div>
+
       </div>
     </>
   );

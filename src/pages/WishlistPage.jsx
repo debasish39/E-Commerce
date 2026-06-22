@@ -287,7 +287,7 @@ export default function WishlistPage() {
                         src={item.image}
                         alt={item.title}
                         className="wl-img"
-                        onError={e => e.target.src="https://via.placeholder.com/300"}
+                       onError={(e) => { e.target.src = "https://placehold.co/600x600?text=EShop"; }}
                       />
 
                       {/* hover overlay */}
@@ -322,7 +322,14 @@ export default function WishlistPage() {
                         {item.title}
                       </Link>
                       <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-4">
-                        {item.description?.slice(0, 72) || "No description available"}…
+                        {
+                        item.description
+
+             ? item.description.slice(0, 72)
+
+                 : "Premium product from EShop"
+
+                        }
                       </p>
 
                       {/* bottom row */}

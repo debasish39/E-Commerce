@@ -1,4 +1,3 @@
-import { useSignUp, useSignIn } from "@clerk/clerk-react";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
@@ -7,8 +6,7 @@ import { FaGithub, FaEye, FaEyeSlash, FaArrowRight, FaCheckCircle } from "react-
 import { toast } from "sonner";
 
 export default function SignUp() {
-  const { signUp, isLoaded: signUpLoaded }  = useSignUp();
-  const { signIn, isLoaded: signInLoaded }  = useSignIn();
+ 
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword]     = useState(false);
@@ -55,71 +53,208 @@ export default function SignUp() {
     setErrors({ ...errors, [name]: validateField(name, value) });
   };
 
- const handleSubmit = async (e) => {
+
+
+const handleSubmit =
+async (e) => {
+
   e.preventDefault();
 
-  if (!signUpLoaded) {
-    toast.error("System not ready");
+  /* =====================================
+     VALIDATE ALL FIELDS
+  ===================================== */
+
+  const newErrors = {
+
+    firstName:
+      validateField(
+
+        "firstName",
+
+        form.firstName
+
+      ),
+
+    lastName:
+      validateField(
+
+        "lastName",
+
+        form.lastName
+
+      ),
+
+    email:
+      validateField(
+
+        "email",
+
+        form.email
+
+      ),
+
+    password:
+      validateField(
+
+        "password",
+
+        form.password
+
+      ),
+
+  };
+
+  setErrors(newErrors);
+
+  setTouched({
+
+    firstName: true,
+
+    lastName: true,
+
+    email: true,
+
+    password: true,
+
+  });
+
+  /* =====================================
+     STOP IF ERRORS
+  ===================================== */
+
+  if (
+
+    Object.values(newErrors)
+      .some(Boolean)
+
+  ) {
+
+    toast.error(
+
+      "Please fix all errors"
+
+    );
+
     return;
+
   }
 
   setLoading(true);
 
   try {
-    await signUp.create({
-      firstName: form.firstName,
-      lastName: form.lastName,
-      emailAddress: form.email,
-      password: form.password,
-    });
 
-    // Send verification email immediately
-    await signUp.prepareEmailAddressVerification({
-      strategy: "email_code",
-    });
+    const res =
+      await fetch(
 
-    toast.success("Verification code sent 📩");
+        "https://eshop-backend-y0e7.onrender.com/api/auth/signup",
 
-    navigate("/verify");
-  } catch (err) {
-    console.error(err);
-    toast.error(err.errors?.[0]?.message || "Signup failed");
+        {
+
+          method: "POST",
+
+          headers: {
+
+            "Content-Type":
+              "application/json",
+
+          },
+
+          body: JSON.stringify({
+
+            firstName:
+              form.firstName.trim(),
+
+            lastName:
+              form.lastName.trim(),
+
+            email:
+              form.email.trim(),
+
+            password:
+              form.password,
+
+          }),
+
+        }
+
+      );
+
+    const data =
+      await res.json();
+
+    /* =====================================
+       BACKEND ERRORS
+    ===================================== */
+
+    if (!res.ok) {
+
+      /* EMAIL EXISTS */
+      if (
+
+        data.message
+          ?.toLowerCase()
+          .includes("email")
+
+      ) {
+
+        setErrors((prev) => ({
+
+          ...prev,
+
+          email:
+            data.message,
+
+        }));
+
+      }
+
+      throw new Error(
+
+        data.message ||
+
+        "Signup failed"
+
+      );
+
+    }
+
+    toast.success(
+
+      "OTP sent successfully 📩"
+
+    );
+
+    localStorage.setItem(
+
+      "verifyEmail",
+
+      form.email
+
+    );
+
+    navigate(
+      "/verify-signup-otp"
+    );
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+    toast.error(
+      error.message
+    );
+
   } finally {
+
     setLoading(false);
+
   }
+
 };
 
-  const handleGoogle = async () => {
-    if (!signInLoaded) return;
-    setSocialLoading("google");
-    try {
-      await signIn.authenticateWithRedirect({
-        strategy: "oauth_google",
-        redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/",
-      });
-    } catch (err) {
-      console.error(err);
-      toast.error("Google sign-in failed");
-      setSocialLoading(null);
-    }
-  };
-
-  const handleGithub = async () => {
-    if (!signInLoaded) return;
-    setSocialLoading("github");
-    try {
-      await signIn.authenticateWithRedirect({
-        strategy: "oauth_github",
-        redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/",
-      });
-    } catch (err) {
-      console.error(err);
-      toast.error("GitHub sign-in failed");
-      setSocialLoading(null);
-    }
-  };
+ 
 
   return (
     <AuthLayout title="Create Account">
@@ -288,37 +423,6 @@ export default function SignUp() {
 
       <div className="su-root space-y-4">
 
-        {/* ── SOCIAL LOGIN ── */}
-        <div className="su-enter space-y-2">
-          <button
-            onClick={handleGoogle}
-            type="button"
-            disabled={socialLoading==="google"}
-            className={`social-btn ${socialLoading==="google"?"loading":""}`}>
-            {socialLoading==="google"
-              ? <div className="spinner"/>
-              : <FcGoogle size={18}/>}
-            <span className="relative z-10">Continue with Google</span>
-          </button>
-
-          <button
-            onClick={handleGithub}
-            type="button"
-            disabled={socialLoading==="github"}
-            className={`social-btn ${socialLoading==="github"?"loading":""}`}>
-            {socialLoading==="github"
-              ? <div className="spinner"/>
-              : <FaGithub size={18} style={{ color:"#1f2937" }}/>}
-            <span className="relative z-10">Continue with GitHub</span>
-          </button>
-        </div>
-
-        {/* ── DIVIDER ── */}
-        <div className="su-enter divider-wrap">
-          <div className="divider-line"/>
-          <span className="divider-text">Or</span>
-          <div className="divider-line"/>
-        </div>
 
         {/* ── FORM ── */}
         <form onSubmit={handleSubmit} className="su-enter space-y-3.5">

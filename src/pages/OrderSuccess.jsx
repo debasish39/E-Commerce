@@ -1,407 +1,1596 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import Lottie from "lottie-react";
+
 import successAnimation from "../assets/success.json";
 import successmusic from "../assets/successmusic.mp3";
-/* ── injected styles ── */
+
+import {
+  ShoppingBag,
+  ClipboardList,
+  Headphones,
+  ShieldCheck,
+  Truck,
+  RotateCcw,
+  CheckCircle2,
+  Package,
+  Home,
+  ArrowRight,
+  Sparkles,
+  CreditCard,
+  MapPin,
+} from "lucide-react";
+
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Clash+Display:wght@500;600;700&display=swap');
 
-.os-root {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  min-height: 90vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px 16px;
-  background: transparent;
-  position: relative;
-  overflow: hidden;
+:root{
+  --indigo:#4f46e5;
+  --blue:#2563eb;
+  --slate:#0f172a;
 }
 
-/* ── confetti particle ── */
-.os-confetti {
-  position: absolute;
-  width: 8px; height: 8px;
-  border-radius: 2px;
-  opacity: 0;
-  animation: osFall var(--dur) ease-in var(--delay) forwards;
-  pointer-events: none;
-  z-index: 0;
-}
-@keyframes osFall {
-  0%   { opacity: 1; transform: translateY(-60px) rotate(0deg) scale(1); }
-  80%  { opacity: .8; }
-  100% { opacity: 0; transform: translateY(420px) rotate(720deg) scale(.5); }
+*{
+  box-sizing:border-box;
 }
 
-/* ── card ── */
-.os-card {
-  position: relative; z-index: 1;
-  border-radius: 28px;
-  padding: 44px 36px 40px;
-  max-width: 440px; width: 100%;
-  display: flex; flex-direction: column; align-items: center;
-  text-align: center;
-  animation: osCardIn .65s cubic-bezier(.22,1,.36,1) both;
-}
-@keyframes osCardIn {
-  from { opacity:0; transform:translateY(32px) scale(.96); }
-  to   { opacity:1; transform:translateY(0) scale(1); }
+.os-root{
+
+  font-family:'Outfit',sans-serif;
+
+  min-height:100vh;
+
+  position:relative;
+  overflow:hidden;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:40px 20px;
+
+  background:
+    radial-gradient(circle at top right,#dbeafe 0%,transparent 30%),
+    radial-gradient(circle at bottom left,#c7d2fe 0%,transparent 35%),
+    linear-gradient(135deg,#f8fafc,#eef2ff);
 }
 
-/* glow ring behind card */
-.os-card::before {
-  content: '';
-  position: absolute; inset: -2px;
-  border-radius: 30px;
-  z-index: -1;
-  filter: blur(4px);
+/* AMBIENT BACKGROUND */
+
+.os-root::before{
+
+  content:"";
+
+  position:absolute;
+  inset:-20%;
+
+  background:
+    radial-gradient(circle,#6366f122 0%,transparent 40%),
+    radial-gradient(circle,#3b82f622 0%,transparent 45%);
+
+  animation:
+    osAmbientMove 18s linear infinite;
+
+  pointer-events:none;
 }
 
-/* ── lottie wrap ── */
-.os-lottie {
-  width: 180px; height: 180px;
-  animation: osLottieIn .5s cubic-bezier(.22,1,.36,1) .15s both;
-}
-@keyframes osLottieIn {
-  from { opacity:0; transform:scale(.7); }
-  to   { opacity:1; transform:scale(1); }
+@keyframes osAmbientMove{
+
+  0%{
+    transform:translate3d(0,0,0) rotate(0deg);
+  }
+
+  100%{
+    transform:translate3d(-4%,2%,0) rotate(10deg);
+  }
+
 }
 
-/* ── badge ── */
-.os-badge {
-  display: inline-flex; align-items: center; gap: 7px;
-  background: linear-gradient(135deg,rgba(99,102,241,.12),rgba(59,130,246,.10));
-  border: 1px solid rgba(199,210,254,.8);
-  border-radius: 100px;
-  padding: 5px 16px;
-  font-size: 11px; font-weight: 700;
-  letter-spacing: .10em; text-transform: uppercase;
-  color: #4f46e5;
-  margin-bottom: 14px;
-  animation: osFadeUp .5s ease .3s both;
-}
-.os-badge-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: #4f46e5;
-  animation: osPulse 1.8s ease-in-out infinite;
-}
-@keyframes osPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.6)} }
+/* FLOATING BLOBS */
 
-/* ── heading ── */
-.os-h1 {
-  font-family: 'Bricolage Grotesque', sans-serif;
-  font-size: clamp(1.6rem, 5vw, 2.1rem);
-  font-weight: 800;
-  color: #0f172a;
-  line-height: 1.15;
-  letter-spacing: -.02em;
-  margin-bottom: 10px;
-  animation: osFadeUp .5s ease .4s both;
-}
-.os-h1 span {
-  background: linear-gradient(135deg,#4f46e5,#2563eb);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+.os-blob{
+  position:absolute;
+
+  border-radius:999px;
+
+  filter:blur(90px);
+
+  opacity:.5;
+
+  pointer-events:none;
 }
 
-/* ── sub text ── */
-.os-sub {
-  font-size: .95rem; color: #64748b;
-  line-height: 1.6; max-width: 320px;
-  margin-bottom: 28px;
-  animation: osFadeUp .5s ease .5s both;
-}
-.os-sub strong { color: #4f46e5; font-weight: 700; }
+.os-blob-1{
+  width:340px;
+  height:340px;
 
-/* ── delivery info strip ── */
-.os-strip {
-  display: flex; align-items: center; gap: 0;
-  width: 100%;
-  // background: rgba(238,242,255,0.7);
-  border: 1px solid rgba(199,210,254,.6);
-  border-radius: 16px;
-  padding: 14px 0;
-  margin-bottom: 28px;
-  animation: osFadeUp .5s ease .55s both;
-}
-.os-strip-item {
-  flex: 1;
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 0 12px;
-  border-right: 1px solid rgba(199,210,254,.6);
-}
-.os-strip-item:last-child { border-right: none; }
-.os-strip-icon { font-size: 18px; }
-.os-strip-label { font-size: 10px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing:.06em; }
-.os-strip-val   { font-size: 12.5px; font-weight: 700; color: #334155; }
+  background:#6366f1;
 
-/* ── progress tracker ── */
-.os-tracker {
-  width: 100%; margin-bottom: 28px;
-  animation: osFadeUp .5s ease .6s both;
-}
-.os-tracker-steps {
-  display: flex; align-items: center; justify-content: space-between;
-  position: relative;
-}
-.os-tracker-line {
-  position: absolute; top: 14px; left: 14px; right: 14px; height: 3px;
-  background: #e2e8f0; border-radius: 2px; z-index: 0;
-}
-.os-tracker-fill {
-  position: absolute; top: 14px; left: 14px; height: 3px;
-  background: linear-gradient(90deg,#4f46e5,#2563eb);
-  border-radius: 2px; z-index: 1;
-  animation: osFillBar 1.4s cubic-bezier(.22,1,.36,1) .8s both;
-  width: 0;
-}
-@keyframes osFillBar { to { width: calc(33.33% - 0px); } }
+  top:-120px;
+  right:-80px;
 
-.os-step {
-  display: flex; flex-direction: column; align-items: center; gap: 7px;
-  position: relative; z-index: 2; flex: 1;
-}
-.os-step-circle {
-  width: 30px; height: 30px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px;
-  transition: all .3s;
-}
-.os-step.done .os-step-circle {
-  background: linear-gradient(135deg,#4f46e5,#2563eb);
-  color: white;
-  box-shadow: 0 3px 12px rgba(79,70,229,0.35);
-  animation: osBounce .4s cubic-bezier(.34,1.6,.64,1) var(--delay) both;
-}
-@keyframes osBounce {
-  from { transform:scale(0); opacity:0; }
-  to   { transform:scale(1); opacity:1; }
-}
-.os-step.active .os-step-circle {
-  background: white;
-  border: 2.5px solid #4f46e5;
-  color: #4f46e5;
-}
-.os-step.pending .os-step-circle {
-  background: #f1f5f9;
-  border: 2px solid #e2e8f0;
-  color: #94a3b8;
-}
-.os-step-label { font-size: 10.5px; font-weight: 600; color: #64748b; white-space: nowrap; }
-.os-step.done .os-step-label,
-.os-step.active .os-step-label { color: #4f46e5; }
-
-/* ── CTAs ── */
-.os-ctas {
-  display: flex; gap: 10px; width: 100%; flex-wrap: wrap;
-  animation: osFadeUp .5s ease .7s both;
-}
-.os-btn-primary {
-  flex: 1; min-width: 140px;
-  padding: 14px 20px; border: none; border-radius: 13px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 14px; font-weight: 700; color: white; cursor: pointer;
-  background: linear-gradient(135deg,#4f46e5,#2563eb);
-  box-shadow: 0 4px 20px rgba(79,70,229,0.32);
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: transform .18s, box-shadow .18s, filter .18s;
-  position: relative; overflow: hidden;
-}
-.os-btn-primary::before {
-  content:''; position:absolute; inset:0;
-  background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);
-  background-size:200% 100%; animation:osShim 2.6s ease-in-out infinite;
-}
-@keyframes osShim { 0%{background-position:-200% center} 100%{background-position:200% center} }
-.os-btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(79,70,229,.44); filter:brightness(1.06); }
-.os-btn-primary:active { transform:scale(.97); }
-
-.os-btn-secondary {
-  flex: 1; min-width: 120px;
-  padding: 13px 20px; border-radius: 13px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 14px; font-weight: 700; color: #4f46e5; cursor: pointer;
-  background: rgba(238,242,255,0.8);
-  border: 1.5px solid rgba(199,210,254,.8);
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: transform .18s, box-shadow .18s, background .18s;
-  backdrop-filter: blur(8px);
-}
-.os-btn-secondary:hover {
-  transform: translateY(-2px);
-  background: rgba(224,231,255,0.9);
-  box-shadow: 0 6px 20px rgba(79,70,229,.12);
-}
-.os-btn-secondary:active { transform:scale(.97); }
-
-/* ── footnote ── */
-.os-foot {
-  margin-top: 18px;
-  font-size: 11.5px; color: #94a3b8;
-  display: flex; align-items: center; gap: 6px;
-  animation: osFadeUp .5s ease .75s both;
-}
-.os-foot::before, .os-foot::after {
-  content:''; flex:1; height:1px; background:rgba(199,210,254,.5);
+  animation:
+    osFloat 8s ease-in-out infinite;
 }
 
-@keyframes osFadeUp {
-  from { opacity:0; transform:translateY(14px); }
-  to   { opacity:1; transform:translateY(0); }
+.os-blob-2{
+  width:260px;
+  height:260px;
+
+  background:#60a5fa;
+
+  bottom:-80px;
+  left:-60px;
+
+  animation:
+    osFloat 10s ease-in-out infinite reverse;
 }
 
-@media(max-width:440px){
-  .os-card { padding:32px 20px 28px; border-radius:22px; }
-  .os-ctas { flex-direction:column; }
-  .os-strip-val { font-size:11.5px; }
+@keyframes osFloat{
+
+  0%,100%{
+    transform:translateY(0px);
+  }
+
+  50%{
+    transform:translateY(-22px);
+  }
+
+}
+
+/* CONFETTI */
+
+.os-confetti{
+  position:fixed;
+
+  opacity:0;
+
+  pointer-events:none;
+
+  z-index:0;
+
+  animation:
+    osFall var(--dur) ease-in var(--delay) forwards;
+}
+
+@keyframes osFall{
+
+  0%{
+    opacity:1;
+
+    transform:
+      translateY(-60px)
+      rotate(0deg)
+      scale(1);
+  }
+
+  100%{
+    opacity:0;
+
+    transform:
+      translateY(420px)
+      rotate(720deg)
+      scale(.5);
+  }
+
+}
+
+/* MAIN LAYOUT */
+
+.os-layout{
+
+  width:100%;
+  max-width:1180px;
+
+  display:grid;
+  grid-template-columns:1.2fr .8fr;
+
+  gap:28px;
+
+  position:relative;
+  z-index:1;
+}
+
+/* CARD */
+
+.os-card{
+
+  position:relative;
+
+  overflow:hidden;
+
+  border-radius:36px;
+
+  padding:44px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.72),
+      rgba(255,255,255,.42)
+    );
+
+  backdrop-filter:
+    blur(28px)
+    saturate(180%);
+
+  border:
+    1px solid rgba(255,255,255,.22);
+
+  outline:
+    1px solid rgba(255,255,255,.08);
+
+  box-shadow:
+    0 20px 80px rgba(15,23,42,.12),
+    inset 0 1px 1px rgba(255,255,255,.35);
+
+  transform-origin:center;
+
+  animation:
+    osCinematicIn .9s cubic-bezier(.16,1,.3,1);
+
+  transition:
+    transform .4s cubic-bezier(.22,1,.36,1);
+}
+
+.os-card:hover{
+  transform:translateY(-4px);
+}
+
+/* CURSOR GLOW */
+
+.os-card::before{
+
+  content:"";
+
+  position:absolute;
+  inset:0;
+
+  background:
+    radial-gradient(
+      circle at var(--x) var(--y),
+      rgba(99,102,241,.14),
+      transparent 35%
+    );
+
+  opacity:0;
+
+  transition:opacity .3s;
+
+  pointer-events:none;
+}
+
+.os-card:hover::before{
+  opacity:1;
+}
+
+@keyframes osCinematicIn{
+
+  0%{
+    opacity:0;
+
+    transform:
+      perspective(1600px)
+      rotateX(10deg)
+      translateY(50px)
+      scale(.94);
+  }
+
+  100%{
+    opacity:1;
+
+    transform:
+      perspective(1600px)
+      rotateX(0)
+      translateY(0)
+      scale(1);
+  }
+
+}
+
+/* SUCCESS AREA */
+
+.os-success-wrap{
+  position:relative;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  margin-bottom:12px;
+}
+
+.os-ring{
+
+  position:absolute;
+
+  width:220px;
+  height:220px;
+
+  border-radius:999px;
+
+  border:
+    1px solid rgba(99,102,241,.14);
+
+  animation:
+    osRing 8s linear infinite;
+}
+
+@keyframes osRing{
+
+  from{
+    transform:rotate(0deg) scale(1);
+  }
+
+  to{
+    transform:rotate(360deg) scale(1.05);
+  }
+
+}
+
+.os-success-glow{
+
+  position:absolute;
+
+  width:220px;
+  height:220px;
+
+  border-radius:999px;
+
+  background:
+    radial-gradient(circle,#6366f155 0%,transparent 70%);
+
+  filter:blur(40px);
+
+  animation:
+    osGlowPulse 3s ease-in-out infinite;
+}
+
+@keyframes osGlowPulse{
+
+  0%,100%{
+    transform:scale(1);
+    opacity:.6;
+  }
+
+  50%{
+    transform:scale(1.12);
+    opacity:1;
+  }
+
+}
+
+.os-lottie{
+  width:180px;
+  height:180px;
+
+  position:relative;
+  z-index:2;
+}
+
+/* BADGE */
+
+.os-badge{
+
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+
+  padding:8px 18px;
+
+  border-radius:999px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(99,102,241,.12),
+      rgba(59,130,246,.08)
+    );
+
+  border:
+    1px solid rgba(199,210,254,.8);
+
+  color:var(--indigo);
+
+  font-size:11px;
+  font-weight:700;
+
+  letter-spacing:.14em;
+  text-transform:uppercase;
+
+  margin-bottom:18px;
+}
+
+.os-badge-dot{
+
+  width:6px;
+  height:6px;
+
+  border-radius:50%;
+
+  background:var(--indigo);
+
+  animation:
+    osPulse 1.8s ease infinite;
+}
+
+@keyframes osPulse{
+
+  0%,100%{
+    opacity:1;
+    transform:scale(1);
+  }
+
+  50%{
+    opacity:.5;
+    transform:scale(1.6);
+  }
+
+}
+
+/* TEXT */
+
+.os-h1{
+
+  font-family:'Clash Display',sans-serif;
+
+  font-size:clamp(2rem,5vw,3.2rem);
+
+  line-height:1.05;
+
+  letter-spacing:-.04em;
+
+  color:var(--slate);
+
+  margin-bottom:16px;
+}
+
+.os-h1 span{
+
+  background:
+    linear-gradient(
+      135deg,
+      #4f46e5,
+      #2563eb
+    );
+
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.os-sub{
+
+  max-width:560px;
+
+  color:#64748b;
+
+  font-size:1rem;
+
+  line-height:1.8;
+
+  margin-bottom:26px;
+}
+
+.os-sub strong{
+  color:var(--indigo);
+}
+
+/* ETA */
+
+.os-eta{
+
+  width:100%;
+
+  display:flex;
+  align-items:center;
+  gap:14px;
+
+  padding:18px 20px;
+
+  border-radius:24px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(79,70,229,.08),
+      rgba(37,99,235,.06)
+    );
+
+  border:
+    1px solid rgba(99,102,241,.12);
+
+  margin-bottom:28px;
+}
+
+.os-eta-icon{
+
+  width:48px;
+  height:48px;
+
+  border-radius:18px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:white;
+
+  color:var(--indigo);
+
+  box-shadow:
+    0 8px 24px rgba(79,70,229,.12);
+}
+
+.os-eta p{
+
+  margin:0;
+
+  font-size:12px;
+  font-weight:600;
+
+  color:#64748b;
+
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+.os-eta strong{
+
+  color:var(--slate);
+
+  font-size:16px;
+}
+
+/* STRIP */
+
+.os-strip{
+
+  width:100%;
+
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+
+  overflow:hidden;
+
+  border-radius:24px;
+
+  margin-bottom:28px;
+
+  background:
+    rgba(255,255,255,.45);
+
+  border:
+    1px solid rgba(199,210,254,.35);
+
+  backdrop-filter:blur(14px);
+}
+
+.os-strip-item{
+
+  padding:20px;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+
+  transition:
+    transform .5s cubic-bezier(.22,1,.36,1),
+    background .4s;
+}
+
+.os-strip-item:hover{
+
+  transform:
+    translateY(-4px)
+    scale(1.02);
+
+  background:
+    rgba(255,255,255,.55);
+}
+
+.os-strip-icon{
+
+  width:44px;
+  height:44px;
+
+  border-radius:16px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:
+    linear-gradient(
+      135deg,
+      #eef2ff,
+      #dbeafe
+    );
+
+  color:var(--indigo);
+}
+
+.os-strip-label{
+
+  font-size:11px;
+  font-weight:700;
+
+  text-transform:uppercase;
+
+  letter-spacing:.08em;
+
+  color:#94a3b8;
+}
+
+.os-strip-val{
+
+  font-size:14px;
+  font-weight:700;
+
+  color:#334155;
+}
+
+/* TRACKER */
+
+.os-tracker{
+  margin-bottom:30px;
+}
+
+.os-tracker-steps{
+
+  display:flex;
+  justify-content:space-between;
+
+  position:relative;
+}
+
+.os-tracker-line{
+
+  position:absolute;
+
+  top:14px;
+  left:18px;
+  right:18px;
+
+  height:4px;
+
+  border-radius:999px;
+
+  background:#e2e8f0;
+}
+
+.os-tracker-fill{
+
+  position:absolute;
+
+  top:14px;
+  left:18px;
+
+  height:4px;
+
+  width:0;
+
+  border-radius:999px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #4f46e5,
+      #2563eb
+    );
+
+  animation:
+    osFillBar 1.5s cubic-bezier(.22,1,.36,1) .8s forwards;
+}
+
+@keyframes osFillBar{
+  to{
+    width:calc(33.33% - 6px);
+  }
+}
+
+.os-step{
+
+  position:relative;
+  z-index:2;
+
+  flex:1;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
+
+.os-step-circle{
+
+  width:32px;
+  height:32px;
+
+  border-radius:50%;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.os-step.done .os-step-circle{
+
+  background:
+    linear-gradient(
+      135deg,
+      #4f46e5,
+      #2563eb
+    );
+
+  color:white;
+}
+
+.os-step.active .os-step-circle{
+
+  background:white;
+
+  border:2px solid var(--indigo);
+
+  color:var(--indigo);
+
+  animation:
+    osActiveGlow 2s ease infinite;
+}
+
+.os-step.pending .os-step-circle{
+
+  background:#f1f5f9;
+
+  color:#94a3b8;
+}
+
+@keyframes osActiveGlow{
+
+  0%,100%{
+    box-shadow:
+      0 0 0 0 rgba(79,70,229,.3);
+  }
+
+  70%{
+    box-shadow:
+      0 0 0 14px rgba(79,70,229,0);
+  }
+
+}
+
+.os-step-label{
+
+  font-size:11px;
+  font-weight:700;
+
+  color:#64748b;
+}
+
+/* CTA */
+
+.os-ctas{
+
+  display:flex;
+  gap:14px;
+
+  position:sticky;
+  bottom:0;
+}
+
+.os-btn-primary,
+.os-btn-secondary{
+
+  flex:1;
+
+  border:none;
+
+  border-radius:18px;
+
+  padding:16px 20px;
+
+  font-size:14px;
+  font-weight:700;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+
+  cursor:pointer;
+
+  transition:
+    transform .5s cubic-bezier(.22,1,.36,1),
+    box-shadow .5s,
+    filter .5s;
+}
+
+.os-btn-primary{
+
+  background:
+    linear-gradient(
+      135deg,
+      #4f46e5,
+      #2563eb
+    );
+
+  color:white;
+
+  box-shadow:
+    0 12px 34px rgba(79,70,229,.3);
+}
+
+.os-btn-secondary{
+
+  background:
+    rgba(255,255,255,.55);
+
+  color:var(--indigo);
+
+  border:
+    1px solid rgba(199,210,254,.5);
+}
+
+.os-btn-primary:hover,
+.os-btn-secondary:hover{
+
+  transform:
+    translateY(-4px)
+    scale(1.02);
+
+  filter:brightness(1.04);
+}
+
+.os-btn-primary:active,
+.os-btn-secondary:active{
+  transform:scale(.97);
+}
+
+/* SIDEBAR */
+
+.os-side{
+
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+}
+
+.os-side-card{
+
+  position:relative;
+
+  overflow:hidden;
+
+  border-radius:32px;
+
+  padding:28px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.7),
+      rgba(255,255,255,.4)
+    );
+
+  backdrop-filter:
+    blur(26px)
+    saturate(180%);
+
+  border:
+    1px solid rgba(255,255,255,.2);
+
+  box-shadow:
+    0 20px 60px rgba(15,23,42,.08);
+}
+
+.os-side-badge{
+
+  display:inline-flex;
+
+  padding:6px 12px;
+
+  border-radius:999px;
+
+  background:#eef2ff;
+
+  color:var(--indigo);
+
+  font-size:11px;
+  font-weight:700;
+
+  margin-bottom:18px;
+}
+
+.os-side h3{
+
+  margin:0 0 24px;
+
+  font-size:24px;
+  font-weight:700;
+
+  color:var(--slate);
+}
+
+.os-side-list{
+
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+
+  margin-bottom:22px;
+}
+
+.os-side-row{
+
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  color:#64748b;
+
+  font-size:14px;
+}
+
+.os-side-row strong{
+  color:var(--slate);
+}
+
+.os-side-total{
+
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  padding-top:20px;
+
+  border-top:
+    1px solid rgba(199,210,254,.4);
+}
+
+.os-side-total strong{
+
+  font-size:24px;
+
+  color:var(--indigo);
+}
+
+/* FOOTER */
+
+.os-foot{
+
+  margin-top:24px;
+
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  color:#94a3b8;
+
+  font-size:13px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:980px){
+
+  .os-layout{
+    grid-template-columns:1fr;
+  }
+
+}
+
+@media(max-width:640px){
+
+  .os-root{
+    padding:18px;
+  }
+
+  .os-card{
+    padding:28px 22px;
+  }
+
+  .os-side-card{
+    padding:22px;
+  }
+
+  .os-strip{
+    grid-template-columns:1fr;
+  }
+
+  .os-ctas{
+    flex-direction:column;
+  }
+
+  .os-h1{
+    font-size:2rem;
+  }
+
 }
 `;
 
-/* confetti colours matching app theme */
 const CONFETTI_COLORS = [
-  "#4f46e5", "#6366f1", "#2563eb", "#60a5fa",
-  "#a5b4fc", "#c7d2fe", "#fb923c", "#fde68a",
+  "#4f46e5",
+  "#6366f1",
+  "#2563eb",
+  "#60a5fa",
+  "#a5b4fc",
+  "#c7d2fe",
 ];
 
 const STEPS = [
-  { icon: "✅", label: "Confirmed", state: "done", delay: ".85s" },
-  { icon: "📦", label: "Packing", state: "active", delay: "1s" },
-  { icon: "🚚", label: "Shipping", state: "pending", delay: "" },
-  { icon: "🏠", label: "Delivered", state: "pending", delay: "" },
+  {
+    icon: <CheckCircle2 size={15} />,
+    label: "Confirmed",
+    state: "done",
+  },
+  {
+    icon: <Package size={15} />,
+    label: "Packing",
+    state: "active",
+  },
+  {
+    icon: <Truck size={15} />,
+    label: "Shipping",
+    state: "pending",
+  },
+  {
+    icon: <Home size={15} />,
+    label: "Delivered",
+    state: "pending",
+  },
 ];
 
 export default function OrderSuccess() {
+
   const navigate = useNavigate();
+
   const [confetti, setConfetti] = useState([]);
+  const location = useLocation();
 
-  /* inject styles once */
+  const order = location.state?.order;
+  if (!order) {
+
+    return <Navigate to="/" replace />;
+
+  }
   useEffect(() => {
-    const id = "os-styles";
-    if (!document.getElementById(id)) {
-      const el = document.createElement("style");
-      el.id = id; el.textContent = CSS;
-      document.head.appendChild(el);
-    }
+
+    const audio = new Audio(successmusic);
+
+    audio.volume = 0.45;
+
+    audio.play().catch(() => { });
+
   }, []);
-  // useEffect(() => {
-  //   const audio = new Audio(successmusic);
 
-  //   audio.volume = 0.7;
-
-  //   audio.play().catch((err) => {
-  //     console.log("Audio autoplay blocked:", err);
-  //   });
-
-  // }, []);
-  /* spawn confetti */
   useEffect(() => {
-    const pieces = Array.from({ length: 32 }, (_, i) => ({
-      id: i,
-      color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
-      left: `${Math.random() * 100}%`,
-      dur: `${1.2 + Math.random() * 1.8}s`,
-      delay: `${Math.random() * 0.8}s`,
-      size: `${6 + Math.random() * 6}px`,
-      borderRadius: Math.random() > .5 ? "50%" : "2px",
-    }));
+
+    const id = "modern-success-ui";
+
+    if (!document.getElementById(id)) {
+
+      const style = document.createElement("style");
+
+      style.id = id;
+      style.textContent = CSS;
+
+      document.head.appendChild(style);
+
+    }
+
+  }, []);
+
+  useEffect(() => {
+
+    const pieces = Array.from(
+      { length: 40 },
+      (_, i) => ({
+        id: i,
+        color:
+          CONFETTI_COLORS[
+          i % CONFETTI_COLORS.length
+          ],
+        left: `${Math.random() * 100}%`,
+        dur: `${1.4 + Math.random() * 1.8}s`,
+        delay: `${Math.random() * .8}s`,
+        size: `${6 + Math.random() * 8}px`,
+      })
+    );
+
     setConfetti(pieces);
+
+  }, []);
+
+  const orderId = useMemo(() => {
+
+    return `#ESH-${Math.floor(
+      10000 + Math.random() * 90000
+    )}`;
+
   }, []);
 
   return (
+
     <div className="os-root">
-      {/* confetti */}
-      {confetti.map(p => (
+
+      {/* BLOBS */}
+      <div className="os-blob os-blob-1" />
+      <div className="os-blob os-blob-2" />
+
+      {/* CONFETTI */}
+      {confetti.map((p) => (
+
         <div
           key={p.id}
           className="os-confetti"
           style={{
             left: p.left,
             top: "-20px",
-            width: p.size, height: p.size,
-            borderRadius: p.borderRadius,
+
+            width: p.size,
+            height: p.size,
+
+            background: p.color,
+
             "--dur": p.dur,
             "--delay": p.delay,
           }}
         />
+
       ))}
 
-      {/* ── CARD ── */}
-      <div className="os-card">
+      {/* LAYOUT */}
+      <div className="os-layout">
 
-        {/* Lottie */}
-        <div className="os-lottie">
-          <Lottie animationData={successAnimation} autoplay loop={false} />
-        </div>
+        {/* LEFT */}
+        <div
+          className="os-card"
 
-        {/* Badge */}
-        <div className="os-badge">
-          <span className="os-badge-dot" /> Order Confirmed
-        </div>
+          onMouseMove={(e) => {
 
-        {/* Heading */}
-        <h1 className="os-h1">
-          <span>Thank you</span> for your order! 🎉
-        </h1>
+            const rect =
+              e.currentTarget.getBoundingClientRect();
 
-        {/* Sub */}
-        <p className="os-sub">
-          Your order has been placed and will be delivered within{" "}
-          <strong>5–7 business days</strong>. We'll send you a tracking link via email.
-        </p>
+            e.currentTarget.style.setProperty(
+              "--x",
+              `${e.clientX - rect.left}px`
+            );
 
-        {/* Info strip */}
-        <div className="os-strip">
-          {[
-            { icon: "📦", label: "Estimated", val: "5–7 Days" },
-            { icon: "🔒", label: "Payment", val: "Secured" },
-            { icon: "↩️", label: "Returns", val: "10 Days" },
-          ].map(s => (
-            <div className="os-strip-item" key={s.label}>
-              <span className="os-strip-icon">{s.icon}</span>
-              <span className="os-strip-label">{s.label}</span>
-              <span className="os-strip-val">{s.val}</span>
+            e.currentTarget.style.setProperty(
+              "--y",
+              `${e.clientY - rect.top}px`
+            );
+
+          }}
+        >
+
+          {/* SUCCESS */}
+          <div className="os-success-wrap">
+
+            <div className="os-ring" />
+
+            <div className="os-success-glow" />
+
+            <div className="os-lottie">
+
+              <Lottie
+                animationData={successAnimation}
+                autoplay
+                loop={false}
+              />
+
             </div>
-          ))}
-        </div>
 
-        {/* Progress tracker */}
-        <div className="os-tracker">
-          <div className="os-tracker-steps">
-            <div className="os-tracker-line" />
-            <div className="os-tracker-fill" />
-            {STEPS.map(s => (
-              <div key={s.label} className={`os-step ${s.state}`}>
-                <div
-                  className="os-step-circle"
-                  style={s.state === "done" ? { "--delay": s.delay } : {}}
-                >
+          </div>
+
+          {/* BADGE */}
+          <div className="os-badge">
+
+            <span className="os-badge-dot" />
+
+            {order.paymentMethod === "COD"
+              ? "Order Placed"
+              : "Payment Successful"}
+          </div>
+
+          {/* TITLE */}
+          <h1 className="os-h1">
+
+            <span>Order confirmed.</span>
+
+            <br />
+
+            We’re preparing it now.
+
+          </h1>
+
+          {/* SUBTEXT */}
+          <p className="os-sub">
+
+            Your order has been successfully placed and
+            will arrive within{" "}
+
+            <strong>5–7 business days</strong>.
+
+            Real-time updates will be sent to your
+            email and phone.
+
+          </p>
+
+          {/* ETA */}
+          <div className="os-eta">
+
+            <div className="os-eta-icon">
+
+              <Truck size={20} />
+
+            </div>
+
+            <div>
+
+              <p>Estimated Delivery</p>
+
+              <strong>
+                {order.estimatedDelivery || "5–7 Business Days"}
+              </strong>
+
+            </div>
+
+          </div>
+
+          {/* STRIP */}
+          <div className="os-strip">
+
+            {[
+              {
+                icon: <Truck size={18} />,
+                label: "Estimated",
+                val: "5–7 Days",
+              },
+              {
+                icon: <ShieldCheck size={18} />,
+                label: "Payment",
+                val: "Secured",
+              },
+              {
+                icon: <RotateCcw size={18} />,
+                label: "Returns",
+                val: "10 Days",
+              },
+            ].map((s) => (
+
+              <div
+                className="os-strip-item"
+                key={s.label}
+              >
+
+                <div className="os-strip-icon">
                   {s.icon}
                 </div>
-                <span className="os-step-label">{s.label}</span>
+
+                <span className="os-strip-label">
+                  {s.label}
+                </span>
+
+                <span className="os-strip-val">
+                  {s.val}
+                </span>
+
               </div>
+
             ))}
+
           </div>
+
+          {/* TRACKER */}
+          <div className="os-tracker">
+
+            <div className="os-tracker-steps">
+
+              <div className="os-tracker-line" />
+
+              <div className="os-tracker-fill" />
+
+              {STEPS.map((s) => (
+
+                <div
+                  key={s.label}
+                  className={`os-step ${s.state}`}
+                >
+
+                  <div className="os-step-circle">
+                    {s.icon}
+                  </div>
+
+                  <span className="os-step-label">
+                    {s.label}
+                  </span>
+
+                </div>
+
+              ))}
+
+            </div>
+
+          </div>
+
+          {/* CTA */}
+          <div className="os-ctas">
+
+            <button
+              className="os-btn-primary"
+              onClick={() => navigate("/products")}
+            >
+
+              <ShoppingBag size={17} />
+
+              Continue Shopping
+
+              <ArrowRight size={16} />
+
+            </button>
+
+            <button
+              className="os-btn-secondary"
+              onClick={() => navigate("/order-history")}
+            >
+
+              <ClipboardList size={17} />
+
+              View Orders
+
+            </button>
+
+          </div>
+
+          {/* FOOTER */}
+          <p className="os-foot">
+
+            <Headphones size={14} />
+
+            Need help?
+
+            <span
+              onClick={() => navigate("/contact")}
+              style={{
+                color: "#4f46e5",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              Contact Support
+            </span>
+
+          </p>
+
         </div>
 
-        {/* CTAs */}
-        <div className="os-ctas">
-          <button className="os-btn-primary" onClick={() => navigate("/products")}>
-            🛍️ Continue
-          </button>
-          <button className="os-btn-secondary" onClick={() => navigate("/order-history")}>
-            📋 View Orders
-          </button>
+        {/* RIGHT SIDE */}
+        <div className="os-side">
+
+          {/* SUMMARY */}
+          <div className="os-side-card">
+
+            <span className="os-side-badge">
+              {orderId}
+            </span>
+
+            <h3>Order Summary</h3>
+
+            <div className="os-side-list">
+
+              <div className="os-side-row">
+
+                <span>{order.items[0]?.name}</span>
+
+                <strong>
+                  ₹{Number(order.totalPrice - 5).toLocaleString()}
+                </strong>
+
+              </div>
+
+              <div className="os-side-row">
+
+                <span>Delivery</span>
+
+                <strong>Free</strong>
+
+              </div>
+
+              <div className="os-side-row">
+
+                <span>Payment</span>
+
+                <strong>{order.paymentMethod}</strong>
+
+              </div>
+
+              <div className="os-side-row">
+
+                <span>Shipping</span>
+
+                <strong>Express</strong>
+
+              </div>
+
+            </div>
+
+            <div className="os-side-total">
+
+              <span>Total</span>
+
+              <strong>₹{order.totalPrice.toLocaleString()}</strong>
+
+            </div>
+
+          </div>
+
+          {/* SHIPPING */}
+          <div className="os-side-card">
+
+            <span className="os-side-badge">
+              Shipping
+            </span>
+
+            <h3>Delivery Address</h3>
+
+            <div
+              style={{
+                display: "flex",
+                gap: 14,
+                alignItems: "flex-start",
+              }}
+            >
+
+              <div
+                style={{
+                  width: 46,
+                  height: 46,
+
+                  borderRadius: 18,
+
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+
+                  background:
+                    "linear-gradient(135deg,#eef2ff,#dbeafe)",
+
+                  color: "#4f46e5",
+
+                  flexShrink: 0,
+                }}
+              >
+
+                <MapPin size={20} />
+
+              </div>
+
+              <div>
+
+                <div
+                  style={{
+                    fontWeight: 700,
+                    color: "#0f172a",
+                    marginBottom: 6,
+                  }}
+                >
+                  {order.shippingAddress.name}
+                </div>
+
+                <div
+                  style={{
+                    color: "#64748b",
+                    lineHeight: 1.7,
+                    fontSize: 14,
+                  }}
+                >
+                  {order.shippingAddress.address}
+
+                  <br />
+
+                  {order.shippingAddress.city},
+
+                  {" "}
+                  {order.shippingAddress.state}
+
+                  <br />
+
+                  {order.shippingAddress.country}
+
+                  {" "}
+
+                  {order.shippingAddress.postcode}
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* PAYMENT */}
+          <div className="os-side-card">
+
+            <span className="os-side-badge">
+              Payment
+            </span>
+
+            <h3>Transaction Details</h3>
+
+            <div className="os-side-list">
+
+              {order?.items?.map((item, index) => (
+
+                <div
+                  key={index}
+                  className="os-side-row"
+                >
+
+                  <span>
+                    {item.name} × {item.quantity}
+                  </span>
+
+                  <strong>
+                    ₹{Number(item.price).toLocaleString()}
+                  </strong>
+
+                </div>
+
+              ))}
+
+              <div className="os-side-row">
+
+                <span>Delivery</span>
+
+                <strong>Free</strong>
+
+              </div>
+
+              <div className="os-side-row">
+
+                <span>Payment</span>
+
+                <strong>
+                  {order.paymentMethod}
+                </strong>
+
+              </div>
+
+              <div className="os-side-row">
+
+                <span>Shipping</span>
+
+                <strong>
+                  {order.deliveryType || "Express"}
+                </strong>
+
+              </div>
+
+            </div>
+
+            <button
+              className="os-btn-secondary"
+              style={{
+                width: "100%",
+                marginTop: 10,
+              }}
+            >
+
+              <CreditCard size={16} />
+
+              Download Invoice
+
+            </button>
+
+          </div>
+
         </div>
 
-        {/* Footnote */}
-        <p className="os-foot">
-          Need help? <span
-            onClick={() => navigate("/contact")}
-            style={{ color: "#4f46e5", fontWeight: 700, cursor: "pointer", textDecoration: "underline", textDecorationStyle: "dotted" }}
-          >Contact Support</span>
-        </p>
       </div>
+
     </div>
+
   );
+
 }

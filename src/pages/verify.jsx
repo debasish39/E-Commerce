@@ -1,111 +1,340 @@
-import { useSignUp } from "@clerk/clerk-react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import AuthLayout from "../components/AuthLayout";
-import { toast } from "sonner";
+
+import {
+
+  useState,
+
+} from "react";
+
+import {
+
+  useNavigate,
+
+} from "react-router-dom";
+
+import AuthLayout
+from "../components/AuthLayout";
+
+import {
+
+  toast,
+
+} from "sonner";
+
+/* =====================================
+   BACKEND URL
+===================================== */
+
+const BACKEND_URL =
+  "https://eshop-backend-y0e7.onrender.com";
 
 export default function Verify() {
-const { signUp, setActive } = useSignUp();
-const [code, setCode] = useState("");
-const navigate = useNavigate();
 
-const verifyCode = async (e) => {
-e.preventDefault();
+  /* =====================================
+     STATES
+  ===================================== */
 
+  const [
 
-try {
-  const result = await signUp.attemptEmailAddressVerification({
     code,
-  });
 
-  if (result.status === "complete") {
-    await setActive({ session: result.createdSessionId });
-    toast.success("Account verified 🎉");
-    navigate("/");
-  }
-} catch (err) {
-  toast.error("Invalid verification code");
-  console.error(err);
-}
+    setCode,
 
+  ] = useState("");
 
-};
+  const [
 
-return ( <AuthLayout title="Verify Your Email"> <div className="flex justify-center items-center w-full">
+    loading,
 
+    setLoading,
 
-    <div
-      className="
-      w-full max-w-md
-      rounded-3xl
-      p-6 sm:p-8
-      space-y-3
-    "
+  ] = useState(false);
+
+  const navigate =
+    useNavigate();
+
+  /* =====================================
+     VERIFY OTP
+  ===================================== */
+
+  const verifyCode =
+    async (e) => {
+
+      e.preventDefault();
+
+      setLoading(true);
+
+      try {
+
+        /* =====================================
+           EMAIL
+        ===================================== */
+
+        const email =
+
+          localStorage.getItem(
+
+            "verifyEmail"
+
+          );
+
+        /* =====================================
+           API CALL
+        ===================================== */
+
+        const res =
+          await fetch(
+
+            `${BACKEND_URL}/api/auth/verify-signup-otp`,
+
+            {
+
+              method: "POST",
+
+              headers: {
+
+                "Content-Type":
+                  "application/json",
+
+              },
+
+              body: JSON.stringify({
+
+                email,
+
+                otp: code,
+
+              }),
+
+            }
+
+          );
+
+        const data =
+          await res.json();
+
+        /* =====================================
+           ERROR
+        ===================================== */
+
+        if (!res.ok) {
+
+          throw new Error(
+
+            data.message ||
+
+            "Invalid OTP"
+
+          );
+
+        }
+
+        /* =====================================
+           SAVE TOKEN
+        ===================================== */
+
+        localStorage.setItem(
+
+          "token",
+
+          data.token
+
+        );
+
+        /* =====================================
+           REMOVE TEMP EMAIL
+        ===================================== */
+
+        localStorage.removeItem(
+
+          "verifyEmail"
+
+        );
+
+        /* =====================================
+           SUCCESS
+        ===================================== */
+
+        toast.success(
+  "Account verified 🎉"
+);
+
+// small delay so token is written first
+setTimeout(() => {
+  window.location.href = "/";
+},300);
+
+      } catch (error) {
+
+        console.error(
+          error
+        );
+
+        toast.error(
+          error.message
+        );
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
+    };
+
+  return (
+
+    <AuthLayout
+      title="Verify Your Email"
     >
 
-      {/* Header */}
-      <div className="text-center space-y-2">
-   
+      <div
+        className="
+          flex
+          justify-center
+          items-center
+          w-full
+        "
+      >
 
-        <p className="text-gray-400 text-sm">
-          We sent a 6-digit code to your email.
-        </p>
+        <div
+
+          className="
+            w-full
+            max-w-md
+            rounded-3xl
+            p-6 sm:p-8
+            space-y-3
+          "
+
+        >
+
+          {/* =====================================
+             HEADER
+          ===================================== */}
+
+          <div
+            className="
+              text-center
+              space-y-2
+            "
+          >
+
+            <p
+              className="
+                text-gray-400
+                text-sm
+              "
+            >
+
+              We sent a
+              6-digit code
+              to your email.
+
+            </p>
+
+          </div>
+
+          {/* =====================================
+             FORM
+          ===================================== */}
+
+          <form
+
+            onSubmit={
+              verifyCode
+            }
+
+            className="
+              space-y-5
+            "
+
+          >
+
+            {/* OTP INPUT */}
+
+            <input
+
+              type="text"
+
+              maxLength={6}
+
+              placeholder="Enter code"
+
+              value={code}
+
+              onChange={(e) =>
+                setCode(
+                  e.target.value
+                )
+              }
+
+              className="
+                w-full
+                text-center
+                tracking-[0.4em]
+                text-lg
+                p-4
+                rounded-xl
+                bg-white/5
+                border
+                border-indigo-400/30
+                focus:border-indigo-500
+                focus:ring-2
+                focus:ring-indigo-500/40
+                outline-none
+                transition
+              "
+
+            />
+
+            {/* VERIFY BUTTON */}
+
+            <button
+
+              type="submit"
+
+              disabled={
+                loading
+              }
+
+              className="
+                w-full
+                py-3 sm:py-4
+                rounded-xl
+                font-medium
+                text-white
+                bg-gradient-to-r
+                from-blue-600
+                via-indigo-600
+                to-purple-600
+                shadow-lg
+                shadow-indigo-500/30
+                hover:scale-[1.02]
+                transition
+              "
+
+            >
+
+              {
+
+                loading
+
+                  ? "Verifying..."
+
+                  : "Verify Account"
+
+              }
+
+            </button>
+
+          </form>
+
+        </div>
+
       </div>
 
-      {/* Form */}
-      <form onSubmit={verifyCode} className="space-y-5">
+    </AuthLayout>
 
-        {/* Code Input */}
-        <input
-          type="text"
-          maxLength={6}
-          placeholder="Enter code"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          className="
-          w-full
-          text-center
-          tracking-[0.4em]
-          text-lg
-          p-4
-          rounded-xl
-          bg-white/5
-          border border-indigo-400/30
-          focus:border-indigo-500
-          focus:ring-2 focus:ring-indigo-500/40
-          outline-none
-          transition
-          "
-        />
+  );
 
-        {/* Verify Button */}
-        <button
-          type="submit"
-          className="
-          w-full
-          py-3 sm:py-4
-          rounded-xl
-          font-medium
-          text-white
-          bg-gradient-to-r
-          from-blue-600
-          via-indigo-600
-          to-purple-600
-          shadow-lg shadow-indigo-500/30
-          hover:scale-[1.02]
-          transition
-          "
-        >
-          Verify Account
-        </button>
-
-      </form>
-
-    </div>
-
-  </div>
-</AuthLayout>
-
-
-);
 }

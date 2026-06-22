@@ -18,7 +18,7 @@ import {
 } from "react-icons/fa";
 import { MdLocalShipping, MdAutoAwesome } from "react-icons/md";
 import { BsBoxSeam } from "react-icons/bs";
-
+import { useNavigate } from "react-router-dom";
 /* ── ORDER STATUS PIPELINE ── */
 const STATUS_STEPS = [
   { key: "Placed", label: "Order Placed", icon: <FaBoxOpen size={14} />, color: "#f59e0b" },
@@ -47,69 +47,229 @@ const TrackOrder = () => {
   const [searched, setSearched] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showNoticeModal, setShowNoticeModal] = useState(true);
+  const navigate = useNavigate();
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://eshop-backend-y0e7.onrender.com";
+  const BACKEND_URL ="https://eshop-backend-y0e7.onrender.com";
+const fetchOrder =
+  async (customId) => {
 
-  const fetchOrder = async (customId) => {
-    if (!customId || customId.trim() === "") {
-      toast.error("Order ID required", {
-        description: "Enter the Order ID sent to your email.",
-      });
+    if (
+
+      !customId ||
+
+      customId.trim() === ""
+
+    ) {
+
+      toast.error(
+
+        "Order ID required",
+
+        {
+
+          description:
+            "Enter the Order ID sent to your email.",
+
+        }
+
+      );
+
       return;
+
     }
+
     try {
+
       setLoading(true);
+
       setOrder(null);
+
       setSearched(true);
-      const res = await fetch(`${BACKEND_URL}/api/order/${customId}`);
-      const data = await res.json();
-      if (data.success) setOrder(data.order);
-      else {
+
+      const token =
+        localStorage.getItem(
+          "token"
+        );
+        if (!token) {
+
+  navigate("/sign-in");
+
+  return;
+
+}
+
+      const res =
+        await fetch(
+
+          `${BACKEND_URL}/api/order/${customId}`,
+
+          {
+
+            headers: {
+
+              Authorization:
+                `Bearer ${token}`,
+
+            },
+
+          }
+
+        );
+
+      const data =
+        await res.json();
+
+      if (data.success) {
+
+        setOrder(
+          data.order
+        );
+
+      } else {
+
         setOrder(null);
-        toast.error("Order not found", {
-          description: "Please check your Order ID and try again.",
-        });
+
+        toast.error(
+
+          data.message ||
+
+          "Order not found",
+
+          {
+
+            description:
+              "Please check your Order ID.",
+
+          }
+
+        );
+
       }
+
     } catch (e) {
+
       console.error(e);
-      toast.error("Failed to fetch order");
+
+      toast.error(
+        "Failed to fetch order"
+      );
+
       setOrder(null);
+
     } finally {
+
       setLoading(false);
+
     }
+
   };
+
 
   useEffect(() => {
     if (id) fetchOrder(id);
   }, [id]);
 
-  const handleCancel = async () => {
-    if (!order) return;
+ const handleCancel =
+  async () => {
+
+    if (!order)
+      return;
 
     try {
-      setCancelLoading(true);
-      const res = await fetch(`${BACKEND_URL}/api/order/cancel/${order._id}`, {
-        method: "PUT",
-      });
 
-      const data = await res.json();
+      setCancelLoading(true);
+
+      const token =
+        localStorage.getItem(
+          "token"
+        );
+
+      if (!token) {
+
+        navigate(
+          "/sign-in"
+        );
+
+        return;
+
+      }
+
+      const res =
+        await fetch(
+
+          `${BACKEND_URL}/api/order/cancel/${order._id}`,
+
+          {
+
+            method: "PUT",
+
+            headers: {
+
+              Authorization:
+                `Bearer ${token}`,
+
+            },
+
+          }
+
+        );
+
+      const data =
+        await res.json();
 
       if (data.success) {
-        toast.success("Order cancelled", {
-          description: "Your order has been successfully cancelled.",
-        });
 
-        setOrder(data.order);
-        setShowCancelModal(false);
+        toast.success(
+
+          "Order cancelled",
+
+          {
+
+            description:
+              "Your order has been successfully cancelled.",
+
+          }
+
+        );
+
+        setOrder(
+          data.order
+        );
+
+        setShowCancelModal(
+          false
+        );
+
       } else {
-        toast.error(data.message || "Failed to cancel order");
+
+        toast.error(
+
+          data.message ||
+
+          "Failed to cancel order"
+
+        );
+
       }
+
     } catch (error) {
-      console.error(error);
-      toast.error("Error cancelling order");
+
+      console.error(
+        error
+      );
+
+      toast.error(
+        "Error cancelling order"
+      );
+
     } finally {
-      setCancelLoading(false);
+
+      setCancelLoading(
+        false
+      );
+
     }
+
   };
 
   const canCancel =

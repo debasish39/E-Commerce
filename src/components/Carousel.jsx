@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { getData } from "../context/DataContext";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "@clerk/clerk-react";
 import {
   FaRupeeSign, FaStar, FaShoppingCart, FaBolt, FaFire,
   FaTag, FaArrowRight, FaHeart, FaTruck, FaShieldAlt
@@ -65,10 +64,23 @@ const pad = n => String(n).padStart(2, "0");
 export default function Carousel() {
   const { data, fetchAllProducts } = getData();
   const { addToCart, cartItem } = useCart();
-  const { isSignedIn } = useUser();
   const navigate = useNavigate();
   // const [loading, setLoading]       = useState(true);
   const countdown = useCountdown();
+ 
+/* =====================================
+   JWT TOKEN
+===================================== */
+
+const token =
+  localStorage.getItem(
+    "token"
+  );
+
+const isSignedIn =
+  !!token;
+
+
   // console.log("Carousel data:", data);
   useEffect(() => {
     if (!data || data.length === 0) {
@@ -92,7 +104,7 @@ export default function Carousel() {
   */
 
   const product83Index = orderedData.findIndex(
-    (item) => item.id === 83
+    (item) => item._id === 83
   );
 
   let reorderedData = [...orderedData];
@@ -105,13 +117,13 @@ export default function Carousel() {
   const handleCart = useCallback((item, e) => {
     e?.stopPropagation();
     if (!isSignedIn) { toast.error("Please login first"); setTimeout(() => navigate("/sign-in"), 300); return; }
-    if (cartItem.some(c => String(c.productId) === String(item.id))) {
+    if (cartItem.some(c => String(c.productId) === String(item._id))) {
       toast.info("Already in cart 🛒"); setTimeout(() => navigate("/cart"), 100); return;
     }
     addToCart(item); toast.success("Added to cart 🛒");
   }, [isSignedIn, cartItem, addToCart, navigate]);
 
-  const inCart = item => cartItem.some(c => String(c.productId) === String(item.id));
+  const inCart = item => cartItem.some(c => String(c.productId) === String(item._id));
 
   const SWIPER_COMMON = {
 
@@ -249,7 +261,7 @@ export default function Carousel() {
             const added = inCart(item);
 
             return (
-              <SwiperSlide key={item.id}>
+              <SwiperSlide key={item._id}>
                 <div className="cw-ds">
                   {/* giant bg number */}
                   <div className="cw-ds-num">{String(idx + 1).padStart(2, "0")}</div>
@@ -292,7 +304,7 @@ export default function Carousel() {
 
                     <h2
                       className="cw-ds-title"
-                      onClick={() => navigate(`/products/${item.id}`)}
+                      onClick={() => navigate(`/products/${item._id}`)}
                     >
                       {item.title}
                     </h2>
@@ -376,7 +388,7 @@ export default function Carousel() {
 
                       <button
                         className="cw-ds-btn-s"
-                        onClick={() => navigate(`/products/${item.id}`)}
+                        onClick={() => navigate(`/products/${item._id}`)}
                       >
                         👁️ Details
                       </button>
@@ -400,7 +412,7 @@ export default function Carousel() {
                     <img
                       src={item.thumbnail} alt={item.title}
                       className="cw-ds-img"
-                      onClick={() => navigate(`/products/${item.id}`)}
+                      onClick={() => navigate(`/products/${item._id}`)}
                     />
                   </div>
                 </div>
@@ -446,7 +458,7 @@ export default function Carousel() {
             const added = inCart(item);
 
             return (
-              <SwiperSlide key={item.id}>
+              <SwiperSlide key={item._id}>
                 <div className="cw-ms" style={{ animationDelay: `${idx * .03}s` }}>
                   {/* accent glow inside card */}
                   <div style={{
@@ -467,14 +479,14 @@ export default function Carousel() {
                     <img
                       src={item.thumbnail} alt={item.title}
                       className="cw-ms-img"
-                      onClick={() => navigate(`/products/${item.id}`)}
+                      onClick={() => navigate(`/products/${item._id}`)}
                     />
                   </div>
 
                   {/* body */}
                   <div className="cw-ms-body" style={{ position: "relative", zIndex: 1 }}>
                     <div className="cw-ms-brand">{item.brand || item.category || "Brand"}</div>
-                    <div className="cw-ms-title" onClick={() => navigate(`/products/${item.id}`)}>
+                    <div className="cw-ms-title" onClick={() => navigate(`/products/${item._id}`)}>
                       {item.title}
                     </div>
 
@@ -525,7 +537,7 @@ export default function Carousel() {
                       </button>
                       <button
                         className="cw-ms-btn-s"
-                        onClick={() => navigate(`/products/${item.id}`)}
+                        onClick={() => navigate(`/products/${item._id}`)}
                       >
                         <AiOutlineEye size={16} />
                       </button>

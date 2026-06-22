@@ -1,28 +1,205 @@
-import React from "react";
-import { useUser } from "@clerk/clerk-react";
-import { Navigate, useLocation } from "react-router-dom";
+import React, {
+
+  useEffect,
+
+  useState,
+
+} from "react";
+
+import {
+
+  Navigate,
+
+  useLocation,
+
+} from "react-router-dom";
+
 import Spinner from "./Spinner";
-export default function ProtectedRoute({ children }) {
-  const { user, isLoaded } = useUser();
-  const location = useLocation();
 
-  if (!isLoaded) {
+export default function ProtectedRoute({
+
+  children,
+
+}) {
+
+  /* =====================================
+     STATES
+  ===================================== */
+
+  const [
+
+    loading,
+
+    setLoading,
+
+  ] = useState(true);
+
+  const [
+
+    isAuthenticated,
+
+    setIsAuthenticated,
+
+  ] = useState(false);
+
+  const location =
+    useLocation();
+
+  /* =====================================
+     CHECK AUTH
+  ===================================== */
+
+  useEffect(() => {
+
+    const verifyUser =
+      async () => {
+
+        try {
+
+          const token =
+
+            localStorage.getItem(
+              "token"
+            );
+
+          /* =====================================
+             NO TOKEN
+          ===================================== */
+
+          if (!token) {
+
+            setLoading(
+              false
+            );
+
+            return;
+
+          }
+
+          /* =====================================
+             VERIFY TOKEN
+          ===================================== */
+
+          const res =
+            await fetch(
+
+              "http://127.0.0.1:5000/api/auth/me",
+
+              {
+
+                headers: {
+
+                  Authorization:
+                    `Bearer ${token}`,
+
+                },
+
+              }
+
+            );
+
+          const data =
+            await res.json();
+
+          /* =====================================
+             SUCCESS
+          ===================================== */
+
+          if (data.success) {
+
+            setIsAuthenticated(
+              true
+            );
+
+          } else {
+
+            localStorage.removeItem(
+              "token"
+            );
+
+          }
+
+        } catch (error) {
+
+          console.error(
+            error
+          );
+
+          localStorage.removeItem(
+            "token"
+          );
+
+        } finally {
+
+          setLoading(
+            false
+          );
+
+        }
+
+      };
+
+    verifyUser();
+
+  }, []);
+
+  /* =====================================
+     LOADING
+  ===================================== */
+
+  if (loading) {
+
     return (
-      <div className="min-h-screen flex items-center justify-center text-white">
+
+      <div
+        className="
+          min-h-screen
+          flex
+          items-center
+          justify-center
+          text-white
+        "
+      >
+
         <Spinner />
+
       </div>
+
     );
+
   }
 
-  if (!user) {
+  /* =====================================
+     NOT AUTHENTICATED
+  ===================================== */
+
+  if (!isAuthenticated) {
+
     return (
+
       <Navigate
+
         to="/sign-in"
-        state={{ from: location }}
+
+        state={{
+
+          from:
+            location,
+
+        }}
+
         replace
+
       />
+
     );
+
   }
+
+  /* =====================================
+     AUTHENTICATED
+  ===================================== */
 
   return <>{children}</>;
+
 }

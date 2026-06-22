@@ -1,4 +1,3 @@
-import { useSignIn } from "@clerk/clerk-react";
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
@@ -7,10 +6,27 @@ import { FaGithub, FaEye, FaEyeSlash, FaArrowRight, FaCheckCircle, FaClock, FaLo
 import { toast } from "sonner";
 
 export default function SignIn() {
-  const { signIn, setActive, isLoaded }  = useSignIn();
   const navigate = useNavigate();
 
-  const [step, setStep]                  = useState("login");
+  const [step, setStep] = useState("login");
+ 
+/* =====================================
+   LOGIN TYPE
+===================================== */
+
+const [
+
+  loginType,
+
+  setLoginType,
+
+] = useState(
+
+  "password"
+
+);
+
+
   const [email, setEmail]                = useState("");
   const [password, setPassword]          = useState("");
   const [newPassword, setNewPassword]    = useState("");
@@ -21,58 +37,447 @@ export default function SignIn() {
   const [timer, setTimer]                = useState(0);
   const [showPassword, setShowPassword]  = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
-  const [emailError, setEmailError]      = useState("");
-  const [passwordError, setPasswordError] = useState("");
+
+const [errors, setErrors] =
+  useState({
+
+    email: "",
+
+    password: "",
+
+    otp: "",
+
+    resetCode: "",
+
+    newPassword: "",
+
+  });
+
+
   const inputsRef = useRef([]);
 
   const validateEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
   const validatePassword = (p) => p.length >= 6;
+const BACKEND_URL ="https://eshop-backend-y0e7.onrender.com/api/auth";
 
-  /* ── LOGIN ── */
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setEmailError("");
-    setPasswordError("");
+const validateField =
+  (name, value) => {
 
-    if (!email) { setEmailError("Email is required"); return; }
-    if (!validateEmail(email)) { setEmailError("Enter a valid email"); return; }
-    if (!password) { setPasswordError("Password is required"); return; }
-    if (!validatePassword(password)) { setPasswordError("Password must be 6+ characters"); return; }
-    if (!isLoaded) return;
+    switch (name) {
 
-    setLoading(true);
-    try {
-      const result = await signIn.create({ identifier: email, password });
-      if (result.status === "complete") {
-        await setActive({ session: result.createdSessionId });
-        toast.success("Login successful");
-        window.location.href = "/";
-      } else if (result.status === "needs_first_factor") {
-        await signIn.prepareFirstFactor({ strategy: "email_code" });
-        setTimer(30);
-        toast.success("OTP sent to your email");
-        setStep("otp");
-      }
-    } catch (err) {
-      toast.error(err.errors?.[0]?.message || "Login failed");
-    } finally {
-      setLoading(false);
+      case "email":
+
+        if (!value)
+          return "Email is required";
+
+        if (!validateEmail(value))
+          return "Enter valid email";
+
+        return "";
+
+      case "password":
+
+        if (!value)
+          return "Password is required";
+
+        if (value.length < 6)
+          return "Minimum 6 characters";
+
+        return "";
+
+      case "otp":
+
+        if (!value)
+          return "OTP required";
+
+        if (value.length !== 6)
+          return "OTP must be 6 digits";
+
+        return "";
+
+      case "resetCode":
+
+        if (!value)
+          return "Reset code required";
+
+        if (value.length !== 6)
+          return "Reset code must be 6 digits";
+
+        return "";
+
+      case "newPassword":
+
+        if (!value)
+          return "New password required";
+
+        if (value.length < 6)
+          return "Minimum 6 characters";
+
+        if (!/[A-Z]/.test(value))
+          return "Add uppercase letter";
+
+        if (!/[0-9]/.test(value))
+          return "Add number";
+
+        return "";
+
+      default:
+
+        return "";
+
     }
+
   };
 
-  /* ── OTP ── */
-  const verifyOTP = async (code) => {
-    if (code.length !== 6) { toast.error("Enter complete 6-digit code"); return; }
-    try {
-      const result = await signIn.attemptFirstFactor({ strategy: "email_code", code });
-      if (result.status === "complete") {
-        toast.success("Login successful");
-        window.location.href = "/";
-      }
-    } catch {
-      toast.error("Invalid OTP");
-    }
+
+
+
+/* =====================================
+   LOGIN
+===================================== */
+
+
+const handleLogin =
+async (e) => {
+
+  e.preventDefault();
+
+  /* =====================================
+     VALIDATE FIELDS
+  ===================================== */
+
+  const newErrors = {
+
+    email:
+      validateField(
+        "email",
+        email
+      ),
+
+    password:
+
+      loginType ===
+      "password"
+
+        ? validateField(
+            "password",
+            password
+          )
+
+        : "",
+
   };
+
+  /* =====================================
+     SET ERRORS
+  ===================================== */
+
+  setErrors(newErrors);
+
+  /* =====================================
+     STOP IF ERRORS
+  ===================================== */
+
+  if (
+
+    Object.values(newErrors)
+      .some(Boolean)
+
+  ) {
+
+    return;
+
+  }
+
+  setLoading(true);
+
+  try {
+
+    /* =====================================
+       API URL
+    ===================================== */
+
+    const url =
+
+      loginType ===
+      "password"
+
+        ? `${BACKEND_URL}/signin-password`
+
+        : `${BACKEND_URL}/signin-otp`;
+
+    /* =====================================
+       BODY
+    ===================================== */
+
+    const body =
+
+      loginType ===
+      "password"
+
+        ? {
+
+            email:
+              email.trim(),
+
+            password,
+
+          }
+
+        : {
+
+            email:
+              email.trim(),
+
+          };
+
+    /* =====================================
+       API CALL
+    ===================================== */
+
+    const res =
+      await fetch(
+
+        url,
+
+        {
+
+          method: "POST",
+
+          headers: {
+
+            "Content-Type":
+              "application/json",
+
+          },
+
+          body:
+            JSON.stringify(
+              body
+            ),
+
+        }
+
+      );
+
+    const data =
+      await res.json();
+
+    /* =====================================
+       BACKEND ERROR
+    ===================================== */
+
+    if (!res.ok) {
+
+      /* INVALID EMAIL */
+      if (
+
+        data.message
+          ?.toLowerCase()
+          .includes("email")
+
+      ) {
+
+        setErrors((prev) => ({
+
+          ...prev,
+
+          email:
+            data.message,
+
+        }));
+
+      }
+
+      /* INVALID PASSWORD */
+      if (
+
+        data.message
+          ?.toLowerCase()
+          .includes("password")
+
+      ) {
+
+        setErrors((prev) => ({
+
+          ...prev,
+
+          password:
+            data.message,
+
+        }));
+
+      }
+
+      throw new Error(
+
+        data.message ||
+
+        "Login failed"
+
+      );
+
+    }
+
+    /* =====================================
+       PASSWORD LOGIN
+    ===================================== */
+
+    if (
+
+      loginType ===
+      "password"
+
+    ) {
+
+      localStorage.setItem(
+
+        "token",
+
+        data.token
+
+      );
+
+      toast.success(
+
+        "Login successful 🎉"
+
+      );
+
+      window.location.href =
+        "/";
+
+      return;
+
+    }
+
+    /* =====================================
+       OTP LOGIN
+    ===================================== */
+
+    toast.success(
+
+      "OTP sent to email"
+
+    );
+
+    setTimer(30);
+
+    setStep("otp");
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+    toast.error(
+      error.message
+    );
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
+
+
+
+
+
+
+/* =====================================
+   VERIFY OTP
+===================================== */
+
+const verifyOTP =
+async (code) => {
+const otpError = validateField( "otp", code ); if (otpError) { setErrors((prev) => ({ ...prev, otp: otpError, })); return; }
+  if (code.length !== 6) {
+
+    toast.error(
+      "Enter complete 6-digit code"
+    );
+
+    return;
+
+  }
+
+  try {
+
+    const res =
+      await fetch(
+
+        `${BACKEND_URL}/verify-signin-otp`,
+
+        {
+
+          method: "POST",
+
+          headers: {
+
+            "Content-Type":
+              "application/json",
+
+          },
+
+          body: JSON.stringify({
+
+            email,
+
+            otp: code,
+
+          }),
+
+        }
+
+      );
+
+    const data =
+      await res.json();
+
+    if (!res.ok) {
+
+      throw new Error(
+
+        data.message ||
+
+        "Invalid OTP"
+
+      );
+
+    }
+
+    /* =====================================
+       SAVE TOKEN
+    ===================================== */
+
+    localStorage.setItem(
+
+      "token",
+
+      data.token
+
+    );
+
+    toast.success(
+      "Login successful 🎉"
+    );
+
+    window.location.href = "/";
+
+  } catch (error) {
+
+    toast.error(
+      error.message
+    );
+
+  }
+
+};
+
 
   const handleOtpChange = (value, index) => {
     if (!/^\d?$/.test(value)) return;
@@ -90,83 +495,346 @@ export default function SignIn() {
     return () => clearInterval(interval);
   }, [timer]);
 
-  const resendOTP = async () => {
-    await signIn.prepareFirstFactor({ strategy: "email_code" });
+
+/* =====================================
+   RESEND OTP
+===================================== */
+
+const resendOTP =
+async () => {
+
+  try {
+
+    const res =
+      await fetch(
+
+        `${BACKEND_URL}/resend-login-otp`,
+
+        {
+
+          method: "POST",
+
+          headers: {
+
+            "Content-Type":
+              "application/json",
+
+          },
+
+          body: JSON.stringify({
+
+            email,
+
+          }),
+
+        }
+
+      );
+
+    const data =
+      await res.json();
+
+    if (!res.ok) {
+
+      throw new Error(
+
+        data.message ||
+
+        "Failed to resend OTP"
+
+      );
+
+    }
+
     setTimer(30);
-    toast.success("OTP resent");
-  };
+
+    toast.success(
+      "OTP resent"
+    );
+
+  } catch (error) {
+
+    toast.error(
+      error.message
+    );
+
+  }
+
+};
+
+
 
   /* ── RESET PASSWORD ── */
-  const handleForgotPassword = async () => {
-    setEmailError("");
-    if (!email) { setEmailError("Enter email first"); return; }
-    if (!validateEmail(email)) { setEmailError("Enter a valid email"); return; }
-    try {
-      await signIn.create({ strategy: "reset_password_email_code", identifier: email });
-      toast.success("Reset code sent to your email");
-      setStep("reset");
-    } catch (err) {
-      toast.error(err.errors?.[0]?.message || "Failed to send reset code");
-    }
-  };
 
-  const handleResetPassword = async (e) => {
-    e.preventDefault();
-    if (!resetCode) { toast.error("Enter reset code"); return; }
-    if (resetCode.length !== 6) { toast.error("Reset code must be 6 digits"); return; }
-    if (!newPassword) { toast.error("Enter new password"); return; }
-    if (!validatePassword(newPassword)) { toast.error("Password must be 6+ characters"); return; }
+/* =====================================
+   FORGOT PASSWORD
+===================================== */
+
+
+const handleForgotPassword =
+async () => {
+
+  /* =====================================
+     VALIDATE EMAIL
+  ===================================== */
+
+  const emailError =
+    validateField(
+      "email",
+      email
+    );
+
+  /* =====================================
+     SET ERROR
+  ===================================== */
+
+  setErrors((prev) => ({
+
+    ...prev,
+
+    email:
+      emailError,
+
+  }));
+
+  /* =====================================
+     STOP IF INVALID
+  ===================================== */
+
+  if (emailError)
+    return;
+
+  try {
 
     setLoading(true);
-    try {
-      const result = await signIn.attemptFirstFactor({
-        strategy: "reset_password_email_code",
-        code: resetCode,
-        password: newPassword,
-      });
-      if (result.status === "complete") {
-        toast.success("Password reset successful");
-        window.location.href = "/";
-      }
-    } catch (err) {
-      const clerkErrors = err.errors || [];
-      if (clerkErrors.length > 0) {
-        clerkErrors.forEach(e => toast.error(e.longMessage || e.message));
-      } else {
-        toast.error("Password reset failed");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const handleGoogle = async () => {
-    setSocialLoading("google");
-    try {
-      await signIn.authenticateWithRedirect({
-        strategy: "oauth_google",
-        redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/",
-      });
-    } catch (err) {
-      toast.error("Google sign-in failed");
-      setSocialLoading(null);
-    }
-  };
+    const res =
+      await fetch(
 
-  const handleGithub = async () => {
-    setSocialLoading("github");
-    try {
-      await signIn.authenticateWithRedirect({
-        strategy: "oauth_github",
-        redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/",
-      });
-    } catch (err) {
-      toast.error("GitHub sign-in failed");
-      setSocialLoading(null);
+        `${BACKEND_URL}/forgot-password`,
+
+        {
+
+          method: "POST",
+
+          headers: {
+
+            "Content-Type":
+              "application/json",
+
+          },
+
+          body: JSON.stringify({
+
+            email:
+              email.trim(),
+
+          }),
+
+        }
+
+      );
+
+    const data =
+      await res.json();
+
+    /* =====================================
+       BACKEND ERROR
+    ===================================== */
+
+    if (!res.ok) {
+
+      /* EMAIL ERROR */
+      if (
+
+        data.message
+          ?.toLowerCase()
+          .includes("email")
+
+      ) {
+
+        setErrors((prev) => ({
+
+          ...prev,
+
+          email:
+            data.message,
+
+        }));
+
+      }
+
+      throw new Error(
+
+        data.message ||
+
+        "Failed to send reset OTP"
+
+      );
+
     }
-  };
+
+    toast.success(
+
+      "Reset OTP sent 📩"
+
+    );
+
+    setStep("reset");
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+    toast.error(
+      error.message
+    );
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
+
+
+
+/* =====================================
+   RESET PASSWORD
+===================================== */
+
+const handleResetPassword =
+async (e) => {
+
+  e.preventDefault();
+
+  if (!resetCode) {
+
+    toast.error(
+      "Enter reset code"
+    );
+
+    return;
+
+  }
+
+  if (resetCode.length !== 6) {
+
+    toast.error(
+      "Reset code must be 6 digits"
+    );
+
+    return;
+
+  }
+
+  if (!newPassword) {
+
+    toast.error(
+      "Enter new password"
+    );
+
+    return;
+
+  }
+
+  if (
+
+    !validatePassword(
+      newPassword
+    )
+
+  ) {
+
+    toast.error(
+
+      "Password must be 6+ characters"
+
+    );
+
+    return;
+
+  }
+
+  setLoading(true);
+
+  try {
+
+    const res =
+      await fetch(
+
+        `${BACKEND_URL}/reset-password`,
+
+        {
+
+          method: "PUT",
+
+          headers: {
+
+            "Content-Type":
+              "application/json",
+
+          },
+
+          body: JSON.stringify({
+
+            email,
+
+            otp: resetCode,
+
+            newPassword,
+
+          }),
+
+        }
+
+      );
+
+    const data =
+      await res.json();
+
+    if (!res.ok) {
+
+      throw new Error(
+
+        data.message ||
+
+        "Password reset failed"
+
+      );
+
+    }
+
+    toast.success(
+
+      "Password reset successful 🎉"
+
+    );
+
+    setStep("login");
+
+  } catch (error) {
+
+    toast.error(
+
+      error.message
+
+    );
+
+  } finally {
+
+    setLoading(false);
+
+  }
+
+};
+
+
+
+ 
 
   return (
     <AuthLayout title="Welcome Back">
@@ -392,41 +1060,109 @@ export default function SignIn() {
 
       <div className="si-root space-y-4">
 
-        {/* ── SOCIAL LOGIN ── */}
-        {(step === "login") && (
-          <div className="si-enter space-y-2">
-            <button
-              onClick={handleGoogle}
-              type="button"
-              disabled={socialLoading==="google"}
-              className={`social-btn ${socialLoading==="google"?"loading":""}`}>
-              {socialLoading==="google"
-                ? <div className="spinner"/>
-                : <FcGoogle size={18}/>}
-              <span className="relative z-10">Continue with Google</span>
-            </button>
+{/* =====================================
+   LOGIN TYPE TOGGLE
+===================================== */}
 
-            <button
-              onClick={handleGithub}
-              type="button"
-              disabled={socialLoading==="github"}
-              className={`social-btn ${socialLoading==="github"?"loading":""}`}>
-              {socialLoading==="github"
-                ? <div className="spinner"/>
-                : <FaGithub size={18} style={{ color:"#1f2937" }}/>}
-              <span className="relative z-10">Continue with GitHub</span>
-            </button>
-          </div>
-        )}
+<div
+  className="
+    grid
+    grid-cols-2
+    gap-2
+    p-1
+    rounded-xl
+    bg-indigo-50
+  "
+>
 
-        {/* ── DIVIDER ── */}
-        {step === "login" && (
-          <div className="si-enter divider-wrap">
-            <div className="divider-line"/>
-            <span className="divider-text">Or</span>
-            <div className="divider-line"/>
-          </div>
-        )}
+  {/* PASSWORD */}
+
+  <button
+
+    type="button"
+
+    onClick={() =>
+      setLoginType(
+        "password"
+      )
+    }
+
+    className={`
+      py-2.5
+      rounded-lg
+      text-sm
+      font-semibold
+      transition-all
+
+      ${
+
+        loginType ===
+        "password"
+
+          ? `
+            bg-white
+            text-indigo-600
+            shadow-sm
+          `
+
+          : `
+            text-slate-500
+          `
+
+      }
+    `}
+
+  >
+
+    Password Login
+
+  </button>
+
+  {/* OTP */}
+
+  <button
+
+    type="button"
+
+    onClick={() =>
+      setLoginType(
+        "otp"
+      )
+    }
+
+    className={`
+      py-2.5
+      rounded-lg
+      text-sm
+      font-semibold
+      transition-all
+
+      ${
+
+        loginType ===
+        "otp"
+
+          ? `
+            bg-white
+            text-indigo-600
+            shadow-sm
+          `
+
+          : `
+            text-slate-500
+          `
+
+      }
+    `}
+
+  >
+
+    OTP Login
+
+  </button>
+
+</div>
+
 
         {/* ── LOGIN ── */}
         {step === "login" && (
@@ -438,38 +1174,174 @@ export default function SignIn() {
                 placeholder="eshopcustomerinfo@gmail.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className={`form-input ${emailError?"error":""}`}
+              
+className={`
+  form-input
+
+  ${
+
+    errors.email
+
+      ? "error"
+
+      : ""
+
+  }
+`}
+
+
               />
-              {emailError && <div className="form-error">{emailError}</div>}
+             
+{
+
+  errors.email && (
+
+    <div
+      className="
+        form-error
+      "
+    >
+
+      {errors.email}
+
+    </div>
+
+  )
+
+}
+
+
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword?"text":"password"}
-                  placeholder="6+ characters"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className={`form-input ${passwordError?"error":""}`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="pw-toggle">
-                  {showPassword ? <FaEyeSlash size={14}/> : <FaEye size={14}/>}
-                </button>
-              </div>
-              {passwordError && <div className="form-error">{passwordError}</div>}
-            </div>
+      
+{/* =====================================
+   PASSWORD FIELD
+===================================== */}
+
+{
+
+  loginType ===
+  "password" && (
+
+    <div
+      className="
+        form-group
+      "
+    >
+
+      <label
+        className="
+          form-label
+        "
+      >
+
+        Password
+
+      </label>
+
+      <div
+        className="
+          relative
+        "
+      >
+
+        <input
+
+          type={
+            showPassword
+
+              ? "text"
+
+              : "password"
+          }
+
+          placeholder="6+ characters"
+
+          value={password}
+
+          onChange={(e) =>
+            setPassword(
+              e.target.value
+            )
+          }
+
+          className={`
+            form-input
+
+            ${
+
+              errors.password
+
+                ? "error"
+
+                : ""
+
+            }
+          `}
+
+        />
+
+        <button
+
+          type="button"
+
+          onClick={() =>
+            setShowPassword(
+              !showPassword
+            )
+          }
+
+          className="
+            pw-toggle
+          "
+
+        >
+
+          {
+
+            showPassword
+
+              ? <FaEyeSlash size={14}/>
+
+              : <FaEye size={14}/>
+
+          }
+
+        </button>
+
+      </div>
+
+     { errors.password && ( <div className=" form-error " > {errors.password} </div> ) }
+
+    </div>
+
+  )
+
+}
+
+
 
             <button
               type="submit"
               disabled={loading}
               className="submit-btn">
-              {loading
-                ? <><div className="spinner relative z-10"/> Signing In...</>
-                : <><span className="relative z-10">Sign In</span> <FaArrowRight size={13} className="relative z-10"/></>}
+    
+{
+
+  loading
+
+    ? "Please wait..."
+
+    : loginType ===
+      "password"
+
+        ? "Sign In"
+
+        : "Send OTP"
+
+}
+
+
             </button>
 
             <button

@@ -11,7 +11,6 @@ import {
 } from "react-icons/fa";
 import { MdPayments, MdLocalShipping, MdVerifiedUser } from "react-icons/md";
 import { BsBoxSeam } from "react-icons/bs";
-import { useUser } from "@clerk/clerk-react";
 import {
   Modal,
   ModalContent,
@@ -80,7 +79,6 @@ const STATUS_CFG = {
 };
 
 const OrderHistory = () => {
-  const { user } = useUser();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState({});
@@ -94,65 +92,153 @@ const OrderHistory = () => {
   const [cancellingOrderId, setCancellingOrderId] = useState(null);
   const [cancelling, setCancelling] = useState(false);
 
-  useEffect(() => {
-    if (!user) return;
 
-    const fetchOrders = async () => {
+const [user, setUser] =
+  useState(null);
+
+const [token, setToken] =
+  useState(
+
+    localStorage.getItem(
+      "token"
+    )
+
+  );
+
+
+useEffect(() => {
+
+  if (!token)
+    return;
+
+  const fetchOrders =
+    async () => {
+
       try {
-        const res = await fetch(
-          `https://eshop-backend-y0e7.onrender.com/api/orders/${user.id}`
-        );
-        const data = await res.json();
+
+        const res =
+          await fetch(
+
+            "https://eshop-backend-y0e7.onrender.com/api/my-orders",
+
+            {
+
+              headers: {
+
+                Authorization:
+                  `Bearer ${token}`,
+
+              },
+
+            }
+
+          );
+
+        const data =
+          await res.json();
+
         if (data.success) {
-          setOrders(data.orders || []);
+
+          setOrders(
+            data.orders || []
+          );
+
         }
+
       } catch (error) {
-        console.error(error);
+
+        console.error(
+          error
+        );
+
       } finally {
+
         setLoading(false);
+
       }
+
     };
 
-    fetchOrders();
-  }, [user]);
+  fetchOrders();
+
+}, [token]);
+
 
   const toggleExpand = (id) => setExpanded((p) => ({ ...p, [id]: !p[id] }));
 
   // ── CANCEL ORDER ──
-  const handleCancelOrder = async () => {
-    if (!cancellingOrderId) return;
+ // ── CANCEL ORDER ──
+const handleCancelOrder = async () => {
 
-    setCancelling(true);
-    try {
-      const res = await fetch(
-        `https://eshop-backend-y0e7.onrender.com/api/order/cancel/${cancellingOrderId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-        }
+  if (!cancellingOrderId) return;
+
+  setCancelling(true);
+
+  try {
+
+    // GET TOKEN
+    const token = localStorage.getItem("token");
+
+    console.log("TOKEN:", token);
+
+    console.log("CANCELLING ORDER ID:", cancellingOrderId);
+
+    const res = await fetch(
+      `https://eshop-backend-y0e7.onrender.com/api/order/cancel/${cancellingOrderId}`,
+      {
+        method: "PUT",
+
+        headers: {
+          "Content-Type": "application/json",
+
+          // AUTHORIZATION HEADER
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    console.log("RESPONSE STATUS:", res.status);
+
+    const data = await res.json();
+
+    console.log("RESPONSE DATA:", data);
+
+    if (data.success) {
+
+      setOrders((prevOrders) =>
+        prevOrders.map((o) =>
+          o._id === cancellingOrderId
+            ? { ...o, status: "Cancelled" }
+            : o
+        )
       );
 
-      const data = await res.json();
+      setShowCancelModal(false);
 
-      if (data.success) {
-        setOrders((prevOrders) =>
-          prevOrders.map((o) =>
-            o._id === cancellingOrderId ? { ...o, status: "Cancelled" } : o
-          )
-        );
-        setShowCancelModal(false);
-        setCancellingOrderId(null);
-      } else {
-        toast.error("Failed to cancel order. Please try again.");
-      }
-    } catch (error) {
-      console.error("Cancel order error:", error);
-      toast.error("Error cancelling order");
-    } finally {
-      setCancelling(false);
+      setCancellingOrderId(null);
+
+      toast.success("Order cancelled successfully");
+
+    } else {
+
+      console.log("BACKEND ERROR:", data);
+
+      toast.error(
+        data.message || "Failed to cancel order. Please try again."
+      );
     }
-  };
 
+  } catch (error) {
+
+    console.error("CANCEL ORDER ERROR:", error);
+
+    toast.error("Error cancelling order");
+
+  } finally {
+
+    setCancelling(false);
+  }
+};
   const generateInvoice = (order) => {
     setDownloading((p) => ({ ...p, [order._id]: true }));
 
@@ -1090,23 +1176,51 @@ const isCancelExpired = diffDays > 7;
                             📦 Order Items ({order.items.length})
                           </p>
                           {order.items.map((item, i) => (
-                            <div key={i} className="item-row">
-                              <span className="text-slate-700 font-medium flex items-center gap-3 min-w-0">
-                                <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-400 to-blue-500 flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
-                                  {i + 1}
-                                </span>
-                                <span className="line-clamp-2 text-sm">{item.title}</span>
-                              </span>
-                              <div className="flex items-center gap-3 flex-shrink-0">
-                                <span className="text-slate-400 text-xs font-normal">× {item.quantity}</span>
-                                <span className="flex items-center text-indigo-600 font-bold text-sm">
-                                  <FaRupeeSign size={11} />
-                                  {(item.price * item.quantity).toFixed(0)}
-                                </span>
-                              </div>
-                            </div>
-                          ))}
+  <div
+    key={i}
+    className="item-row flex items-center justify-between gap-3"
+  >
+    <div className="flex items-center gap-3 min-w-0">
 
+      <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-400 to-blue-500 flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
+        {i + 1}
+      </span>
+
+      <img
+        src={
+          item.image ||
+          "https://via.placeholder.com/80"
+        }
+        alt={item.title}
+        className="w-14 h-14 rounded-xl object-cover border border-slate-200"
+      />
+
+      <div className="min-w-0">
+        <h4 className="text-sm font-semibold text-slate-700 line-clamp-2">
+          {item.title}
+        </h4>
+
+        <p className="text-xs text-slate-400">
+          Qty: {item.quantity}
+        </p>
+      </div>
+
+    </div>
+
+    <div className="flex items-center gap-3 flex-shrink-0">
+
+      <span className="text-slate-400 text-xs">
+        × {item.quantity}
+      </span>
+
+      <span className="flex items-center text-indigo-600 font-bold text-sm">
+        <FaRupeeSign size={11} />
+        {(item.price * item.quantity).toFixed(0)}
+      </span>
+
+    </div>
+  </div>
+))}
                           {/* BILL BREAKDOWN */}
                           <div className="mt-5 pt-4 border-t border-indigo-200/60 space-y-1.5">
                             <div className="bill-row">

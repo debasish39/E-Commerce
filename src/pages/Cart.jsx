@@ -1,13 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { useCart } from '../context/CartContext';
-import { FaRegTrashAlt, FaCheckCircle, FaHistory, FaWallet, FaCreditCard, FaUser, FaMapMarkerAlt, FaRupeeSign, FaEnvelope } from 'react-icons/fa';
+import {
+  FaRegTrashAlt,
+  FaCheckCircle,
+  FaHistory,
+  FaWallet,
+  FaCreditCard,
+  FaUser,
+  FaMapMarkerAlt,
+  FaRupeeSign,
+  FaEnvelope,
+  FaShieldAlt,
+  FaShoppingBag
+} from 'react-icons/fa';
 import { LuNotebookText } from 'react-icons/lu';
 import { MdDeliveryDining, MdPayments, MdLocationCity, MdMyLocation } from 'react-icons/md';
 import { GiShoppingBag } from 'react-icons/gi';
 import { AiOutlinePlus, AiOutlineMinus, AiFillEnvironment } from 'react-icons/ai';
 import { IoArrowForward, IoArrowBack } from 'react-icons/io5';
 import { BsTelephoneFill } from 'react-icons/bs';
-import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import emptyCart from '../assets/empty-cart.png';
 import { toast } from 'sonner';
@@ -19,14 +30,25 @@ import {
 } from '@heroui/react';
 
 const STEPS = [
-  { id: 1, label: 'Cart', icon: '🛒' },
-  { id: 2, label: 'Delivery', icon: '📍' },
-  { id: 3, label: 'Payment', icon: '💳' },
+  {
+    id: 1,
+    label: 'Cart',
+    icon: <GiShoppingBag size={16} />,
+  },
+  {
+    id: 2,
+    label: 'Delivery',
+    icon: <AiFillEnvironment size={16} />,
+  },
+  {
+    id: 3,
+    label: 'Payment',
+    icon: <MdPayments size={16} />,
+  },
 ];
 
 const Cart = ({ location, getLocation, onLocationChange }) => {
   const { cartItem, removeFromCart, increaseQty, decreaseQty, clearCart } = useCart();
-  const { user } = useUser();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [paymentType, setPaymentType] = useState(null);
@@ -36,6 +58,122 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
   const { isOpen: isInstrOpen, onOpen: onInstrOpen, onClose: onInstrClose } = useDisclosure();
   const { isOpen: isCodConfirmOpen, onOpen: onCodConfirmOpen, onClose: onCodConfirmClose } = useDisclosure();
 
+/* =====================================
+   AUTH USER
+===================================== */
+
+const [
+
+  user,
+
+  setUser,
+
+] = useState(null);
+
+/* =====================================
+   TOKEN
+===================================== */
+
+const [token, setToken] = useState(
+  localStorage.getItem("token")
+);
+useEffect(() => {
+
+  const syncToken = () => {
+
+    setToken(
+      localStorage.getItem("token")
+    );
+
+  };
+
+  window.addEventListener(
+    "storage",
+    syncToken
+  );
+
+  syncToken();
+
+  return () => {
+
+    window.removeEventListener(
+      "storage",
+      syncToken
+    );
+
+  };
+
+}, []);
+/* =====================================
+   LOAD USER
+===================================== */
+
+useEffect(() => {
+
+  if (!token)
+    return;
+
+  const fetchUser =
+    async () => {
+
+      try {
+
+        const res =
+          await fetch(
+
+            "https://eshop-backend-y0e7.onrender.com/api/auth/me",
+
+            {
+
+              headers: {
+
+                Authorization:
+                  `Bearer ${token}`,
+
+              },
+
+            }
+
+          );
+if (res.status === 401) {
+
+  localStorage.removeItem("token");
+
+  setUser(null);
+
+  toast.error("Session expired");
+
+  navigate("/sign-in");
+
+  return;
+
+}
+        const data =
+          await res.json();
+
+        if (data.success) {
+
+          setUser(
+            data.user
+          );
+
+        }
+
+      } catch (error) {
+
+        console.error(
+          error
+        );
+
+      }
+
+    };
+
+  fetchUser();
+
+}, []);
+
+
   const [address, setAddress] = useState({
     name: '', email: '', phone: '', street: '', state: '', postcode: '', country: '',
   });
@@ -44,8 +182,11 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
     if (location) {
       setAddress(prev => ({
         ...prev,
-        name: user?.fullName || '',
-        email: user?.primaryEmailAddress?.emailAddress || '',
+      
+name:
+`${user?.firstName || ""} ${user?.lastName || ""}`,
+email:
+user?.email || '',
         street: location.city || location.town || location.village || location.county || '',
         state: location.state || '',
         postcode: location.postcode || '',
@@ -61,9 +202,13 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
   /* ── completeOrder — email required, phone optional ── */
 
 
-  const completeOrder = async (method = 'Razorpay') => {
+const completeOrder = async (
+  method = "Razorpay",
+  paymentData = {}
+) => {
     // validation
-    if (!user) {
+  
+    if (!token || !user){
       toast.error('Please login before placing an order');
       return;
     }
@@ -73,36 +218,114 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
       return;
     }
 
+console.log("====================================");
+console.log("COMPLETE ORDER STARTED");
+console.log("USER:", user);
+console.log("TOKEN:", token);
+console.log("CART ITEMS:", cartItem);
+console.log("====================================");
+
+cartItem.forEach((item, index) => {
+
+  console.log(`ITEM ${index + 1}`);
+
+  console.log("FULL ITEM:", item);
+
+  console.log("PRODUCT ID:", item.productId);
+
+  console.log("TITLE:", item.title);
+
+  console.log("PRICE:", item.price);
+
+  console.log("QUANTITY:", item.quantity);
+
+  console.log("--------------------------------");
+
+});
+
+
+console.log("FINAL CART ITEMS:", cartItem);
+
+cartItem.forEach((item) => {
+
+  console.log("ITEM:", item);
+
+  console.log("PRODUCT ID:", item.productId);
+
+});
+
+
     // order payload
-    const order = {
-      userId: user.id,
-      user: address.name || user.fullName || 'Guest',
-      email: address.email,
-      phone: address.phone ? `+91 ${address.phone}` : '',
-      deliveryAddress: {
-        street: address.street,
-        state: address.state,
-        postcode: address.postcode,
-        country: address.country,
-      },
-      total: Number(totalAmount),
-      paymentMethod: method,
-      paymentStatus: method === 'COD' ? 'Pending' : 'Paid',
-      status: 'Processing',
-      items: cartItem.map(i => ({
-        title: i.title,
-        price: Number(i.price),
-        quantity: i.quantity
-      })),
-    };
+ 
+const order = {
+
+  userId: user._id,
+
+  user: address.name,
+
+  email: address.email,
+
+  phone: address.phone
+    ? `+91 ${address.phone}`
+    : "",
+
+  deliveryAddress: {
+    street: address.street,
+    state: address.state,
+    postcode: address.postcode,
+    country: address.country,
+  },
+
+  total: Number(totalAmount),
+
+  paymentMethod: method,
+
+  paymentStatus:
+    method === "COD"
+      ? "Pending"
+      : "Paid",
+
+  razorpayOrderId:
+    paymentData.razorpay_order_id || "",
+
+  razorpayPaymentId:
+    paymentData.razorpay_payment_id || "",
+
+  razorpaySignature:
+    paymentData.razorpay_signature || "",
+
+  status: "Processing",
+
+  items: cartItem.map((i) => ({
+  productId: i.productId,
+
+  title: i.title,
+
+  image: i.image, // ADD THIS
+
+  price: Number(i.price),
+
+  quantity: i.quantity,
+})),
+};
+
 
     try {
       // save order
       const res = await fetch(`${BACKEND_URL}/api/save-order`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+       
+headers: {
+
+  'Content-Type':
+    'application/json',
+
+  Authorization:
+    `Bearer ${token}`,
+
+},
+
+
         body: JSON.stringify(order),
       });
 
@@ -146,8 +369,97 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
 
       // small delay for UX
       setTimeout(() => {
-        navigate('/order-success');
-      }, 300);
+
+  navigate("/order-success", {
+
+    state: {
+
+      order: {
+
+        orderId:
+          data.order?._id ||
+
+          `ESH-${Date.now()}`,
+
+        totalPrice:
+          totalAmount,
+
+        paymentMethod:
+          method,
+
+        paymentStatus:
+
+          method === "COD"
+
+            ? "Pending"
+
+            : "Paid",
+
+        deliveryType:
+          "Express",
+
+        estimatedDelivery:
+          "5-7 Business Days",
+
+        transactionId:
+
+          data.order?.transactionId ||
+
+          `TXN${Date.now()}`,
+
+        shippingAddress: {
+
+          name:
+            address.name,
+
+          address:
+            address.street,
+
+          city:
+            address.state,
+
+          state:
+            address.state,
+
+          country:
+            address.country,
+
+          postcode:
+            address.postcode,
+
+          phone:
+            address.phone,
+
+          email:
+            address.email,
+
+        },
+
+        items:
+
+          cartItem.map(i => ({
+
+            name:
+              i.title,
+
+            quantity:
+              i.quantity,
+
+            price:
+              Number(i.price),
+
+            image:
+              i.image,
+
+          })),
+
+      },
+
+    },
+
+  });
+
+}, 300);
 
     } catch (err) {
       console.error(err);
@@ -158,35 +470,68 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
   /* ── Razorpay — no phone required ── */
   const handleRazorpayPayment = async () => {
     try {
+      console.log("TOTAL:", totalAmount);
       const res = await fetch(`${BACKEND_URL}/api/create-order`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+
+headers: {
+
+  'Content-Type':
+    'application/json',
+
+  Authorization:
+    `Bearer ${token}`,
+
+},
+
         body: JSON.stringify({ amount: totalAmount }),
       });
       const data = await res.json();
       if (!res.ok) { toast.error('Order creation failed ❌'); return; }
       if (!window.Razorpay) { toast.error('Razorpay not loaded'); return; }
 
-      const rzp = new window.Razorpay({
-        key: import.meta.env.VITE_RAZORPAY_KEY,
-        amount: data.amount,
-        currency: 'INR',
-        name: 'E-Shop',
-        description: 'Order Payment',
-        order_id: data.id,
-        handler: async (response) => {
-          const vRes = await fetch(`${BACKEND_URL}/api/verify-payment`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(response),
-          });
-          const vData = await vRes.json();
-          if (vData.success) completeOrder('Razorpay');
-          else toast.error('Payment verification failed ❌');
+   
+console.log("CREATE ORDER RESPONSE:", data);
+console.log("RAZORPAY KEY:", import.meta.env.VITE_RAZORPAY_KEY);
+
+const rzp = new window.Razorpay({
+  key: import.meta.env.VITE_RAZORPAY_KEY,
+
+  amount: data.order.amount,
+
+  currency: data.order.currency,
+
+  name: "Odikart",
+
+  description: "Order Payment",
+
+  order_id: data.order.id,
+
+  handler: async (response) => {
+    console.log("RAZORPAY RESPONSE:", response);
+
+    const vRes = await fetch(
+      `${BACKEND_URL}/api/verify-payment`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        prefill: { name: user?.fullName || 'Guest', email: address.email, contact: address.phone || '' },
-        theme: { color: '#6366F1' },
-      });
+        body: JSON.stringify(response),
+      }
+    );
+
+    const vData = await vRes.json();
+
+    if (vData.success) {
+      await completeOrder(
+        "Razorpay",
+        response
+      );
+    }
+  },
+});
       rzp.open();
     } catch { toast.error('Payment failed ❌'); }
   };
@@ -421,7 +766,11 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
                         className={`w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-sm transition-all duration-300
                           ${s.id < step ? "step-done cursor-pointer" : s.id === step ? "step-active" : "step-idle cursor-default"}`}
                       >
-                        {s.id < step ? '✅' : s.icon}
+                     {s.id < step ? (
+  <FaCheckCircle size={16} />
+) : (
+  s.icon
+)}
                       </button>
                       <span className={`text-xs font-semibold ${s.id === step ? "text-indigo-600" : s.id < step ? "text-indigo-400" : "text-slate-400"}`}>
                         {s.label}
@@ -442,7 +791,7 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
                       My Cart <span className="text-indigo-400 text-lg">({cartItem.length})</span>
                     </h2>
                     <button onClick={() => navigate('/order-history')} className="btn-secondary px-4 py-2 text-xs">
-                      📦 Orders
+                      <FaHistory size={14} /> View Orders
                     </button>
                   </div>
 
@@ -499,7 +848,7 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
 
                       <div className="s-row">
                         <span className="flex items-center gap-2">
-                          🛍️ Handling
+                          <GiShoppingBag size={13} /> Handling
                         </span>
                         <span className="flex items-center font-semibold text-slate-700">
                           ₹5
@@ -508,11 +857,11 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
 
                       <div className="border-t pt-3 flex justify-between">
                         <span className="font-bold text-slate-800 flex items-center gap-2">
-                          👛 Total
+                          Total
                         </span>
 
                         <span className="flex items-center font-extrabold text-lg text-indigo-600">
-                          ₹{totalAmount}
+                           <FaRupeeSign size={13} className="mr-1" />{totalAmount}
                         </span>
                       </div>
                     </div>
@@ -530,7 +879,10 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
              {step === 2 && (
   <div className="step-panel">
     <h2 className="cart-serif text-2xl font-bold text-indigo-900 mb-6">
-      📍 Delivery Information
+      <span className="flex items-center gap-2">
+  <AiFillEnvironment className="text-indigo-600" />
+  Delivery Information
+</span>
     </h2>
 
     <div className="cart-card p-6 sm:p-8 space-y-4">
@@ -538,7 +890,7 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-indigo-50 pb-4 mb-2">
         <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xl">
-          📦
+          <GiShoppingBag className="text-indigo-600" size={20} />
         </div>
 
         <div>
@@ -556,7 +908,10 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
       <div>
         <div className="flex items-center gap-2 mb-1.5">
           <label className="text-xs font-semibold text-slate-600">
-            👤 Full Name
+            <span className="flex items-center gap-1">
+  <FaUser className="text-indigo-500" size={12} />
+  Full Name
+</span>
           </label>
 
           <span className="req-badge">Required</span>
@@ -575,7 +930,10 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
       <div>
         <div className="flex items-center gap-2 mb-1.5">
           <label className="text-xs font-semibold text-slate-600">
-            ✉️ Email Address
+            <span className="flex items-center gap-1">
+  <FaEnvelope className="text-indigo-500" size={12} />
+  Email Address
+</span>
           </label>
 
           <span className="req-badge">Required</span>
@@ -618,15 +976,18 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
       <div>
         <div className="flex items-center gap-2 mb-1.5">
           <label className="text-xs font-semibold text-slate-600">
-            📞 Phone Number
+           <span className="flex items-center gap-1">
+  <BsTelephoneFill className="text-indigo-500" size={11} />
+  Phone Number
+</span>
           </label>
 
           <span className="req-badge">Required</span>
         </div>
 
         <div className="flex items-center f-input-bare pr-0 pl-0 overflow-hidden">
-          <span className="px-3 text-indigo-400 text-sm font-bold flex-shrink-0 border-r border-indigo-100 mr-1">
-            🇮🇳 +91
+          <span className=" text-indigo-400 text-sm font-bold flex-shrink-0 border-r border-indigo-100 mr-1">
+            +91
           </span>
 
           <input
@@ -658,7 +1019,10 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
       <div>
         <div className="flex items-center gap-2 mb-1.5">
           <label className="text-xs font-semibold text-slate-600">
-            📍 Street Address
+           <span className="flex items-center gap-1">
+  <FaMapMarkerAlt className="text-indigo-500" size={11} />
+  Street Address
+</span>
           </label>
 
           <span className="req-badge">Required</span>
@@ -681,7 +1045,10 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
         <div>
           <div className="flex items-center gap-1.5 mb-1.5">
             <label className="text-xs font-semibold text-slate-600">
-              🏙️ State
+              <span className="flex items-center gap-1">
+  <MdLocationCity className="text-indigo-500" size={13} />
+  State
+</span>
             </label>
 
             <span className="req-badge">Required</span>
@@ -701,7 +1068,10 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
         <div>
           <div className="flex items-center gap-1.5 mb-1.5">
             <label className="text-xs font-semibold text-slate-600">
-              📮 Post Code
+           <span className="flex items-center gap-1">
+  <MdMyLocation className="text-indigo-500" size={13} />
+  Post Code
+</span>
             </label>
 
             <span className="req-badge">Required</span>
@@ -723,7 +1093,10 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
       <div>
         <div className="flex items-center gap-2 mb-1.5">
           <label className="text-xs font-semibold text-slate-600">
-            🌍 Country
+            <span className="flex items-center gap-1">
+  <AiFillEnvironment className="text-indigo-500" size={13} />
+  Country
+</span>
           </label>
 
           <span className="req-badge">Required</span>
@@ -762,7 +1135,10 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
         }}
         className="btn-secondary w-full py-3 text-sm mt-1"
       >
-        📡 Auto-detect My Location
+      <>
+  <MdMyLocation size={16} />
+  Auto-detect My Location
+</>
       </button>
     </div>
 
@@ -772,7 +1148,10 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
         onClick={() => setStep(1)}
         className="btn-secondary flex-1 py-4 text-sm"
       >
-        ⬅️ Back
+        <>
+  <IoArrowBack size={15} />
+  Back
+</>
       </button>
 
       <button
@@ -787,7 +1166,7 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
           Continue to Payment
         </span>
 
-        ➜
+       <IoArrowForward size={15} className="relative z-10" />
       </button>
     </div>
   </div>
@@ -795,107 +1174,347 @@ const Cart = ({ location, getLocation, onLocationChange }) => {
 
               {/* ═══ STEP 3 — PAYMENT ═══ */}
               {step === 3 && (
-                <div className="step-panel space-y-5">
-                  <div>
-                    <h2 className="cart-serif text-2xl font-bold text-indigo-900 mb-1">Payment</h2>
-                    <p className="text-slate-400 text-sm">Choose how you'd like to pay</p>
-                  </div>
+            <div className="step-panel space-y-6">
 
-                  {/* recap */}
-                  <div className="cart-card p-5">
-                    <p className="text-xs font-bold tracking-widest text-indigo-400 uppercase mb-3">Order Recap</p>
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="space-y-0.5">
-                        <p className="text-sm font-semibold text-slate-700">{cartItem.length} item{cartItem.length !== 1 ? "s" : ""}</p>
-                        <p className="text-xs text-slate-400">📧 {address.email}</p>
-                        <p className="text-xs text-slate-400">📍 {address.street}, {address.state}</p>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="text-xs text-slate-400">Total</p>
-                        <p className="flex items-center text-xl font-extrabold text-indigo-600">
-                          <FaRupeeSign size={13} />{totalAmount}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+  {/* Header */}
+  <div>
+    <h2 className="text-3xl font-black tracking-tight text-slate-900">
+      Payment
+    </h2>
 
-                  {/* payment options */}
-                  <div className="space-y-3">
-                    <button className={`pay-option w-full ${paymentType === "razorpay" ? "selected" : ""}`}
-                      onClick={() => setPaymentType("razorpay")}>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center">
-                          <FaCreditCard className="text-indigo-600" size={16} />
-                        </div>
-                        <div className="text-left">
-                          <p className="text-sm font-bold text-slate-800">Pay Online</p>
-                          <div className="flex gap-1.5 mt-1">
-                            <span className="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded-full font-semibold border border-green-200">Secure</span>
-                            <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-semibold border border-blue-200">Instant</span>
-                            <span className="text-[10px] bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full font-semibold border border-purple-200">UPI · Cards</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${paymentType === "razorpay" ? "border-indigo-500" : "border-slate-300"}`}>
-                        {paymentType === "razorpay" && <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" />}
-                      </div>
-                    </button>
+    <p className="text-slate-500 text-sm mt-1">
+      Complete your purchase securely
+    </p>
+  </div>
 
-                    <button className={`pay-option w-full ${paymentType === "cod" ? "selected" : ""}`}
-                      onClick={() => setPaymentType("cod")}>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center">
-                          <FaWallet className="text-amber-500" size={16} />
-                        </div>
-                        <div className="text-left">
-                          <p className="text-sm font-bold text-slate-800">Cash on Delivery</p>
-                          <p className="text-[11px] text-amber-600 font-medium mt-0.5">Pay when it arrives · 3–5 days</p>
-                        </div>
-                      </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${paymentType === "cod" ? "border-amber-500" : "border-slate-300"}`}>
-                        {paymentType === "cod" && <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />}
-                      </div>
-                    </button>
-                  </div>
+  {/* ORDER SUMMARY */}
+  <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-white/70 backdrop-blur-xl shadow-xl p-6">
 
-                  {/* inline instructions */}
-                  {paymentType && (
-                    <div className={`rounded-2xl p-4 border ${paymentType === "razorpay" ? "bg-indigo-50 border-indigo-200 text-indigo-700" : "bg-amber-50 border-amber-200 text-amber-700"}`}>
-                      <p className="font-bold text-xs uppercase tracking-wider mb-2.5">
-                        {paymentType === "razorpay" ? "🔐 Razorpay — Secure Checkout" : "💵 Cash on Delivery — What to expect"}
-                      </p>
-                      <div className="space-y-1.5">
-                        {(paymentType === "razorpay"
-                          ? ["Select UPI / Card / Netbanking", "Complete payment in Razorpay popup", "Do not close the payment window", "Confirmation sent to " + address.email]
-                          : ["Pay when your order arrives", "Delivery in 3–5 business days", "Keep exact change ready", "Order confirmation sent to " + address.email]
-                        ).map(t => (
-                          <div key={t} className="flex items-center gap-2 text-xs">
-                            <FaCheckCircle className={`flex-shrink-0 ${paymentType === "razorpay" ? "text-indigo-500" : "text-amber-500"}`} size={11} />
-                            {t}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+    {/* gradient glow */}
+    <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-200 rounded-full blur-3xl opacity-30" />
 
-                  <p className="text-center text-xs text-slate-400">🔒 Secure payments powered by Razorpay</p>
+    <div className="relative flex items-start justify-between gap-5">
 
-                  <div className="flex gap-3 pt-2">
-                    <button onClick={() => setStep(2)} className="btn-secondary flex-1 py-4 text-sm">
-                      <IoArrowBack size={15} /> Back
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (!paymentType) { toast.warning("Please select a payment method"); return; }
-                        paymentType === "razorpay" ? onInstrOpen() : onCodConfirmOpen();
-                      }}
-                      disabled={!paymentType}
-                      className="btn-primary flex-[2] py-4 text-sm">
-                      <span className="relative z-10">{paymentType === "cod" ? "Confirm Order" : "Proceed to Pay"}</span>
-                      <IoArrowForward size={15} className="relative z-10" />
-                    </button>
-                  </div>
-                </div>
+      {/* left */}
+      <div className="space-y-4">
+
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.25em] text-indigo-500 mb-3">
+            Order Summary
+          </p>
+
+          <div className="flex items-center gap-2">
+            <div className="w-11 h-11 rounded-2xl bg-indigo-100 flex items-center justify-center">
+              <FaShoppingBag className="text-indigo-600" />
+            </div>
+
+            <div>
+              <p className="font-bold text-slate-800">
+                {cartItem.length} item{cartItem.length !== 1 ? "s" : ""}
+              </p>
+
+              <p className="text-xs text-slate-400">
+                Ready for checkout
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* email */}
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center">
+            <FaEnvelope className="text-slate-500 text-sm" />
+          </div>
+
+          <div>
+            <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">
+              Email
+            </p>
+
+            <p className="text-sm font-medium text-slate-700">
+              {address.email}
+            </p>
+          </div>
+        </div>
+
+        {/* address */}
+        <div className="flex items-start gap-3">
+          <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center">
+            <FaMapMarkerAlt className="text-slate-500 text-sm" />
+          </div>
+
+          <div>
+            <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">
+              Delivery Address
+            </p>
+
+            <p className="text-sm font-medium text-slate-700 leading-relaxed">
+              {address.street}, {address.state}
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      {/* total */}
+      <div className="text-right">
+
+        <p className="text-xs uppercase tracking-wide text-slate-400 font-semibold">
+          Total Amount
+        </p>
+
+        <div className="mt-2 inline-flex items-center rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3 shadow-lg">
+
+          <FaRupeeSign className="text-white mr-1" size={14} />
+
+          <span className="text-2xl font-black text-white tracking-tight">
+            {totalAmount}
+          </span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  {/* PAYMENT OPTIONS */}
+  <div className="space-y-4">
+
+    {/* ONLINE */}
+    <button
+      onClick={() => setPaymentType("razorpay")}
+      className={`group relative overflow-hidden w-full rounded-3xl border p-5 transition-all duration-300
+      ${
+        paymentType === "razorpay"
+          ? "border-indigo-500 bg-indigo-50 shadow-lg shadow-indigo-100"
+          : "border-slate-200 bg-white hover:border-indigo-200 hover:shadow-md"
+      }`}
+    >
+
+      <div className="flex items-center justify-between">
+
+        <div className="flex items-center gap-4">
+
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-md">
+            <FaCreditCard className="text-white text-lg" />
+          </div>
+
+          <div className="text-left">
+
+            <div className="flex items-center gap-2">
+              <p className="font-bold text-slate-800 text-base">
+                Pay Online
+              </p>
+
+              <span className="px-2 py-1 rounded-full bg-green-100 text-green-600 text-[10px] font-bold uppercase tracking-wide">
+                Recommended
+              </span>
+            </div>
+
+            <p className="text-sm text-slate-500 mt-1">
+              UPI, Cards, Wallets & Netbanking
+            </p>
+
+            <div className="flex gap-2 mt-3">
+
+              <span className="px-2 py-1 rounded-full bg-indigo-100 text-indigo-600 text-[11px] font-semibold">
+                Secure
+              </span>
+
+              <span className="px-2 py-1 rounded-full bg-violet-100 text-violet-600 text-[11px] font-semibold">
+                Instant
+              </span>
+
+              <span className="px-2 py-1 rounded-full bg-sky-100 text-sky-600 text-[11px] font-semibold">
+                Razorpay
+              </span>
+
+            </div>
+
+          </div>
+        </div>
+
+        <div
+          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all
+          ${
+            paymentType === "razorpay"
+              ? "border-indigo-600"
+              : "border-slate-300"
+          }`}
+        >
+          {paymentType === "razorpay" && (
+            <div className="w-3 h-3 rounded-full bg-indigo-600" />
+          )}
+        </div>
+
+      </div>
+    </button>
+
+    {/* COD */}
+    <button
+      onClick={() => setPaymentType("cod")}
+      className={`group relative overflow-hidden w-full rounded-3xl border p-5 transition-all duration-300
+      ${
+        paymentType === "cod"
+          ? "border-amber-400 bg-amber-50 shadow-lg shadow-amber-100"
+          : "border-slate-200 bg-white hover:border-amber-200 hover:shadow-md"
+      }`}
+    >
+
+      <div className="flex items-center justify-between">
+
+        <div className="flex items-center gap-4">
+
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-md">
+            <FaWallet className="text-white text-lg" />
+          </div>
+
+          <div className="text-left">
+
+            <p className="font-bold text-slate-800 text-base">
+              Cash on Delivery
+            </p>
+
+            <p className="text-sm text-slate-500 mt-1">
+              Pay after receiving your order
+            </p>
+
+            <div className="mt-3">
+              <span className="px-2 py-1 rounded-full bg-amber-100 text-amber-700 text-[11px] font-semibold">
+                3–5 Business Days
+              </span>
+            </div>
+
+          </div>
+        </div>
+
+        <div
+          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all
+          ${
+            paymentType === "cod"
+              ? "border-amber-500"
+              : "border-slate-300"
+          }`}
+        >
+          {paymentType === "cod" && (
+            <div className="w-3 h-3 rounded-full bg-amber-500" />
+          )}
+        </div>
+
+      </div>
+    </button>
+  </div>
+
+  {/* INFO BOX */}
+  {paymentType && (
+    <div
+      className={`rounded-3xl p-5 border
+      ${
+        paymentType === "razorpay"
+          ? "bg-indigo-50 border-indigo-100"
+          : "bg-amber-50 border-amber-100"
+      }`}
+    >
+
+      <p
+        className={`font-bold text-sm mb-4
+        ${
+          paymentType === "razorpay"
+            ? "text-indigo-700"
+            : "text-amber-700"
+        }`}
+      >
+        {paymentType === "razorpay"
+          ? "Secure Payment Instructions"
+          : "Cash on Delivery Details"}
+      </p>
+
+      <div className="space-y-3">
+
+        {(paymentType === "razorpay"
+          ? [
+              "Choose UPI, Card or Netbanking",
+              "Complete payment in Razorpay popup",
+              "Do not close payment window",
+              `Confirmation sent to ${address.email}`,
+            ]
+          : [
+              "Pay after delivery arrives",
+              "Delivery within 3–5 business days",
+              "Keep exact amount ready",
+              `Confirmation sent to ${address.email}`,
+            ]
+        ).map((t) => (
+          <div key={t} className="flex items-center gap-3">
+
+            <div
+              className={`w-6 h-6 rounded-full flex items-center justify-center
+              ${
+                paymentType === "razorpay"
+                  ? "bg-indigo-100"
+                  : "bg-amber-100"
+              }`}
+            >
+              <FaCheckCircle
+                size={11}
+                className={
+                  paymentType === "razorpay"
+                    ? "text-indigo-600"
+                    : "text-amber-600"
+                }
+              />
+            </div>
+
+            <p className="text-sm text-slate-700 font-medium">
+              {t}
+            </p>
+
+          </div>
+        ))}
+
+      </div>
+    </div>
+  )}
+
+  {/* footer */}
+  <div className="flex items-center justify-center gap-2 text-sm text-slate-400">
+    <FaShieldAlt className="text-green-500" />
+    Secure checkout powered by Razorpay
+  </div>
+
+  {/* ACTION BUTTONS */}
+  <div className="flex gap-4 pt-2">
+
+    <button
+      onClick={() => setStep(2)}
+      className="flex-1 h-14 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 transition-all font-semibold text-slate-700 flex items-center justify-center gap-2"
+    >
+      <IoArrowBack />
+      Back
+    </button>
+
+    <button
+      onClick={() => {
+        if (!paymentType) {
+          toast.warning("Please select a payment method");
+          return;
+        }
+
+        paymentType === "razorpay"
+          ? onInstrOpen()
+          : onCodConfirmOpen();
+      }}
+      disabled={!paymentType}
+      className="flex-[2] h-14 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:scale-[1.01] active:scale-[0.99] transition-all text-white font-bold shadow-xl shadow-indigo-200 flex items-center justify-center gap-2 disabled:opacity-50"
+    >
+      {paymentType === "cod"
+        ? "Confirm Order"
+        : "Proceed to Pay"}
+
+      <IoArrowForward />
+    </button>
+
+  </div>
+</div>
               )}
             </>
           )}
