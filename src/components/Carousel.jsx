@@ -411,7 +411,7 @@ const isSignedIn =
                     </div>
                     <img
                       src={item.thumbnail} alt={item.title}
-                      className="cw-ds-img"
+                      className="cw-ds-img border rounded-full"
                       onClick={() => navigate(`/products/${item._id}`)}
                     />
                   </div>

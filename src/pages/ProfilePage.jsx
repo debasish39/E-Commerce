@@ -9,7 +9,7 @@ import {
   ModalFooter,
 } from "@heroui/react";
 import { toast } from "react-toastify";
-
+import "react-toastify/dist/ReactToastify.css";
 export default function ProfilePage() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [openProfile, setOpenProfile] = useState(false);

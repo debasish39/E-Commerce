@@ -83,7 +83,7 @@ export default function ProtectedRoute({
           const res =
             await fetch(
 
-              "http://127.0.0.1:5000/api/auth/me",
+              "https://eshop-backend-y0e7.onrender.com/api/auth/me",
 
               {
 
