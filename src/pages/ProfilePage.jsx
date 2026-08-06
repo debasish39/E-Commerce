@@ -893,6 +893,48 @@ export default function ProfilePage() {
                   <FaSignOutAlt size={14} />
                   Sign Out
                 </button>
+                <button
+  className="pp-btn pp-btn-danger"
+  onClick={async () => {
+    const confirmDelete = window.confirm(
+      "Are you sure? This will permanently delete your account and cannot be undone."
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(
+        "https://eshop-backend-y0e7.onrender.com/api/auth/delete-account",
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success("Account permanently deleted");
+
+        localStorage.removeItem("token");
+
+        setTimeout(() => {
+          window.location.href = "/sign-in";
+        }, 1000);
+      } else {
+        toast.error(data.message);
+      }
+
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete account");
+    }
+  }}
+>
+  Delete Account
+</button>
               </div>
             </div>
 

@@ -132,7 +132,7 @@ const OrderHistory = () => {
           const res =
             await fetch(
 
-              "http://localhost:5000/api/my-orders",
+              "https://eshop-backend-y0e7.onrender.com/api/my-orders",
 
               {
 
@@ -196,7 +196,7 @@ const OrderHistory = () => {
       console.log("CANCELLING ORDER ID:", cancellingOrderId);
 
       const res = await fetch(
-        `http://localhost:5000/api/order/cancel/${cancellingOrderId}`,
+        `https://eshop-backend-y0e7.onrender.com/api/order/cancel/${cancellingOrderId}`,
         {
           method: "PUT",
 

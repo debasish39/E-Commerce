@@ -145,7 +145,7 @@ async (e) => {
     const res =
       await fetch(
 
-        "http://localhost:5000/api/auth/signup",
+        "https://eshop-backend-y0e7.onrender.com/api/auth/signup",
 
         {
 

@@ -386,7 +386,7 @@ const handleDownloadInvoice = async () => {
     const token = localStorage.getItem("token");
 
     const res = await fetch(
-      `http://localhost:5000/api/order/cancel/${order._id}`,
+      `https://eshop-backend-y0e7.onrender.com/api/order/cancel/${order._id}`,
       {
         method: "PUT",
         headers: {

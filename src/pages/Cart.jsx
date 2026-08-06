@@ -122,7 +122,7 @@ useEffect(() => {
         const res =
           await fetch(
 
-            "http://localhost:5000/api/auth/me",
+            "https://eshop-backend-y0e7.onrender.com/api/auth/me",
 
             {
 
@@ -209,7 +209,7 @@ user?.email || '',
   useEffect(() => {
   setFinalTotal(totalAmount);
 }, [totalAmount]);
-  const BACKEND_URL = 'http://localhost:5000';
+  const BACKEND_URL = 'https://eshop-backend-y0e7.onrender.com';
 const applyCoupon = async () => {
 
   if (!couponCode.trim()) {
@@ -227,7 +227,7 @@ const applyCoupon = async () => {
     setCouponSuccess("");
 
     const res = await fetch(
-      "http://localhost:5000/api/coupons/apply",
+      "https://eshop-backend-y0e7.onrender.com/api/coupons/apply",
       {
         method: "POST",
         headers: {

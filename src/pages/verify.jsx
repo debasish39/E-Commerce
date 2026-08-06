@@ -25,7 +25,7 @@ import {
 ===================================== */
 
 const BACKEND_URL =
-  "http://localhost:5000";
+  "https://eshop-backend-y0e7.onrender.com";
 
 export default function Verify() {
 

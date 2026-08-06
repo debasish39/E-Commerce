@@ -16,27 +16,216 @@ import {
   FaPhoneAlt, FaUser, FaCreditCard, FaTimes,
   FaBarcode, FaTruckMoving, FaBox,
 } from "react-icons/fa";
-import { MdLocalShipping, MdAutoAwesome } from "react-icons/md";
 import { BsBoxSeam } from "react-icons/bs";
+import { MdLocalShipping, MdAutoAwesome } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 /* ── ORDER STATUS PIPELINE ── */
+/* ===============================
+   ORDER STATUS TIMELINE
+================================ */
+
 const STATUS_STEPS = [
-  { key: "Placed", label: "Order Placed", icon: <FaBoxOpen size={14} />, color: "#f59e0b" },
-  { key: "Confirmed", label: "Confirmed", icon: <FaCheckCircle size={14} />, color: "#3b82f6" },
-  { key: "Shipped", label: "Shipped", icon: <FaTruckMoving size={14} />, color: "#8b5cf6" },
-  { key: "Delivered", label: "Delivered", icon: <FaTruck size={14} />, color: "#10b981" },
+  {
+    key: "Pending Payment",
+    label: "Pending Payment",
+    icon: <FaClock size={14} />,
+    color: "#f59e0b",
+  },
+  {
+    key: "Confirmed",
+    label: "Confirmed",
+    icon: <FaCheckCircle size={14} />,
+    color: "#3b82f6",
+  },
+  {
+    key: "Processing",
+    label: "Processing",
+    icon: <BsBoxSeam size={14} />,
+    color: "#6366f1",
+  },
+  {
+    key: "Packed",
+    label: "Packed",
+    icon: <FaBox size={14} />,
+    color: "#8b5cf6",
+  },
+  {
+    key: "Ready for Pickup",
+    label: "Ready",
+    icon: <FaShoppingBag size={14} />,
+    color: "#7c3aed",
+  },
+  {
+    key: "Shipped",
+    label: "Shipped",
+    icon: <FaTruckMoving size={14} />,
+    color: "#2563eb",
+  },
+  {
+    key: "In Transit",
+    label: "In Transit",
+    icon: <MdLocalShipping size={16} />,
+    color: "#0ea5e9",
+  },
+  {
+    key: "Out for Delivery",
+    label: "Out for Delivery",
+    icon: <FaTruck size={14} />,
+    color: "#f97316",
+  },
+  {
+    key: "Delivered",
+    label: "Delivered",
+    icon: <FaCheckCircle size={14} />,
+    color: "#10b981",
+  },
 ];
 
-const STATUS_ORDER = ["Placed", "Confirmed", "Shipped", "Delivered"];
+const STATUS_ORDER = STATUS_STEPS.map((step) => step.key);
 
 const STATUS_CFG = {
-  Placed: { bg: "#fef3c7", border: "#fbbf24", text: "#b45309", dot: "#f59e0b" },
-  Confirmed: { bg: "#eff6ff", border: "#93c5fd", text: "#1d4ed8", dot: "#3b82f6" },
-  Shipped: { bg: "#f5f3ff", border: "#a78bfa", text: "#6d28d9", dot: "#8b5cf6" },
-  Delivered: { bg: "#f0fdf4", border: "#6ee7b7", text: "#065f46", dot: "#10b981" },
-  Cancelled: { bg: "#fef2f2", border: "#fca5a5", text: "#b91c1c", dot: "#ef4444" },
-  Processing: { bg: "#eef2ff", border: "#a5b4fc", text: "#3730a3", dot: "#6366f1" },
+  "Pending Payment": {
+    bg: "#fef3c7",
+    border: "#fbbf24",
+    text: "#92400e",
+    dot: "#f59e0b",
+  },
+
+  Confirmed: {
+    bg: "#eff6ff",
+    border: "#93c5fd",
+    text: "#1d4ed8",
+    dot: "#3b82f6",
+  },
+
+  Processing: {
+    bg: "#eef2ff",
+    border: "#a5b4fc",
+    text: "#4338ca",
+    dot: "#6366f1",
+  },
+
+  Packed: {
+    bg: "#f5f3ff",
+    border: "#c4b5fd",
+    text: "#6d28d9",
+    dot: "#8b5cf6",
+  },
+
+  "Ready for Pickup": {
+    bg: "#ede9fe",
+    border: "#c4b5fd",
+    text: "#5b21b6",
+    dot: "#7c3aed",
+  },
+
+  Shipped: {
+    bg: "#eff6ff",
+    border: "#93c5fd",
+    text: "#1e40af",
+    dot: "#2563eb",
+  },
+
+  "In Transit": {
+    bg: "#ecfeff",
+    border: "#67e8f9",
+    text: "#155e75",
+    dot: "#06b6d4",
+  },
+
+  "Out for Delivery": {
+    bg: "#fff7ed",
+    border: "#fdba74",
+    text: "#c2410c",
+    dot: "#f97316",
+  },
+
+  Delivered: {
+    bg: "#f0fdf4",
+    border: "#6ee7b7",
+    text: "#065f46",
+    dot: "#10b981",
+  },
+
+  Cancelled: {
+    bg: "#fef2f2",
+    border: "#fca5a5",
+    text: "#b91c1c",
+    dot: "#ef4444",
+  },
+
+  "Return Requested": {
+    bg: "#fff7ed",
+    border: "#fdba74",
+    text: "#9a3412",
+    dot: "#fb923c",
+  },
+
+  "Return Approved": {
+    bg: "#f5f3ff",
+    border: "#c4b5fd",
+    text: "#6d28d9",
+    dot: "#8b5cf6",
+  },
+
+  "Return Pickup Scheduled": {
+    bg: "#eff6ff",
+    border: "#93c5fd",
+    text: "#1d4ed8",
+    dot: "#3b82f6",
+  },
+
+  "Return Picked Up": {
+    bg: "#ecfeff",
+    border: "#67e8f9",
+    text: "#155e75",
+    dot: "#06b6d4",
+  },
+
+  "Received by Admin": {
+    bg: "#eef2ff",
+    border: "#a5b4fc",
+    text: "#4338ca",
+    dot: "#6366f1",
+  },
+
+  Inspection: {
+    bg: "#faf5ff",
+    border: "#d8b4fe",
+    text: "#7e22ce",
+    dot: "#a855f7",
+  },
+
+  "Return Rejected": {
+    bg: "#fef2f2",
+    border: "#fca5a5",
+    text: "#b91c1c",
+    dot: "#ef4444",
+  },
+
+  Returned: {
+    bg: "#f3f4f6",
+    border: "#d1d5db",
+    text: "#374151",
+    dot: "#6b7280",
+  },
+
+  "Refund Processing": {
+    bg: "#fff7ed",
+    border: "#fdba74",
+    text: "#9a3412",
+    dot: "#fb923c",
+  },
+
+  "Refund Completed": {
+    bg: "#ecfdf5",
+    border: "#6ee7b7",
+    text: "#047857",
+    dot: "#10b981",
+  },
 };
+
+
 
 const TrackOrder = () => {
  const [searchParams] = useSearchParams();
@@ -51,7 +240,7 @@ const id = searchParams.get("id");
   const [showNoticeModal, setShowNoticeModal] = useState(true);
   const navigate = useNavigate();
 
-  const BACKEND_URL ="http://localhost:5000";
+  const BACKEND_URL ="https://eshop-backend-y0e7.onrender.com";
 const fetchOrder =
   async (customId) => {
 
@@ -280,15 +469,17 @@ window.location.reload();
   };
 
   const canCancel =
-    order &&
-    !order.cancelled &&
-    (new Date() - new Date(order.createdAt)) / (1000 * 60 * 60 * 24) <= 7 &&
-    order.status !== "Cancelled" &&
-    order.status !== "Delivered";
+  order &&
+  order.cancellation?.allowed &&
+  !order.cancellation?.cancelled &&
+  new Date() < new Date(order.cancellation?.cancelBefore) &&
+  order.status !== "Cancelled" &&
+  order.status !== "Delivered";
 
   const currentStepIdx = STATUS_ORDER.indexOf(order?.status);
-  const isCancelled = order?.status === "Cancelled";
-
+const isCancelled =
+  order?.status === "Cancelled" ||
+  order?.cancellation?.cancelled;
   const formatDate = (d) =>
     d
       ? new Date(d).toLocaleDateString("en-IN", {
@@ -911,22 +1102,22 @@ window.location.reload();
                     {
                       icon: <FaUser size={12} style={{ color: "#6366f1" }} />,
                       label: "Customer",
-                      value: order.user,
+                      value: order.fullname,
                     },
                     {
                       icon: <FaEnvelope size={12} style={{ color: "#2563eb" }} />,
                       label: "Email",
-                      value: order.email,
+                      value: order.deliveryAddress?.customer?.email,
                     },
                     {
                       icon: <FaPhoneAlt size={12} style={{ color: "#10b981" }} />,
                       label: "Phone",
-                      value: order.phone,
+                      value: order.deliveryAddress?.customer?.phone,
                     },
                     {
                       icon: <FaCreditCard size={12} style={{ color: "#8b5cf6" }} />,
                       label: "Payment",
-                      value: `${order.paymentMethod} · ${order.paymentStatus}`,
+                      value: `${order.payment?.method} · ${order.payment?.status}`,
                     },
                   ].map(({ icon, label, value }) => (
                     <div key={label} className="info-chip">
@@ -959,7 +1150,7 @@ window.location.reload();
                   </div>
                   <p className="relative to-serif text-3xl font-extrabold text-white flex items-baseline gap-1">
                     <FaRupeeSign size={18} />
-                    {order.total?.toLocaleString("en-IN")}
+                    {order.pricing?.total?.toLocaleString("en-IN")}
                   </p>
                 </div>
 
@@ -973,12 +1164,39 @@ window.location.reload();
                       </p>
                     </div>
                     <p className="text-sm text-slate-700 leading-relaxed font-medium">
-                      {order.deliveryAddress.street}
-                      <br />
-                      {order.deliveryAddress.state}
-                      {order.deliveryAddress.postcode ? ` - ${order.deliveryAddress.postcode}` : ""}
-                      <br />
-                      {order.deliveryAddress.country}
+        {order.deliveryAddress?.address?.addressLine1}
+
+{order.deliveryAddress?.address?.addressLine2 && (
+  <>
+    <br />
+    {order.deliveryAddress.address.addressLine2}
+  </>
+)}
+
+{order.deliveryAddress?.address?.landmark && (
+  <>
+    <br />
+    {order.deliveryAddress.address.landmark}
+  </>
+)}
+
+<br />
+
+{order.deliveryAddress?.address?.area},{" "}
+{order.deliveryAddress?.address?.city}
+
+<br />
+
+{order.deliveryAddress?.address?.district},{" "}
+{order.deliveryAddress?.address?.state}
+
+{" - "}
+
+{order.deliveryAddress?.address?.postalCode}
+
+<br />
+
+{order.deliveryAddress?.address?.country}
                     </p>
                   </div>
                 )}

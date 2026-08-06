@@ -13,7 +13,7 @@ export const DataProvider = ({ children }) => {
   const [priceRange, setPriceRange] = useState([0, 5000]);
 
   const BACKEND_URL =
-    "http://localhost:5000/api";
+    "https://eshop-backend-y0e7.onrender.com/api";
 
   // const calculatePrice = (price) => {
   //   let finalPrice;
