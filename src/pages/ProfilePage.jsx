@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react";
-import { FaSignOutAlt, FaUser, FaTimes, FaShieldAlt, FaEnvelope, FaCamera, FaCheck, FaLock } from "react-icons/fa";
-import FuzzyText from "../components/FuzzyText";
+import {
+  FaSignOutAlt,
+  FaChevronRight,
+  FaEnvelope,
+  FaCamera,
+  FaCheck,
+  FaLock,
+  FaUser,
+  FaShieldAlt,
+  FaTrash,
+  FaArrowLeft,
+} from "react-icons/fa";
 import {
   Modal,
   ModalContent,
@@ -10,8 +20,10 @@ import {
 } from "@heroui/react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 export default function ProfilePage() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [openProfile, setOpenProfile] = useState(false);
   const [openSecurity, setOpenSecurity] = useState(false);
 
@@ -22,9 +34,10 @@ export default function ProfilePage() {
   });
 
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [profileSaved, setProfileSaved] = useState(false);
 
   const token = localStorage.getItem("token");
 
@@ -46,1342 +59,914 @@ export default function ProfilePage() {
     if (token) fetchUser();
   }, [token]);
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="pp-skeleton-page">
+        <style>{`
+          .pp-skeleton-page { min-height: 100vh; background: #F6F6FB; }
+          .pp-skeleton-bar { height: 56px; background: #fff; border-bottom: 1px solid #E7E5F0; }
+          .pp-skeleton-block {
+            background: linear-gradient(90deg, #ECEBF4 25%, #F5F4FA 37%, #ECEBF4 63%);
+            background-size: 400% 100%;
+            animation: pp-shimmer 1.4s ease infinite;
+            border-radius: 16px;
+          }
+          @keyframes pp-shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+        `}</style>
+        <div className="pp-skeleton-bar" />
+        <div style={{ maxWidth: 640, margin: "24px auto", padding: "0 16px" }}>
+          <div className="pp-skeleton-block" style={{ height: 96, width: 96, borderRadius: "50%", marginBottom: 16 }} />
+          <div className="pp-skeleton-block" style={{ height: 20, width: "50%", marginBottom: 10 }} />
+          <div className="pp-skeleton-block" style={{ height: 14, width: "35%", marginBottom: 28 }} />
+          <div className="pp-skeleton-block" style={{ height: 64, marginBottom: 12 }} />
+          <div className="pp-skeleton-block" style={{ height: 64, marginBottom: 12 }} />
+        </div>
+      </div>
+    );
+  }
+
+  const memberSince = user?.createdAt
+    ? user.createdAt.split("/")[2]?.split(",")[0]
+    : "2024";
 
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;900&family=Roboto+Flex:opsz,wght@8..144,400..800&display=swap');
 
         :root {
-          --p-indigo-950: #1e1b4b;
-          --p-indigo-900: #312e81;
-          --p-indigo-700: #4338ca;
-          --p-indigo-600: #4f46e5;
-          --p-indigo-500: #6366f1;
-          --p-indigo-400: #818cf8;
-          --p-indigo-200: #c7d2fe;
-          --p-indigo-100: #e0e7ff;
-          --p-indigo-50: #eef2ff;
-          --p-blue-600: #2563eb;
-          --p-blue-500: #3b82f6;
-          --p-blue-400: #60a5fa;
-          --p-blue-100: #dbeafe;
-          --p-blue-50: #eff6ff;
-          --p-white: #ffffff;
-          --p-slate-700: #334155;
-          --p-slate-500: #64748b;
-          --p-slate-300: #cbd5e1;
-          --p-slate-100: #f1f5f9;
-          --p-grad: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
-          --p-grad-soft: linear-gradient(135deg, #eef2ff 0%, #eff6ff 100%);
-          --p-shadow-card: 0 4px 24px rgba(79, 70, 229, 0.08), 0 1px 4px rgba(79, 70, 229, 0.04);
-          --p-shadow-btn: 0 4px 16px rgba(79, 70, 229, 0.28);
-          font-family: 'Plus Jakarta Sans', sans-serif;
+          --m-primary: #4F46E5;
+          --m-primary-dark: #3730A3;
+          --m-primary-container: #E7E5FE;
+          --m-on-primary-container: #211B6D;
+          --m-secondary: #2563EB;
+          --m-surface: #FFFFFF;
+          --m-surface-dim: #F6F6FB;
+          --m-surface-container: #F1F0F8;
+          --m-surface-container-high: #E9E7F4;
+          --m-outline: #DEDCE9;
+          --m-outline-strong: #C9C6DA;
+          --m-on-surface: #1B1B21;
+          --m-on-surface-variant: #5F5C6B;
+          --m-error: #BA1A1A;
+          --m-error-container: #FFDAD6;
+          --m-on-error-container: #410002;
+          --m-success: #146C2E;
+          --m-success-container: #C1F0D0;
+          --m-radius-full: 100px;
+          --m-radius-lg: 20px;
+          --m-radius-xl: 28px;
+          --m-elev-1: 0 1px 2px rgba(27,27,33,0.16), 0 1px 4px rgba(27,27,33,0.06);
+          --m-elev-2: 0 2px 6px rgba(27,27,33,0.12), 0 4px 14px rgba(27,27,33,0.08);
+          --m-elev-3: 0 6px 18px rgba(27,27,33,0.14), 0 2px 6px rgba(27,27,33,0.08);
+          font-family: 'Roboto', 'Roboto Flex', system-ui, sans-serif;
         }
 
-        * { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .serif { font-family: 'Playfair Display', serif; }
+        * { font-family: 'Roboto', 'Roboto Flex', system-ui, sans-serif; box-sizing: border-box; }
 
-        /* ════ ANIMATIONS ════ */
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        @keyframes ppFadeUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes ppPop {
+          from { opacity: 0; transform: scale(0.92); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes ppPulseRing {
+          0% { box-shadow: 0 0 0 0 rgba(20,108,46,0.35); }
+          100% { box-shadow: 0 0 0 6px rgba(20,108,46,0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after { animation-duration: 0.001ms !important; }
         }
 
-        @keyframes slideInDown {
-          from {
-            opacity: 0;
-            transform: translateY(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes scaleIn {
-          from {
-            opacity: 0;
-            transform: scale(0.9);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-
-        @keyframes blobDrift1 {
-          from {
-            transform: translate(0, 0) scale(1);
-          }
-          to {
-            transform: translate(-30px, 40px) scale(1.06);
-          }
-        }
-
-        @keyframes blobDrift2 {
-          from {
-            transform: translate(0, 0) scale(1);
-          }
-          to {
-            transform: translate(20px, -25px) scale(1.04);
-          }
-        }
-
-        @keyframes heroShimmer {
-          0% {
-            background-position: -100% 0;
-          }
-          100% {
-            background-position: 200% 0;
-          }
-        }
-
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-4px);
-          }
-        }
-
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.5;
-          }
-        }
-
-        @keyframes checkMark {
-          0% {
-            transform: scale(0) rotate(-45deg);
-          }
-          50% {
-            transform: scale(1.2);
-          }
-          100% {
-            transform: scale(1) rotate(0);
-          }
-        }
-
-        /* ════ PAGE ════ */
+        /* ════ PAGE / APP BAR ════ */
         .pp-page {
           min-height: 100vh;
-          background: linear-gradient(160deg, #f0f4ff 0%, #e8f0ff 35%, #f5f8ff 70%, #ffffff 100%);
-          padding: 0 0 80px;
-          position: relative;
-          overflow: hidden;
+          background: var(--m-surface-dim);
+          padding-bottom: 48px;
         }
 
-        .pp-blob {
-          position: absolute;
+        .pp-appbar {
+          position: sticky;
+          top: 0;
+          z-index: 30;
+          background: rgba(255,255,255,0.92);
+          backdrop-filter: blur(12px);
+          border-bottom: 1px solid var(--m-outline);
+          height: 60px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 0 16px;
+        }
+
+        .pp-appbar-icon {
+          width: 40px;
+          height: 40px;
           border-radius: 50%;
-          pointer-events: none;
-          filter: blur(80px);
-          z-index: 0;
-        }
-
-        .pp-blob-1 {
-          width: 600px;
-          height: 600px;
-          top: -200px;
-          right: -150px;
-          background: radial-gradient(circle, rgba(79, 70, 229, 0.1) 0%, transparent 65%);
-          animation: blobDrift1 12s ease-in-out infinite alternate;
-        }
-
-        .pp-blob-2 {
-          width: 400px;
-          height: 400px;
-          bottom: -100px;
-          left: -100px;
-          background: radial-gradient(circle, rgba(37, 99, 235, 0.09) 0%, transparent 65%);
-          animation: blobDrift2 15s ease-in-out infinite alternate;
-        }
-
-        .pp-dots {
-          position: absolute;
-          inset: 0;
-          background-image: radial-gradient(circle, rgba(79, 70, 229, 0.05) 1.5px, transparent 1.5px);
-          background-size: 30px 30px;
-          pointer-events: none;
-          z-index: 0;
-        }
-
-        .pp-inner {
-          position: relative;
-          z-index: 1;
-          max-width: 1000px;
-          margin: 0 auto;
-          padding: 0 24px;
-        }
-
-        /* ════ HERO ════ */
-        .pp-hero {
-          position: relative;
-          height: 220px;
-          border-radius: 0 0 40px 40px;
-          overflow: hidden;
-          margin-bottom: -70px;
-          animation: slideInDown 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        .pp-hero-mesh {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 40%, #2563eb 70%, #4f46e5 100%);
-        }
-
-        .pp-hero-lines {
-          position: absolute;
-          inset: 0;
-          overflow: hidden;
-        }
-
-        .pp-hero-lines::before,
-        .pp-hero-lines::after {
-          content: '';
-          position: absolute;
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 50%;
-        }
-
-        .pp-hero-lines::before {
-          width: 400px;
-          height: 400px;
-          top: -200px;
-          right: -60px;
-        }
-
-        .pp-hero-lines::after {
-          width: 280px;
-          height: 280px;
-          bottom: -140px;
-          left: 60px;
-        }
-
-        .pp-hero-shimmer {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.06) 50%, transparent 70%);
-          background-size: 200% 100%;
-          animation: heroShimmer 4s linear infinite;
-        }
-
-        .pp-wordmark {
-          position: absolute;
-          inset: 0;
           display: flex;
           align-items: center;
           justify-content: center;
-        }
-
-        .pp-wordmark-pill {
-          position: relative;
-          padding: 14px 36px;
-          border-radius: 24px;
-          background: rgba(0, 0, 0, 0.25);
-          backdrop-filter: blur(16px);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-
-        /* ════ PROFILE CARD ════ */
-        .pp-card {
-          background: rgba(255, 255, 255, 0.92);
-          backdrop-filter: blur(20px);
-          border-radius: 32px;
-          border: 1.5px solid rgba(79, 70, 229, 0.12);
-          box-shadow: 0 20px 60px rgba(79, 70, 229, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05);
-          padding: 32px;
-          position: relative;
-          overflow: hidden;
-          margin-bottom: 28px;
-          animation: fadeInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
-        }
-
-        .pp-card::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 4px;
-          background: var(--p-grad);
-          border-radius: 32px 32px 0 0;
-        }
-
-        .pp-avatar-row {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          justify-content: space-between;
-          gap: 28px;
-          flex-wrap: wrap;
-        }
-
-        .pp-avatar-group {
-          display: flex;
-          align-items: center;
-          gap: 24px;
-        }
-
-        .pp-avatar-wrap {
-          position: relative;
+          color: var(--m-on-surface-variant);
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          transition: background 0.15s;
           flex-shrink: 0;
         }
+        .pp-appbar-icon:hover { background: var(--m-surface-container); }
 
-        .pp-avatar-ring {
-          position: absolute;
-          inset: -6px;
-          border-radius: 50%;
-          background: var(--p-grad);
-          padding: 3px;
-          z-index: 0;
-          animation: float 3s ease-in-out infinite;
+        .pp-appbar-title {
+          font-size: 18px;
+          font-weight: 700;
+          color: var(--m-on-surface);
+          letter-spacing: -0.01em;
         }
 
-        .pp-avatar-ring-inner {
-          width: 100%;
-          height: 100%;
-          border-radius: 50%;
-          background: white;
+        .pp-inner {
+          max-width: 640px;
+          margin: 0 auto;
+          padding: 0 16px;
         }
+
+        /* ════ PROFILE HEADER ════ */
+        .pp-header {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 32px 16px 24px;
+          animation: ppFadeUp 0.45s ease both;
+        }
+
+        .pp-avatar-wrap { position: relative; margin-bottom: 16px; }
 
         .pp-avatar {
-          position: relative;
-          z-index: 1;
-          width: 84px;
-          height: 84px;
+          width: 96px;
+          height: 96px;
           border-radius: 50%;
           object-fit: cover;
-          border: 4px solid white;
-          box-shadow: 0 12px 28px rgba(79, 70, 229, 0.25);
+          box-shadow: var(--m-elev-2);
+          border: 3px solid var(--m-surface);
         }
 
         .pp-status-dot {
           position: absolute;
-          bottom: 2px;
-          right: 2px;
+          bottom: 4px;
+          right: 4px;
           width: 18px;
           height: 18px;
-          background: #10b981;
+          background: var(--m-success);
           border-radius: 50%;
-          border: 3px solid white;
-          z-index: 2;
-          box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
-          animation: pulse 2s ease-in-out infinite;
+          border: 3px solid var(--m-surface);
+          animation: ppPulseRing 2s ease-out infinite;
         }
 
-        .pp-user-info h1 {
-          font-family: 'Playfair Display', serif;
-          font-size: 32px;
-          font-weight: 800;
-          color: var(--p-indigo-950);
-          letter-spacing: -0.02em;
-          line-height: 1.1;
-          margin: 0;
-        }
-
-        .pp-user-email {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 14px;
-          color: var(--p-slate-500);
-          margin-top: 8px;
-          font-weight: 500;
-        }
-
-        .pp-user-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 11px;
-          font-weight: 800;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          color: var(--p-indigo-600);
-          background: var(--p-indigo-50);
-          border: 1.5px solid var(--p-indigo-200);
-          border-radius: 100px;
-          padding: 5px 14px;
-          margin-top: 10px;
-        }
-
-        /* ════ ACTIONS ════ */
-        .pp-actions {
-          display: flex;
-          gap: 12px;
-          flex-wrap: wrap;
-          align-items: center;
-        }
-
-        .pp-btn {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 12px 24px;
-          border-radius: 15px;
-          font-size: 14px;
+        .pp-header h1 {
+          font-size: 22px;
           font-weight: 700;
-          cursor: pointer;
-          border: none;
-          transition: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-          white-space: nowrap;
-          letter-spacing: 0.01em;
-          position: relative;
-          overflow: hidden;
+          color: var(--m-on-surface);
+          letter-spacing: -0.01em;
+          margin: 0 0 4px;
         }
 
-        .pp-btn::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(135deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
-          background-size: 200% 100%;
-          opacity: 0;
-          transition: opacity 0.28s;
+        .pp-header-email {
+          font-size: 14px;
+          color: var(--m-on-surface-variant);
+          font-weight: 500;
+          margin-bottom: 12px;
         }
 
-        .pp-btn-outline {
-          background: rgba(79, 70, 229, 0.08);
-          color: var(--p-indigo-700);
-          border: 1.5px solid rgba(79, 70, 229, 0.25);
-          box-shadow: 0 2px 8px rgba(79, 70, 229, 0.05);
-        }
-
-        .pp-btn-outline:hover {
-          background: rgba(79, 70, 229, 0.15);
-          border-color: rgba(79, 70, 229, 0.4);
-          transform: translateY(-3px);
-          box-shadow: 0 12px 28px rgba(79, 70, 229, 0.18);
-        }
-
-        .pp-btn-primary {
-          background: var(--p-grad);
-          color: white;
-          box-shadow: 0 8px 24px rgba(79, 70, 229, 0.3);
-        }
-
-        .pp-btn-primary:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 16px 40px rgba(79, 70, 229, 0.4);
-          filter: brightness(1.05);
-        }
-
-        .pp-btn:active {
-          transform: scale(0.96);
-        }
-
-        /* ════ CHIPS ════ */
-        .pp-chips {
+        .pp-chiprow {
           display: flex;
+          align-items: center;
+          gap: 8px;
           flex-wrap: wrap;
-          gap: 12px;
-          margin-top: 28px;
-          padding-top: 28px;
-          border-top: 1.5px solid rgba(79, 70, 229, 0.08);
+          justify-content: center;
         }
 
         .pp-chip {
           display: inline-flex;
           align-items: center;
-          gap: 10px;
-          padding: 10px 18px;
-          border-radius: 14px;
-          background: var(--p-grad-soft);
-          border: 1.5px solid rgba(79, 70, 229, 0.12);
-          font-size: 13px;
-          color: var(--p-slate-700);
+          gap: 6px;
+          padding: 6px 14px 6px 10px;
+          border-radius: var(--m-radius-full);
+          font-size: 12px;
           font-weight: 600;
+          border: 1px solid var(--m-outline-strong);
+          color: var(--m-on-surface-variant);
+          background: var(--m-surface);
         }
 
-        .pp-chip-icon {
-          width: 24px;
-          height: 24px;
-          border-radius: 8px;
-          background: var(--p-grad);
+        .pp-chip--verified {
+          color: var(--m-success);
+          border-color: #A6E3B8;
+          background: var(--m-success-container);
+        }
+
+        /* ════ QUICK ACTIONS ════ */
+        .pp-actions {
+          display: flex;
+          gap: 10px;
+          justify-content: center;
+          margin: 20px 0 8px;
+          flex-wrap: wrap;
+        }
+
+        .pp-mbtn {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          height: 40px;
+          padding: 0 20px;
+          border-radius: var(--m-radius-full);
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          border: none;
+          transition: box-shadow 0.15s, background 0.15s, transform 0.1s;
+        }
+        .pp-mbtn:active { transform: scale(0.97); }
+
+        .pp-mbtn--filled {
+          background: var(--m-primary);
+          color: #fff;
+          box-shadow: var(--m-elev-1);
+        }
+        .pp-mbtn--filled:hover { background: var(--m-primary-dark); box-shadow: var(--m-elev-2); }
+
+        .pp-mbtn--tonal {
+          background: var(--m-primary-container);
+          color: var(--m-on-primary-container);
+        }
+        .pp-mbtn--tonal:hover { background: #DAD7FC; }
+
+        .pp-mbtn--outline {
+          background: transparent;
+          color: var(--m-on-surface-variant);
+          border: 1px solid var(--m-outline-strong);
+        }
+        .pp-mbtn--outline:hover { background: var(--m-surface-container); }
+
+        .pp-mbtn--danger {
+          background: transparent;
+          color: var(--m-error);
+          border: 1px solid #F3B8B1;
+        }
+        .pp-mbtn--danger:hover { background: var(--m-error-container); }
+
+        .pp-mbtn--full { width: 100%; justify-content: center; }
+        .pp-mbtn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+        /* ════ SECTION / LIST ════ */
+        .pp-section-label {
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: var(--m-on-surface-variant);
+          margin: 28px 4px 10px;
+        }
+
+        .pp-list {
+          background: var(--m-surface);
+          border-radius: var(--m-radius-lg);
+          border: 1px solid var(--m-outline);
+          overflow: hidden;
+          box-shadow: var(--m-elev-1);
+          animation: ppFadeUp 0.45s ease 0.05s both;
+        }
+
+        .pp-tile {
           display: flex;
           align-items: center;
-          justify-content: center;
-          color: white;
-          font-size: 11px;
-          flex-shrink: 0;
-        }
-
-        /* ════ MODALS ════ */
-        .pp-modal-header {
-          position: relative;
-          padding: 0;
+          gap: 14px;
+          width: 100%;
+          padding: 14px 16px;
+          background: transparent;
           border: none;
-          overflow: hidden;
+          border-bottom: 1px solid var(--m-outline);
+          cursor: pointer;
+          text-align: left;
+          transition: background 0.15s;
         }
+        .pp-list .pp-tile:last-child { border-bottom: none; }
+        .pp-tile:hover { background: var(--m-surface-container); }
+        .pp-tile:active { background: var(--m-surface-container-high); }
 
-        .pp-modal-header-gradient {
-          background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 40%, #2563eb 70%, #4f46e5 100%);
-          padding: 48px 32px 60px;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .pp-modal-header-gradient::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.08) 50%, transparent 70%);
-          animation: heroShimmer 4s linear infinite;
-        }
-
-        .pp-modal-close {
-          position: absolute;
-          top: 16px;
-          right: 16px;
+        .pp-tile-icon {
           width: 40px;
           height: 40px;
           border-radius: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(255, 255, 255, 0.15);
-          backdrop-filter: blur(16px);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          color: white;
-          cursor: pointer;
-          transition: all 0.28s;
-          z-index: 10;
-        }
-
-        .pp-modal-close:hover {
-          background: rgba(255, 255, 255, 0.25);
-          transform: scale(1.1) rotate(90deg);
-        }
-
-        .pp-modal-title {
-          font-family: 'Playfair Display', serif;
-          font-size: 32px;
-          font-weight: 800;
-          color: white;
-          letter-spacing: -0.02em;
-          position: relative;
-          z-index: 1;
-          margin: 0 0 8px 0;
-        }
-
-        .pp-modal-subtitle {
-          color: rgba(255, 255, 255, 0.8);
+          flex-shrink: 0;
           font-size: 15px;
-          position: relative;
-          z-index: 1;
+          background: var(--m-primary-container);
+          color: var(--m-primary-dark);
+        }
+
+        .pp-tile-icon--danger {
+          background: var(--m-error-container);
+          color: var(--m-error);
+        }
+
+        .pp-tile-body { flex: 1; min-width: 0; }
+
+        .pp-tile-title {
+          font-size: 14.5px;
+          font-weight: 600;
+          color: var(--m-on-surface);
+          margin: 0;
+        }
+        .pp-tile-title--danger { color: var(--m-error); }
+
+        .pp-tile-sub {
+          font-size: 12.5px;
+          color: var(--m-on-surface-variant);
+          margin: 2px 0 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .pp-tile-chevron { color: var(--m-on-surface-variant); flex-shrink: 0; opacity: 0.6; }
+
+        /* ════ SHEET / MODAL SHARED ════ */
+        .pp-sheet-handle {
+          width: 36px;
+          height: 4px;
+          border-radius: 4px;
+          background: var(--m-outline-strong);
+          margin: 10px auto 4px;
+        }
+
+        .pp-sheet-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 4px 20px 16px;
+        }
+
+        .pp-sheet-icon {
+          width: 44px;
+          height: 44px;
+          border-radius: 14px;
+          background: var(--m-primary-container);
+          color: var(--m-on-primary-container);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 18px;
+          flex-shrink: 0;
+        }
+
+        .pp-sheet-title {
+          font-size: 18px;
+          font-weight: 700;
+          color: var(--m-on-surface);
           margin: 0;
         }
 
-        /* ════ FORM FIELDS ════ */
-        .pp-form-group {
-          margin-bottom: 24px;
-          animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-        }
-
-        .pp-form-group:nth-child(1) {
-          animation-delay: 0.1s;
-        }
-        .pp-form-group:nth-child(2) {
-          animation-delay: 0.15s;
-        }
-        .pp-form-group:nth-child(3) {
-          animation-delay: 0.2s;
-        }
-        .pp-form-group:nth-child(4) {
-          animation-delay: 0.25s;
-        }
-
-        .pp-form-label {
-          display: block;
+        .pp-sheet-subtitle {
           font-size: 13px;
-          font-weight: 800;
-          letter-spacing: 0.08em;
-          color: var(--p-indigo-700);
-          text-transform: uppercase;
-          margin-bottom: 10px;
+          color: var(--m-on-surface-variant);
+          margin: 2px 0 0;
         }
 
-        .pp-form-input {
-          width: 100%;
-          background: rgba(248, 250, 255, 0.8);
-          border: 1.5px solid rgba(79, 70, 229, 0.15);
-          border-radius: 15px;
-          padding: 14px 18px;
-          font-size: 14px;
-          font-weight: 500;
-          color: var(--p-indigo-950);
-          transition: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-          backdrop-filter: blur(10px);
-        }
+        /* ════ FORM FIELDS (Material filled style) ════ */
+        .pp-field { margin-bottom: 16px; }
 
-        .pp-form-input::placeholder {
-          color: #cbd5e1;
-          font-weight: 500;
-        }
-
-        .pp-form-input:focus {
-          outline: none;
-          background: rgba(255, 255, 255, 0.95);
-          border-color: #6366f1;
-          box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
-          backdrop-filter: blur(20px);
-        }
-
-        .pp-form-input:disabled {
-          background: rgba(241, 245, 249, 0.6);
-          color: #94a3b8;
-          cursor: not-allowed;
-          border-color: rgba(148, 163, 184, 0.2);
-        }
-
-        /* ════ UPLOAD BOX ════ */
-        .pp-upload-box {
-          border: 2.5px dashed rgba(79, 70, 229, 0.25);
-          border-radius: 24px;
-          background: rgba(238, 242, 255, 0.7);
-          padding: 32px;
-          text-align: center;
-          cursor: pointer;
-          transition: all 0.28s;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .pp-upload-box:hover {
-          border-color: rgba(79, 70, 229, 0.5);
-          background: rgba(238, 242, 255, 1);
-          transform: translateY(-2px);
-          box-shadow: 0 12px 32px rgba(79, 70, 229, 0.15);
-        }
-
-        .pp-upload-icon {
-          width: 72px;
-          height: 72px;
-          border-radius: 20px;
-          background: var(--p-grad);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 32px;
-          margin: 0 auto 16px;
-          box-shadow: 0 12px 32px rgba(79, 70, 229, 0.25);
-        }
-
-        .pp-upload-title {
-          font-size: 16px;
-          font-weight: 800;
-          color: var(--p-indigo-950);
+        .pp-field-label {
+          display: block;
+          font-size: 12px;
+          font-weight: 700;
+          color: var(--m-on-surface-variant);
+          letter-spacing: 0.02em;
           margin-bottom: 6px;
         }
 
-        .pp-upload-desc {
-          font-size: 13px;
-          color: var(--p-slate-500);
+        .pp-field-input {
+          width: 100%;
+          background: var(--m-surface-container);
+          border: 1.5px solid transparent;
+          border-bottom: 2px solid var(--m-outline-strong);
+          border-radius: 10px 10px 4px 4px;
+          padding: 13px 14px;
+          font-size: 14.5px;
+          font-weight: 500;
+          color: var(--m-on-surface);
+          transition: all 0.15s;
         }
 
-        /* ════ BUTTONS ════ */
-        .pp-btn-ghost {
-          display: inline-flex;
+        .pp-field-input::placeholder { color: #9B98A8; font-weight: 400; }
+
+        .pp-field-input:focus {
+          outline: none;
+          background: var(--m-surface-container-high);
+          border-bottom-color: var(--m-primary);
+        }
+
+        .pp-field-input:disabled {
+          color: #9B98A8;
+          cursor: not-allowed;
+          border-bottom-color: var(--m-outline);
+        }
+
+        /* ════ UPLOAD ════ */
+        .pp-upload {
+          display: flex;
           align-items: center;
-          gap: 8px;
-          padding: 12px 24px;
-          border-radius: 15px;
-          font-size: 14px;
-          font-weight: 700;
+          gap: 14px;
+          border: 1.5px dashed var(--m-outline-strong);
+          border-radius: 16px;
+          background: var(--m-surface-container);
+          padding: 14px 16px;
           cursor: pointer;
-          border: 1.5px solid rgba(79, 70, 229, 0.2);
-          background: rgba(248, 250, 255, 0.8);
-          color: var(--p-slate-700);
-          transition: all 0.28s;
+          transition: all 0.15s;
         }
+        .pp-upload:hover { background: var(--m-surface-container-high); border-color: var(--m-primary); }
 
-        .pp-btn-ghost:hover {
-          border-color: rgba(79, 70, 229, 0.4);
-          color: var(--p-indigo-700);
-          background: rgba(238, 242, 255, 0.9);
-          transform: translateY(-2px);
-          box-shadow: 0 8px 20px rgba(79, 70, 229, 0.12);
-        }
-
-        .pp-btn-danger {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 12px 28px;
-          border-radius: 15px;
-          font-size: 14px;
-          font-weight: 700;
-          cursor: pointer;
-          border: none;
-          background: var(--p-grad);
-          color: white;
-          box-shadow: 0 8px 24px rgba(79, 70, 229, 0.3);
-          transition: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        .pp-btn-danger:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 16px 40px rgba(79, 70, 229, 0.4);
-          filter: brightness(1.05);
-        }
-
-        .pp-btn-danger:active {
-          transform: scale(0.96);
-        }
-
-        /* ════ LOGOUT MODAL ════ */
-        .pp-logout-icon {
-          width: 64px;
-          height: 64px;
-          border-radius: 18px;
-          background: linear-gradient(135deg, rgba(79, 70, 229, 0.15), rgba(37, 99, 235, 0.1));
-          border: 1.5px solid rgba(79, 70, 229, 0.2);
+        .pp-upload-icon {
+          width: 42px;
+          height: 42px;
+          border-radius: 12px;
+          background: var(--m-primary);
+          color: #fff;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: var(--p-indigo-600);
-          font-size: 28px;
-          margin-bottom: 16px;
+          font-size: 16px;
+          flex-shrink: 0;
         }
 
-        .pp-logout-title {
-          font-family: 'Playfair Display', serif;
-          font-size: 24px;
-          font-weight: 800;
-          color: var(--p-indigo-950);
-          margin-bottom: 8px;
+        .pp-upload-title { font-size: 13.5px; font-weight: 700; color: var(--m-on-surface); }
+        .pp-upload-desc { font-size: 12px; color: var(--m-on-surface-variant); margin-top: 1px; }
+
+        /* ════ LOGOUT / DELETE DIALOG ════ */
+        .pp-dialog-icon {
+          width: 52px;
+          height: 52px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 20px;
+          margin: 4px auto 14px;
+        }
+        .pp-dialog-icon--neutral { background: var(--m-primary-container); color: var(--m-on-primary-container); }
+        .pp-dialog-icon--danger { background: var(--m-error-container); color: var(--m-error); }
+
+        .pp-dialog-title {
+          font-size: 18px;
+          font-weight: 700;
+          color: var(--m-on-surface);
+          text-align: center;
+          margin: 0 0 6px;
         }
 
-        .pp-logout-text {
-          font-size: 14px;
-          color: var(--p-slate-500);
-          line-height: 1.6;
+        .pp-dialog-text {
+          font-size: 13.5px;
+          color: var(--m-on-surface-variant);
+          text-align: center;
+          line-height: 1.55;
+          margin: 0;
         }
 
-        /* ════ RESPONSIVE ════ */
-        @media (max-width: 768px) {
-          .pp-inner {
-            padding: 0 16px;
-          }
-
-          .pp-card {
-            padding: 24px;
-          }
-
-          .pp-avatar-row {
-            flex-direction: column;
-            gap: 20px;
-          }
-
-          .pp-actions {
-            width: 100%;
-          }
-
-          .pp-btn {
-            flex: 1;
-            justify-content: center;
-          }
-
-          .pp-user-info h1 {
-            font-size: 24px;
-          }
-
-          .pp-modal-title {
-            font-size: 24px;
-          }
-
-          .pp-form-input {
-            padding: 12px 16px;
-            font-size: 16px;
-          }
+        @media (max-width: 480px) {
+          .pp-header h1 { font-size: 20px; }
+          .pp-actions { flex-direction: column; align-items: stretch; }
+          .pp-mbtn { justify-content: center; }
         }
       `}</style>
 
       <div className="pp-page">
-        <div className="pp-blob pp-blob-1" />
-        <div className="pp-blob pp-blob-2" />
-        <div className="pp-dots" />
-
-        {/* HERO BANNER */}
-        <div className="pp-hero">
-          <div className="pp-hero-mesh" />
-          <div className="pp-hero-lines" />
-          <div className="pp-hero-shimmer" />
-          <div className="pp-wordmark">
-            <div className="pp-wordmark-pill">
-              <FuzzyText
-                fontSize="clamp(2rem,6vw,4.5rem)"
-                fontWeight={900}
-                color="#ffffff"
-                baseIntensity={0.12}
-                hoverIntensity={0.40}
-              >
-                E-Shop
-              </FuzzyText>
-            </div>
-          </div>
+        {/* APP BAR */}
+        <div className="pp-appbar">
+          <button className="pp-appbar-icon" onClick={() => window.history.back()} aria-label="Back">
+            <FaArrowLeft size={15} />
+          </button>
+          <span className="pp-appbar-title">Account</span>
         </div>
 
-        {/* MAIN CONTENT */}
-        <div className="pp-inner" style={{ paddingTop: 100 }}>
-          {/* PROFILE CARD */}
-          <div className="pp-card">
-            <div className="pp-avatar-row">
-              <div className="pp-avatar-group">
-                <div className="pp-avatar-wrap">
-                  <div className="pp-avatar-ring">
-                    <div className="pp-avatar-ring-inner" />
-                  </div>
-                  <img
-                    src={user?.image || "https://i.pravatar.cc/300"}
-                    alt="avatar"
-                    className="pp-avatar"
-                  />
-                  <span className="pp-status-dot" title="Online" />
-                </div>
-
-                <div className="pp-user-info">
-                  <h1>
-                    {user?.firstName} {user?.lastName}
-                  </h1>
-                  <div className="pp-user-email">
-                    <FaEnvelope size={12} />
-                    {user?.email}
-                  </div>
-                  <div className="pp-user-badge">
-                    <FaCheck size={10} />
-                    Verified Member
-                  </div>
-                </div>
-              </div>
-
-              {/* ACTION BUTTONS */}
-              <div className="pp-actions">
-                <button
-                  className="pp-btn pp-btn-outline"
-                  onClick={() => setOpenProfile(true)}
-                >
-                  <FaUser size={14} />
-                  Profile
-                </button>
-
-                <button
-                  className="pp-btn pp-btn-outline"
-                  onClick={() => setOpenSecurity(true)}
-                >
-                  <FaLock size={14} />
-                  Security
-                </button>
-
-                <button
-                  className="pp-btn pp-btn-primary"
-                  onClick={() => setShowLogoutConfirm(true)}
-                >
-                  <FaSignOutAlt size={14} />
-                  Sign Out
-                </button>
-                <button
-  className="pp-btn pp-btn-danger"
-  onClick={async () => {
-    const confirmDelete = window.confirm(
-      "Are you sure? This will permanently delete your account and cannot be undone."
-    );
-
-    if (!confirmDelete) return;
-
-    try {
-      const res = await fetch(
-        "https://eshop-backend-y0e7.onrender.com/api/auth/delete-account",
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await res.json();
-
-      if (data.success) {
-        toast.success("Account permanently deleted");
-
-        localStorage.removeItem("token");
-
-        setTimeout(() => {
-          window.location.href = "/sign-in";
-        }, 1000);
-      } else {
-        toast.error(data.message);
-      }
-
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to delete account");
-    }
-  }}
->
-  Delete Account
-</button>
-              </div>
+        <div className="pp-inner">
+          {/* PROFILE HEADER */}
+          <div className="pp-header">
+            <div className="pp-avatar-wrap">
+              <img src={user?.image || "https://i.pravatar.cc/300"} alt="avatar" className="pp-avatar" />
+              <span className="pp-status-dot" title="Online" />
             </div>
 
-            {/* INFO CHIPS */}
-            <div className="pp-chips">
-              <div className="pp-chip">
-                <div className="pp-chip-icon">
-                  <FaEnvelope size={10} />
-                </div>
-                {user?.email}
-              </div>
-              <div className="pp-chip">
-                <div className="pp-chip-icon">
-                  <FaCheck size={10} />
-                </div>
-                Account verified
-              </div>
-              <div className="pp-chip">
-                <div className="pp-chip-icon">✦</div>
-                Member since{" "}
-                {user?.createdAt
-                  ? user.createdAt.split("/")[2].split(",")[0]
-                  : "2024"}
-              </div>
+            <h1>{user?.firstName} {user?.lastName}</h1>
+            <div className="pp-header-email">{user?.email}</div>
+
+            <div className="pp-chiprow">
+              <span className="pp-chip pp-chip--verified"><FaCheck size={9} /> Verified</span>
+              <span className="pp-chip">Member since {memberSince}</span>
+            </div>
+
+            <div className="pp-actions">
+              <button className="pp-mbtn pp-mbtn--filled" onClick={() => setOpenProfile(true)}>
+                <FaUser size={13} /> Edit profile
+              </button>
+              <button className="pp-mbtn pp-mbtn--tonal" onClick={() => setOpenSecurity(true)}>
+                <FaLock size={13} /> Security
+              </button>
             </div>
           </div>
+
+          {/* ACCOUNT LIST */}
+          <div className="pp-section-label">Account</div>
+          <div className="pp-list">
+            <button className="pp-tile" onClick={() => setOpenProfile(true)}>
+              <div className="pp-tile-icon"><FaUser size={15} /></div>
+              <div className="pp-tile-body">
+                <p className="pp-tile-title">Profile information</p>
+                <p className="pp-tile-sub">Name, phone number and photo</p>
+              </div>
+              <FaChevronRight className="pp-tile-chevron" size={12} />
+            </button>
+
+            <button className="pp-tile" onClick={() => setOpenSecurity(true)}>
+              <div className="pp-tile-icon"><FaShieldAlt size={15} /></div>
+              <div className="pp-tile-body">
+                <p className="pp-tile-title">Security &amp; password</p>
+                <p className="pp-tile-sub">Change your account password</p>
+              </div>
+              <FaChevronRight className="pp-tile-chevron" size={12} />
+            </button>
+          </div>
+
+          {/* MORE / DANGER ZONE */}
+          <div className="pp-section-label">More</div>
+          <div className="pp-list">
+            <button className="pp-tile" onClick={() => setShowLogoutConfirm(true)}>
+              <div className="pp-tile-icon"><FaSignOutAlt size={15} /></div>
+              <div className="pp-tile-body">
+                <p className="pp-tile-title">Sign out</p>
+                <p className="pp-tile-sub">You can sign back in anytime</p>
+              </div>
+              <FaChevronRight className="pp-tile-chevron" size={12} />
+            </button>
+
+            <button className="pp-tile" onClick={() => setShowDeleteConfirm(true)}>
+              <div className="pp-tile-icon pp-tile-icon--danger"><FaTrash size={13} /></div>
+              <div className="pp-tile-body">
+                <p className="pp-tile-title pp-tile-title--danger">Delete account</p>
+                <p className="pp-tile-sub">Permanently remove your account and data</p>
+              </div>
+              <FaChevronRight className="pp-tile-chevron" size={12} />
+            </button>
+          </div>
         </div>
+      </div>
 
-        {/* ══ PROFILE MODAL ══ */}
-        <Modal
-          size="2xl"
-          isOpen={openProfile}
-          onOpenChange={setOpenProfile}
-          backdrop="blur"
-          hideCloseButton
-          scrollBehavior="inside"
-          classNames={{
-            base: "bg-white/95 backdrop-blur-xl border border-indigo-100 rounded-[32px] shadow-[0_20px_80px_rgba(79,70,229,0.20)] mx-3 my-4 max-h-[95vh]",
-            backdrop: "bg-indigo-950/40 backdrop-blur-md",
-          }}
-        >
-          <ModalContent className="overflow-hidden">
-            {/* HEADER */}
-            <div className="pp-modal-header">
-              <div className="pp-modal-header-gradient">
-                <button
-                  onClick={() => setOpenProfile(false)}
-                  className="pp-modal-close"
-                >
-                  <FaTimes size={16} />
-                </button>
-                <h2 className="pp-modal-title">Profile Settings</h2>
-                <p className="pp-modal-subtitle">Manage your personal account details</p>
-              </div>
-
-              {/* AVATAR */}
-              <div style={{ textAlign: "center", marginTop: -52, position: "relative", zIndex: 10 }}>
-                <img
-                  src={user?.image || "https://i.pravatar.cc/300"}
-                  alt="profile"
-                  style={{
-                    width: 104,
-                    height: 104,
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                    border: "5px solid white",
-                    boxShadow: "0 20px 50px rgba(79,70,229,0.25)",
-                  }}
-                />
-                <span
-                  style={{
-                    position: "absolute",
-                    right: -6,
-                    bottom: 6,
-                    width: 20,
-                    height: 20,
-                    borderRadius: "50%",
-                    background: "#10b981",
-                    border: "3px solid white",
-                  }}
-                />
-              </div>
+      {/* ══ PROFILE SHEET ══ */}
+      <Modal
+        placement="bottom"
+        isOpen={openProfile}
+        onOpenChange={setOpenProfile}
+        backdrop="blur"
+        hideCloseButton
+        scrollBehavior="inside"
+        classNames={{
+          base: "bg-white rounded-t-[28px] rounded-b-none m-0 max-w-full sm:max-w-[520px] sm:mx-auto sm:rounded-[28px] sm:mb-4 max-h-[92vh]",
+          backdrop: "bg-black/40",
+        }}
+      >
+        <ModalContent>
+          <div className="pp-sheet-handle" />
+          <div className="pp-sheet-header">
+            <div className="pp-sheet-icon"><FaUser size={17} /></div>
+            <div>
+              <p className="pp-sheet-title">Profile information</p>
+              <p className="pp-sheet-subtitle">Visible to you only</p>
             </div>
+          </div>
 
-            {/* BODY */}
-            <ModalBody style={{ padding: "48px 32px 24px" }}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* FIRST NAME */}
-                <div className="pp-form-group">
-                  <label className="pp-form-label">First Name</label>
-                  <input
-                    type="text"
-                    value={user?.firstName || ""}
-                    onChange={(e) =>
-                      setUser({ ...user, firstName: e.target.value })
-                    }
-                    className="pp-form-input"
-                    placeholder="Enter first name"
-                  />
-                </div>
-
-                {/* LAST NAME */}
-                <div className="pp-form-group">
-                  <label className="pp-form-label">Last Name</label>
-                  <input
-                    type="text"
-                    value={user?.lastName || ""}
-                    onChange={(e) =>
-                      setUser({ ...user, lastName: e.target.value })
-                    }
-                    className="pp-form-input"
-                    placeholder="Enter last name"
-                  />
-                </div>
-
-                {/* EMAIL */}
-                <div className="pp-form-group md:col-span-2">
-                  <label className="pp-form-label">Email Address</label>
-                  <input
-                    type="email"
-                    disabled
-                    value={user?.email || ""}
-                    className="pp-form-input"
-                  />
-                </div>
-
-                {/* PHONE */}
-                <div className="pp-form-group md:col-span-2">
-                  <label className="pp-form-label">Phone Number</label>
-                  <input
-                    type="text"
-                    value={user?.phone || ""}
-                    onChange={(e) =>
-                      setUser({ ...user, phone: e.target.value })
-                    }
-                    className="pp-form-input"
-                    placeholder="Enter phone number"
-                  />
-                </div>
-
-                {/* UPLOAD */}
-                <div className="pp-form-group md:col-span-2">
-                  <label className="pp-form-label">Profile Photo</label>
-                  <label className="pp-upload-box">
-                    <div className="pp-upload-icon">
-                      <FaCamera />
-                    </div>
-                    <div className="pp-upload-title">Upload Profile Photo</div>
-                    <div className="pp-upload-desc">Camera or gallery supported</div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      hidden
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (!file) return;
-                        const imageUrl = URL.createObjectURL(file);
-                        setUser({
-                          ...user,
-                          image: imageUrl,
-                          imageFile: file,
-                        });
-                      }}
-                    />
-                  </label>
-                </div>
+          <ModalBody style={{ padding: "4px 20px 8px" }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+              <div className="pp-field">
+                <label className="pp-field-label">First name</label>
+                <input
+                  type="text"
+                  value={user?.firstName || ""}
+                  onChange={(e) => setUser({ ...user, firstName: e.target.value })}
+                  className="pp-field-input"
+                  placeholder="Enter first name"
+                />
               </div>
-            </ModalBody>
 
-            {/* FOOTER */}
-            <ModalFooter style={{ padding: "20px 32px 32px" }}>
-              <div className="flex flex-col-reverse sm:flex-row gap-3 w-full">
-                <button
-                  onClick={() => setOpenProfile(false)}
-                  className="pp-btn-ghost"
-                  style={{ flex: 1 }}
-                >
-                  Cancel
-                </button>
-
-                <button
-                  onClick={async () => {
-                    try {
-                      const formData = new FormData();
-                      formData.append("firstName", user.firstName);
-                      formData.append("lastName", user.lastName);
-                      formData.append("phone", user.phone);
-                      if (user.imageFile) {
-                        formData.append("image", user.imageFile);
-                      }
-
-                      const res = await fetch(
-                        "https://eshop-backend-y0e7.onrender.com/api/auth/update-profile",
-                        {
-                          method: "PUT",
-                          headers: {
-                            Authorization: `Bearer ${token}`,
-                          },
-                          body: formData,
-                        }
-                      );
-
-                      const data = await res.json();
-                      if (data.success) {
-  setUser(data.user);
-
-  toast.success("Profile updated successfully ✨");
-
-  setOpenProfile(false);
-
-  setTimeout(() => {
-    window.location.reload();
-  }, 500);
-}
-                    } catch (error) {
-                      console.error(error);
-                      toast.error("Failed to update profile");
-                    }
-                  }}
-                  className="pp-btn pp-btn-primary"
-                  style={{ flex: 1 }}
-                >
-                  <FaCheck size={14} />
-                  Save Changes
-                </button>
+              <div className="pp-field">
+                <label className="pp-field-label">Last name</label>
+                <input
+                  type="text"
+                  value={user?.lastName || ""}
+                  onChange={(e) => setUser({ ...user, lastName: e.target.value })}
+                  className="pp-field-input"
+                  placeholder="Enter last name"
+                />
               </div>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
 
-        {/* ══ SECURITY MODAL ══ */}
-        <Modal
-          size="md"
-          isOpen={openSecurity}
-          onOpenChange={setOpenSecurity}
-          backdrop="blur"
-          hideCloseButton
-          scrollBehavior="inside"
-          classNames={{
-            base: "bg-white/95 backdrop-blur-xl border border-indigo-100 rounded-[32px] shadow-[0_20px_80px_rgba(79,70,229,0.20)] mx-3 my-4",
-            backdrop: "bg-indigo-950/40 backdrop-blur-md",
-          }}
-        >
-          <ModalContent className="overflow-hidden">
-            <div className="pp-modal-header">
-              <div className="pp-modal-header-gradient">
-                <button
-                  onClick={() => setOpenSecurity(false)}
-                  className="pp-modal-close"
-                >
-                  <FaTimes size={16} />
-                </button>
-                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                  <div
-                    style={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 18,
-                      background: "rgba(255,255,255,0.12)",
-                      border: "1px solid rgba(255,255,255,0.15)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 28,
-                      color: "white",
-                    }}
-                  >
-                    🔒
-                  </div>
+              <div className="pp-field sm:col-span-2">
+                <label className="pp-field-label">Email address</label>
+                <input type="email" disabled value={user?.email || ""} className="pp-field-input" />
+              </div>
+
+              <div className="pp-field sm:col-span-2">
+                <label className="pp-field-label">Phone number</label>
+                <input
+                  type="text"
+                  value={user?.phone || ""}
+                  onChange={(e) => setUser({ ...user, phone: e.target.value })}
+                  className="pp-field-input"
+                  placeholder="Enter phone number"
+                />
+              </div>
+
+              <div className="pp-field sm:col-span-2">
+                <label className="pp-field-label">Profile photo</label>
+                <label className="pp-upload">
+                  <div className="pp-upload-icon"><FaCamera size={15} /></div>
                   <div>
-                    <h2 className="pp-modal-title" style={{ marginBottom: 4 }}>
-                      Security Settings
-                    </h2>
-                    <p className="pp-modal-subtitle">Update your password securely</p>
+                    <div className="pp-upload-title">Upload a new photo</div>
+                    <div className="pp-upload-desc">Camera or gallery supported</div>
                   </div>
-                </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (!file) return;
+                      const imageUrl = URL.createObjectURL(file);
+                      setUser({ ...user, image: imageUrl, imageFile: file });
+                    }}
+                  />
+                </label>
               </div>
             </div>
+          </ModalBody>
 
-            <ModalBody style={{ padding: "32px" }}>
-              <div className="space-y-6">
-                {/* CURRENT PASSWORD */}
-                <div className="pp-form-group" style={{ marginBottom: 0 }}>
-                  <label className="pp-form-label">Current Password</label>
-                  <input
-                    type="password"
-                    value={passwordData.currentPassword}
-                    onChange={(e) =>
-                      setPasswordData({
-                        ...passwordData,
-                        currentPassword: e.target.value,
-                      })
-                    }
-                    placeholder="Enter current password"
-                    className="pp-form-input"
-                  />
-                </div>
-
-                {/* NEW PASSWORD */}
-                <div className="pp-form-group" style={{ marginBottom: 0 }}>
-                  <label className="pp-form-label">New Password</label>
-                  <input
-                    type="password"
-                    value={passwordData.newPassword}
-                    onChange={(e) =>
-                      setPasswordData({
-                        ...passwordData,
-                        newPassword: e.target.value,
-                      })
-                    }
-                    placeholder="Enter new password"
-                    className="pp-form-input"
-                  />
-                </div>
-
-                {/* CONFIRM PASSWORD */}
-                <div className="pp-form-group" style={{ marginBottom: 0 }}>
-                  <label className="pp-form-label">Confirm Password</label>
-                  <input
-                    type="password"
-                    value={passwordData.confirmPassword}
-                    onChange={(e) =>
-                      setPasswordData({
-                        ...passwordData,
-                        confirmPassword: e.target.value,
-                      })
-                    }
-                    placeholder="Confirm new password"
-                    className="pp-form-input"
-                  />
-                </div>
-              </div>
-            </ModalBody>
-
-            <ModalFooter style={{ padding: "0 32px 32px" }}>
+          <ModalFooter style={{ padding: "12px 20px 20px" }}>
+            <div className="flex flex-col-reverse sm:flex-row gap-2 w-full">
+              <button onClick={() => setOpenProfile(false)} className="pp-mbtn pp-mbtn--outline pp-mbtn--full">
+                Cancel
+              </button>
               <button
-                disabled={passwordLoading}
+                disabled={profileLoading}
                 onClick={async () => {
                   try {
-                    if (
-                      passwordData.newPassword !==
-                      passwordData.confirmPassword
-                    ) {
-                      return toast.error("Passwords do not match");
-                    }
-
-                    setPasswordLoading(true);
+                    setProfileLoading(true);
+                    const formData = new FormData();
+                    formData.append("firstName", user.firstName);
+                    formData.append("lastName", user.lastName);
+                    formData.append("phone", user.phone);
+                    if (user.imageFile) formData.append("image", user.imageFile);
 
                     const res = await fetch(
-                      "https://eshop-backend-y0e7.onrender.com/api/auth/change-password",
+                      "https://eshop-backend-y0e7.onrender.com/api/auth/update-profile",
                       {
                         method: "PUT",
-                        headers: {
-                          "Content-Type": "application/json",
-                          Authorization: `Bearer ${token}`,
-                        },
-                        body: JSON.stringify({
-                          currentPassword: passwordData.currentPassword,
-                          newPassword: passwordData.newPassword,
-                        }),
+                        headers: { Authorization: `Bearer ${token}` },
+                        body: formData,
                       }
                     );
 
                     const data = await res.json();
-
                     if (data.success) {
-                      toast.success("Password changed successfully 🎉");
-                      setPasswordData({
-                        currentPassword: "",
-                        newPassword: "",
-                        confirmPassword: "",
-                      });
-                      setOpenSecurity(false);
-                      setTimeout(() => {
-                        window.location.reload();
-                      }, 500);
+                      setUser(data.user);
+                      toast.success("Profile updated");
+                      setOpenProfile(false);
+                      setTimeout(() => window.location.reload(), 500);
                     } else {
                       toast.error(data.message);
                     }
                   } catch (error) {
                     console.error(error);
-                    toast.error("Failed to change password");
+                    toast.error("Failed to update profile");
                   } finally {
-                    setPasswordLoading(false);
+                    setProfileLoading(false);
                   }
                 }}
-                className="pp-btn pp-btn-danger w-full"
-                style={{ padding: "14px 0" }}
+                className="pp-mbtn pp-mbtn--filled pp-mbtn--full"
               >
-                {passwordLoading ? "Updating..." : "Update Password"}
+                {profileLoading ? "Saving..." : "Save changes"}
               </button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
+            </div>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
-        {/* ══ LOGOUT MODAL ══ */}
-        <Modal
-          size="sm"
-          isOpen={showLogoutConfirm}
-          onOpenChange={setShowLogoutConfirm}
-          backdrop="blur"
-          hideCloseButton
-          classNames={{
-            base: "bg-white border border-indigo-100 rounded-[28px] shadow-[0_20px_80px_rgba(79,70,229,0.20)] max-w-sm",
-            backdrop: "bg-indigo-950/40 backdrop-blur-md",
-          }}
-        >
-          <ModalContent>
-          <ModalBody style={{ padding: "32px" }}>
-  <div className="flex items-center justify-center gap-3 mb-3">
-    <div className="pp-logout-icon">
-      <FaSignOutAlt />
-    </div>
+      {/* ══ SECURITY SHEET ══ */}
+      <Modal
+        placement="bottom"
+        isOpen={openSecurity}
+        onOpenChange={setOpenSecurity}
+        backdrop="blur"
+        hideCloseButton
+        scrollBehavior="inside"
+        classNames={{
+          base: "bg-white rounded-t-[28px] rounded-b-none m-0 max-w-full sm:max-w-[440px] sm:mx-auto sm:rounded-[28px] sm:mb-4",
+          backdrop: "bg-black/40",
+        }}
+      >
+        <ModalContent>
+          <div className="pp-sheet-handle" />
+          <div className="pp-sheet-header">
+            <div className="pp-sheet-icon"><FaLock size={16} /></div>
+            <div>
+              <p className="pp-sheet-title">Security &amp; password</p>
+              <p className="pp-sheet-subtitle">Update your password</p>
+            </div>
+          </div>
 
-    <h3 className="pp-logout-title m-0">
-      Sign out of E-Shop?
-    </h3>
-  </div>
+          <ModalBody style={{ padding: "4px 20px 8px" }}>
+            <div className="pp-field">
+              <label className="pp-field-label">Current password</label>
+              <input
+                type="password"
+                value={passwordData.currentPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                placeholder="Enter current password"
+                className="pp-field-input"
+              />
+            </div>
 
-  <p className="pp-logout-text text-center">
-    You'll need to sign back in to access your cart and orders.
-  </p>
-</ModalBody>
+            <div className="pp-field">
+              <label className="pp-field-label">New password</label>
+              <input
+                type="password"
+                value={passwordData.newPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                placeholder="Enter new password"
+                className="pp-field-input"
+              />
+            </div>
 
-            <ModalFooter style={{ padding: "0 32px 32px", gap: 12 }}>
-             <button
-  onClick={() => setShowLogoutConfirm(false)}
-  className="pp-btn-ghost flex items-center justify-center gap-2"
-  style={{ flex: 1 }}
->
-  <span>Cancel</span>
-</button>
-             <button
-  onClick={() => {
-    localStorage.removeItem("token");
-    window.location.href = "/sign-in";
-  }}
-  className="pp-btn-danger flex items-center justify-center gap-2"
-  style={{ flex: 1 }}
->
-  <FaSignOutAlt size={14} />
-  <span>Logout</span>
-</button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-      </div>
+            <div className="pp-field" style={{ marginBottom: 4 }}>
+              <label className="pp-field-label">Confirm new password</label>
+              <input
+                type="password"
+                value={passwordData.confirmPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                placeholder="Confirm new password"
+                className="pp-field-input"
+              />
+            </div>
+          </ModalBody>
+
+          <ModalFooter style={{ padding: "16px 20px 20px" }}>
+            <button
+              disabled={passwordLoading}
+              onClick={async () => {
+                try {
+                  if (passwordData.newPassword !== passwordData.confirmPassword) {
+                    return toast.error("Passwords do not match");
+                  }
+
+                  setPasswordLoading(true);
+
+                  const res = await fetch(
+                    "https://eshop-backend-y0e7.onrender.com/api/auth/change-password",
+                    {
+                      method: "PUT",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                      },
+                      body: JSON.stringify({
+                        currentPassword: passwordData.currentPassword,
+                        newPassword: passwordData.newPassword,
+                      }),
+                    }
+                  );
+
+                  const data = await res.json();
+
+                  if (data.success) {
+                    toast.success("Password changed");
+                    setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+                    setOpenSecurity(false);
+                    setTimeout(() => window.location.reload(), 500);
+                  } else {
+                    toast.error(data.message);
+                  }
+                } catch (error) {
+                  console.error(error);
+                  toast.error("Failed to change password");
+                } finally {
+                  setPasswordLoading(false);
+                }
+              }}
+              className="pp-mbtn pp-mbtn--filled pp-mbtn--full"
+            >
+              {passwordLoading ? "Updating..." : "Update password"}
+            </button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* ══ LOGOUT DIALOG ══ */}
+      <Modal
+        size="sm"
+        isOpen={showLogoutConfirm}
+        onOpenChange={setShowLogoutConfirm}
+        backdrop="blur"
+        hideCloseButton
+        classNames={{
+          base: "bg-white rounded-[24px] max-w-[340px] mx-4",
+          backdrop: "bg-black/40",
+        }}
+      >
+        <ModalContent>
+          <ModalBody style={{ padding: "28px 24px 8px" }}>
+            <div className="pp-dialog-icon pp-dialog-icon--neutral"><FaSignOutAlt size={18} /></div>
+            <p className="pp-dialog-title">Sign out?</p>
+            <p className="pp-dialog-text">You'll need to sign back in to access your cart and orders.</p>
+          </ModalBody>
+          <ModalFooter style={{ padding: "16px 24px 24px", gap: 10 }}>
+            <button onClick={() => setShowLogoutConfirm(false)} className="pp-mbtn pp-mbtn--outline pp-mbtn--full">
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                localStorage.removeItem("token");
+                window.location.href = "/sign-in";
+              }}
+              className="pp-mbtn pp-mbtn--filled pp-mbtn--full"
+            >
+              Sign out
+            </button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* ══ DELETE ACCOUNT DIALOG ══ */}
+      <Modal
+        size="sm"
+        isOpen={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        backdrop="blur"
+        hideCloseButton
+        classNames={{
+          base: "bg-white rounded-[24px] max-w-[360px] mx-4",
+          backdrop: "bg-black/40",
+        }}
+      >
+        <ModalContent>
+          <ModalBody style={{ padding: "28px 24px 8px" }}>
+            <div className="pp-dialog-icon pp-dialog-icon--danger"><FaTrash size={16} /></div>
+            <p className="pp-dialog-title">Delete your account?</p>
+            <p className="pp-dialog-text">
+              This permanently removes your account and all of your data. This action cannot be undone.
+            </p>
+          </ModalBody>
+          <ModalFooter style={{ padding: "16px 24px 24px", gap: 10 }}>
+            <button onClick={() => setShowDeleteConfirm(false)} className="pp-mbtn pp-mbtn--outline pp-mbtn--full">
+              Cancel
+            </button>
+            <button
+              disabled={deleteLoading}
+              onClick={async () => {
+                try {
+                  setDeleteLoading(true);
+                  const res = await fetch(
+                    "https://eshop-backend-y0e7.onrender.com/api/auth/delete-account",
+                    {
+                      method: "DELETE",
+                      headers: { Authorization: `Bearer ${token}` },
+                    }
+                  );
+
+                  const data = await res.json();
+
+                  if (data.success) {
+                    toast.success("Account permanently deleted");
+                    localStorage.removeItem("token");
+                    setTimeout(() => {
+                      window.location.href = "/sign-in";
+                    }, 1000);
+                  } else {
+                    toast.error(data.message);
+                  }
+                } catch (error) {
+                  console.error(error);
+                  toast.error("Failed to delete account");
+                } finally {
+                  setDeleteLoading(false);
+                }
+              }}
+              className="pp-mbtn pp-mbtn--danger pp-mbtn--full"
+              style={{ background: "var(--m-error)", color: "#fff", border: "none" }}
+            >
+              {deleteLoading ? "Deleting..." : "Delete account"}
+            </button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </>
   );
 }
