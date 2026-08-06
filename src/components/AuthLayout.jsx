@@ -16,15 +16,28 @@ const CSS = `
 
 /* page shell */
 .al-shell {
-  position:fixed; inset:0; z-index:60;
-  display:flex; align-items:center; justify-content:center;
-  padding:16px; font-family:var(--al-f-b);
-  overflow:hidden;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+
+  display: flex;
+  align-items: flex-start;   /* instead of center */
+  justify-content: center;
+
+  padding: 32px 16px;
+
+  font-family: var(--al-f-b);
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  scrollbar-width: thin;
 }
 
 /* layered background */
 .al-bg {
   position:absolute; inset:0; z-index:0;
+  height: 118vh;
   background:linear-gradient(145deg,#e8e6ff 0%,#dce8ff 40%,#edf1ff 100%);
 }
 
@@ -62,17 +75,26 @@ const CSS = `
 }
 
 /* card */
-.al-card {
-  position:relative; z-index:1;
-  width:100%; max-width:460px;
-  background:rgba(255,255,255,.88);
-  backdrop-filter:blur(28px) saturate(180%);
-  -webkit-backdrop-filter:blur(28px) saturate(180%);
-  border:1px solid rgba(80,70,228,.14);
-  border-radius:28px;
-  box-shadow:0 24px 80px rgba(80,70,228,.18), 0 2px 0 rgba(255,255,255,.80) inset;
-  padding:36px 32px 32px;
-  animation:alCardIn .50s cubic-bezier(.22,1,.36,1) both;
+.al-card{
+  position:relative;
+  z-index:1;
+  width:100%;
+  max-width:480px;
+
+  background:rgba(255,255,255,.72);
+  backdrop-filter:blur(30px);
+  -webkit-backdrop-filter:blur(30px);
+
+  border:1px solid rgba(255,255,255,.45);
+
+  border-radius:32px;
+
+  box-shadow:
+    0 30px 80px rgba(80,70,228,.15),
+    0 10px 30px rgba(59,130,246,.08),
+    inset 0 1px 0 rgba(255,255,255,.8);
+
+  padding:40px 34px 32px;
   overflow:hidden;
 }
 @media(max-width:480px){ .al-card { padding:28px 20px 24px; border-radius:24px; } }
@@ -119,13 +141,62 @@ const CSS = `
   -webkit-background-clip:text; -webkit-text-fill-color:transparent;
   background-clip:text;
 }
+/* logo */
+.al-logo{
+  display:flex;
+  justify-content:center;
+  margin-bottom:24px;
+}
 
+.al-logo-wrapper{
+  position:relative;
+}
+
+.al-logo-wrapper::before{
+  content:'';
+  position:absolute;
+  inset:-20px;
+  background:radial-gradient(
+    circle,
+    rgba(80,70,228,.22),
+    transparent 70%
+  );
+  filter:blur(20px);
+  z-index:-1;
+}
+
+.al-logo-image{
+  height: 90px;
+  width:auto;
+  object-fit:contain;
+  animation:logoFloat 4s ease-in-out infinite;
+}
+
+@keyframes logoFloat{
+  0%,100%{
+    transform:translateY(0px);
+  }
+  50%{
+    transform:translateY(-4px);
+  }
+}
 /* title */
-.al-title {
+.al-title{
   font-family:var(--al-f-h);
-  font-size:clamp(1.5rem,4vw,1.9rem); font-weight:900;
-  letter-spacing:-.03em; line-height:1.1;
-  color:#1a1535; text-align:center; margin-bottom:6px;
+  font-size:30px;
+  font-weight:600;
+  text-align:center;
+  line-height:1.05;
+  letter-spacing:-.04em;
+
+  background:linear-gradient(
+    135deg,
+    #111827,
+    #5046e4
+  );
+
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
 }
 .al-subtitle {
   font-size:13px; color:#9ca3af; text-align:center; margin-bottom:22px; font-weight:400;
@@ -179,12 +250,17 @@ export default function AuthLayout({ title, children }) {
 
           {/* logo */}
           <div className="al-logo">
-            <div className="al-logo-icon">E</div>
-            <span className="al-logo-name">E-Shop</span>
-          </div>
+  <div className="al-logo-wrapper">
+    <img
+      src="/logo.png"
+      alt="Odikart"
+      className="al-logo-image"
+    />
+  </div>
+</div>
 
           {/* title */}
-          <h1 className="al-title">{title}</h1>
+          <h1 className="al-title text-3xl font-bold text-center">{title}</h1>
           {subtitle && <p className="al-subtitle">{subtitle}</p>}
 
           {/* content */}

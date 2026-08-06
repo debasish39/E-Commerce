@@ -3,7 +3,6 @@ import { useNavigate, Link } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub, FaEye, FaEyeSlash, FaArrowRight, FaCheckCircle } from "react-icons/fa";
-import { toast } from "sonner";
 
 export default function SignUp() {
  
@@ -129,11 +128,11 @@ async (e) => {
 
   ) {
 
-    toast.error(
+    // toast.error(
 
-      "Please fix all errors"
+    //   "Please fix all errors"
 
-    );
+    // );
 
     return;
 
@@ -146,7 +145,7 @@ async (e) => {
     const res =
       await fetch(
 
-        "https://eshop-backend-y0e7.onrender.com/api/auth/signup",
+        "http://localhost:5000/api/auth/signup",
 
         {
 
@@ -218,11 +217,11 @@ async (e) => {
 
     }
 
-    toast.success(
+    // toast.success(
 
-      "OTP sent successfully 📩"
+    //   "OTP sent successfully 📩"
 
-    );
+    // );
 
     localStorage.setItem(
 
@@ -242,9 +241,9 @@ async (e) => {
       error
     );
 
-    toast.error(
-      error.message
-    );
+    // toast.error(
+    //   error.message
+    // );
 
   } finally {
 

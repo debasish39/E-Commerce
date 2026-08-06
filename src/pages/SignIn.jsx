@@ -58,7 +58,7 @@ const [errors, setErrors] =
 
   const validateEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
   const validatePassword = (p) => p.length >= 6;
-const BACKEND_URL ="https://eshop-backend-y0e7.onrender.com/api/auth";
+const BACKEND_URL ="http://localhost:5000/api/auth";
 
 const validateField =
   (name, value) => {

@@ -677,7 +677,7 @@ useEffect(() => {
       className="
         fixed inset-0 z-[100]
 
-        bg-slate-950/30
+        bg-black/70
         backdrop-blur-md
 
         transition-all duration-500
@@ -717,9 +717,9 @@ useEffect(() => {
 
           rounded-[36px]
 
-          border border-white/20
+          border border-white/60
 
-          bg-white/20
+          bg-white/50
           backdrop-blur-[30px]
 
           shadow-[0_40px_120px_rgba(15,23,42,0.35)]
@@ -755,7 +755,7 @@ useEffect(() => {
 
             rounded-full
 
-            bg-blue-500/10
+            bg-blue-500/50
 
             blur-3xl
 
@@ -804,9 +804,9 @@ useEffect(() => {
               flex items-center justify-center
 
               bg-gradient-to-br
-              from-indigo-500
+              from-indigo-900
               via-blue-500
-              to-violet-500
+              to-violet-900
 
               shadow-[0_12px_32px_rgba(79,70,229,0.30)]
 
@@ -816,7 +816,7 @@ useEffect(() => {
 
             <Search
               size={20}
-              className="text-white"
+              className="text-indigo-100"
             />
 
           </div>
@@ -845,9 +845,9 @@ useEffect(() => {
 
       text-[16px]
       font-semibold
-      text-white
+      text-black/90
 
-      placeholder:text-white/70
+      placeholder:text-black/70
 
       outline-none
     "
@@ -982,12 +982,12 @@ useEffect(() => {
 
                 px-2 mb-4
 
-                text-[11px]
+                text-[15px]
                 font-bold
 
                 uppercase tracking-[0.16em]
 
-                text-indigo-900
+                text-black/90
               "
             >
 

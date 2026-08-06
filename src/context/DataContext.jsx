@@ -13,7 +13,7 @@ export const DataProvider = ({ children }) => {
   const [priceRange, setPriceRange] = useState([0, 5000]);
 
   const BACKEND_URL =
-    "https://eshop-backend-y0e7.onrender.com/api";
+    "http://localhost:5000/api";
 
   // const calculatePrice = (price) => {
   //   let finalPrice;
@@ -66,6 +66,10 @@ export const DataProvider = ({ children }) => {
         setData(
           productsData
         );
+        console.log(
+          "Fetched products successfully"
+        );
+        console.log(productsData);
 
       } catch (error) {
 
@@ -88,8 +92,22 @@ export const DataProvider = ({ children }) => {
     const values = data.map((item) => item[property]);
     return [...new Set(values)];
   };
-
-  const categoryOnlyData = useMemo(() => getUniqueCategory(data, "category"), [data]);
+const categoryOnlyData = useMemo(() => {
+  return [
+    ...new Map(
+      data
+        .filter(item => item.category)
+        .map(item => [
+          item.category._id,
+          {
+            _id: item.category._id,
+            name: item.category.name,
+          },
+        ])
+    ).values(),
+  ];
+}, [data]);
+console.log(categoryOnlyData);
   const brandOnlyData = useMemo(() => getUniqueCategory(data, "brand"), [data]);
 
   const handleCategoryChange = (e) => setCategory(e.target.value);
@@ -105,9 +123,11 @@ export const DataProvider = ({ children }) => {
     }
 
     // 📦 CATEGORY
-    if (category !== "All") {
-      temp = temp.filter((item) => item.category === category);
-    }
+   if (category !== "All") {
+  temp = temp.filter(
+    item => item.category?._id === category
+  );
+}
 
     // 🏷 BRAND
     if (brand !== "All") {

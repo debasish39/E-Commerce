@@ -376,7 +376,7 @@ const isSignedIn =
           </h2>
 
           {product.brand && (
-            <p style={{ fontSize:10.5, color:"#94a3b8", marginBottom:4, fontWeight:500 }}>
+            <p style={{ fontSize:10.5, color:"#4f46e5", marginBottom:4, fontWeight:500 }}>
               by {product.brand}
             </p>
           )}

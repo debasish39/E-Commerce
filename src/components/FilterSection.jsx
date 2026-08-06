@@ -487,26 +487,40 @@ console.log("FilterSection Rendered");
               marginTop: openCategory ? "12px" : "0"
             }}>
               <div className="fs-list">
-                {["All", ...categoryOnlyData].map((cat) => {
-                  const active = category === cat;
-                  return (
-                    <div
-                      key={cat}
-                      onClick={() => {
-                        setCategory(cat);
-                        setOpenCategory(false);
-                      }}
-                      className={`fs-item ${active ? "active" : ""}`}
-                    >
-                      <span>{cat}</span>
-                      {active && (
-                        <div className="fs-checkmark">
-                          <FaCheck style={{ fontSize: "8px" }} />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+               <div className="fs-list">
+
+  <div
+    className={`fs-item ${category === "All" ? "active" : ""}`}
+    onClick={() => setCategory("All")}
+  >
+    <span>All</span>
+  </div>
+
+  {categoryOnlyData.map((cat) => (
+
+    <div
+      key={cat._id}
+      onClick={() => {
+        setCategory(cat._id);
+        setOpenCategory(false);
+      }}
+      className={`fs-item ${
+        category === cat._id ? "active" : ""
+      }`}
+    >
+      <span>{cat.name}</span>
+
+      {category === cat._id && (
+        <div className="fs-checkmark">
+          <FaCheck size={8} />
+        </div>
+      )}
+
+    </div>
+
+  ))}
+
+</div>
               </div>
             </div>
           </div>

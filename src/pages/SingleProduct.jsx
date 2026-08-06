@@ -674,7 +674,7 @@ const handleLoadMore = () => {
     window.scrollTo(0, 0);
     (async () => {
       try {
-        const res = await axios.get(`https://eshop-backend-y0e7.onrender.com/api/products/${id}`);
+        const res = await axios.get(`http://localhost:5000/api/products/${id}`);
         const p = res.data.product;
         setProduct(p);
         setReviews(p.reviews || []);
@@ -689,8 +689,8 @@ const handleLoadMore = () => {
     if (!product?.category) return;
     (async () => {
       try {
-        const res = await axios.get(`https://eshop-backend-y0e7.onrender.com/api/products`,
-          { params: { category: product.category, limit: 6 } });
+        const res = await axios.get(`http://localhost:5000/api/products`,
+          { params: { category: <span>{product.category?.name}</span>, limit: 6 } });
         setRelated(res.data.products.filter(p => p._id !== product._id));
       } catch (e) { console.error(e); }
     })();
@@ -747,7 +747,7 @@ const handleLoadMore = () => {
       revImgs.forEach(f => fd.append("images", f));
       revVideos.forEach(f => fd.append("videos", f));
       const res = await axios.post(
-        `https://eshop-backend-y0e7.onrender.com/api/products/${product._id}/review`, fd,
+        `http://localhost:5000/api/products/${product._id}/review`, fd,
         { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
       );
       if (res.data.success) {
@@ -764,7 +764,7 @@ const handleLoadMore = () => {
     try {
       const endpoint = type === "like" ? "like" : "dislike";
       const res = await axios.put(
-        `https://eshop-backend-y0e7.onrender.com/api/products/${id}/review/${rid}/${endpoint}`, {},
+        `http://localhost:5000/api/products/${product._id}/review/${rid}/${endpoint}`, {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setReviews(prev => prev.map(r => r._id === rid
@@ -775,7 +775,7 @@ const handleLoadMore = () => {
   const deleteReview = async rid => {
     if (!token) return;
     try {
-      await axios.delete(`https://eshop-backend-y0e7.onrender.com/api/products/${product._id}/review/${rid}`,
+      await axios.delete(`http://localhost:5000/api/products/${product._id}/review/${rid}`,
         { headers: { Authorization: `Bearer ${token}` } });
       setReviews(prev => prev.filter(r => r._id !== rid));
       toast.success("Review deleted");
@@ -918,9 +918,9 @@ const handleLoadMore = () => {
             <div className="spx-card" style={{ padding: "22px 24px" }}>
               {/* badges row */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginBottom: 14 }}>
-                <span className="spx-pill pp"><FaListAlt size={9} />{product.category}</span>
-                {product.subCategory && <span className="spx-pill pg">{product.subCategory}</span>}
-                <span className="spx-pill pg"><FaIndustry size={9} />{product.brand}</span>
+                <span className="spx-pill pp"><FaListAlt size={9} />{<span>{product.category?.name}</span>}</span>
+                {product.subCategory && <span className="spx-pill pg">{product.subCategory?.name}</span>}
+                <span className="spx-pill pg"><FaIndustry size={9} />{product.brand?.name}</span>
                 <span className={`spx-pill ${product.stock > 0 ? "pgn" : "prd"}`}>
                   {product.stock > 0 ? `✓ In Stock (${product.stock})` : "Out of Stock"}
                 </span>

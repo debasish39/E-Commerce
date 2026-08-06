@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -39,7 +39,9 @@ const STATUS_CFG = {
 };
 
 const TrackOrder = () => {
-  const { id } = useParams();
+ const [searchParams] = useSearchParams();
+
+const id = searchParams.get("id");
   const [orderId, setOrderId] = useState(id || "");
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -49,7 +51,7 @@ const TrackOrder = () => {
   const [showNoticeModal, setShowNoticeModal] = useState(true);
   const navigate = useNavigate();
 
-  const BACKEND_URL ="https://eshop-backend-y0e7.onrender.com";
+  const BACKEND_URL ="http://localhost:5000";
 const fetchOrder =
   async (customId) => {
 
@@ -164,10 +166,17 @@ const fetchOrder =
 
   };
 
+useEffect(() => {
 
-  useEffect(() => {
-    if (id) fetchOrder(id);
-  }, [id]);
+  if (id) {
+
+    setOrderId(id);
+
+    fetchOrder(id);
+
+  }
+
+}, [id]);
 
  const handleCancel =
   async () => {
@@ -232,13 +241,11 @@ const fetchOrder =
 
         );
 
-        setOrder(
-          data.order
-        );
+      setOrder(data.order);
+setShowCancelModal(false);
 
-        setShowCancelModal(
-          false
-        );
+// refresh page
+window.location.reload();
 
       } else {
 

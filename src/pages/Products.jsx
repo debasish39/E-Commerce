@@ -543,7 +543,7 @@ export default function Products() {
               <div className={gridView ? "prod-grid mb-3" : "prod-list mb-3"}>
                 {paginatedProducts.map((product, idx) => (
                   <div
-                    key={product.id}
+                    key={product._id}
                     data-aos="zoom-in"
                     data-aos-delay={idx * 25}
                   >

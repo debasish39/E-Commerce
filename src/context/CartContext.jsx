@@ -24,15 +24,12 @@ const CartContext = createContext(null);
 ===================================== */
 
 const BACKEND_URL =
-  "https://eshop-backend-y0e7.onrender.com";
+  "http://localhost:5000";
 
 
 function CartProvider({
   children,
 }) {
-
-
-
   /* =====================================
      STATE
   ===================================== */
@@ -275,62 +272,45 @@ const addToCart =
      INCREASE QUANTITY
   ===================================== */
 
-  const increaseQty =
-    async (
+  const increaseQty = async (productId) => {
 
-      productId
+  try {
 
-    ) => {
-
-      try {
-
-        const res =
-          await fetch(
-
-            `${BACKEND_URL}/api/cart/increase`,
-
-            {
-
-              method: "PUT",
-
-              headers: {
-
-                "Content-Type":
-                  "application/json",
-
-                Authorization:
-                  `Bearer ${token}`,
-
-              },
-
-              body: JSON.stringify({
-
-                productId,
-
-              }),
-
-            }
-
-          );
-
-        const data =
-          await res.json();
-
-        setCartItem(
-
-          data.cart.items
-
-        );
-
-      } catch (error) {
-
-        console.error(
-          error
-        );
-
+    const res = await fetch(
+      `${BACKEND_URL}/api/cart/increase`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          productId,
+        }),
       }
+    );
 
-    };
+    const data = await res.json();
+
+    console.log("Increase Response:", data);
+
+    if (!data.success) {
+
+      toast.error(data.error);
+
+      return;
+
+    }
+
+    setCartItem(data.cart.items);
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
+
+};
 
   /* =====================================
      DECREASE QUANTITY

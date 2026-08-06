@@ -77,6 +77,7 @@ const [
 const [token, setToken] = useState(
   localStorage.getItem("token")
 );
+
 useEffect(() => {
 
   const syncToken = () => {
@@ -121,7 +122,7 @@ useEffect(() => {
         const res =
           await fetch(
 
-            "https://eshop-backend-y0e7.onrender.com/api/auth/me",
+            "http://localhost:5000/api/auth/me",
 
             {
 
@@ -177,7 +178,15 @@ if (res.status === 401) {
   const [address, setAddress] = useState({
     name: '', email: '', phone: '', street: '', state: '', postcode: '', country: '',
   });
+const [couponCode, setCouponCode] = useState("");
 
+const [couponDiscount, setCouponDiscount] = useState(0);
+
+const [finalTotal, setFinalTotal] = useState(0);
+const [couponError, setCouponError] = useState("");
+
+const [couponSuccess, setCouponSuccess] = useState("");
+const [couponLoading, setCouponLoading] = useState(false);
   useEffect(() => {
     if (location) {
       setAddress(prev => ({
@@ -197,8 +206,80 @@ user?.email || '',
 
   const totalPrice = cartItem.reduce((t, i) => t + Number(i.price) * i.quantity, 0);
   const totalAmount = totalPrice + 5;
-  const BACKEND_URL = 'https://eshop-backend-y0e7.onrender.com';
+  useEffect(() => {
+  setFinalTotal(totalAmount);
+}, [totalAmount]);
+  const BACKEND_URL = 'http://localhost:5000';
+const applyCoupon = async () => {
 
+  if (!couponCode.trim()) {
+
+    setCouponError("Please enter a coupon code.");
+    setCouponSuccess("");
+    return;
+
+  }
+
+  try {
+
+    setCouponLoading(true);
+    setCouponError("");
+    setCouponSuccess("");
+
+    const res = await fetch(
+      "http://localhost:5000/api/coupons/apply",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          code: couponCode,
+          total: totalPrice,
+        }),
+      }
+    );
+
+    const data = await res.json();
+
+    console.log("STATUS:", res.status);
+    console.log("RESPONSE:", data);
+
+    if (!res.ok) {
+
+  setCouponDiscount(0);
+  setCouponSuccess("");
+  setCouponError(data.message);
+
+  // Show toast
+  toast.error(data.message || "Failed to apply coupon");
+
+  return;
+}
+    setCouponDiscount(data.discount);
+    setFinalTotal(data.finalTotal + 5);
+
+    setCouponError("");
+    setCouponSuccess(data.message || "Coupon Applied Successfully");
+
+  } catch (err) {
+
+    console.error(err);
+
+    setCouponDiscount(0);
+
+    setCouponError(
+      err.message || "Something went wrong."
+    );
+
+  } finally {
+
+    setCouponLoading(false);
+
+  }
+
+};
   /* ── completeOrder — email required, phone optional ── */
 
 
@@ -270,14 +351,32 @@ const order = {
     : "",
 
   deliveryAddress: {
-    street: address.street,
-    state: address.state,
-    postcode: address.postcode,
-    country: address.country,
+  customer: {
+    fullName: address.name,
+    phone: address.phone,
   },
 
-  total: Number(totalAmount),
+  address: {
+    addressLine1: address.street,
+    area: address.street,
+    city: location?.city || "",
+    district: location?.county || "",
+    state: address.state,
+    postalCode: address.postcode,
+    country: address.country,
+  },
+},
+subtotal: Number(totalPrice),
 
+shippingCharge: 5,
+
+tax: 0,
+
+couponCode,
+
+couponDiscount,
+
+total: Number(finalTotal),
   paymentMethod: method,
 
   paymentStatus:
@@ -329,12 +428,18 @@ headers: {
         body: JSON.stringify(order),
       });
 
-      const data = await res.json();
+     const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Order failed');
-      }
+console.log("STATUS:", res.status);
+console.log("RESPONSE:", data);
 
+if (!res.ok) {
+  throw new Error(
+    data.message ||
+    data.error ||
+    "Order failed"
+  );
+}
       // success toast
       if (method === 'COD') {
         toast.success('Order placed (Cash on Delivery)');
@@ -343,26 +448,26 @@ headers: {
       }
 
       // 🔊 PLAY SUCCESS SOUND
-      try {
-        const audio = new Audio(successmusic);
+      // try {
+      //   const audio = new Audio(successmusic);
 
-        audio.preload = "auto";
-        audio.volume = 0.7;
+      //   audio.preload = "auto";
+      //   audio.volume = 0.7;
 
-        // reset position
-        audio.currentTime = 0;
+      //   // reset position
+      //   audio.currentTime = 0;
 
-        // attempt playback
-        await audio.play();
+      //   // attempt playback
+      //   await audio.play();
 
-        // optional cleanup
-        audio.onended = () => {
-          audio.pause();
-        };
+      //   // optional cleanup
+      //   audio.onended = () => {
+      //     audio.pause();
+      //   };
 
-      } catch (audioError) {
-        console.log('Audio playback blocked:', audioError);
-      }
+      // } catch (audioError) {
+      //   console.log('Audio playback blocked:', audioError);
+      // }
 
       // clear cart
       await clearCart();
@@ -379,10 +484,9 @@ headers: {
         orderId:
           data.order?._id ||
 
-          `ESH-${Date.now()}`,
+          `ODI-${Date.now()}`,
 
-        totalPrice:
-          totalAmount,
+        totalPrice: finalTotal,
 
         paymentMethod:
           method,
@@ -462,9 +566,14 @@ headers: {
 }, 300);
 
     } catch (err) {
-      console.error(err);
-      toast.error('Failed to place order');
-    }
+
+  console.error("ORDER ERROR:", err);
+
+  toast.error(
+    err.message || "Failed to place order"
+  );
+
+}
   };
 
   /* ── Razorpay — no phone required ── */
@@ -484,7 +593,7 @@ headers: {
 
 },
 
-        body: JSON.stringify({ amount: totalAmount }),
+        body: JSON.stringify({ amount: finalTotal }),
       });
       const data = await res.json();
       if (!res.ok) { toast.error('Order creation failed ❌'); return; }
@@ -506,6 +615,9 @@ const rzp = new window.Razorpay({
   description: "Order Payment",
 
   order_id: data.order.id,
+theme: {
+    color: "#4F46E5", // Indigo
+  },
 
   handler: async (response) => {
     console.log("RAZORPAY RESPONSE:", response);
@@ -830,7 +942,7 @@ const rzp = new window.Razorpay({
                     <div className="space-y-2.5">
                       <div className="s-row">
                         <span className="flex items-center gap-2">
-                          🧾 Items Total
+                          🧾 Subtotal
                         </span>
                         <span className="flex items-center font-semibold text-slate-700">
                           ₹{totalPrice}
@@ -861,7 +973,7 @@ const rzp = new window.Razorpay({
                         </span>
 
                         <span className="flex items-center font-extrabold text-lg text-indigo-600">
-                           <FaRupeeSign size={13} className="mr-1" />{totalAmount}
+                           <FaRupeeSign size={13} className="mr-1" />{finalTotal}
                         </span>
                       </div>
                     </div>
@@ -1275,7 +1387,105 @@ const rzp = new window.Razorpay({
       </div>
     </div>
   </div>
+<div className="cart-card p-5 space-y-3">
 
+  <h3 className="font-bold text-slate-800">
+    Apply Coupon
+  </h3>
+
+  <div className="flex gap-3">
+
+    <input
+  value={couponCode}
+  onChange={(e) => {
+
+    setCouponCode(
+      e.target.value.toUpperCase()
+    );
+
+    setCouponError("");
+
+    setCouponSuccess("");
+
+  }}
+
+  placeholder="Enter Coupon Code"
+
+  className={`f-input-bare flex-1 ${
+    couponError
+      ? "border-red-500"
+      : couponSuccess
+      ? "border-green-500"
+      : ""
+  }`}
+/>
+
+    <button
+      onClick={applyCoupon}
+      disabled={couponLoading}
+      className="btn-primary px-6"
+    >
+      {couponLoading ? "Applying..." : "Apply"}
+    </button>
+
+  </div>
+{couponError && (
+
+  <div
+    className="
+      mt-4
+      flex
+      items-start
+      gap-3
+      rounded-2xl
+      border
+      border-red-200
+      bg-red-50
+      px-4
+      py-4
+    "
+  >
+
+    <div className="text-red-500 text-xl">
+      ❌
+    </div>
+
+    <div>
+
+      <h4 className="font-semibold text-red-700">
+        Coupon Not Applied
+      </h4>
+
+      <p className="text-sm text-red-600 mt-1">
+        {couponError}
+      </p>
+
+    </div>
+
+  </div>
+
+)}
+  {couponDiscount > 0 && (
+
+    <div className="rounded-xl bg-green-50 border border-green-200 p-3">
+
+      <div className="text-green-700 font-semibold">
+
+        Coupon Applied Successfully 🎉
+
+      </div>
+
+      <div className="text-sm mt-2">
+
+        Discount: ₹{couponDiscount}
+
+      </div>
+
+    </div>
+
+  )}
+
+</div>
   {/* PAYMENT OPTIONS */}
   <div className="space-y-4">
 

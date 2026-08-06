@@ -19,7 +19,7 @@ import {
   ModalFooter,
   Button,
 } from "@heroui/react";
-
+import SingleOrderPage from './SingleOrderPage';
 /* ── STATUS CONFIG ── */
 const STATUS_CFG = {
   Placed: {
@@ -91,154 +91,166 @@ const OrderHistory = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancellingOrderId, setCancellingOrderId] = useState(null);
   const [cancelling, setCancelling] = useState(false);
+  // ADD THESE NEW STATES
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
+  const [user, setUser] =
+    useState(null);
 
-const [user, setUser] =
-  useState(null);
+  const [token, setToken] =
+    useState(
 
-const [token, setToken] =
-  useState(
+      localStorage.getItem(
+        "token"
+      )
 
-    localStorage.getItem(
-      "token"
-    )
+    );
 
-  );
+  // ADD THIS FUNCTION
+  const handleOrderClick = (order) => {
+    setSelectedOrder(order);
+    setSelectedOrderId(order._id);
+  };
 
+  // ADD THIS FUNCTION
+  const handleBackToList = () => {
+    setSelectedOrder(null);
+    setSelectedOrderId(null);
+  };
 
-useEffect(() => {
+  useEffect(() => {
 
-  if (!token)
-    return;
+    if (!token)
+      return;
 
-  const fetchOrders =
-    async () => {
+    const fetchOrders =
+      async () => {
 
-      try {
+        try {
 
-        const res =
-          await fetch(
+          const res =
+            await fetch(
 
-            "https://eshop-backend-y0e7.onrender.com/api/my-orders",
+              "http://localhost:5000/api/my-orders",
 
-            {
+              {
 
-              headers: {
+                headers: {
 
-                Authorization:
-                  `Bearer ${token}`,
+                  Authorization:
+                    `Bearer ${token}`,
 
-              },
+                },
 
-            }
+              }
 
+            );
+
+          const data =
+            await res.json();
+
+          if (data.success) {
+
+            setOrders(
+              data.orders || []
+            );
+
+          }
+
+        } catch (error) {
+
+          console.error(
+            error
           );
 
-        const data =
-          await res.json();
+        } finally {
 
-        if (data.success) {
-
-          setOrders(
-            data.orders || []
-          );
+          setLoading(false);
 
         }
 
-      } catch (error) {
+      };
 
-        console.error(
-          error
-        );
+    fetchOrders();
 
-      } finally {
-
-        setLoading(false);
-
-      }
-
-    };
-
-  fetchOrders();
-
-}, [token]);
+  }, [token]);
 
 
   const toggleExpand = (id) => setExpanded((p) => ({ ...p, [id]: !p[id] }));
 
   // ── CANCEL ORDER ──
- // ── CANCEL ORDER ──
-const handleCancelOrder = async () => {
+  const handleCancelOrder = async () => {
 
-  if (!cancellingOrderId) return;
+    if (!cancellingOrderId) return;
 
-  setCancelling(true);
+    setCancelling(true);
 
-  try {
+    try {
 
-    // GET TOKEN
-    const token = localStorage.getItem("token");
+      // GET TOKEN
+      const token = localStorage.getItem("token");
 
-    console.log("TOKEN:", token);
+      console.log("TOKEN:", token);
 
-    console.log("CANCELLING ORDER ID:", cancellingOrderId);
+      console.log("CANCELLING ORDER ID:", cancellingOrderId);
 
-    const res = await fetch(
-      `https://eshop-backend-y0e7.onrender.com/api/order/cancel/${cancellingOrderId}`,
-      {
-        method: "PUT",
+      const res = await fetch(
+        `http://localhost:5000/api/order/cancel/${cancellingOrderId}`,
+        {
+          method: "PUT",
 
-        headers: {
-          "Content-Type": "application/json",
+          headers: {
+            "Content-Type": "application/json",
 
-          // AUTHORIZATION HEADER
-          Authorization: `Bearer ${token}`,
-        },
+            // AUTHORIZATION HEADER
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("RESPONSE STATUS:", res.status);
+
+      const data = await res.json();
+
+      console.log("RESPONSE DATA:", data);
+
+      if (data.success) {
+
+        setOrders((prevOrders) =>
+          prevOrders.map((o) =>
+            o._id === cancellingOrderId
+              ? { ...o, status: "Cancelled" }
+              : o
+          )
+        );
+
+        setShowCancelModal(false);
+
+        setCancellingOrderId(null);
+
+        toast.success("Order cancelled successfully");
+
+      } else {
+
+        console.log("BACKEND ERROR:", data);
+
+        toast.error(
+          data.message || "Failed to cancel order. Please try again."
+        );
       }
-    );
 
-    console.log("RESPONSE STATUS:", res.status);
+    } catch (error) {
 
-    const data = await res.json();
+      console.error("CANCEL ORDER ERROR:", error);
 
-    console.log("RESPONSE DATA:", data);
+      toast.error("Error cancelling order");
 
-    if (data.success) {
+    } finally {
 
-      setOrders((prevOrders) =>
-        prevOrders.map((o) =>
-          o._id === cancellingOrderId
-            ? { ...o, status: "Cancelled" }
-            : o
-        )
-      );
-
-      setShowCancelModal(false);
-
-      setCancellingOrderId(null);
-
-      toast.success("Order cancelled successfully");
-
-    } else {
-
-      console.log("BACKEND ERROR:", data);
-
-      toast.error(
-        data.message || "Failed to cancel order. Please try again."
-      );
+      setCancelling(false);
     }
-
-  } catch (error) {
-
-    console.error("CANCEL ORDER ERROR:", error);
-
-    toast.error("Error cancelling order");
-
-  } finally {
-
-    setCancelling(false);
-  }
-};
+  };
   const generateInvoice = (order) => {
     setDownloading((p) => ({ ...p, [order._id]: true }));
 
@@ -265,12 +277,12 @@ const handleCancelOrder = async () => {
 
       const orderDate = order.createdAt
         ? new Date(order.createdAt).toLocaleString("en-IN", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
         : "N/A";
 
       // ── HEADER ──
@@ -279,7 +291,7 @@ const handleCancelOrder = async () => {
 
       try {
         doc.addImage(Logo, "PNG", pageWidth - 42, 8, 20, 20);
-      } catch {}
+      } catch { }
 
       doc.setTextColor(255, 255, 255);
       doc.setFont("helvetica", "bold");
@@ -291,7 +303,7 @@ const handleCancelOrder = async () => {
       doc.text("Premium Online Shopping Experience", margin, 26);
 
       doc.setFontSize(8);
-      doc.text("https://eshop.debasish.xyz", margin, 32);
+      doc.text("https://odikart.in", margin, 32);
       doc.text("support@eshop.com", margin, 36);
 
       // ── INVOICE TITLE ──
@@ -371,14 +383,16 @@ const handleCancelOrder = async () => {
       doc.setFontSize(10);
 
       const billingLines = [
-        `Customer: ${order.user || "Guest User"}`,
-        `Phone: ${order.phone || "N/A"}`,
-        `Email: ${order.email || "N/A"}`,
-        `Address: ${order.deliveryAddress?.street || ""}`,
-        `${order.deliveryAddress?.state || ""} - ${
-          order.deliveryAddress?.postcode || ""
+        `Customer: ${order.deliveryAddress?.customer?.fullName || "Guest User"}`,
+        `Phone: ${order.deliveryAddress?.customer?.phone || "N/A"}`,
+        `Email: ${order.user?.email || ""}`,
+
+        `Address: ${order.deliveryAddress?.address?.addressLine1 || ""}`,
+        `${order.deliveryAddress?.address?.area || ""}`,
+        `${order.deliveryAddress?.address?.city || ""}`,
+        `${order.deliveryAddress?.address?.district || ""}`,
+        `${order.deliveryAddress?.address?.state || ""} - ${order.deliveryAddress?.address?.postalCode || ""
         }`,
-        `${order.deliveryAddress?.country || ""}`,
       ];
 
       let infoY = y + 14;
@@ -444,14 +458,30 @@ const handleCancelOrder = async () => {
       });
 
       // ── TOTAL SECTION ──
-      const subtotal = order.items.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-      );
+      // Price Details
+      const subtotal =
+        Number(order?.pricing?.subtotal) ||
+        order.items.reduce(
+          (sum, item) =>
+            sum + Number(item.price) * Number(item.quantity),
+          0
+        );
 
-      const shipping = 0;
-      const handling = 5;
-      const grandTotal = subtotal + shipping + handling;
+      const shipping =
+        Number(order?.pricing?.shippingCharge) || 0;
+
+      const tax =
+        Number(order?.pricing?.tax) || 0;
+
+      const couponDiscount =
+        Number(order?.pricing?.couponDiscount) || 0;
+
+      const couponCode =
+        order?.pricing?.couponCode || "";
+
+      const grandTotal =
+        Number(order?.pricing?.total) ||
+        subtotal + shipping + tax - couponDiscount;
 
       y += 10;
 
@@ -473,27 +503,64 @@ const handleCancelOrder = async () => {
       });
 
       doc.text("Shipping", pageWidth - 80, y + 25);
-      doc.text("FREE", pageWidth - 20, y + 25, {
+      doc.text(formatCurrency(shipping), pageWidth - 20, y + 25, {
         align: "right",
       });
 
-      doc.text("Handling", pageWidth - 80, y + 32);
-      doc.text(formatCurrency(handling), pageWidth - 20, y + 32, {
+      doc.text("Tax", pageWidth - 80, y + 32);
+      doc.text(formatCurrency(tax), pageWidth - 20, y + 32, {
         align: "right",
       });
 
-      doc.setDrawColor(...colors.border);
-      doc.line(pageWidth - 80, y + 35, pageWidth - 20, y + 35);
+      let currentY = y + 39;
+
+      if (couponDiscount > 0) {
+
+        doc.setTextColor(220, 38, 38);
+
+        doc.text(
+          `Coupon (${couponCode})`,
+          pageWidth - 80,
+          currentY
+        );
+
+        doc.text(
+          `- ${formatCurrency(couponDiscount)}`,
+          pageWidth - 20,
+          currentY,
+          { align: "right" }
+        );
+
+        doc.setTextColor(...colors.dark);
+
+        currentY += 7;
+      }
+
+      doc.line(
+        pageWidth - 80,
+        currentY,
+        pageWidth - 20,
+        currentY
+      );
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(11);
-
       doc.setTextColor(...colors.success);
 
-      doc.text("Grand Total", pageWidth - 80, y + 41);
-      doc.text(formatCurrency(grandTotal), pageWidth - 20, y + 41, {
-        align: "right",
-      });
+      doc.text(
+        "Grand Total",
+        pageWidth - 80,
+        currentY + 8
+      );
+
+      doc.text(
+        formatCurrency(grandTotal),
+        pageWidth - 20,
+        currentY + 8,
+        {
+          align: "right",
+        }
+      );
 
       // ── STATUS SECTION ──
       doc.setTextColor(...colors.dark);
@@ -506,19 +573,19 @@ const handleCancelOrder = async () => {
       doc.setFontSize(9);
 
       doc.text(
-        `Order Status: ${order.status || "Placed"}`,
+        `Order Status: ${order?.status || "Placed"}`,
         margin,
         y + 20
       );
 
       doc.text(
-        `Payment Status: ${order.paymentStatus || "Pending"}`,
+        `Payment Status: ${order.payment?.status || "Pending"}`,
         margin,
         y + 27
       );
 
       doc.text(
-        `Payment Method: ${order.paymentMethod || "COD"}`,
+        `Payment Method: ${order.payment?.method || "COD"}`,
         margin,
         y + 34
       );
@@ -566,10 +633,10 @@ const handleCancelOrder = async () => {
   const formatDate = (d) =>
     d
       ? new Date(d).toLocaleDateString("en-IN", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
       : "—";
   const formatTime = (d) =>
     d
@@ -605,7 +672,14 @@ const handleCancelOrder = async () => {
       if (sortOption === "priceLow") return a.total - b.total;
       return 0;
     });
-
+  if (selectedOrder) {
+    return (
+      <SingleOrderPage
+        order={selectedOrder}
+        onBack={handleBackToList}
+      />
+    );
+  }
   return (
     <>
       <style>{`
@@ -935,7 +1009,12 @@ const handleCancelOrder = async () => {
                 },
                 {
                   label: "Total Spent",
-                  value: `₹${orders.reduce((s, o) => s + o.total, 0).toLocaleString("en-IN")}`,
+                  value: `₹${orders
+                    .filter((o) => o.status === "Delivered")
+                    .reduce(
+                      (s, o) => s + Number(o?.pricing?.total || 0),
+                      0
+                    ).toLocaleString("en-IN")}`,
                   icon: <FaRupeeSign size={15} style={{ color: "#2563eb" }} />,
                   bg: "#eff6ff",
                 },
@@ -991,26 +1070,46 @@ const handleCancelOrder = async () => {
           {!loading && filteredOrders.length > 0 && (
             <div className="space-y-5">
               {filteredOrders.map((order, idx) => {
-                const subtotal = order.items.reduce((s, i) => s + i.price * i.quantity, 0);
-                const handling = 5;
-                const grandTotal = subtotal + handling;
+                const subtotal =
+                  Number(order?.pricing?.subtotal) ||
+                  order.items.reduce(
+                    (sum, item) =>
+                      sum + Number(item.price) * Number(item.quantity),
+                    0
+                  );
+
+                const shipping =
+                  Number(order?.pricing?.shippingCharge) || 0;
+
+                const tax =
+                  Number(order?.pricing?.tax) || 0;
+
+                const couponDiscount =
+                  Number(order?.pricing?.couponDiscount) || 0;
+
+                const couponCode =
+                  order?.pricing?.couponCode || "";
+
+                const grandTotal =
+                  Number(order?.pricing?.total) ||
+                  (subtotal + shipping + tax - couponDiscount);
                 const isExp = !!expanded[order._id];
                 const isDL = !!downloading[order._id];
-                const statusCfg = STATUS_CFG[order.status] || STATUS_CFG.Placed;
-                const canCancelOrder = statusCfg.canCancel && order.status !== "Cancelled";
-// check if order is older than 7 days
-const orderDate = new Date(order.createdAt);
-const currentDate = new Date();
+                const statusCfg = STATUS_CFG[order?.status] || STATUS_CFG.Placed;
+                const canCancelOrder = statusCfg.canCancel && order?.status !== "Cancelled";
+                // check if order is older than 7 days
+                const orderDate = new Date(order.createdAt);
+                const currentDate = new Date();
 
-const diffTime = currentDate - orderDate;
+                const diffTime = currentDate - orderDate;
 
-const diffDays = diffTime / (1000 * 60 * 60 * 24);
+                const diffDays = diffTime / (1000 * 60 * 60 * 24);
 
-const isCancelExpired = diffDays > 7;
+                const isCancelExpired = diffDays > 7;
                 return (
                   <div
                     key={order._id}
-                    className="oh-card card-enter"
+                    className="oh-card card-enter cursor-pointer"
                     style={{ animationDelay: `${idx * 0.06}s` }}
                   >
                     {/* ── TOP ACCENT LINE ── */}
@@ -1046,18 +1145,17 @@ const isCancelExpired = diffDays > 7;
                                 Order #{order._id.slice(-8).toUpperCase()}
                               </p>
                               <p className="text-xs text-slate-400 font-medium mt-1">
-                                Placed by <span className="text-indigo-600 font-bold">{order.user}</span>
+                                Placed by <span className="text-indigo-600 font-bold">{order.deliveryAddress?.customer?.fullName}</span>
                               </p>
                               <div className="flex items-center gap-2 mt-2 flex-wrap">
                                 <span
-                                  className={`text-[11px] font-bold px-2.5 py-1 rounded-full inline-flex items-center gap-1.5 ${
-                                    order.paymentMethod === "COD"
-                                      ? "bg-amber-50 text-amber-700 border border-amber-200"
-                                      : "bg-green-50 text-green-700 border border-green-200"
-                                  }`}
+                                  className={`text-[11px] font-bold px-2.5 py-1 rounded-full inline-flex items-center gap-1.5 ${order?.payment.method === "COD"
+                                    ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                    : "bg-green-50 text-green-700 border border-green-200"
+                                    }`}
                                 >
                                   <MdPayments size={10} />
-                                  {order.paymentMethod}
+                                  {order?.payment.method || "COD"}
                                 </span>
                                 {order.paymentStatus === "paid" && (
                                   <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 inline-flex items-center gap-1.5">
@@ -1083,7 +1181,7 @@ const isCancelExpired = diffDays > 7;
                                 className="w-2 h-2 rounded-full"
                                 style={{ background: statusCfg.dot }}
                               />
-                              {order.status || "Placed"}
+                              {order?.status || "Placed"}
                             </span>
                           </div>
                         </div>
@@ -1115,7 +1213,7 @@ const isCancelExpired = diffDays > 7;
                         </div>
 
                         {/* DELIVERY ADDRESS */}
-                        {order.deliveryAddress?.street && (
+                        {order.deliveryAddress?.address?.addressLine1 && (
                           <div className="flex items-start gap-3 bg-indigo-50/50 border border-indigo-200/50 rounded-2xl px-4 py-3">
                             <FaMapPin
                               size={13}
@@ -1123,11 +1221,12 @@ const isCancelExpired = diffDays > 7;
                             />
                             <div className="text-xs text-slate-600 leading-relaxed">
                               <p className="font-semibold text-indigo-900">
-                                {order.deliveryAddress.street}
+                                {order.deliveryAddress.address.addressLine1}
                               </p>
                               <p className="text-slate-500 mt-1">
-                                {order.deliveryAddress.state} - {order.deliveryAddress.postcode} •{" "}
-                                {order.deliveryAddress.country}
+                                {order.deliveryAddress.address.state} - {order.deliveryAddress.address.postalCode} •{" "}
+                                {order.deliveryAddress.address.city},
+                                {order.deliveryAddress.address.district}
                               </p>
                             </div>
                           </div>
@@ -1141,10 +1240,10 @@ const isCancelExpired = diffDays > 7;
                               {formatDate(order.createdAt)} at {formatTime(order.createdAt)}
                             </span>
                           </div>
-                          {order.phone && (
+                          {order.deliveryAddress?.customer?.phone && (
                             <div className="flex items-center gap-2 text-slate-500">
                               <FaPhoneAlt size={11} style={{ color: "#6366f1" }} />
-                              <span className="font-medium">{order.phone}</span>
+                              <span className="font-medium">{order.deliveryAddress.customer.phone}</span>
                             </div>
                           )}
                         </div>
@@ -1176,51 +1275,51 @@ const isCancelExpired = diffDays > 7;
                             📦 Order Items ({order.items.length})
                           </p>
                           {order.items.map((item, i) => (
-  <div
-    key={i}
-    className="item-row flex items-center justify-between gap-3"
-  >
-    <div className="flex items-center gap-3 min-w-0">
+                            <div
+                              key={i}
+                              className="item-row flex items-center justify-between gap-3"
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
 
-      <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-400 to-blue-500 flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
-        {i + 1}
-      </span>
+                                <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-400 to-blue-500 flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
+                                  {i + 1}
+                                </span>
 
-      <img
-        src={
-          item.image ||
-          "https://via.placeholder.com/80"
-        }
-        alt={item.title}
-        className="w-14 h-14 rounded-xl object-cover border border-slate-200"
-      />
+                                <img
+                                  src={
+                                    item.image ||
+                                    "https://via.placeholder.com/80"
+                                  }
+                                  alt={item.title}
+                                  className="w-14 h-14 rounded-xl object-cover border border-slate-200"
+                                />
 
-      <div className="min-w-0">
-        <h4 className="text-sm font-semibold text-slate-700 line-clamp-2">
-          {item.title}
-        </h4>
+                                <div className="min-w-0">
+                                  <h4 className="text-sm font-semibold text-slate-700 line-clamp-2">
+                                    {item.title}
+                                  </h4>
 
-        <p className="text-xs text-slate-400">
-          Qty: {item.quantity}
-        </p>
-      </div>
+                                  <p className="text-xs text-slate-400">
+                                    Qty: {item.quantity}
+                                  </p>
+                                </div>
 
-    </div>
+                              </div>
 
-    <div className="flex items-center gap-3 flex-shrink-0">
+                              <div className="flex items-center gap-3 flex-shrink-0">
 
-      <span className="text-slate-400 text-xs">
-        × {item.quantity}
-      </span>
+                                <span className="text-slate-400 text-xs">
+                                  × {item.quantity}
+                                </span>
 
-      <span className="flex items-center text-indigo-600 font-bold text-sm">
-        <FaRupeeSign size={11} />
-        {(item.price * item.quantity).toFixed(0)}
-      </span>
+                                <span className="flex items-center text-indigo-600 font-bold text-sm">
+                                  <FaRupeeSign size={11} />
+                                  {(item.price * item.quantity).toFixed(0)}
+                                </span>
 
-    </div>
-  </div>
-))}
+                              </div>
+                            </div>
+                          ))}
                           {/* BILL BREAKDOWN */}
                           <div className="mt-5 pt-4 border-t border-indigo-200/60 space-y-1.5">
                             <div className="bill-row">
@@ -1229,14 +1328,32 @@ const isCancelExpired = diffDays > 7;
                                 ₹{subtotal.toFixed(2)}
                               </span>
                             </div>
+
                             <div className="bill-row">
-                              <span className="text-slate-600 font-medium">Delivery</span>
-                              <span className="font-bold text-green-600 text-xs">FREE</span>
+                              <span className="text-slate-600 font-medium">Shipping</span>
+                              <span className="font-bold text-slate-800">
+                                ₹{shipping.toFixed(2)}
+                              </span>
                             </div>
+
                             <div className="bill-row">
-                              <span className="text-slate-600 font-medium">Handling</span>
-                              <span className="font-bold text-slate-800">₹{handling.toFixed(2)}</span>
+                              <span className="text-slate-600 font-medium">Tax</span>
+                              <span className="font-bold text-slate-800">
+                                ₹{tax.toFixed(2)}
+                              </span>
                             </div>
+
+                            {couponDiscount > 0 && (
+                              <div className="bill-row">
+                                <span className="text-red-600 font-medium">
+                                  Coupon ({couponCode})
+                                </span>
+                                <span className="font-bold text-red-600">
+                                  -₹{couponDiscount.toFixed(2)}
+                                </span>
+                              </div>
+                            )}
+
                             <div className="flex justify-between pt-2 border-t border-indigo-200 font-bold text-slate-900">
                               <span>Grand Total</span>
                               <span className="flex items-center text-lg text-indigo-600">
@@ -1256,14 +1373,14 @@ const isCancelExpired = diffDays > 7;
                           </span>
                           <span className="flex items-center font-extrabold text-2xl text-indigo-600">
                             <FaRupeeSign size={14} />
-                            {grandTotal.toFixed(2)}
+                            {grandTotal?.toFixed(2)}
                           </span>
                         </div>
 
                         <div className="flex items-center gap-2 flex-wrap">
                           <button
                             className="expand-btn"
-                            onClick={() => toggleExpand(order._id)}
+                            onClick={() => handleOrderClick(order)}
                           >
                             {isExp ? <FaChevronUp size={11} /> : <FaChevronDown size={11} />}
                             {isExp ? "Hide" : "Details"}
@@ -1277,7 +1394,7 @@ const isCancelExpired = diffDays > 7;
                             Track
                           </button>
 
-                          <button
+                          {/* <button
                             className={`dl-btn ${isDL ? "loading" : ""}`}
                             onClick={() => !isDL && generateInvoice(order)}
                             disabled={isDL}
@@ -1288,33 +1405,33 @@ const isCancelExpired = diffDays > 7;
                               <FaDownload size={12} className="relative z-10" />
                             )}
                             <span className="relative z-10">{isDL ? "Generating…" : "Invoice"}</span>
-                          </button>
-{canCancelOrder && !isCancelExpired && (
-  <button
-    className="cancel-btn"
-    onClick={() => {
-      setCancellingOrderId(order._id);
-      setShowCancelModal(true);
-    }}
-  >
-    <FaTimes size={11} />
-    Cancel
-  </button>
-)}
+                          </button> */}
+                          {canCancelOrder && !isCancelExpired && (
+                            <button
+                              className="cancel-btn"
+                              onClick={() => {
+                                setCancellingOrderId(order._id);
+                                setShowCancelModal(true);
+                              }}
+                            >
+                              <FaTimes size={11} />
+                              Cancel
+                            </button>
+                          )}
 
-{isCancelExpired && order.status !== "Cancelled" && (
-  <div
-    className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold"
-    style={{
-      background: "#fef2f2",
-      color: "#dc2626",
-      border: "1px solid #fecaca",
-    }}
-  >
-    <FaExclamationTriangle size={11} />
-    Cancellation period expired
-  </div>
-)}
+                          {isCancelExpired && order.status !== "Cancelled" && (
+                            <div
+                              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold"
+                              style={{
+                                background: "#fef2f2",
+                                color: "#dc2626",
+                                border: "1px solid #fecaca",
+                              }}
+                            >
+                              <FaExclamationTriangle size={11} />
+                              Cancellation period expired
+                            </div>
+                          )}
 
                         </div>
                       </div>
@@ -1457,11 +1574,10 @@ const isCancelExpired = diffDays > 7;
                         <button
                           key={status}
                           onClick={() => setStatusFilter(status)}
-                          className={`px-4 py-2 text-xs font-bold rounded-full transition ${
-                            statusFilter === status
-                              ? "bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-lg"
-                              : "bg-white border border-indigo-200 text-indigo-600 hover:border-indigo-400"
-                          }`}
+                          className={`px-4 py-2 text-xs font-bold rounded-full transition ${statusFilter === status
+                            ? "bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-lg"
+                            : "bg-white border border-indigo-200 text-indigo-600 hover:border-indigo-400"
+                            }`}
                         >
                           {status}
                         </button>
@@ -1484,11 +1600,10 @@ const isCancelExpired = diffDays > 7;
                       <button
                         key={opt.value}
                         onClick={() => setSortOption(opt.value)}
-                        className={`px-4 py-2 text-xs font-bold rounded-full transition ${
-                          sortOption === opt.value
-                            ? "bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-lg"
-                            : "bg-white border border-indigo-200 text-indigo-600 hover:border-indigo-400"
-                        }`}
+                        className={`px-4 py-2 text-xs font-bold rounded-full transition ${sortOption === opt.value
+                          ? "bg-gradient-to-r from-indigo-500 to-blue-500 text-white shadow-lg"
+                          : "bg-white border border-indigo-200 text-indigo-600 hover:border-indigo-400"
+                          }`}
                       >
                         {opt.label}
                       </button>
@@ -1509,11 +1624,10 @@ const isCancelExpired = diffDays > 7;
                       <button
                         key={item.value}
                         onClick={() => setDateFilter(item.value)}
-                        className={`px-4 py-2 text-xs font-bold rounded-full transition ${
-                          dateFilter === item.value
-                            ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg"
-                            : "bg-white border border-blue-200 text-blue-600 hover:border-blue-400"
-                        }`}
+                        className={`px-4 py-2 text-xs font-bold rounded-full transition ${dateFilter === item.value
+                          ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg"
+                          : "bg-white border border-blue-200 text-blue-600 hover:border-blue-400"
+                          }`}
                       >
                         {item.label}
                       </button>
