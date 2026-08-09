@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import { getData } from "../context/DataContext";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +10,7 @@ import { AiOutlineEye } from "react-icons/ai";
 import { MdFlashOn } from "react-icons/md";
 import { toast } from "sonner";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Autoplay, EffectFade } from "swiper/modules";
+import {   Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -56,6 +56,67 @@ const useCountdown = (h = 8, m = 32, s = 14) => {
 };
 
 const pad = n => String(n).padStart(2, "0");
+const getVariants = (item) =>
+  Array.isArray(item?.variants) ? item.variants : [];
+
+const getFirstVariant = (item) => getVariants(item)[0] || null;
+
+const getProductPrice = (item) => {
+  const variant = getFirstVariant(item);
+  return Number(item?.price ?? variant?.price ?? 0);
+};
+
+const getProductOriginalPrice = (item) => {
+  const variant = getFirstVariant(item);
+  return Number(
+    item?.originalPrice ??
+    variant?.originalPrice ??
+    getProductPrice(item)
+  );
+};
+
+const getProductDiscount = (item) => {
+  const variant = getFirstVariant(item);
+  const original = getProductOriginalPrice(item);
+  const price = getProductPrice(item);
+
+  // Prefer the actual stored discount percentage.
+  const storedDiscount = Number(
+    item?.offer?.enabled
+      ? item?.offer?.value
+      : variant?.discountPercentage ?? 0
+  );
+
+  if (storedDiscount > 0) {
+    return { pct: storedDiscount, original };
+  }
+
+  if (original > price && original > 0) {
+    return {
+      pct: Math.round(((original - price) / original) * 100),
+      original,
+    };
+  }
+
+  return { pct: 0, original: price };
+};
+
+const getProductImage = (item) => {
+  const thumbnail = item?.media?.thumbnail;
+  const images = item?.media?.images;
+
+  if (thumbnail) return thumbnail;
+
+  if (Array.isArray(images) && images.length > 0) {
+    return images[0];
+  }
+
+  // Backward compatibility with older API response.
+  if (item?.thumbnail) return item.thumbnail;
+
+  return "/placeholder-product.png";
+};
+
 
 
 /* ══════════════════════════════════
@@ -99,21 +160,9 @@ const isSignedIn =
 
   const orderedData = data || [];
 
-  /*
-    Move product id=83 to first position
-  */
-
-  const product83Index = orderedData.findIndex(
-    (item) => item._id === 83
-  );
-
-  let reorderedData = [...orderedData];
-
-  if (product83Index !== -1) {
-    const [product83] = reorderedData.splice(product83Index, 1);
-
-    reorderedData.unshift(product83);
-  }
+  // Products come from MongoDB and are already ordered by the API.
+  // Do not assume a numeric product id such as 83.
+  const reorderedData = [...orderedData];
   const handleCart = useCallback((item, e) => {
     e?.stopPropagation();
     if (!isSignedIn) { toast.error("Please login first"); setTimeout(() => navigate("/sign-in"), 300); return; }
@@ -170,6 +219,14 @@ const isSignedIn =
   //     </div>
   //   );
   // }
+  if (!reorderedData.length) {
+    return (
+      <div className="cw-root flex items-center justify-center min-h-[220px]">
+        <p className="text-gray-500">No approved products available.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="cw-root">
 
@@ -247,17 +304,18 @@ const isSignedIn =
       <div className="cw-desktop">
         <Swiper
           {...SWIPER_COMMON}
-          modules={[Autoplay]}
+          modules={[  Autoplay]}
           navigation
           className="cw-desk-swiper"
         >
           {reorderedData.map((item, idx) => {
             const badge = BADGES[idx % BADGES.length];
             const accent = ACCENTS[idx % ACCENTS.length];
-            const { pct, original } = getDiscount(item.price, idx);
-            const stars = Math.min(5, Math.max(3, Math.round(item.rating || 4)));
-            const rCount = (1200 + idx * 379).toLocaleString();
-            const emi = Math.round(item.price / 6).toLocaleString("en-IN");
+            const price = getProductPrice(item);
+            const { pct, original } = getProductDiscount(item);
+            const stars = Math.min(5, Math.max(0, Math.round(Number(item.rating) || 0)));
+            const rCount = Number(item.numReviews || 0).toLocaleString("en-IN");
+            const emi = Math.round(price / 6).toLocaleString("en-IN");
             const added = inCart(item);
 
             return (
@@ -322,7 +380,7 @@ const isSignedIn =
                       ))}
 
                       <span className="cw-ds-rpill">
-                        {item.rating?.toFixed(1) || "4.2"} ⭐
+                        {Number(item.rating || 0).toFixed(1)} ⭐
                       </span>
 
                       <span className="cw-ds-rcount">
@@ -338,7 +396,7 @@ const isSignedIn =
                           ₹
                         </span>
 
-                        {item.price?.toLocaleString("en-IN")}
+                        {price.toLocaleString("en-IN")}
                       </span>
 
                       <span className="cw-ds-orig">
@@ -353,9 +411,9 @@ const isSignedIn =
                     {/* 🚚 Features */}
                     <div className="cw-ds-chips">
                       {[
-                        { icon: "🚚", t: "Free Delivery" },
+                        { icon: "🚚", t: item.shipping?.freeShipping ? "Free Delivery" : "Shipping Available" },
                         { icon: "🛡️", t: "Secure Pay" },
-                        { icon: "🔄", t: "10-Day Return" },
+                        { icon: "🔄", t: `${item.shipping?.returnDays ?? 7}-Day Return` },
                       ].map(({ icon, t }) => (
                         <span key={t} className="cw-ds-chip">
                           {icon} {t}
@@ -410,7 +468,7 @@ const isSignedIn =
                       <FaFire size={12} /> {pct}% OFF
                     </div>
                     <img
-                      src={item.thumbnail} alt={item.title}
+                      src={getProductImage(item)} alt={item.title}
                       className="cw-ds-img border rounded-full"
                       onClick={() => navigate(`/products/${item._id}`)}
                     />
@@ -446,15 +504,16 @@ const isSignedIn =
       <div className="cw-mobile" style={{ padding: "14px 8px 20px" }}>
         <Swiper
           {...SWIPER_COMMON}
-          modules={[Autoplay]}
+          modules={[ Autoplay]}
           className="cw-mob-swiper"
           style={{ paddingBottom: 36 }}
         >
           {reorderedData.map((item, idx) => {
             const badge = BADGES[idx % BADGES.length];
             const accent = ACCENTS[idx % ACCENTS.length];
-            const { pct, original } = getDiscount(item.price, idx);
-            const stars = Math.min(5, Math.max(3, Math.round(item.rating || 4)));
+            const price = getProductPrice(item);
+            const { pct, original } = getProductDiscount(item);
+            const stars = Math.min(5, Math.max(0, Math.round(Number(item.rating) || 0)));
             const added = inCart(item);
 
             return (
@@ -477,7 +536,7 @@ const isSignedIn =
                       <FaFire size={9} /> {pct}% OFF
                     </div>
                     <img
-                      src={item.thumbnail} alt={item.title}
+                      src={getProductImage(item)} alt={item.title}
                       className="cw-ms-img"
                       onClick={() => navigate(`/products/${item._id}`)}
                     />
@@ -497,14 +556,14 @@ const isSignedIn =
                           <FaStar key={i} size={11} color={i < stars ? "#fbbf24" : "lightgray"} />
                         ))}
                         <span className="cw-ms-rpill" style={{ marginLeft: 4 }}>
-                          {item.rating?.toFixed(1) || "4.2"} <FaStar size={8} />
+                          {Number(item.rating || 0).toFixed(1)} <FaStar size={8} />
                         </span>
                       </div>
                       {/* price right */}
                       <div className="cw-ms-price-block">
                         <span className="cw-ms-price">
                           <span className="cw-ms-price-sym"><FaRupeeSign /></span>
-                          {item.price?.toLocaleString("en-IN")}
+                          {price.toLocaleString("en-IN")}
                         </span>
                         <div className="cw-ms-price-sub">
                           <span className="cw-ms-orig">₹{original.toLocaleString("en-IN")}</span>
@@ -515,9 +574,9 @@ const isSignedIn =
 
                     <div className="cw-ms-trust">
                       {[
-                        { icon: <FaTruck size={9} />, t: "Free Delivery" },
+                        { icon: <FaTruck size={9} />, t: item.shipping?.freeShipping ? "Free Delivery" : "Shipping Available" },
                         { icon: <FaShieldAlt size={9} />, t: "Secure Pay" },
-                        { icon: "🔄", t: "10-Day Return" },
+                        { icon: "🔄", t: `${item.shipping?.returnDays ?? 7}-Day Return` },
                       ].map(({ icon, t }) => (
                         <span key={t} className="cw-ms-trust-item">{icon} {t}</span>
                       ))}
