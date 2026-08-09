@@ -576,6 +576,47 @@ export default function SingleProduct() {
 const [visibleReviews, setVisibleReviews] = useState(1);
   const [currentIndex, setCurrentIndex] =
     useState(0);
+
+  /* ── Schema-compatible variant/media helpers ── */
+  const variants = product?.variants || [];
+
+  const getVariantAttr = (variant, key) => {
+    const attrs = variant?.attributes;
+    if (!attrs) return "";
+    if (typeof attrs.get === "function") {
+      return attrs.get(key) || attrs.get(key.toLowerCase()) || "";
+    }
+    return attrs[key] || attrs[key.toLowerCase()] || "";
+  };
+
+  const variantSize = (variant) =>
+    getVariantAttr(variant, "Size");
+
+  const variantColor = (variant) =>
+    getVariantAttr(variant, "Color");
+
+  const sizeOptions = [...new Set(variants.map(variantSize).filter(Boolean))];
+  const colorOptions = [...new Set(variants.map(variantColor).filter(Boolean))];
+
+  const selectedVariant = variants.find((variant) => {
+    const sizeMatches =
+      !selSize || !sizeOptions.length || variantSize(variant) === selSize;
+    const colorMatches =
+      !selColor || !colorOptions.length || variantColor(variant) === selColor;
+    return sizeMatches && colorMatches && variant.isActive !== false;
+  }) || variants.find((variant) => variant.isActive !== false) || variants[0];
+
+  const productStock = selectedVariant?.stock ?? 0;
+  const productPrice = selectedVariant?.price ?? 0;
+  const productOriginalPrice = selectedVariant?.originalPrice ?? 0;
+  const productDiscount = selectedVariant?.discountPercentage || 0;
+  const productShippingCharge = product?.shipping?.shippingCharge ?? 0;
+  const productMinQty = product?.minimumOrderQuantity || 1;
+  const productMaxQty = product?.maximumOrderQuantity || 10;
+  const productImages = [
+    product?.media?.thumbnail,
+    ...(product?.media?.images || []),
+  ].filter(Boolean);
   const {
     isOpen: isReviewModalOpen,
     onOpen: openReviewModal,
@@ -583,6 +624,10 @@ const [visibleReviews, setVisibleReviews] = useState(1);
   } = useDisclosure();
   const displayedReviews = reviews.slice(0, visibleReviews);
   const [loadingMore, setLoadingMore] = useState(false);
+
+  useEffect(() => {
+    setVisibleReviews(1);
+  }, [product?._id]);
 
 const handleLoadMore = () => {
   setLoadingMore(true);
@@ -678,8 +723,17 @@ const handleLoadMore = () => {
         const p = res.data.product;
         setProduct(p);
         setReviews(p.reviews || []);
-        if (p.sizes?.[0]) setSelSize(p.sizes[0].label);
-        if (p.colors?.[0]) setSelColor(p.colors[0]);
+        const firstVariant =
+          p.variants?.find((v) => v.isActive !== false) || p.variants?.[0];
+        const attrs = firstVariant?.attributes || {};
+        const readAttr = (key) => {
+          if (typeof attrs.get === "function") {
+            return attrs.get(key) || attrs.get(key.toLowerCase()) || "";
+          }
+          return attrs[key] || attrs[key.toLowerCase()] || "";
+        };
+        setSelSize(readAttr("Size"));
+        setSelColor(readAttr("Color"));
       } catch (e) { console.error(e); }
     })();
   }, [id]);
@@ -689,16 +743,23 @@ const handleLoadMore = () => {
     if (!product?.category) return;
     (async () => {
       try {
-        const res = await axios.get(`https://eshop-backend-y0e7.onrender.com/api/products`,
-          { params: { category: <span>{product.category?.name}</span>, limit: 6 } });
+     const res = await axios.get(
+  `https://eshop-backend-y0e7.onrender.com/api/products`,
+  {
+    params: {
+      category: product.category?.name,
+      limit: 6,
+    },
+  }
+);
         setRelated(res.data.products.filter(p => p._id !== product._id));
       } catch (e) { console.error(e); }
     })();
   }, [product?.category, product?._id]);
 
-  const allImgs = product
-    ? [product.thumbnail, ...(product.images || []).filter(i => i !== product.thumbnail)].filter(Boolean)
-    : [];
+  const allImgs = productImages.filter(
+    (img, index, arr) => arr.indexOf(img) === index
+  );
 
   const startAuto = useCallback(() => {
     if (allImgs.length <= 1) return;
@@ -711,14 +772,17 @@ const handleLoadMore = () => {
   const isInCart = cartItem.some(c => String(c.productId) === String(product?._id));
   const isWishlisted = wishlist.some(w => String(w.productId) === String(product?._id));
 
-  const sizeObj = product?.sizes?.find(s => s.label === selSize);
-  const finalPrice = sizeObj?.price || product?.price || 0;
-  const origPrice = product?.originalPrice || Math.round(finalPrice / (1 - (product?.discountPercentage || 0) / 100));
+  const finalPrice = productPrice;
+  const origPrice = productOriginalPrice || (
+    productDiscount > 0
+      ? Math.round(finalPrice / (1 - productDiscount / 100))
+      : finalPrice
+  );
 
   const handleCart = () => {
     if (!isSignedIn) { toast.error("Please login first"); navigate("/sign-in"); return; }
     if (isInCart) { navigate("/cart"); return; }
-    if (!product.stock) { toast.error("Out of Stock"); return; }
+    if (!productStock) { toast.error("Out of Stock"); return; }
     addToCart({ ...product, productId: product._id, price: finalPrice, size: selSize, color: selColor, quantity: qty });
     toast.success("Added to cart 🛒");
   };
@@ -753,6 +817,7 @@ const handleLoadMore = () => {
       if (res.data.success) {
         setReviews(res.data.reviews);
         setRevText(""); setRevRating(0); setRevHover(0); setRevImgs([]); setRevVideos([]);
+        onReviewModalChange(false);
         toast.success("Review submitted ✨");
       }
     } catch (err) { toast.error(err?.response?.data?.message || "Failed"); }
@@ -793,7 +858,7 @@ const handleLoadMore = () => {
     </div>
   );
 
-  const disc = Math.round(product.discountPercentage || 0);
+  const disc = Math.round(productDiscount || 0);
 
   /* tab definitions */
   const TABS = [
@@ -804,19 +869,19 @@ const handleLoadMore = () => {
 
   /* spec rows */
   const specsA = [
-    { l: "SKU", v: product.sku },
-    { l: "Barcode", v: product.barcode },
+    { l: "SKU", v: selectedVariant?.sku || "—" },
+    { l: "Barcode", v: selectedVariant?.barcode || "—" },
     { l: "Material", v: product.material },
-    { l: "Weight", v: product.weight ? `${product.weight}g` : null },
+    { l: "Weight", v: selectedVariant?.weight ? `${selectedVariant.weight}g` : null },
     { l: "Currency", v: product.currency },
   ].filter(r => r.v);
 
   const specsB = [
-    { l: "Dimensions", v: product.dimensions ? `${product.dimensions.width}×${product.dimensions.height}×${product.dimensions.depth} cm` : null },
-    { l: "Tax", v: product.tax ? `${product.tax}%` : null },
-    { l: "Shipping", v: product.shippingCharge ? `₹${product.shippingCharge}` : "Free" },
-    { l: "Min Order", v: `${product.minimumOrderQuantity || 1} unit` },
-    { l: "Max Order", v: `${product.maximumOrderQuantity || 10} units` },
+    { l: "Dimensions", v: selectedVariant?.dimensions ? `${selectedVariant.dimensions.width || 0}×${selectedVariant.dimensions.height || 0}×${selectedVariant.dimensions.depth || 0} cm` : null },
+    { l: "Tax", v: selectedVariant?.tax ? `${selectedVariant.tax}%` : null },
+    { l: "Shipping", v: productShippingCharge ? `₹${productShippingCharge}` : "Free" },
+    { l: "Min Order", v: `${productMinQty} unit` },
+    { l: "Max Order", v: `${productMaxQty} units` },
     { l: "Warranty", v: product.warrantyInformation },
   ].filter(r => r.v);
 
@@ -920,9 +985,9 @@ const handleLoadMore = () => {
               <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginBottom: 14 }}>
                 <span className="spx-pill pp"><FaListAlt size={9} />{<span>{product.category?.name}</span>}</span>
                 {product.subCategory && <span className="spx-pill pg">{product.subCategory?.name}</span>}
-                <span className="spx-pill pg"><FaIndustry size={9} />{product.brand?.name}</span>
-                <span className={`spx-pill ${product.stock > 0 ? "pgn" : "prd"}`}>
-                  {product.stock > 0 ? `✓ In Stock (${product.stock})` : "Out of Stock"}
+                <span className="spx-pill pg"><FaIndustry size={9} />{product.brand}</span>
+                <span className={`spx-pill ${productStock > 0 ? "pgn" : "prd"}`}>
+                  {productStock > 0 ? `✓ In Stock (${productStock})` : "Out of Stock"}
                 </span>
                 {product.bestSeller && <span className="spx-pill pam">🏆 Best Seller</span>}
                 {product.trending && <span className="spx-pill pp">🔥 Trending</span>}
@@ -939,7 +1004,7 @@ const handleLoadMore = () => {
                 <Stars rating={parseFloat(avgRating)} />
                 <span style={{ fontSize: 13.5, fontWeight: 800, color: "#1a1535", fontFamily: "var(--fm)" }}>{avgRating}</span>
                 <span style={{ fontSize: 12, color: "#a0aec0" }}>({reviews.length} reviews)</span>
-                <span style={{ fontSize: 10.5, color: "#c4cce0", marginLeft: "auto", fontFamily: "var(--fm)" }}>SKU: {product.sku}</span>
+                <span style={{ fontSize: 10.5, color: "#c4cce0", marginLeft: "auto", fontFamily: "var(--fm)" }}>SKU: {selectedVariant?.sku || "—"}</span>
               </div>
             </div>
 
@@ -954,7 +1019,7 @@ const handleLoadMore = () => {
                   <div style={{ fontSize: 13, color: "#a0aec0", textDecoration: "line-through" }}>₹{origPrice.toLocaleString("en-IN")}</div>
                   <div style={{ fontSize: 11.5, fontWeight: 800, color: "#10b981" }}>Save ₹{(origPrice - finalPrice).toLocaleString("en-IN")}</div>
                 </div>
-                <div style={{ marginLeft: "auto", fontSize: 11, color: "#a0aec0", fontWeight: 600 }}>+₹{product.shippingCharge || 0} shipping</div>
+                <div style={{ marginLeft: "auto", fontSize: 11, color: "#a0aec0", fontWeight: 600 }}>+₹{productShippingCharge} shipping</div>
               </div>
               <div style={{ marginTop: 12 }}>
                 <div className="spx-emi">
@@ -968,32 +1033,39 @@ const handleLoadMore = () => {
             {/* ── Size + Color + Qty card ── */}
             <div className="spx-card" style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 20 }}>
 
-              {product.sizes?.length > 0 && (
+              {sizeOptions.length > 0 && (
                 <div>
                   <div className="spx-label">
                     Size — <span style={{ color: "#5046e4", textTransform: "none", letterSpacing: 0, fontFamily: "var(--fb)" }}>{selSize}</span>
                   </div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {product.sizes.map(s => (
-                      <button key={s.label}
-                        className={`spx-size${selSize === s.label ? " on" : ""}`}
-                        disabled={s.stock === 0}
-                        onClick={() => setSelSize(s.label)}>
-                        {s.label}
-                        {s.price !== product.price && <span style={{ fontSize: 10, opacity: .7, marginLeft: 4 }}>₹{s.price}</span>}
-                      </button>
-                    ))}
+                    {sizeOptions.map((size) => {
+                      const sizeVariant = variants.find(
+                        (v) => variantSize(v) === size && v.isActive !== false
+                      );
+                      return (
+                        <button key={size}
+                          className={`spx-size${selSize === size ? " on" : ""}`}
+                          disabled={!sizeVariant || sizeVariant.stock === 0}
+                          onClick={() => setSelSize(size)}>
+                          {size}
+                          {sizeVariant?.price != null && sizeVariant.price !== productPrice && (
+                            <span style={{ fontSize: 10, opacity: .7, marginLeft: 4 }}>₹{sizeVariant.price}</span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
 
-              {product.colors?.length > 0 && (
+              {colorOptions.length > 0 && (
                 <div>
                   <div className="spx-label">
                     Color — <span style={{ color: "#5046e4", textTransform: "none", letterSpacing: 0, fontFamily: "var(--fb)" }}>{selColor}</span>
                   </div>
                   <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-                    {product.colors.map(c => (
+                    {colorOptions.map((c) => (
                       <button key={c}
                         className={`spx-cd${selColor === c ? " on" : ""}`}
                         style={{ background: COLOR_MAP[c] || "#9ca3af", outline: c === "White" ? "1.5px solid #e2e8f0" : "none" }}
@@ -1009,9 +1081,9 @@ const handleLoadMore = () => {
                 <div className="spx-qty">
                   <button className="spx-qb" onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
                   <span className="spx-qn">{qty}</span>
-                  <button className="spx-qb" onClick={() => setQty(q => Math.min(product.maximumOrderQuantity || 10, q + 1))}>+</button>
+                  <button className="spx-qb" onClick={() => setQty(q => Math.min(productMaxQty, q + 1))}>+</button>
                 </div>
-                <span style={{ fontSize: 11, color: "#c4cce0" }}>Max {product.maximumOrderQuantity || 10}</span>
+                <span style={{ fontSize: 11, color: "#c4cce0" }}>Max {productMaxQty}</span>
               </div>
             </div>
 
@@ -1031,7 +1103,7 @@ const handleLoadMore = () => {
             {/* ── Trust badges ── */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
               {[
-                { icon: <FaTruck size={13} style={{ color: "#10b981" }} />, text: product.shippingInformation || "Free Delivery" },
+                { icon: <FaTruck size={13} style={{ color: "#10b981" }} />, text: product.shipping?.freeShipping ? "Free Delivery" : (product.shippingInformation || "Delivery available") },
                 { icon: <FaUndoAlt size={12} style={{ color: "#3b82f6" }} />, text: product.returnPolicy || "Easy Returns" },
                 { icon: <FaShieldAlt size={12} style={{ color: "#5046e4" }} />, text: "Secure Payment" },
                 { icon: <FaCheckCircle size={12} style={{ color: "#f59e0b" }} />, text: product.warrantyInformation || "Genuine" },
@@ -2081,7 +2153,7 @@ const handleLoadMore = () => {
                       }}
                     >
                       <FaCheckCircle />
-                      Verified Purchase
+                      {selectedReview?.verifiedPurchase ? "Verified Purchase" : "Customer Review"}
                     </div>
 
                     {/* Rating */}

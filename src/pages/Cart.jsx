@@ -203,10 +203,20 @@ user?.email || '',
       }));
     }
   }, [location, user]);
+const totalPrice = cartItem.reduce(
+  (total, item) =>
+    total +
+    Number(item.price || 0) *
+      Number(item.quantity || 1),
+  0
+);
 
-  const totalPrice = cartItem.reduce((t, i) => t + Number(i.price) * i.quantity, 0);
-  const totalAmount = totalPrice + 5;
-  useEffect(() => {
+const shippingCharge = 5;
+
+const totalAmount =
+  totalPrice + shippingCharge;
+
+useEffect(() => {
   setFinalTotal(totalAmount);
 }, [totalAmount]);
   const BACKEND_URL = 'https://eshop-backend-y0e7.onrender.com';
@@ -651,24 +661,38 @@ theme: {
   /* ── COD ── */
   const handleCOD = () => onCodConfirmOpen();
 
-  const handleDecrease = (id, qty) => {
-    if (qty === 1) {
-      toast('Remove item from cart?', {
-        description: 'Quantity will become 0.',
-        action: { label: 'Remove', onClick: () => { removeFromCart(id); toast.success('Item removed'); } },
-        cancel: { label: 'Cancel' },
-      });
-    } else { decreaseQty(id); }
-  };
-
+const handleDecrease = (
+  id,
+  qty,
+  variantSku
+) => {
+  if (qty === 1) {
+    toast("Remove item from cart?", {
+      description: "Quantity will become 0.",
+      action: {
+        label: "Remove",
+        onClick: () => {
+          removeFromCart(id, variantSku);
+          toast.success("Item removed");
+        },
+      },
+      cancel: {
+        label: "Cancel",
+      },
+    });
+  } else {
+    decreaseQty(id, variantSku);
+  }
+};
   /* ── validation ── */
   const canProceedStep1 = cartItem.length > 0;
-  const canProceedStep2 =
-    address.name.trim() &&
-    address.email.includes('@') &&
-    address.street.trim() &&
-    address.state.trim() &&
-    address.country.trim();
+ const canProceedStep2 =
+  address.name.trim() &&
+  address.email.includes("@") &&
+  address.phone.length === 10 &&
+  address.street.trim() &&
+  address.state.trim() &&
+  address.country.trim();
 
   /* ── email validation indicator ── */
   const emailValid = address.email && address.email.includes('@');
@@ -908,7 +932,7 @@ theme: {
                   </div>
 
                   {cartItem.map((item) => (
-                    <div key={item.productId} className="cart-card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-5">
+                    <div key={`${item.productId}-${item.variantSku || "default"}`} className="cart-card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-5">
                       <div className="flex items-center gap-4 flex-1 cursor-pointer"
                         onClick={() => navigate(`/products/${item.productId}`)}>
                         <img src={item.image} alt={item.title}
@@ -920,16 +944,32 @@ theme: {
                       </div>
                       <div className="flex items-center gap-3 justify-end">
                         <div className="qty-wrap">
-                          <button className="qty-btn" onClick={e => { e.stopPropagation(); handleDecrease(item.productId, item.quantity); }}>
+                          <button className="qty-btn" onClick={e => { e.stopPropagation(); handleDecrease(
+  item.productId,
+  item.quantity,
+  item.variantSku
+); }}>
                             <AiOutlineMinus size={12} />
                           </button>
                           <span className="text-sm font-bold text-slate-800 w-5 text-center">{item.quantity}</span>
-                          <button className="qty-btn" onClick={e => { e.stopPropagation(); increaseQty(item.productId); }}>
+                          <button className="qty-btn" onClick={e => { e.stopPropagation(); increaseQty(
+  item.productId,
+  item.variantSku
+); }}>
                             <AiOutlinePlus size={12} />
                           </button>
                         </div>
                         <button
-                          onClick={e => { e.stopPropagation(); setSelectedItem(item.productId); onDeleteOpen(); }}
+                          onClick={e => {
+  e.stopPropagation();
+
+  setSelectedItem({
+    productId: item.productId,
+    variantSku: item.variantSku || "",
+  });
+
+  onDeleteOpen();
+}}
                           className="w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200 bg-white text-slate-400 hover:border-red-400 hover:text-red-500 hover:bg-red-50 transition-all">
                           <FaRegTrashAlt size={13} />
                         </button>
@@ -1379,9 +1419,9 @@ theme: {
 
           <FaRupeeSign className="text-white mr-1" size={14} />
 
-          <span className="text-2xl font-black text-white tracking-tight">
-            {totalAmount}
-          </span>
+        <span className="text-2xl font-black text-white tracking-tight">
+  ₹{finalTotal.toLocaleString("en-IN")}
+</span>
         </div>
 
       </div>
@@ -1738,8 +1778,21 @@ theme: {
               <ModalBody className="text-slate-500 text-sm py-4">Are you sure you want to remove this item from your cart?</ModalBody>
               <ModalFooter className="gap-2 border-t border-slate-100">
                 <Button variant="light" onPress={onDeleteClose} className="text-slate-500">Cancel</Button>
-                <Button onPress={() => { removeFromCart(selectedItem); toast.success("Item removed"); onDeleteClose(); }}
-                  className="bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600">Remove</Button>
+             <Button
+  onPress={async () => {
+    if (!selectedItem) return;
+
+    await removeFromCart(
+      selectedItem.productId,
+      selectedItem.variantSku
+    );
+
+    onDeleteClose();
+  }}
+  className="bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600"
+>
+  Remove
+</Button>
               </ModalFooter>
             </>)}
           </ModalContent>

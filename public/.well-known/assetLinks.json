@@ -1,0 +1,11 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "in.odikart.app",
+      "sha256_cert_fingerprints":
+        ["EB:BE:75:C8:96:6C:05:EF:2D:DA:34:5C:D7:FD:59:1A:92:D5:79:F6:58:71:35:07:C0:F8:6D:B8:83:EA:60:83"]
+    }
+  }
+]
