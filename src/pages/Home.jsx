@@ -1,61 +1,53 @@
-import React, { useEffect } from "react";
-import AOS from "aos";
-import "aos/dist/aos.css";
+import React from "react";
 
 import Carousel from "../components/Carousel";
-import MidBanner from "../components/MidBanner";
-import Features from "../components/Features";
-import Category from "../components/Category";
-import RandomProducts from "../components/RandomProducts";
-import TrendingProducts from "../components/TrendingProducts";
-import PeopleAlsoView from "../components/PeopleAlsoView";
 import RecentlyViewed from "../components/RecentlyViewed";
 import BestSellerProducts from "../components/BestSellerrProducts";
 import PopulartProducts from "../components/PopulartProducts";
 import TopRatedProducts from "../components/TopRatedProducts";
 import FeaturedProducts from "../components/FeaturedProducts";
 import NewArrivalProducts from "../components/NewArrivalProducts";
+
 export default function Home() {
-
-  useEffect(() => {
-    AOS.init({
-      duration: 400,
-      easing: "ease-in-out",
-      once: false,
-      offset: 40,
-    });
-
-    return () => {};
-  }, []);
-
   return (
-    <div className="relative min-h-screen text-gray-800 overflow-hidden duration-500">
+    <main className="relative min-h-screen overflow-hidden text-gray-800 duration-500">
 
-      <div data-aos="fade-up">
+      {/* Hero / Carousel */}
+      <section>
         <Carousel />
-      </div>
- <div data-aos="fade-up">
+      </section>
+
+      {/* Recently Viewed */}
+      <section>
         <RecentlyViewed />
-      </div>
-      <div data-aos="fade-right">
+      </section>
+
+      {/* Best Sellers */}
+      <section>
         <BestSellerProducts />
-      </div>
-      <div data-aos="fade-up">
+      </section>
+
+      {/* Popular Products */}
+      <section>
         <PopulartProducts />
-      </div>
-      
-  
-     <div data-aos="fade-up">
+      </section>
+
+      {/* Top Rated */}
+      <section>
         <TopRatedProducts />
-      </div>
-      
-      <div data-aos="fade-up">
+      </section>
+
+      {/* Featured Products */}
+      <section>
         <FeaturedProducts />
-      </div>  
-      <div data-aos="fade-up">
-        <NewArrivalProducts/>
-      </div>
-    
-    </div>
+      </section>
+
+      {/* New Arrivals */}
+      <section>
+        <NewArrivalProducts />
+      </section>
+
+    </main>
   );
 }
+
