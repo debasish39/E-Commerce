@@ -17,15 +17,12 @@ const BACKEND_URL =
 
 export default function TopRatedProducts() {
   const navigate = useNavigate();
-
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
   /* =====================================================
      FETCH TOP RATED
   ===================================================== */
-
   const fetchTopRated = useCallback(async () => {
     console.log("");
     console.log("==========================================");
