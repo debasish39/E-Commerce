@@ -11,7 +11,7 @@ import { toast } from "react-hot-toast";
 export const DataContext = createContext(null);
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
+console.log(BACKEND_URL);
 /*
 |--------------------------------------------------------------------------
 | Get product price

@@ -13,8 +13,7 @@ import {
 } from "react-icons/fa";
 
 const BACKEND_URL =
-  import.meta.env.VITE_BACKEND_URL ||
-  "http://localhost:5000";
+  import.meta.env.VITE_BACKEND_URL;
 
 export default function BestSellerProducts() {
   const navigate = useNavigate();
