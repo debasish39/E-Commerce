@@ -1,146 +1,94 @@
 import React, {
-
   useEffect,
-
   useState,
-
 } from "react";
 
 import {
-
   Navigate,
-
   useLocation,
-
 } from "react-router-dom";
 
 import Spinner from "./Spinner";
 
 export default function ProtectedRoute({
-
   children,
-
 }) {
-
   /* =====================================
      STATES
   ===================================== */
 
   const [
-
     loading,
-
     setLoading,
-
   ] = useState(true);
 
   const [
-
     isAuthenticated,
-
     setIsAuthenticated,
-
   ] = useState(false);
 
-  const location =
-    useLocation();
+  const location = useLocation();
 
   /* =====================================
      CHECK AUTH
   ===================================== */
 
   useEffect(() => {
+    const verifyUser = async () => {
+      try {
+        const token =
+          localStorage.getItem("token");
 
-    const verifyUser =
-      async () => {
+        /* =====================================
+           NO TOKEN
+        ===================================== */
 
-        try {
-
-          const token =
-
-            localStorage.getItem(
-              "token"
-            );
-
-          /* =====================================
-             NO TOKEN
-          ===================================== */
-
-          if (!token) {
-
-            setLoading(
-              false
-            );
-
-            return;
-
-          }
-
-          /* =====================================
-             VERIFY TOKEN
-          ===================================== */
-
-          const res =
-            await fetch(
-
-              "http://localhost:5000/api/auth/me",
-
-              {
-
-                headers: {
-
-                  Authorization:
-                    `Bearer ${token}`,
-
-                },
-
-              }
-
-            );
-
-          const data =
-            await res.json();
-
-          /* =====================================
-             SUCCESS
-          ===================================== */
-
-          if (data.success) {
-
-            setIsAuthenticated(
-              true
-            );
-
-          } else {
-
-            localStorage.removeItem(
-              "token"
-            );
-
-          }
-
-        } catch (error) {
-
-          console.error(
-            error
-          );
-
-          localStorage.removeItem(
-            "token"
-          );
-
-        } finally {
-
-          setLoading(
-            false
-          );
-
+        if (!token) {
+          setLoading(false);
+          return;
         }
 
-      };
+        /* =====================================
+           VERIFY TOKEN
+        ===================================== */
+
+        const backendUrl =
+          import.meta.env.VITE_BACKEND_URL;
+
+        const res = await fetch(
+          `${backendUrl}/api/auth/me`,
+          {
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await res.json();
+
+        /* =====================================
+           SUCCESS
+        ===================================== */
+
+        if (data.success) {
+          setIsAuthenticated(true);
+        } else {
+          localStorage.removeItem("token");
+        }
+      } catch (error) {
+        console.error(
+          "Authentication verification failed:",
+          error
+        );
+
+        localStorage.removeItem("token");
+      } finally {
+        setLoading(false);
+      }
+    };
 
     verifyUser();
-
   }, []);
 
   /* =====================================
@@ -148,9 +96,7 @@ export default function ProtectedRoute({
   ===================================== */
 
   if (loading) {
-
     return (
-
       <div
         className="
           min-h-screen
@@ -160,13 +106,9 @@ export default function ProtectedRoute({
           text-white
         "
       >
-
         <Spinner />
-
       </div>
-
     );
-
   }
 
   /* =====================================
@@ -174,26 +116,15 @@ export default function ProtectedRoute({
   ===================================== */
 
   if (!isAuthenticated) {
-
     return (
-
       <Navigate
-
         to="/sign-in"
-
         state={{
-
-          from:
-            location,
-
+          from: location,
         }}
-
         replace
-
       />
-
     );
-
   }
 
   /* =====================================
@@ -201,5 +132,4 @@ export default function ProtectedRoute({
   ===================================== */
 
   return <>{children}</>;
-
 }

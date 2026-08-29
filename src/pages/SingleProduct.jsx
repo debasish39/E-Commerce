@@ -10,7 +10,7 @@ import {
   ModalContent,
   ModalHeader,
   ModalBody,
-  useDisclosure,ModalFooter,Button
+  useDisclosure, ModalFooter, Button
 } from "@heroui/react";
 import {
   FaTimes,
@@ -573,7 +573,7 @@ export default function SingleProduct() {
     useState(0);
   const [galleryImages, setGalleryImages] =
     useState([]);
-const [visibleReviews, setVisibleReviews] = useState(1);
+  const [visibleReviews, setVisibleReviews] = useState(1);
   const [currentIndex, setCurrentIndex] =
     useState(0);
 
@@ -617,6 +617,7 @@ const [visibleReviews, setVisibleReviews] = useState(1);
     product?.media?.thumbnail,
     ...(product?.media?.images || []),
   ].filter(Boolean);
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
   const {
     isOpen: isReviewModalOpen,
     onOpen: openReviewModal,
@@ -629,17 +630,17 @@ const [visibleReviews, setVisibleReviews] = useState(1);
     setVisibleReviews(1);
   }, [product?._id]);
 
-const handleLoadMore = () => {
-  setLoadingMore(true);
+  const handleLoadMore = () => {
+    setLoadingMore(true);
 
-  setTimeout(() => {
-    setVisibleReviews((prev) =>
-      Math.min(prev + 3, reviews.length)
-    );
+    setTimeout(() => {
+      setVisibleReviews((prev) =>
+        Math.min(prev + 3, reviews.length)
+      );
 
-    setLoadingMore(false);
-  }, 800);
-};
+      setLoadingMore(false);
+    }, 800);
+  };
   const showPrevImage = () => {
 
     const newIndex =
@@ -719,7 +720,9 @@ const handleLoadMore = () => {
     window.scrollTo(0, 0);
     (async () => {
       try {
-        const res = await axios.get(`https://eshop-backend-y0e7.onrender.com/api/products/${id}`);
+        const res = await axios.get(
+          `${BACKEND_URL}/api/products/${id}`
+        );
         const p = res.data.product;
         setProduct(p);
         setReviews(p.reviews || []);
@@ -737,21 +740,139 @@ const handleLoadMore = () => {
       } catch (e) { console.error(e); }
     })();
   }, [id]);
+/* =====================================================
+   RECENTLY VIEWED
+   NO AUTHENTICATION REQUIRED
+   COOKIE BASED
+===================================================== */
 
+useEffect(() => {
+  if (!id) {
+    console.log(
+      "🟡 RECENTLY VIEWED: Product ID missing"
+    );
+    return;
+  }
+
+  const saveRecentlyViewed = async () => {
+    console.log("");
+    console.log(
+      "=========================================="
+    );
+    console.log(
+      "🟣 SAVE RECENTLY VIEWED START"
+    );
+    console.log(
+      "🟣 Product ID:",
+      id
+    );
+    console.log(
+      "🟣 API:",
+      `${BACKEND_URL}/api/products/recently-viewed/${id}`
+    );
+
+    try {
+      const url =
+        `${BACKEND_URL}/api/products/recently-viewed/${id}`;
+
+      console.log(
+        "🟣 Sending POST request..."
+      );
+
+      console.log(
+        "🟣 credentials: include"
+      );
+
+      const response =
+        await fetch(url, {
+          method: "POST",
+
+          credentials: "include",
+
+          headers: {
+            Accept:
+              "application/json",
+          },
+        });
+
+      console.log(
+        "🟢 Recently Viewed POST status:",
+        response.status
+      );
+
+      console.log(
+        "🟢 Recently Viewed POST ok:",
+        response.ok
+      );
+
+      const contentType =
+        response.headers.get(
+          "content-type"
+        );
+
+      console.log(
+        "🟢 Content-Type:",
+        contentType
+      );
+
+      const data =
+        await response.json();
+
+      console.log(
+        "🟢 Recently Viewed response:",
+        data
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message ||
+            `Request failed with status ${response.status}`
+        );
+      }
+
+      console.log(
+        "✅ RECENTLY VIEWED SAVED SUCCESSFULLY"
+      );
+
+    } catch (error) {
+      console.error(
+        "🔴 RECENTLY VIEWED SAVE ERROR:",
+        error
+      );
+
+      console.error(
+        "🔴 Error message:",
+        error?.message
+      );
+
+    } finally {
+      console.log(
+        "🟣 SAVE RECENTLY VIEWED END"
+      );
+
+      console.log(
+        "=========================================="
+      );
+    }
+  };
+
+  saveRecentlyViewed();
+
+}, [id, BACKEND_URL]);
   /* fetch related */
   useEffect(() => {
     if (!product?.category) return;
     (async () => {
       try {
-     const res = await axios.get(
-  `https://eshop-backend-y0e7.onrender.com/api/products`,
-  {
-    params: {
-      category: product.category?.name,
-      limit: 6,
-    },
-  }
-);
+        const res = await axios.get(
+          `${BACKEND_URL}/api/products`,
+          {
+            params: {
+              category: product.category?.name,
+              limit: 6,
+            },
+          }
+        );
         setRelated(res.data.products.filter(p => p._id !== product._id));
       } catch (e) { console.error(e); }
     })();
@@ -779,13 +900,30 @@ const handleLoadMore = () => {
       : finalPrice
   );
 
-  const handleCart = () => {
-    if (!isSignedIn) { toast.error("Please login first"); navigate("/sign-in"); return; }
-    if (isInCart) { navigate("/cart"); return; }
-    if (!productStock) { toast.error("Out of Stock"); return; }
-    addToCart({ ...product, productId: product._id, price: finalPrice, size: selSize, color: selColor, quantity: qty });
-    toast.success("Added to cart 🛒");
-  };
+ const handleCart = () => {
+  if (!isSignedIn) {
+    toast.error("Please login first");
+    navigate("/sign-in");
+    return;
+  }
+
+  if (isInCart) {
+    navigate("/cart");
+    return;
+  }
+
+  if (!selectedVariant) {
+    toast.error("Please select a product variant");
+    return;
+  }
+
+  if (!productStock) {
+    toast.error("Out of Stock");
+    return;
+  }
+
+  addToCart(product, selectedVariant, qty);
+};
   const handleWish = () => {
     if (!isSignedIn) { toast.error("Please login first"); navigate("/sign-in"); return; }
     if (isWishlisted) { removeFromWishlist(String(product._id)); toast("Removed ❌"); }
@@ -811,7 +949,7 @@ const handleLoadMore = () => {
       revImgs.forEach(f => fd.append("images", f));
       revVideos.forEach(f => fd.append("videos", f));
       const res = await axios.post(
-        `https://eshop-backend-y0e7.onrender.com/api/products/${product._id}/review`, fd,
+        `${BACKEND_URL}/api/products/${product._id}/review`, fd,
         { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
       );
       if (res.data.success) {
@@ -829,7 +967,7 @@ const handleLoadMore = () => {
     try {
       const endpoint = type === "like" ? "like" : "dislike";
       const res = await axios.put(
-        `https://eshop-backend-y0e7.onrender.com/api/products/${product._id}/review/${rid}/${endpoint}`, {},
+        `${BACKEND_URL}/api/products/${product._id}/review/${rid}/${endpoint}`, {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setReviews(prev => prev.map(r => r._id === rid
@@ -840,7 +978,7 @@ const handleLoadMore = () => {
   const deleteReview = async rid => {
     if (!token) return;
     try {
-      await axios.delete(`https://eshop-backend-y0e7.onrender.com/api/products/${product._id}/review/${rid}`,
+      await axios.delete(`${BACKEND_URL}/api/products/${product._id}/review/${rid}`,
         { headers: { Authorization: `Bearer ${token}` } });
       setReviews(prev => prev.filter(r => r._id !== rid));
       toast.success("Review deleted");
@@ -1606,205 +1744,205 @@ const handleLoadMore = () => {
 
 
                   {/* review list */}
-              {reviews.length === 0 ? (
-  <div
-    style={{
-      textAlign: "center",
-      padding: "32px 0",
-      color: "#c4cce0",
-      fontSize: 13.5,
-    }}
-  >
-    No reviews yet — be the first! 🌟
-  </div>
-) : (
-  <>
-    {displayedReviews.map((r, i) => (
-      <div key={r._id || i} className="spx-rv">
-        <div
-          style={{
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            marginBottom: 12,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 11,
-            }}
-          >
-            <div
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 12,
-                background:
-                  "linear-gradient(135deg,#5046e4,#3b82f6)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
-              <FaUser size={14} color="white" />
-            </div>
+                  {reviews.length === 0 ? (
+                    <div
+                      style={{
+                        textAlign: "center",
+                        padding: "32px 0",
+                        color: "#c4cce0",
+                        fontSize: 13.5,
+                      }}
+                    >
+                      No reviews yet — be the first! 🌟
+                    </div>
+                  ) : (
+                    <>
+                      {displayedReviews.map((r, i) => (
+                        <div key={r._id || i} className="spx-rv">
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "flex-start",
+                              justifyContent: "space-between",
+                              marginBottom: 12,
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 11,
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: 40,
+                                  height: 40,
+                                  borderRadius: 12,
+                                  background:
+                                    "linear-gradient(135deg,#5046e4,#3b82f6)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                <FaUser size={14} color="white" />
+                              </div>
 
-            <div>
-              <div
-                style={{
-                  fontSize: 13,
-                  fontWeight: 800,
-                  color: "#1a1535",
-                }}
-              >
-                {r.reviewerName || "Anonymous"}
-              </div>
+                              <div>
+                                <div
+                                  style={{
+                                    fontSize: 13,
+                                    fontWeight: 800,
+                                    color: "#1a1535",
+                                  }}
+                                >
+                                  {r.reviewerName || "Anonymous"}
+                                </div>
 
-              <div
-                style={{
-                  fontSize: 10.5,
-                  color: "#c4cce0",
-                }}
-              >
-                {r.createdAt
-                  ? new Date(
-                      r.createdAt
-                    ).toLocaleDateString("en-IN", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })
-                  : ""}
-              </div>
-            </div>
-          </div>
+                                <div
+                                  style={{
+                                    fontSize: 10.5,
+                                    color: "#c4cce0",
+                                  }}
+                                >
+                                  {r.createdAt
+                                    ? new Date(
+                                      r.createdAt
+                                    ).toLocaleDateString("en-IN", {
+                                      day: "numeric",
+                                      month: "short",
+                                      year: "numeric",
+                                    })
+                                    : ""}
+                                </div>
+                              </div>
+                            </div>
 
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-            }}
-          >
-            <Stars rating={r.rating || 0} size={12} />
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 6,
+                              }}
+                            >
+                              <Stars rating={r.rating || 0} size={12} />
 
-            <span
-              style={{
-                fontSize: 12,
-                fontWeight: 700,
-                color: "#1a1535",
-              }}
-            >
-              {r.rating?.toFixed(1)}
-            </span>
-          </div>
-        </div>
+                              <span
+                                style={{
+                                  fontSize: 12,
+                                  fontWeight: 700,
+                                  color: "#1a1535",
+                                }}
+                              >
+                                {r.rating?.toFixed(1)}
+                              </span>
+                            </div>
+                          </div>
 
-        {r.comment && (
-          <p
-            style={{
-              fontSize: 13.5,
-              color: "#5a6278",
-              lineHeight: 1.68,
-              margin: "0 0 12px",
-            }}
-          >
-            {r.comment}
-          </p>
-        )}
+                          {r.comment && (
+                            <p
+                              style={{
+                                fontSize: 13.5,
+                                color: "#5a6278",
+                                lineHeight: 1.68,
+                                margin: "0 0 12px",
+                              }}
+                            >
+                              {r.comment}
+                            </p>
+                          )}
 
-        {r.images?.length > 0 && (
-          <div
-            style={{
-              display: "flex",
-              gap: 8,
-              marginBottom: 12,
-              flexWrap: "wrap",
-            }}
-          >
-            {r.images.map((img, j) => (
-              <img
-                key={j}
-                src={img}
-                alt=""
-                style={{
-                  width: 76,
-                  height: 76,
-                  objectFit: "cover",
-                  borderRadius: 11,
-                  cursor: "pointer",
-                  border:
-                    "1px solid rgba(80,70,228,.09)",
-                }}
-                onClick={() => {
-                  setSelectedReview(r);
-                  setGalleryImages(r.images);
-                  setCurrentIndex(j);
-                  setSelectedImage(img);
-                  onOpen();
-                }}
-              />
-            ))}
-          </div>
-        )}
+                          {r.images?.length > 0 && (
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: 8,
+                                marginBottom: 12,
+                                flexWrap: "wrap",
+                              }}
+                            >
+                              {r.images.map((img, j) => (
+                                <img
+                                  key={j}
+                                  src={img}
+                                  alt=""
+                                  style={{
+                                    width: 76,
+                                    height: 76,
+                                    objectFit: "cover",
+                                    borderRadius: 11,
+                                    cursor: "pointer",
+                                    border:
+                                      "1px solid rgba(80,70,228,.09)",
+                                  }}
+                                  onClick={() => {
+                                    setSelectedReview(r);
+                                    setGalleryImages(r.images);
+                                    setCurrentIndex(j);
+                                    setSelectedImage(img);
+                                    onOpen();
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          )}
 
-        {r.videos?.length > 0 && (
-          <div
-            style={{
-              display: "flex",
-              gap: 8,
-              marginBottom: 12,
-              flexWrap: "wrap",
-            }}
-          >
-            {r.videos.map((video, j) => (
-              <video
-                key={j}
-                src={video}
-                controls
-                style={{
-                  width: 220,
-                  borderRadius: 12,
-                }}
-              />
-            ))}
-          </div>
-        )}
+                          {r.videos?.length > 0 && (
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: 8,
+                                marginBottom: 12,
+                                flexWrap: "wrap",
+                              }}
+                            >
+                              {r.videos.map((video, j) => (
+                                <video
+                                  key={j}
+                                  src={video}
+                                  controls
+                                  style={{
+                                    width: 220,
+                                    borderRadius: 12,
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          )}
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            paddingTop: 11,
-            borderTop:
-              "1px solid rgba(80,70,228,.06)",
-          }}
-        >
-          <button
-            className="spx-lb"
-            onClick={() =>
-              toggleLike(r._id, "like")
-            }
-          >
-            <FaThumbsUp size={11} />{" "}
-            {r.likesCount || 0} Helpful
-          </button>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 8,
+                              paddingTop: 11,
+                              borderTop:
+                                "1px solid rgba(80,70,228,.06)",
+                            }}
+                          >
+                            <button
+                              className="spx-lb"
+                              onClick={() =>
+                                toggleLike(r._id, "like")
+                              }
+                            >
+                              <FaThumbsUp size={11} />{" "}
+                              {r.likesCount || 0} Helpful
+                            </button>
 
-          <button
-            className="spx-lb"
-            onClick={() =>
-              toggleLike(r._id, "dislike")
-            }
-          >
-            <FaThumbsDown size={11} />{" "}
-            {r.dislikesCount || 0}
-          </button>
+                            <button
+                              className="spx-lb"
+                              onClick={() =>
+                                toggleLike(r._id, "dislike")
+                              }
+                            >
+                              <FaThumbsDown size={11} />{" "}
+                              {r.dislikesCount || 0}
+                            </button>
 
-          {/* <button
+                            {/* <button
             onClick={() => deleteReview(r._id)}
             style={{
               marginLeft: "auto",
@@ -1816,17 +1954,17 @@ const handleLoadMore = () => {
           >
             <FaTrash size={10} /> Delete
           </button> */}
-        </div>
-      </div>
-    ))}
+                          </div>
+                        </div>
+                      ))}
 
-    {/* LOAD MORE */}
-   {visibleReviews < reviews.length && (
-  <div className="flex justify-center mt-8">
-    <button
-      onClick={handleLoadMore}
-      disabled={loadingMore}
-      className="
+                      {/* LOAD MORE */}
+                      {visibleReviews < reviews.length && (
+                        <div className="flex justify-center mt-8">
+                          <button
+                            onClick={handleLoadMore}
+                            disabled={loadingMore}
+                            className="
         flex items-center gap-3
         px-7 py-3.5
         rounded-2xl
@@ -1842,27 +1980,27 @@ const handleLoadMore = () => {
         hover:shadow-2xl
         disabled:hover:translate-y-0
       "
-    >
-      {loadingMore ? (
-        <>
-          <div className="w-5 h-5 border-[2.5px] border-white/30 border-t-white rounded-full animate-spin" />
-          Loading...
-        </>
-      ) : (
-        <>
-          <ChevronDown size={18} />
-          Load More Reviews
+                          >
+                            {loadingMore ? (
+                              <>
+                                <div className="w-5 h-5 border-[2.5px] border-white/30 border-t-white rounded-full animate-spin" />
+                                Loading...
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown size={18} />
+                                Load More Reviews
 
-          <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-white/20">
-            {reviews.length - visibleReviews}
-          </span>
-        </>
-      )}
-    </button>
-  </div>
-)}
-  </>
-)}
+                                <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-white/20">
+                                  {reviews.length - visibleReviews}
+                                </span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -2232,500 +2370,500 @@ const handleLoadMore = () => {
           )}
         </ModalContent>
       </Modal>
-   <Modal
-isOpen={isReviewModalOpen}
-onOpenChange={onReviewModalChange}
-size="4xl"
-scrollBehavior="inside"
-backdrop="blur"
-hideCloseButton={true}
+      <Modal
+        isOpen={isReviewModalOpen}
+        onOpenChange={onReviewModalChange}
+        size="4xl"
+        scrollBehavior="inside"
+        backdrop="blur"
+        hideCloseButton={true}
 
->
-
-<ModalContent
-style={{
-borderRadius: "28px",
-overflow: "hidden",
-background: "#fff",
-maxHeight: "92vh",
-boxShadow: "0 30px 80px rgba(15,23,42,.25)",
-}}
-
->
-
-
-{(onClose) => (
-
-
-
-  <>
-    {/* HEADER */}
-    <ModalHeader
-      style={{
-        background:
-          "linear-gradient(135deg,#4F46E5,#7C3AED,#3B82F6)",
-        color: "#fff",
-        padding: "22px 26px",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          width: "100%",
-        }}
       >
-        <div
+
+        <ModalContent
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "14px",
-          }}
-        >
-          <div
-            style={{
-              width: "52px",
-              height: "52px",
-              borderRadius: "16px",
-              background: "rgba(255,255,255,.15)",
-              backdropFilter: "blur(12px)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <FaComments size={22} />
-          </div>
-
-          <div>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: "22px",
-                fontWeight: 800,
-              }}
-            >
-              Write a Review
-            </h2>
-
-            <p
-              style={{
-                margin: "4px 0 0",
-                opacity: 0.9,
-                fontSize: "13px",
-              }}
-            >
-              Share your experience with buyers
-            </p>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={onClose}
-          style={{
-            width: "42px",
-            height: "42px",
-            borderRadius: "14px",
-            border: "1px solid rgba(255,255,255,.2)",
-            background: "rgba(255,255,255,.12)",
-            backdropFilter: "blur(10px)",
-            color: "#fff",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <IoClose size={20} />
-        </button>
-      </div>
-    </ModalHeader>
-
-    {/* BODY */}
-    <ModalBody
-      style={{
-        background:
-          "linear-gradient(to bottom,#F8FAFC,#FFFFFF)",
-        padding: "24px",
-      }}
-    >
-      <form
-        id="reviewForm"
-        onSubmit={submitReview}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "20px",
-        }}
-      >
-        {/* RATING CARD */}
-        <div
-          style={{
+            borderRadius: "28px",
+            overflow: "hidden",
             background: "#fff",
-            borderRadius: "22px",
-            padding: "22px",
-            border: "1px solid #E5E7EB",
-            boxShadow:
-              "0 8px 24px rgba(15,23,42,.04)",
+            maxHeight: "92vh",
+            boxShadow: "0 30px 80px rgba(15,23,42,.25)",
           }}
+
         >
-          <div
-            style={{
-              fontSize: "14px",
-              fontWeight: 700,
-              color: "#111827",
-              marginBottom: "12px",
-            }}
-          >
-            Overall Rating
-          </div>
 
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "14px",
-              flexWrap: "wrap",
-            }}
-          >
-            <Stars
-              rating={revRating}
-              size={30}
-              interactive
-              onRate={(r) => {
-                setRevRating(r);
-                setRevHover(0);
-              }}
-              hover={revHover}
-              setHover={setRevHover}
-            />
 
-            {(revHover || revRating) > 0 && (
-              <span
+          {(onClose) => (
+
+
+
+            <>
+              {/* HEADER */}
+              <ModalHeader
                 style={{
-                  background: "#EEF2FF",
-                  color: "#4338CA",
-                  padding: "6px 14px",
-                  borderRadius: "999px",
-                  fontSize: "13px",
-                  fontWeight: 700,
+                  background:
+                    "linear-gradient(135deg,#4F46E5,#7C3AED,#3B82F6)",
+                  color: "#fff",
+                  padding: "22px 26px",
                 }}
               >
-                {
-                  [
-                    "",
-                    "Poor",
-                    "Fair",
-                    "Good",
-                    "Great",
-                    "Excellent",
-                  ][revHover || revRating]
-                }
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* REVIEW TEXT */}
-        <div
-          style={{
-            background: "#fff",
-            borderRadius: "22px",
-            border: "1px solid #E5E7EB",
-            padding: "20px",
-            boxShadow:
-              "0 8px 24px rgba(15,23,42,.04)",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "14px",
-              fontWeight: 700,
-              marginBottom: "12px",
-            }}
-          >
-            Your Review
-          </div>
-
-          <textarea
-            rows={5}
-            value={revText}
-            onChange={(e) =>
-              setRevText(e.target.value)
-            }
-            placeholder="Tell others about product quality, delivery, packaging and your overall experience..."
-            style={{
-              width: "100%",
-              border: "none",
-              outline: "none",
-              resize: "none",
-              fontSize: "15px",
-              lineHeight: "1.7",
-              background: "transparent",
-              color: "#111827",
-            }}
-          />
-
-          <div
-            style={{
-              textAlign: "right",
-              fontSize: "12px",
-              color: "#94A3B8",
-              marginTop: "10px",
-            }}
-          >
-            {revText.length}/500
-          </div>
-        </div>
-
-        {/* IMAGE UPLOAD */}
-        <div
-          style={{
-            background: "#fff",
-            borderRadius: "22px",
-            padding: "20px",
-            border: "1px solid #E5E7EB",
-            boxShadow:
-              "0 8px 24px rgba(15,23,42,.04)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "16px",
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontWeight: 700,
-                  color: "#111827",
-                }}
-              >
-                Review Photos
-              </div>
-
-              <div
-                style={{
-                  fontSize: "13px",
-                  color: "#6B7280",
-                  marginTop: "4px",
-                }}
-              >
-                Add photos to help other buyers
-              </div>
-            </div>
-
-            {revImgs.length > 0 && (
-              <div
-                style={{
-                  background: "#EEF2FF",
-                  color: "#4338CA",
-                  padding: "8px 12px",
-                  borderRadius: "999px",
-                  fontWeight: 700,
-                  fontSize: "12px",
-                }}
-              >
-                {revImgs.length} Selected
-              </div>
-            )}
-          </div>
-
-          <label
-            style={{
-              border: "2px dashed #C7D2FE",
-              borderRadius: "18px",
-              padding: "24px",
-              background:
-                "linear-gradient(180deg,#F8FAFF,#EEF4FF)",
-              display: "flex",
-              alignItems: "center",
-              gap: "16px",
-              cursor: "pointer",
-            }}
-          >
-            <div
-              style={{
-                width: "60px",
-                height: "60px",
-                borderRadius: "50%",
-                background:
-                  "linear-gradient(135deg,#4F46E5,#6366F1)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#fff",
-                fontSize: "26px",
-              }}
-            >
-              📷
-            </div>
-
-            <div>
-              <div
-                style={{
-                  fontWeight: 700,
-                  color: "#111827",
-                }}
-              >
-                Upload Images
-              </div>
-
-              <div
-                style={{
-                  fontSize: "13px",
-                  color: "#6B7280",
-                  marginTop: "4px",
-                }}
-              >
-                JPG, PNG, WEBP • Multiple files supported
-              </div>
-            </div>
-
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              hidden
-              onChange={(e) =>
-                setRevImgs(
-                  Array.from(e.target.files || [])
-                )
-              }
-            />
-          </label>
-
-          {revImgs.length > 0 && (
-            <div
-              style={{
-                marginTop: "18px",
-                display: "grid",
-                gridTemplateColumns:
-                  "repeat(auto-fill,minmax(110px,1fr))",
-                gap: "12px",
-              }}
-            >
-              {revImgs.map((file, i) => (
                 <div
-                  key={i}
                   style={{
-                    position: "relative",
-                    borderRadius: "16px",
-                    overflow: "hidden",
-                    background: "#fff",
-                    boxShadow:
-                      "0 8px 20px rgba(0,0,0,.08)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    width: "100%",
                   }}
                 >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "14px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "52px",
+                        height: "52px",
+                        borderRadius: "16px",
+                        background: "rgba(255,255,255,.15)",
+                        backdropFilter: "blur(12px)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <FaComments size={22} />
+                    </div>
+
+                    <div>
+                      <h2
+                        style={{
+                          margin: 0,
+                          fontSize: "22px",
+                          fontWeight: 800,
+                        }}
+                      >
+                        Write a Review
+                      </h2>
+
+                      <p
+                        style={{
+                          margin: "4px 0 0",
+                          opacity: 0.9,
+                          fontSize: "13px",
+                        }}
+                      >
+                        Share your experience with buyers
+                      </p>
+                    </div>
+                  </div>
+
                   <button
                     type="button"
-                    onClick={() =>
-                      setRevImgs((prev) =>
-                        prev.filter(
-                          (_, index) =>
-                            index !== i
-                        )
-                      )
-                    }
+                    onClick={onClose}
                     style={{
-                      position: "absolute",
-                      top: "8px",
-                      right: "8px",
-                      width: "28px",
-                      height: "28px",
-                      borderRadius: "50%",
-                      border: "none",
-                      background:
-                        "rgba(17,24,39,.8)",
+                      width: "42px",
+                      height: "42px",
+                      borderRadius: "14px",
+                      border: "1px solid rgba(255,255,255,.2)",
+                      background: "rgba(255,255,255,.12)",
+                      backdropFilter: "blur(10px)",
                       color: "#fff",
                       cursor: "pointer",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      zIndex: 2,
                     }}
                   >
-                    <IoClose size={14} />
+                    <IoClose size={20} />
                   </button>
-
-                  <img
-                    src={URL.createObjectURL(file)}
-                    alt=""
-                    style={{
-                      width: "100%",
-                      height: "110px",
-                      objectFit: "cover",
-                    }}
-                  />
                 </div>
-              ))}
-            </div>
+              </ModalHeader>
+
+              {/* BODY */}
+              <ModalBody
+                style={{
+                  background:
+                    "linear-gradient(to bottom,#F8FAFC,#FFFFFF)",
+                  padding: "24px",
+                }}
+              >
+                <form
+                  id="reviewForm"
+                  onSubmit={submitReview}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "20px",
+                  }}
+                >
+                  {/* RATING CARD */}
+                  <div
+                    style={{
+                      background: "#fff",
+                      borderRadius: "22px",
+                      padding: "22px",
+                      border: "1px solid #E5E7EB",
+                      boxShadow:
+                        "0 8px 24px rgba(15,23,42,.04)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 700,
+                        color: "#111827",
+                        marginBottom: "12px",
+                      }}
+                    >
+                      Overall Rating
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "14px",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <Stars
+                        rating={revRating}
+                        size={30}
+                        interactive
+                        onRate={(r) => {
+                          setRevRating(r);
+                          setRevHover(0);
+                        }}
+                        hover={revHover}
+                        setHover={setRevHover}
+                      />
+
+                      {(revHover || revRating) > 0 && (
+                        <span
+                          style={{
+                            background: "#EEF2FF",
+                            color: "#4338CA",
+                            padding: "6px 14px",
+                            borderRadius: "999px",
+                            fontSize: "13px",
+                            fontWeight: 700,
+                          }}
+                        >
+                          {
+                            [
+                              "",
+                              "Poor",
+                              "Fair",
+                              "Good",
+                              "Great",
+                              "Excellent",
+                            ][revHover || revRating]
+                          }
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* REVIEW TEXT */}
+                  <div
+                    style={{
+                      background: "#fff",
+                      borderRadius: "22px",
+                      border: "1px solid #E5E7EB",
+                      padding: "20px",
+                      boxShadow:
+                        "0 8px 24px rgba(15,23,42,.04)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 700,
+                        marginBottom: "12px",
+                      }}
+                    >
+                      Your Review
+                    </div>
+
+                    <textarea
+                      rows={5}
+                      value={revText}
+                      onChange={(e) =>
+                        setRevText(e.target.value)
+                      }
+                      placeholder="Tell others about product quality, delivery, packaging and your overall experience..."
+                      style={{
+                        width: "100%",
+                        border: "none",
+                        outline: "none",
+                        resize: "none",
+                        fontSize: "15px",
+                        lineHeight: "1.7",
+                        background: "transparent",
+                        color: "#111827",
+                      }}
+                    />
+
+                    <div
+                      style={{
+                        textAlign: "right",
+                        fontSize: "12px",
+                        color: "#94A3B8",
+                        marginTop: "10px",
+                      }}
+                    >
+                      {revText.length}/500
+                    </div>
+                  </div>
+
+                  {/* IMAGE UPLOAD */}
+                  <div
+                    style={{
+                      background: "#fff",
+                      borderRadius: "22px",
+                      padding: "20px",
+                      border: "1px solid #E5E7EB",
+                      boxShadow:
+                        "0 8px 24px rgba(15,23,42,.04)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "16px",
+                      }}
+                    >
+                      <div>
+                        <div
+                          style={{
+                            fontWeight: 700,
+                            color: "#111827",
+                          }}
+                        >
+                          Review Photos
+                        </div>
+
+                        <div
+                          style={{
+                            fontSize: "13px",
+                            color: "#6B7280",
+                            marginTop: "4px",
+                          }}
+                        >
+                          Add photos to help other buyers
+                        </div>
+                      </div>
+
+                      {revImgs.length > 0 && (
+                        <div
+                          style={{
+                            background: "#EEF2FF",
+                            color: "#4338CA",
+                            padding: "8px 12px",
+                            borderRadius: "999px",
+                            fontWeight: 700,
+                            fontSize: "12px",
+                          }}
+                        >
+                          {revImgs.length} Selected
+                        </div>
+                      )}
+                    </div>
+
+                    <label
+                      style={{
+                        border: "2px dashed #C7D2FE",
+                        borderRadius: "18px",
+                        padding: "24px",
+                        background:
+                          "linear-gradient(180deg,#F8FAFF,#EEF4FF)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "16px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "60px",
+                          height: "60px",
+                          borderRadius: "50%",
+                          background:
+                            "linear-gradient(135deg,#4F46E5,#6366F1)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "#fff",
+                          fontSize: "26px",
+                        }}
+                      >
+                        📷
+                      </div>
+
+                      <div>
+                        <div
+                          style={{
+                            fontWeight: 700,
+                            color: "#111827",
+                          }}
+                        >
+                          Upload Images
+                        </div>
+
+                        <div
+                          style={{
+                            fontSize: "13px",
+                            color: "#6B7280",
+                            marginTop: "4px",
+                          }}
+                        >
+                          JPG, PNG, WEBP • Multiple files supported
+                        </div>
+                      </div>
+
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        hidden
+                        onChange={(e) =>
+                          setRevImgs(
+                            Array.from(e.target.files || [])
+                          )
+                        }
+                      />
+                    </label>
+
+                    {revImgs.length > 0 && (
+                      <div
+                        style={{
+                          marginTop: "18px",
+                          display: "grid",
+                          gridTemplateColumns:
+                            "repeat(auto-fill,minmax(110px,1fr))",
+                          gap: "12px",
+                        }}
+                      >
+                        {revImgs.map((file, i) => (
+                          <div
+                            key={i}
+                            style={{
+                              position: "relative",
+                              borderRadius: "16px",
+                              overflow: "hidden",
+                              background: "#fff",
+                              boxShadow:
+                                "0 8px 20px rgba(0,0,0,.08)",
+                            }}
+                          >
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setRevImgs((prev) =>
+                                  prev.filter(
+                                    (_, index) =>
+                                      index !== i
+                                  )
+                                )
+                              }
+                              style={{
+                                position: "absolute",
+                                top: "8px",
+                                right: "8px",
+                                width: "28px",
+                                height: "28px",
+                                borderRadius: "50%",
+                                border: "none",
+                                background:
+                                  "rgba(17,24,39,.8)",
+                                color: "#fff",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                zIndex: 2,
+                              }}
+                            >
+                              <IoClose size={14} />
+                            </button>
+
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt=""
+                              style={{
+                                width: "100%",
+                                height: "110px",
+                                objectFit: "cover",
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </form>
+              </ModalBody>
+
+              {/* FOOTER */}
+              <ModalFooter
+                style={{
+                  borderTop: "1px solid #E5E7EB",
+                  padding: "18px 24px",
+                  background: "#fff",
+                }}
+              >
+                <Button
+                  variant="light"
+                  onPress={onClose}
+                >
+                  Cancel
+                </Button>
+
+                <button
+                  form="reviewForm"
+                  type="submit"
+                  disabled={revLoad}
+                  style={{
+                    minWidth: "180px",
+                    height: "52px",
+                    border: "none",
+                    borderRadius: "16px",
+                    background:
+                      "linear-gradient(135deg,#4F46E5,#7C3AED,#3B82F6)",
+                    color: "#fff",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    boxShadow:
+                      "0 12px 30px rgba(79,70,229,.3)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                  }}
+                >
+                  {revLoad ? (
+                    <>
+                      <div className="spx-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <FaPaperPlane size={14} />
+                      Submit Review
+                    </>
+                  )}
+                </button>
+              </ModalFooter>
+            </>
           )}
-        </div>
-      </form>
-    </ModalBody>
-
-    {/* FOOTER */}
-    <ModalFooter
-      style={{
-        borderTop: "1px solid #E5E7EB",
-        padding: "18px 24px",
-        background: "#fff",
-      }}
-    >
-      <Button
-        variant="light"
-        onPress={onClose}
-      >
-        Cancel
-      </Button>
-
-      <button
-        form="reviewForm"
-        type="submit"
-        disabled={revLoad}
-        style={{
-          minWidth: "180px",
-          height: "52px",
-          border: "none",
-          borderRadius: "16px",
-          background:
-            "linear-gradient(135deg,#4F46E5,#7C3AED,#3B82F6)",
-          color: "#fff",
-          fontWeight: 700,
-          cursor: "pointer",
-          boxShadow:
-            "0 12px 30px rgba(79,70,229,.3)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "8px",
-        }}
-      >
-        {revLoad ? (
-          <>
-            <div className="spx-spin" />
-            Submitting...
-          </>
-        ) : (
-          <>
-            <FaPaperPlane size={14} />
-            Submit Review
-          </>
-        )}
-      </button>
-    </ModalFooter>
-  </>
-)}
 
 
-  </ModalContent>
-</Modal>
+        </ModalContent>
+      </Modal>
 
     </>
   );

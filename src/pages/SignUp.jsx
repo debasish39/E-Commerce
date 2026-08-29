@@ -21,6 +21,7 @@ export default function SignUp() {
 
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+const BACKEND_URL = `${import.meta.env.VITE_BACKEND_URL}/api/auth`;
 
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -145,7 +146,7 @@ async (e) => {
     const res =
       await fetch(
 
-        "https://eshop-backend-y0e7.onrender.com/api/auth/signup",
+        `${BACKEND_URL}/signup`,
 
         {
 

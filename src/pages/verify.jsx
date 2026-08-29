@@ -24,8 +24,7 @@ import {
    BACKEND URL
 ===================================== */
 
-const BACKEND_URL =
-  "https://eshop-backend-y0e7.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function Verify() {
 

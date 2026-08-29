@@ -240,7 +240,7 @@ const id = searchParams.get("id");
   const [showNoticeModal, setShowNoticeModal] = useState(true);
   const navigate = useNavigate();
 
-  const BACKEND_URL ="https://eshop-backend-y0e7.onrender.com";
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 const fetchOrder =
   async (customId) => {
 
@@ -254,12 +254,12 @@ const fetchOrder =
 
       toast.error(
 
-        "Order ID required",
+        " Odikart Order Number required",
 
         {
 
           description:
-            "Enter the Order ID sent to your email.",
+            "Enter the  Odikart Order Number sent to your email.",
 
         }
 
@@ -292,7 +292,7 @@ const fetchOrder =
       const res =
         await fetch(
 
-          `${BACKEND_URL}/api/order/${customId}`,
+          `${BACKEND_URL}/api/track-order/${customId}`,
 
           {
 
@@ -329,7 +329,7 @@ const fetchOrder =
           {
 
             description:
-              "Please check your Order ID.",
+              "Please check your  Odikart Order Number.",
 
           }
 
@@ -935,7 +935,7 @@ const isCancelled =
             </h1>
 
             <p className="text-slate-400 text-sm max-w-sm mx-auto">
-              Enter your order ID to get real-time shipping updates and delivery information
+              Enter your  Odikart Order Number to get real-time shipping updates and delivery information
             </p>
           </div>
 
@@ -943,13 +943,13 @@ const isCancelled =
           <div className="page-enter search-card w-full p-6 sm:p-7 mb-8">
             <label className="block text-xs font-bold tracking-widest text-indigo-500 uppercase mb-3">
               <MdAutoAwesome size={12} style={{ display: "inline-block", marginRight: "6px" }} />
-              Order ID
+               Odikart Order Number
             </label>
 
             <div className="flex gap-3 items-center flex-col sm:flex-row">
               <input
                 type="text"
-                placeholder="e.g. 683a12b4c9e7f2b1..."
+                placeholder="e.g. ODK-3939"
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && fetchOrder(orderId)}
@@ -974,7 +974,7 @@ const isCancelled =
               </div>
               <h2 className="to-serif text-2xl font-bold text-indigo-950 mb-2">Order Not Found</h2>
               <p className="text-slate-400 text-sm mb-6">
-                Double-check your Order ID and try again. You can find it in your confirmation email.
+                Double-check your  Odikart Order Number and try again. You can find it in your confirmation email.
               </p>
               <button
                 onClick={() => setSearched(false)}
@@ -1006,7 +1006,7 @@ const isCancelled =
                   <div className="min-w-0">
                     <p className="text-xs font-bold tracking-widest text-indigo-500 uppercase mb-2">
                       <FaBarcode size={11} style={{ display: "inline-block", marginRight: "6px" }} />
-                      Order ID
+                       Odikart Order Number
                     </p>
                     <p className="font-mono text-sm font-bold text-indigo-950 break-all">{order._id}</p>
                     <p className="flex items-center gap-1.5 text-xs text-slate-400 mt-2">
@@ -1344,7 +1344,7 @@ const isCancelled =
                 </div>
 
                 <div>
-                  <h2 className="text-xl font-extrabold text-slate-900">Save Your Order ID</h2>
+                  <h2 className="text-xl font-extrabold text-slate-900">Save Your  Odikart Order Number</h2>
                   <p className="text-xs text-amber-600 font-bold mt-1 tracking-widest uppercase">
                     Important Notice
                   </p>
@@ -1354,7 +1354,7 @@ const isCancelled =
               <ModalBody className="pb-4">
                 <div className="rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200 p-5 space-y-3">
                   <p className="text-sm leading-relaxed text-slate-700 font-medium">
-                    Your Order ID has been sent to your registered email address. Please copy and save it for:
+                    Your  Odikart Order Number has been sent to your registered email address. Please copy and save it for:
                   </p>
 
                   <div className="space-y-2">

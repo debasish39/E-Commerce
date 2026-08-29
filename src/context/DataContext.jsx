@@ -10,7 +10,7 @@ import { toast } from "react-hot-toast";
 
 export const DataContext = createContext(null);
 
-const BACKEND_URL = "https://eshop-backend-y0e7.onrender.com/api";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 /*
 |--------------------------------------------------------------------------
@@ -126,7 +126,8 @@ export const DataProvider = ({ children }) => {
   const [category, setCategory] = useState("All");
   const [brand, setBrand] = useState("All");
 
-  const [priceRange, setPriceRange] = useState([0, 5000]);
+  const [priceRange, setPriceRange] =
+  useState([0, 100000]);
 
   /*
   |--------------------------------------------------------------------------
@@ -135,7 +136,7 @@ export const DataProvider = ({ children }) => {
   */
   const fetchAllProducts = async () => {
     try {
-      const res = await axios.get(`${BACKEND_URL}/products`);
+      const res = await axios.get(`${BACKEND_URL}/api/products`);
 
       const productsData = Array.isArray(res.data?.products)
         ? res.data.products.map((product) => ({

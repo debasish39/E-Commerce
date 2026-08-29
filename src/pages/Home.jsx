@@ -9,7 +9,12 @@ import Category from "../components/Category";
 import RandomProducts from "../components/RandomProducts";
 import TrendingProducts from "../components/TrendingProducts";
 import PeopleAlsoView from "../components/PeopleAlsoView";
-
+import RecentlyViewed from "../components/RecentlyViewed";
+import BestSellerProducts from "../components/BestSellerrProducts";
+import PopulartProducts from "../components/PopulartProducts";
+import TopRatedProducts from "../components/TopRatedProducts";
+import FeaturedProducts from "../components/FeaturedProducts";
+import NewArrivalProducts from "../components/NewArrivalProducts";
 export default function Home() {
 
   useEffect(() => {
@@ -29,31 +34,28 @@ export default function Home() {
       <div data-aos="fade-up">
         <Carousel />
       </div>
-
+ <div data-aos="fade-up">
+        <RecentlyViewed />
+      </div>
       <div data-aos="fade-right">
-        <Category />
+        <BestSellerProducts />
       </div>
-
-      <div data-aos="fade-left">
-        <RandomProducts />
+      <div data-aos="fade-up">
+        <PopulartProducts />
       </div>
-
-      <div data-aos="fade-right">
-        <TrendingProducts />
+      
+  
+     <div data-aos="fade-up">
+        <TopRatedProducts />
       </div>
-
-      <div data-aos="fade-left">
-        <PeopleAlsoView />
+      
+      <div data-aos="fade-up">
+        <FeaturedProducts />
+      </div>  
+      <div data-aos="fade-up">
+        <NewArrivalProducts/>
       </div>
-
-      <div data-aos="zoom-in">
-        <MidBanner />
-      </div>
-
-      <div data-aos="fade-left">
-        <Features />
-      </div>
-
+    
     </div>
   );
 }

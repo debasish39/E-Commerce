@@ -112,7 +112,7 @@ function SingleOrderPage({ order: initialOrder, onBack }) {
   const [downloading, setDownloading] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelling, setCancelling] = useState(false);
-
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
   useEffect(() => {
     setOrder(initialOrder);
   }, [initialOrder]);
@@ -131,291 +131,287 @@ function SingleOrderPage({ order: initialOrder, onBack }) {
     AOS.refreshHard();
   }, [order?.status]);
 
-const handleDownloadInvoice = async () => {
-  setDownloading(true);
+  const handleDownloadInvoice = async () => {
+    setDownloading(true);
 
-  try {
-    // Load logo from public/logo.png
-    const logo = new Image();
-    logo.src = "/logo.png";
+    try {
+      // Load logo from public/logo.png
+      const logo = new Image();
+      logo.src = "/logo.png";
 
-    await new Promise((resolve, reject) => {
-      logo.onload = resolve;
-      logo.onerror = reject;
-    });
+      await new Promise((resolve, reject) => {
+        logo.onload = resolve;
+        logo.onerror = reject;
+      });
 
-    const doc = new jsPDF("p", "mm", "a4");
+      const doc = new jsPDF("p", "mm", "a4");
 
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 15;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margin = 15;
 
-    // ===========================
-    // Modern Header
-    // ===========================
-    doc.setFillColor(248, 250, 252);
-    doc.rect(0, 0, pageWidth, 42, "F");
+      // ===========================
+      // Modern Header
+      // ===========================
+      doc.setFillColor(248, 250, 252);
+      doc.rect(0, 0, pageWidth, 42, "F");
 
-    // Logo
-    doc.addImage(logo, "PNG", margin, 8, 30, 22);
+      // Logo
+      doc.addImage(logo, "PNG", margin, 8, 30, 22);
 
-    // Invoice Title
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
-    doc.setTextColor(31, 41, 55);
-    doc.text("INVOICE", pageWidth - margin, 17, { align: "right" });
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(107, 114, 128);
-    doc.text("Online Shopping Invoice", pageWidth - margin, 24, {
-      align: "right",
-    });
-
-    // Divider
-    doc.setDrawColor(220);
-    doc.line(margin, 42, pageWidth - margin, 42);
-
-    let y = 52;
-
-    // ===========================
-    // Order Details
-    // ===========================
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.setTextColor(0);
-    doc.text("ORDER DETAILS", margin, y);
-
-    y += 8;
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-
-    doc.text(`Order ID : ${order._id}`, margin, y);
-    y += 6;
-
-    doc.text(
-      `Order Date : ${new Date(order.createdAt).toLocaleString("en-IN")}`,
-      margin,
-      y
-    );
-    y += 6;
-
-    doc.text(`Status : ${order.status}`, margin, y);
-    y += 6;
-
-    doc.text(`Payment Method : ${order.payment.method}`, margin, y);
-    y += 6;
-
-    doc.text(`Payment Status : ${order.payment.status}`, margin, y);
-
-    // ===========================
-    // Customer Details
-    // ===========================
-    y += 12;
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.text("CUSTOMER DETAILS", margin, y);
-
-    y += 8;
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-
-    doc.text(`Name : ${order.fullname || order.user}`, margin, y);
-    y += 6;
-
-    doc.text(`Email : ${order.email}`, margin, y);
-    y += 6;
-
-    doc.text(`Phone : ${order.phone}`, margin, y);
-    y += 6;
-
-   doc.text(
-  `Address : ${order.deliveryAddress.address.addressLine1}, ${
-    order.deliveryAddress.address.addressLine2
-  }, ${order.deliveryAddress.address.landmark}, ${
-    order.deliveryAddress.address.area
-  }, ${order.deliveryAddress.address.city}, ${
-    order.deliveryAddress.address.district
-  }, ${order.deliveryAddress.address.state}, ${
-    order.deliveryAddress.address.postalCode
-  }, ${order.deliveryAddress.address.country}`,
-  margin,
-  y
-);
-
-    // ===========================
-    // Products Table
-    // ===========================
-    y += 15;
-
-    doc.setFillColor(37, 99, 235);
-    doc.roundedRect(margin, y - 5, pageWidth - 30, 10, 2, 2, "F");
-
-    doc.setTextColor(255);
-    doc.setFont("helvetica", "bold");
-
-    doc.text("Product", margin + 3, y + 1);
-    doc.text("Qty", 120, y + 1);
-    doc.text("Price", 145, y + 1);
-    doc.text("Total", 175, y + 1);
-
-    y += 12;
-
-    doc.setTextColor(0);
-    doc.setFont("helvetica", "normal");
-
-    order.items.forEach((item) => {
-      doc.text(item.title.substring(0, 30), margin + 3, y);
-      doc.text(String(item.quantity), 120, y);
-      doc.text(`₹${item.price}`, 145, y);
-      doc.text(`₹${item.price * item.quantity}`, 175, y);
-
-      y += 8;
-    });
-
-    // ===========================
-    // Totals
-    // ===========================
-    y += 8;
-
-    doc.setDrawColor(220);
-    doc.line(120, y, 195, y);
-
-    y += 8;
-
-    doc.text("Subtotal", 120, y);
-    doc.text(`₹${order.pricing.subtotal}`, 175, y);
-
-    y += 7;
-
-    doc.text("Shipping", 120, y);
-    doc.text(`₹${order.pricing.shippingCharge}`, 175, y);
-
-    y += 7;
-
-    doc.text("Tax", 120, y);
-    doc.text(`₹${order.pricing.tax}`, 175, y);
-
-    if ( order.pricing.couponDiscount > 0) {
-      y += 7;
-
-      doc.setTextColor(220, 38, 38);
-      doc.text(`Coupon (${order.pricing.couponCode})`, 120, y);
-      doc.text(`-₹${ order.pricing.couponDiscount}`, 175, y);
-
-      doc.setTextColor(0);
-    }
-
-    y += 10;
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-
-    doc.text("Grand Total", 120, y);
-    doc.text(`₹${order.pricing.total}`, 175, y);
-
-    // ===========================
-    // Razorpay Details
-    // ===========================
-    if (order.paymentMethod === "Razorpay") {
-      y += 18;
-
+      // Invoice Title
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
-      doc.text("PAYMENT DETAILS", margin, y);
+      doc.setFontSize(22);
+      doc.setTextColor(31, 41, 55);
+      doc.text("INVOICE", pageWidth - margin, 17, { align: "right" });
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(107, 114, 128);
+      doc.text("Online Shopping Invoice", pageWidth - margin, 24, {
+        align: "right",
+      });
+
+      // Divider
+      doc.setDrawColor(220);
+      doc.line(margin, 42, pageWidth - margin, 42);
+
+      let y = 52;
+
+      // ===========================
+      // Order Details
+      // ===========================
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor(0);
+      doc.text("ORDER DETAILS", margin, y);
 
       y += 8;
 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
 
-      doc.text(
-        `Payment ID : ${order.payment.gateway.paymentId || "-"}`,
-        margin,
-        y
-      );
-
+      doc.text(`Odikart Order Number : ${order.orderNumber || "-"}`, margin, y);
       y += 6;
 
       doc.text(
-        `Order ID : ${order.payment.gateway.orderId || "-"}`,
+        `Order Date : ${new Date(order.createdAt).toLocaleString("en-IN")}`,
         margin,
         y
       );
-    }
+      y += 6;
 
-    // ===========================
-    // Footer
-    // ===========================
-    y += 20;
+      doc.text(`Status : ${order.status}`, margin, y);
+      y += 6;
 
-    doc.setDrawColor(220);
-    doc.line(margin, y, pageWidth - margin, y);
+      doc.text(`Payment Method : ${order.payment.method}`, margin, y);
+      y += 6;
 
-    y += 8;
+      doc.text(`Payment Status : ${order.payment.status}`, margin, y);
 
-    doc.setFont("helvetica", "italic");
-    doc.setFontSize(10);
-    doc.setTextColor(120);
+      // ===========================
+      // Customer Details
+      // ===========================
+      y += 12;
 
-    doc.text(
-      "Thank you for shopping with Odikart!",
-      pageWidth / 2,
-      y,
-      { align: "center" }
-    );
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text("CUSTOMER DETAILS", margin, y);
 
-    doc.save(`Invoice-${order._id.slice(-6)}.pdf`);
+      y += 8;
 
-    toast.success("Invoice downloaded successfully");
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to download invoice");
-  } finally {
-    setDownloading(false);
-  }
-};
-  const handleCancelOrder = async () => {
-  if (!order?._id) return;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
 
-  setCancelling(true);
+      doc.text(`Name : ${order.fullname || order.user}`, margin, y);
+      y += 6;
 
-  try {
-    const token = localStorage.getItem("token");
+      doc.text(`Email : ${order.email}`, margin, y);
+      y += 6;
 
-    const res = await fetch(
-      `https://eshop-backend-y0e7.onrender.com/api/order/cancel/${order._id}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+      doc.text(`Phone : ${order.phone}`, margin, y);
+      y += 6;
+
+      doc.text(
+        `Address : ${order.deliveryAddress.address.addressLine1}, ${order.deliveryAddress.address.addressLine2
+        }, ${order.deliveryAddress.address.landmark}, ${order.deliveryAddress.address.area
+        }, ${order.deliveryAddress.address.city}, ${order.deliveryAddress.address.district
+        }, ${order.deliveryAddress.address.state}, ${order.deliveryAddress.address.postalCode
+        }, ${order.deliveryAddress.address.country}`,
+        margin,
+        y
+      );
+
+      // ===========================
+      // Products Table
+      // ===========================
+      y += 15;
+
+      doc.setFillColor(37, 99, 235);
+      doc.roundedRect(margin, y - 5, pageWidth - 30, 10, 2, 2, "F");
+
+      doc.setTextColor(255);
+      doc.setFont("helvetica", "bold");
+
+      doc.text("Product", margin + 3, y + 1);
+      doc.text("Qty", 120, y + 1);
+      doc.text("Price", 145, y + 1);
+      doc.text("Total", 175, y + 1);
+
+      y += 12;
+
+      doc.setTextColor(0);
+      doc.setFont("helvetica", "normal");
+
+      order.items.forEach((item) => {
+        doc.text(item.title.substring(0, 30), margin + 3, y);
+        doc.text(String(item.quantity), 120, y);
+        doc.text(`₹${item.price}`, 145, y);
+        doc.text(`₹${item.price * item.quantity}`, 175, y);
+
+        y += 8;
+      });
+
+      // ===========================
+      // Totals
+      // ===========================
+      y += 8;
+
+      doc.setDrawColor(220);
+      doc.line(120, y, 195, y);
+
+      y += 8;
+
+      doc.text("Subtotal", 120, y);
+      doc.text(`₹${order.pricing.subtotal}`, 175, y);
+
+      y += 7;
+
+      doc.text("Shipping", 120, y);
+      doc.text(`₹${order.pricing.shippingCharge}`, 175, y);
+
+      y += 7;
+
+      doc.text("Tax", 120, y);
+      doc.text(`₹${order.pricing.tax}`, 175, y);
+
+      if (order.pricing.couponDiscount > 0) {
+        y += 7;
+
+        doc.setTextColor(220, 38, 38);
+        doc.text(`Coupon (${order.pricing.couponCode})`, 120, y);
+        doc.text(`-₹${order.pricing.couponDiscount}`, 175, y);
+
+        doc.setTextColor(0);
       }
-    );
 
-    const data = await res.json();
+      y += 10;
 
-    if (!res.ok || !data.success) {
-      toast.error(data.message || "Failed to cancel order");
-      return;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+
+      doc.text("Grand Total", 120, y);
+      doc.text(`₹${order.pricing.total}`, 175, y);
+
+      // ===========================
+      // Razorpay Details
+      // ===========================
+      if (order.paymentMethod === "Razorpay") {
+        y += 18;
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.text("PAYMENT DETAILS", margin, y);
+
+        y += 8;
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+
+        doc.text(
+          `Payment ID : ${order.payment.gateway.paymentId || "-"}`,
+          margin,
+          y
+        );
+
+        y += 6;
+
+        doc.text(
+          `Order ID : ${order.payment.gateway.orderId || "-"}`,
+          margin,
+          y
+        );
+      }
+
+      // ===========================
+      // Footer
+      // ===========================
+      y += 20;
+
+      doc.setDrawColor(220);
+      doc.line(margin, y, pageWidth - margin, y);
+
+      y += 8;
+
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(10);
+      doc.setTextColor(120);
+
+      doc.text(
+        "Thank you for shopping with Odikart!",
+        pageWidth / 2,
+        y,
+        { align: "center" }
+      );
+
+      doc.save(`Invoice-${order.orderNumber || order._id.slice(-6)}.pdf`);
+
+      toast.success("Invoice downloaded successfully");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to download invoice");
+    } finally {
+      setDownloading(false);
     }
+  };
+  const handleCancelOrder = async () => {
+    if (!order?._id) return;
 
-    // Update UI with latest order returned by backend
-    setOrder(data.order);
+    setCancelling(true);
 
-    setShowCancelModal(false);
+    try {
+      const token = localStorage.getItem("token");
 
-    toast.success(data.message || "Order cancelled successfully");
-  } catch (error) {
-    console.error(error);
-    toast.error("Server error while cancelling order");
-  } finally {
-    setCancelling(false);
-  }
-};
+      const res = await fetch(
+        `${BACKEND_URL}/api/order/cancel/${order._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        toast.error(data.message || "Failed to cancel order");
+        return;
+      }
+
+      // Update UI with latest order returned by backend
+      setOrder(data.order);
+
+      setShowCancelModal(false);
+
+      toast.success(data.message || "Order cancelled successfully");
+    } catch (error) {
+      console.error(error);
+      toast.error("Server error while cancelling order");
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   const formatDate = (d) =>
     d ? new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }) : "—";
@@ -448,7 +444,7 @@ const handleDownloadInvoice = async () => {
     order.pricing.subtotal ?? order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = order.pricing.shippingCharge ?? 0;
   const tax = order.pricing.tax ?? 0;
-  const couponDiscount =  order.pricing.couponDiscount ?? 0;
+  const couponDiscount = order.pricing.couponDiscount ?? 0;
   const couponCode = order.pricing.couponCode ?? "";
   const grandTotal = order.pricing.total ?? subtotal + shipping + tax - couponDiscount;
 
@@ -497,9 +493,9 @@ const handleDownloadInvoice = async () => {
               <FaBarcode size={11} />
               Order Details
             </div>
-            <h1 className="oh-serif text-3xl sm:text-4xl font-bold text-indigo-950 leading-tight">
-              Order #{order._id.slice(-8).toUpperCase()}
-            </h1>
+           <h1 className="oh-serif text-3xl sm:text-4xl font-bold text-indigo-950 leading-tight">
+  Order #{order.orderNumber || order._id.slice(-8).toUpperCase()}
+</h1>
           </div>
         </div>
 
@@ -526,11 +522,10 @@ const handleDownloadInvoice = async () => {
                       <p className="font-bold text-indigo-950 text-sm mt-0.5">{order.deliveryAddress?.customer?.fullName}</p>
                       <div className="flex items-center gap-2 mt-2 flex-wrap">
                         <span
-                          className={`text-[11px] font-bold px-2.5 py-1 rounded-full inline-flex items-center gap-1.5 ${
-                            order.paymentMethod === "COD"
+                          className={`text-[11px] font-bold px-2.5 py-1 rounded-full inline-flex items-center gap-1.5 ${order.paymentMethod === "COD"
                               ? "bg-amber-50 text-amber-700 border border-amber-200"
                               : "bg-green-50 text-green-700 border border-green-200"
-                          }`}
+                            }`}
                         >
                           <MdPayments size={10} />
                           {order.payment.method}
@@ -554,47 +549,72 @@ const handleDownloadInvoice = async () => {
                   </span>
                 </div>
 
-                {/* Order ID box */}
-                <div className="order-id-box mt-6">
-                  <div className="flex items-center gap-2 justify-between">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <FaBarcode size={13} style={{ color: "#4f46e5" }} />
+                {/* Modern Odikart Order Number */}
+                <div className="order-number-card mt-6">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="order-number-icon">
+                        <FaBarcode size={15} />
+                      </div>
                       <div className="min-w-0">
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Order ID</p>
-                        <p className="text-sm font-bold text-indigo-600 break-all">{order._id}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                          Odikart Order Number
+                        </p>
+                        <p className="text-xl font-extrabold tracking-wide text-indigo-700 mt-1">
+                          {order.orderNumber || "—"}
+                        </p>
+                        <p className="text-[11px] text-slate-400 mt-1">
+                          Use this number to track your order
+                        </p>
                       </div>
                     </div>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(order._id);
-                        toast.success("Order ID copied!");
-                      }}
-                      className="px-2 py-1 rounded-lg bg-indigo-500 text-white text-xs font-bold hover:bg-indigo-600 transition flex-shrink-0"
-                    >
-                      <FaCopy size={11} />
-                    </button>
+
+                    {order.orderNumber && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(order.orderNumber);
+                          toast.success("Order number copied!");
+                        }}
+                        className="copy-order-btn"
+                        title="Copy order number"
+                      >
+                        <FaCopy size={11} />
+                        <span className="hidden sm:inline">Copy</span>
+                      </button>
+                    )}
                   </div>
                 </div>
 
-                {/* Tracking number */}
-                <div className="order-id-box mt-3">
-                  <div className="flex items-center gap-2 justify-between">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <FaTruck size={13} style={{ color: "#4f46e5" }} />
+                {/* Modern Courier Tracking Number */}
+                <div className="tracking-number-card mt-3">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="tracking-icon">
+                        <FaTruck size={14} />
+                      </div>
                       <div className="min-w-0">
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Tracking Number</p>
-                        <p className="text-sm font-bold text-indigo-600 break-all">{order.trackingNumber || "—"}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                          Courier Tracking Number
+                        </p>
+                        <p className="text-sm font-extrabold text-emerald-600 mt-1 break-all">
+                          {order.trackingNumber || "Not assigned yet"}
+                        </p>
                       </div>
                     </div>
+
                     {order.trackingNumber && (
                       <button
+                        type="button"
                         onClick={() => {
                           navigator.clipboard.writeText(order.trackingNumber);
                           toast.success("Tracking number copied!");
                         }}
-                        className="px-2 py-1 rounded-lg bg-indigo-500 text-white text-xs font-bold hover:bg-indigo-600 transition flex-shrink-0"
+                        className="copy-tracking-btn"
+                        title="Copy tracking number"
                       >
                         <FaCopy size={11} />
+                        <span className="hidden sm:inline">Copy</span>
                       </button>
                     )}
                   </div>
@@ -613,189 +633,187 @@ const handleDownloadInvoice = async () => {
             </div>
 
             {/* Tracking timeline */}
-        <div className="oh-card p-6 sm:p-7" data-aos="fade-up" data-aos-delay="100">
+            <div className="oh-card p-6 sm:p-7" data-aos="fade-up" data-aos-delay="100">
 
-<p className="oh-serif text-xl font-bold text-indigo-950 mb-5">
-  📍 Order Tracking
-</p>
+              <p className="oh-serif text-xl font-bold text-indigo-950 mb-5">
+                📍 Order Tracking
+              </p>
 
 
-<div className="mt-5">
+              <div className="mt-5">
 
-{
-VALID_STATUS.map((status,index)=>{
+                {
+                  VALID_STATUS.map((status, index) => {
 
-  const history =
-    order.statusHistory?.find(
-      h => h.status === status
-    );
+                    const history =
+                      order.statusHistory?.find(
+                        h => h.status === status
+                      );
 
 
-  const currentIndex =
-    VALID_STATUS.indexOf(order.status);
+                    const currentIndex =
+                      VALID_STATUS.indexOf(order.status);
 
 
-  const isCompleted =
-    index <= currentIndex;
+                    const isCompleted =
+                      index <= currentIndex;
 
 
-  const isActive =
-    status === order.status;
+                    const isActive =
+                      status === order.status;
 
 
-  const cfg =
-    STATUS_CFG[status] || STATUS_CFG.Placed;
+                    const cfg =
+                      STATUS_CFG[status] || STATUS_CFG.Placed;
 
 
-return (
+                    return (
 
-<div
-key={status}
-className="flex gap-4 relative pb-8 last:pb-0"
->
+                      <div
+                        key={status}
+                        className="flex gap-4 relative pb-8 last:pb-0"
+                      >
 
 
-{
-index !== VALID_STATUS.length-1 && (
+                        {
+                          index !== VALID_STATUS.length - 1 && (
 
-<span
-className="absolute left-[27px] top-14 w-[3px] h-[calc(100%-40px)] rounded-full"
-style={{
-background:
-isCompleted
-? cfg.dot
-:"#e5e7eb"
-}}
-/>
+                            <span
+                              className="absolute left-[27px] top-14 w-[3px] h-[calc(100%-40px)] rounded-full"
+                              style={{
+                                background:
+                                  isCompleted
+                                    ? cfg.dot
+                                    : "#e5e7eb"
+                              }}
+                            />
 
-)
+                          )
 
-}
+                        }
 
 
 
-<div
-className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
-style={{
+                        <div
+                          className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
+                          style={{
 
-background:
-isActive
-? `linear-gradient(135deg,${cfg.dot},#2563eb)`
-:
-isCompleted
-? cfg.bg
-:"#f3f4f6",
+                            background:
+                              isActive
+                                ? `linear-gradient(135deg,${cfg.dot},#2563eb)`
+                                :
+                                isCompleted
+                                  ? cfg.bg
+                                  : "#f3f4f6",
 
 
-border:
-`2px solid ${
-isCompleted
-? cfg.border
-:"#e5e7eb"
-}`,
+                            border:
+                              `2px solid ${isCompleted
+                                ? cfg.border
+                                : "#e5e7eb"
+                              }`,
 
-color:
-isActive
-?"white"
-:
-isCompleted
-?cfg.text
-:"#9ca3af"
+                            color:
+                              isActive
+                                ? "white"
+                                :
+                                isCompleted
+                                  ? cfg.text
+                                  : "#9ca3af"
 
-}}
+                          }}
 
->
+                        >
 
-{
-STATUS_ICONS[status]
-}
+                          {
+                            STATUS_ICONS[status]
+                          }
 
-</div>
+                        </div>
 
 
 
-<div className="flex-1 pt-1">
+                        <div className="flex-1 pt-1">
 
 
-<h4
-className={`font-bold ${
-isCompleted
-?"text-indigo-950"
-:"text-slate-400"
-}`}
->
+                          <h4
+                            className={`font-bold ${isCompleted
+                                ? "text-indigo-950"
+                                : "text-slate-400"
+                              }`}
+                          >
 
-{status}
+                            {status}
 
-</h4>
+                          </h4>
 
 
 
-{
-history ? (
+                          {
+                            history ? (
 
-<div className="mt-2">
+                              <div className="mt-2">
 
-<div className="flex items-center gap-2 text-xs text-emerald-600 font-semibold">
+                                <div className="flex items-center gap-2 text-xs text-emerald-600 font-semibold">
 
-<FaClock />
+                                  <FaClock />
 
-{formatDate(history.date)}
+                                  {formatDate(history.date)}
 
-{" at "}
+                                  {" at "}
 
-{formatTime(history.date)}
+                                  {formatTime(history.date)}
 
-</div>
+                                </div>
 
 
 
-{
-history.remark && (
+                                {
+                                  history.remark && (
 
-<p className="text-xs text-slate-500 mt-1">
-{history.remark}
-</p>
+                                    <p className="text-xs text-slate-500 mt-1">
+                                      {history.remark}
+                                    </p>
 
-)
+                                  )
 
-}
+                                }
 
-</div>
+                              </div>
 
 
-):(
+                            ) : (
 
 
-<div className="text-xs text-slate-400 mt-2">
-Pending
-</div>
+                              <div className="text-xs text-slate-400 mt-2">
+                                Pending
+                              </div>
 
 
-)
+                            )
 
-}
+                          }
 
 
 
-</div>
+                        </div>
 
 
 
-</div>
+                      </div>
 
 
-)
+                    )
 
 
-})
+                  })
 
-}
+                }
 
 
-</div>
+              </div>
 
-</div>
+            </div>
 
             {/* Items */}
             <div className="oh-card p-6 sm:p-7" data-aos="fade-up" data-aos-delay="150">
@@ -1232,6 +1250,111 @@ const PAGE_CSS = `
     border-radius: 12px;
     padding: 12px;
     font-family: 'Courier New', monospace;
+  }
+
+  .order-number-card,
+  .tracking-number-card {
+    position: relative;
+    overflow: hidden;
+    padding: 18px;
+    border-radius: 20px;
+    backdrop-filter: blur(18px);
+    transition: all .25s ease;
+  }
+
+  .order-number-card {
+    background: linear-gradient(135deg, rgba(238,242,255,.96), rgba(239,246,255,.92));
+    border: 1px solid rgba(99,102,241,.18);
+    box-shadow: 0 10px 30px rgba(79,70,229,.08);
+  }
+
+  .tracking-number-card {
+    background: linear-gradient(135deg, rgba(236,253,245,.96), rgba(240,253,250,.92));
+    border: 1px solid rgba(16,185,129,.18);
+    box-shadow: 0 10px 30px rgba(16,185,129,.07);
+  }
+
+  .order-number-card::before,
+  .tracking-number-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+  }
+
+  .order-number-card::before {
+    background: linear-gradient(180deg,#6366f1,#2563eb);
+  }
+
+  .tracking-number-card::before {
+    background: linear-gradient(180deg,#10b981,#059669);
+  }
+
+  .order-number-icon,
+  .tracking-icon {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: rgba(255,255,255,.85);
+    box-shadow: 0 5px 16px rgba(0,0,0,.06);
+  }
+
+  .order-number-icon {
+    color: #4f46e5;
+    border: 1px solid rgba(99,102,241,.15);
+  }
+
+  .tracking-icon {
+    color: #059669;
+    border: 1px solid rgba(16,185,129,.15);
+  }
+
+  .copy-order-btn,
+  .copy-tracking-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 38px;
+    padding: 9px 12px;
+    border-radius: 11px;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all .2s ease;
+    flex-shrink: 0;
+  }
+
+  .copy-order-btn {
+    color: #4f46e5;
+    background: white;
+    border: 1px solid rgba(99,102,241,.18);
+  }
+
+  .copy-order-btn:hover {
+    color: white;
+    background: #4f46e5;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(79,70,229,.22);
+  }
+
+  .copy-tracking-btn {
+    color: #059669;
+    background: white;
+    border: 1px solid rgba(16,185,129,.18);
+  }
+
+  .copy-tracking-btn:hover {
+    color: white;
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(16,185,129,.2);
   }
 
   @media (prefers-reduced-motion: reduce) {

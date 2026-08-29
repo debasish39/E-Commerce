@@ -8,7 +8,7 @@ import { toast } from "react-hot-toast";
 
 const CartContext = createContext(null);
 
-const BACKEND_URL = "https://eshop-backend-y0e7.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 /*
 |--------------------------------------------------------------------------
@@ -158,8 +158,8 @@ function CartProvider({ children }) {
 
         setCartItem(
           data.items ||
-            data.cart?.items ||
-            []
+          data.cart?.items ||
+          []
         );
       } catch (error) {
         console.error(
@@ -297,9 +297,9 @@ function CartProvider({ children }) {
     const exists = cartItem.some(
       (item) =>
         String(item.productId) ===
-          String(product._id) &&
+        String(product._id) &&
         item.variantSku ===
-          variantSku
+        variantSku
     );
 
     if (exists) {
@@ -322,7 +322,7 @@ function CartProvider({ children }) {
     if (
       variant &&
       Number(quantity) >
-        Number(variant.stock || 0)
+      Number(variant.stock || 0)
     ) {
       toast.error(
         `Only ${variant.stock} item(s) available`
@@ -346,12 +346,14 @@ function CartProvider({ children }) {
     |--------------------------------------------------------------------------
     */
 
+    const productImage = getProductImage(product, variant);
+
     const payload = {
       productId: product._id,
       variantSku,
       quantity: Number(quantity),
+      image: productImage,
     };
-
     console.log(
       "REQUEST PAYLOAD:",
       payload
@@ -396,8 +398,8 @@ function CartProvider({ children }) {
       ) {
         toast.error(
           data.message ||
-            data.error ||
-            "Failed to add item"
+          data.error ||
+          "Failed to add item"
         );
 
         return;
@@ -434,233 +436,233 @@ function CartProvider({ children }) {
   |--------------------------------------------------------------------------
   */
 
-const increaseQty = async (
-  productId,
-  variantSku = ""
-) => {
-  if (!token) {
-    toast.error("Please login first");
-    return;
-  }
-
-  try {
-    console.log("INCREASE REQUEST:", {
-      productId,
-      variantSku,
-    });
-
-    const res = await fetch(
-      `${BACKEND_URL}/api/cart/increase`,
-      {
-        method: "PUT",
-
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-
-        body: JSON.stringify({
-          productId: String(productId),
-          variantSku: variantSku || "",
-        }),
-      }
-    );
-
-    const data = await res.json();
-
-    console.log(
-      "INCREASE STATUS:",
-      res.status
-    );
-
-    console.log(
-      "INCREASE RESPONSE:",
-      data
-    );
-
-    if (!res.ok || !data.success) {
-      toast.error(
-        data.message ||
-        data.error ||
-        "Failed to increase quantity"
-      );
-
+  const increaseQty = async (
+    productId,
+    variantSku = ""
+  ) => {
+    if (!token) {
+      toast.error("Please login first");
       return;
     }
 
-    setCartItem(
-      data.cart?.items || []
-    );
+    try {
+      console.log("INCREASE REQUEST:", {
+        productId,
+        variantSku,
+      });
 
-  } catch (error) {
-    console.error(
-      "INCREASE ERROR:",
-      error
-    );
+      const res = await fetch(
+        `${BACKEND_URL}/api/cart/increase`,
+        {
+          method: "PUT",
 
-    toast.error(
-      "Failed to increase quantity"
-    );
-  }
-};
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+
+          body: JSON.stringify({
+            productId: String(productId),
+            variantSku: variantSku || "",
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      console.log(
+        "INCREASE STATUS:",
+        res.status
+      );
+
+      console.log(
+        "INCREASE RESPONSE:",
+        data
+      );
+
+      if (!res.ok || !data.success) {
+        toast.error(
+          data.message ||
+          data.error ||
+          "Failed to increase quantity"
+        );
+
+        return;
+      }
+
+      setCartItem(
+        data.cart?.items || []
+      );
+
+    } catch (error) {
+      console.error(
+        "INCREASE ERROR:",
+        error
+      );
+
+      toast.error(
+        "Failed to increase quantity"
+      );
+    }
+  };
 
   /*
   |--------------------------------------------------------------------------
   | DECREASE QUANTITY
   |--------------------------------------------------------------------------
   */
-const decreaseQty = async (
-  productId,
-  variantSku = ""
-) => {
-  if (!token) {
-    toast.error("Please login first");
-    return;
-  }
-
-  try {
-    console.log("DECREASE REQUEST:", {
-      productId,
-      variantSku,
-    });
-
-    const res = await fetch(
-      `${BACKEND_URL}/api/cart/decrease`,
-      {
-        method: "PUT",
-
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-
-        body: JSON.stringify({
-          productId: String(productId),
-          variantSku: variantSku || "",
-        }),
-      }
-    );
-
-    const data = await res.json();
-
-    console.log(
-      "DECREASE STATUS:",
-      res.status
-    );
-
-    console.log(
-      "DECREASE RESPONSE:",
-      data
-    );
-
-    if (!res.ok || !data.success) {
-      toast.error(
-        data.message ||
-        data.error ||
-        "Failed to decrease quantity"
-      );
-
+  const decreaseQty = async (
+    productId,
+    variantSku = ""
+  ) => {
+    if (!token) {
+      toast.error("Please login first");
       return;
     }
 
-    setCartItem(
-      data.cart?.items || []
-    );
+    try {
+      console.log("DECREASE REQUEST:", {
+        productId,
+        variantSku,
+      });
 
-  } catch (error) {
-    console.error(
-      "DECREASE ERROR:",
-      error
-    );
+      const res = await fetch(
+        `${BACKEND_URL}/api/cart/decrease`,
+        {
+          method: "PUT",
 
-    toast.error(
-      "Failed to decrease quantity"
-    );
-  }
-};
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+
+          body: JSON.stringify({
+            productId: String(productId),
+            variantSku: variantSku || "",
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      console.log(
+        "DECREASE STATUS:",
+        res.status
+      );
+
+      console.log(
+        "DECREASE RESPONSE:",
+        data
+      );
+
+      if (!res.ok || !data.success) {
+        toast.error(
+          data.message ||
+          data.error ||
+          "Failed to decrease quantity"
+        );
+
+        return;
+      }
+
+      setCartItem(
+        data.cart?.items || []
+      );
+
+    } catch (error) {
+      console.error(
+        "DECREASE ERROR:",
+        error
+      );
+
+      toast.error(
+        "Failed to decrease quantity"
+      );
+    }
+  };
   /*
   |--------------------------------------------------------------------------
   | REMOVE FROM CART
   |--------------------------------------------------------------------------
   */
 
- const removeFromCart = async (
-  productId,
-  variantSku = ""
-) => {
-  if (!token) {
-    toast.error("Please login first");
-    return;
-  }
+  const removeFromCart = async (
+    productId,
+    variantSku = ""
+  ) => {
+    if (!token) {
+      toast.error("Please login first");
+      return;
+    }
 
-  try {
-    console.log("REMOVE REQUEST:", {
-      productId,
-      variantSku,
-    });
+    try {
+      console.log("REMOVE REQUEST:", {
+        productId,
+        variantSku,
+      });
 
-    const res = await fetch(
-      `${BACKEND_URL}/api/cart/remove`,
-      {
-        method: "DELETE",
+      const res = await fetch(
+        `${BACKEND_URL}/api/cart/remove`,
+        {
+          method: "DELETE",
 
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
 
-        body: JSON.stringify({
-          productId: String(productId),
-          variantSku: variantSku || "",
-        }),
+          body: JSON.stringify({
+            productId: String(productId),
+            variantSku: variantSku || "",
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      console.log(
+        "REMOVE STATUS:",
+        res.status
+      );
+
+      console.log(
+        "REMOVE RESPONSE:",
+        data
+      );
+
+      if (!res.ok || !data.success) {
+        toast.error(
+          data.message ||
+          data.error ||
+          "Failed to remove item"
+        );
+
+        return false;
       }
-    );
 
-    const data = await res.json();
+      setCartItem(
+        data.cart?.items || []
+      );
 
-    console.log(
-      "REMOVE STATUS:",
-      res.status
-    );
+      toast.success(
+        "Item removed 🗑️"
+      );
 
-    console.log(
-      "REMOVE RESPONSE:",
-      data
-    );
+      return true;
 
-    if (!res.ok || !data.success) {
+    } catch (error) {
+      console.error(
+        "REMOVE CART ERROR:",
+        error
+      );
+
       toast.error(
-        data.message ||
-        data.error ||
         "Failed to remove item"
       );
 
       return false;
     }
-
-    setCartItem(
-      data.cart?.items || []
-    );
-
-    toast.success(
-      "Item removed 🗑️"
-    );
-
-    return true;
-
-  } catch (error) {
-    console.error(
-      "REMOVE CART ERROR:",
-      error
-    );
-
-    toast.error(
-      "Failed to remove item"
-    );
-
-    return false;
-  }
-};
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -696,7 +698,7 @@ const decreaseQty = async (
       ) {
         toast.error(
           data.message ||
-            "Failed to clear cart"
+          "Failed to clear cart"
         );
 
         return;
@@ -730,7 +732,7 @@ const decreaseQty = async (
       return (
         total +
         Number(item.price || 0) *
-          Number(item.quantity || 0)
+        Number(item.quantity || 0)
       );
     },
     0

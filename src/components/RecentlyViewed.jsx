@@ -8,14 +8,16 @@ import { useNavigate } from "react-router-dom";
 
 import {
   FaStar,
-  FaFire,
+  FaHistory,
+  FaTimes,
+  FaTrash,
   FaEye,
 } from "react-icons/fa";
 
-const BACKEND_URL =
-  import.meta.env.VITE_BACKEND_URL;
+const API_URL =
+  import.meta.env.VITE_BACKEND_URL + "/api/products";
 
-export default function TrendingProducts() {
+export default function RecentlyViewed() {
   const navigate = useNavigate();
 
   const [products, setProducts] =
@@ -28,35 +30,39 @@ export default function TrendingProducts() {
     useState("");
 
   /* =====================================================
-     FETCH TRENDING PRODUCTS
+     GET RECENTLY VIEWED
   ===================================================== */
 
-  const fetchTrendingProducts =
+  const fetchRecentlyViewed =
     useCallback(async () => {
       console.log("");
       console.log(
         "=========================================="
       );
-
       console.log(
-        "🔥 TRENDING PRODUCTS FETCH START"
-      );
-
-      const url =
-        `${BACKEND_URL}/api/products/trending`;
-
-      console.log(
-        "🔥 API URL:",
-        url
+        "🔵 GET RECENTLY VIEWED"
       );
 
       try {
+        const url =
+          `${API_URL}/recently-viewed`;
+
+        console.log(
+          "🔵 URL:",
+          url
+        );
+
+        console.log(
+          "🔵 credentials: include"
+        );
+
         setLoading(true);
         setError("");
 
         const response =
           await fetch(url, {
             method: "GET",
+            credentials: "include",
 
             headers: {
               Accept:
@@ -65,12 +71,12 @@ export default function TrendingProducts() {
           });
 
         console.log(
-          "🟢 Trending status:",
+          "🟢 HTTP STATUS:",
           response.status
         );
 
         console.log(
-          "🟢 Trending OK:",
+          "🟢 RESPONSE OK:",
           response.ok
         );
 
@@ -78,7 +84,7 @@ export default function TrendingProducts() {
           await response.json();
 
         console.log(
-          "🟢 Trending API response:",
+          "🟢 API RESPONSE:",
           data
         );
 
@@ -97,36 +103,27 @@ export default function TrendingProducts() {
             : [];
 
         console.log(
-          "🔥 Trending product count:",
+          "🟢 RECENT PRODUCTS:",
           list.length
-        );
-
-        console.log(
-          "🔥 Trending products:",
-          list
         );
 
         setProducts(list);
 
       } catch (error) {
         console.error(
-          "🔴 TRENDING PRODUCTS ERROR:",
+          "🔴 GET RECENTLY VIEWED ERROR:",
           error
         );
 
         setError(
           error?.message ||
-            "Failed to load trending products"
+            "Failed to load recently viewed products"
         );
 
         setProducts([]);
 
       } finally {
         setLoading(false);
-
-        console.log(
-          "🔥 TRENDING PRODUCTS FETCH END"
-        );
 
         console.log(
           "=========================================="
@@ -140,23 +137,135 @@ export default function TrendingProducts() {
 
   useEffect(() => {
     console.log(
-      "🟣 TrendingProducts mounted"
+      "🟣 RecentlyViewed mounted"
     );
 
-    fetchTrendingProducts();
+    fetchRecentlyViewed();
 
     return () => {
       console.log(
-        "🟣 TrendingProducts unmounted"
+        "🟣 RecentlyViewed unmounted"
       );
     };
-  }, [fetchTrendingProducts]);
+  }, [fetchRecentlyViewed]);
+
+  /* =====================================================
+     REMOVE ONE
+  ===================================================== */
+
+  const removeProduct = async (
+    event,
+    productId
+  ) => {
+    event.stopPropagation();
+
+    console.log(
+      "🟠 REMOVE PRODUCT:",
+      productId
+    );
+
+    try {
+      const response =
+        await fetch(
+          `${API_URL}/recently-viewed/${productId}`,
+          {
+            method: "DELETE",
+            credentials: "include",
+          }
+        );
+
+      console.log(
+        "🟠 DELETE STATUS:",
+        response.status
+      );
+
+      const data =
+        await response.json();
+
+      console.log(
+        "🟠 DELETE RESPONSE:",
+        data
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message ||
+            "Failed to remove product"
+        );
+      }
+
+      setProducts(
+        (previous) =>
+          previous.filter(
+            (item) =>
+              item._id !== productId
+          )
+      );
+
+    } catch (error) {
+      console.error(
+        "🔴 REMOVE ERROR:",
+        error
+      );
+    }
+  };
+
+  /* =====================================================
+     CLEAR ALL
+  ===================================================== */
+
+  const clearAll = async () => {
+    console.log(
+      "🔴 CLEAR ALL RECENTLY VIEWED"
+    );
+
+    try {
+      const response =
+        await fetch(
+          `${API_URL}/recently-viewed`,
+          {
+            method: "DELETE",
+            credentials: "include",
+          }
+        );
+
+      console.log(
+        "🔴 CLEAR STATUS:",
+        response.status
+      );
+
+      const data =
+        await response.json();
+
+      console.log(
+        "🔴 CLEAR RESPONSE:",
+        data
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message ||
+            "Failed to clear recently viewed"
+        );
+      }
+
+      setProducts([]);
+
+    } catch (error) {
+      console.error(
+        "🔴 CLEAR ERROR:",
+        error
+      );
+    }
+  };
 
   /* =====================================================
      IMAGE
   ===================================================== */
 
-  const getImage = (product) => {
+  const getImage = (
+    product
+  ) => {
     return (
       product?.media?.thumbnail ||
       product?.media?.images?.[0] ||
@@ -167,15 +276,17 @@ export default function TrendingProducts() {
   };
 
   /* =====================================================
-     ACTIVE VARIANT
+     VARIANT
   ===================================================== */
 
-  const getVariant = (product) => {
+  const getVariant = (
+    product
+  ) => {
     if (
       !Array.isArray(
         product?.variants
       ) ||
-      product.variants.length === 0
+      !product.variants.length
     ) {
       return null;
     }
@@ -193,7 +304,9 @@ export default function TrendingProducts() {
      PRICE
   ===================================================== */
 
-  const getPrice = (product) => {
+  const getPrice = (
+    product
+  ) => {
     const variant =
       getVariant(product);
 
@@ -223,15 +336,17 @@ export default function TrendingProducts() {
      OPEN PRODUCT
   ===================================================== */
 
-  const openProduct = (product) => {
+  const openProduct = (
+    product
+  ) => {
     console.log(
-      "🟣 Trending product clicked:",
+      "🟣 OPEN RECENT PRODUCT:",
       product?._id
     );
 
     if (!product?._id) {
       console.error(
-        "❌ Trending product ID missing"
+        "❌ Product ID missing"
       );
 
       return;
@@ -248,33 +363,22 @@ export default function TrendingProducts() {
 
   if (loading) {
     return (
-      <section className="max-w-7xl mx-auto px-1.5 sm:px-4 py-8">
+      <section className="max-w-7xl mx-auto px-2 sm:px-4 py-8">
 
-        <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl sm:text-3xl font-bold flex items-center gap-2 mb-6">
+          <FaHistory className="text-indigo-500" />
+          Recently Viewed
+        </h2>
 
-          <h2 className="text-xl sm:text-3xl font-bold flex items-center gap-2">
-            <FaFire className="text-orange-500" />
-            Trending Now
-          </h2>
-
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-3">
-
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {[1, 2, 3, 4].map(
             (item) => (
               <div
                 key={item}
-                className="
-                  h-72
-                  rounded-2xl
-                  bg-gray-100
-                  animate-pulse
-                "
+                className="h-72 rounded-2xl bg-gray-100 animate-pulse"
               />
             )
           )}
-
         </div>
 
       </section>
@@ -289,22 +393,15 @@ export default function TrendingProducts() {
     return (
       <section className="max-w-7xl mx-auto px-4 py-8">
 
-        <div className="
-          rounded-2xl
-          border
-          border-red-100
-          bg-red-50
-          p-8
-          text-center
-        ">
+        <div className="rounded-2xl bg-red-50 border border-red-100 p-8 text-center">
 
-          <FaFire
+          <FaHistory
             className="mx-auto text-red-400 mb-3"
             size={30}
           />
 
           <h2 className="text-xl font-bold">
-            Trending Products
+            Recently Viewed
           </h2>
 
           <p className="text-red-500 mt-2">
@@ -313,17 +410,9 @@ export default function TrendingProducts() {
 
           <button
             onClick={
-              fetchTrendingProducts
+              fetchRecentlyViewed
             }
-            className="
-              mt-5
-              px-5
-              py-2.5
-              rounded-xl
-              bg-indigo-600
-              text-white
-              font-semibold
-            "
+            className="mt-5 px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold"
           >
             Try Again
           </button>
@@ -339,10 +428,6 @@ export default function TrendingProducts() {
   ===================================================== */
 
   if (!products.length) {
-    console.log(
-      "🟡 No trending products"
-    );
-
     return null;
   }
 
@@ -353,66 +438,33 @@ export default function TrendingProducts() {
   return (
     <section className="max-w-7xl mx-auto px-1.5 sm:px-4 py-8">
 
-      {/* HEADER */}
+      <div className="flex items-center justify-between mb-6">
 
-      <div
-        data-aos="fade-up"
-        className="
-          flex
-          items-center
-          justify-between
-          mb-6
-        "
-      >
+        <div>
+          <h2 className="text-xl sm:text-3xl font-bold flex items-center gap-2">
+            <FaHistory className="text-indigo-500" />
+            Recently Viewed
+          </h2>
 
-        <h2 className="
-          text-xl
-          sm:text-3xl
-          font-bold
-          flex
-          items-center
-          gap-2
-          text-gray-900
-        ">
-          <FaFire className="text-orange-500" />
-          Trending Now
-        </h2>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+            Products you recently viewed
+          </p>
+        </div>
 
         <button
-          onClick={() =>
-            navigate("/products")
-          }
-          className="
-            text-sm
-            font-semibold
-            text-indigo-600
-            hover:text-indigo-700
-            transition
-          "
+          onClick={clearAll}
+          className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-red-500"
         >
-          View All →
+          <FaTrash size={11} />
+          Clear All
         </button>
 
       </div>
 
-      {/* GRID */}
-
-      <div
-        data-aos="fade-up"
-        data-aos-delay="100"
-        className="
-          grid
-          grid-cols-2
-          sm:grid-cols-3
-          lg:grid-cols-4
-          gap-1.5
-          sm:gap-3
-        "
-      >
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-3">
 
         {products.map(
-          (product, index) => {
-
+          (product) => {
             const price =
               getPrice(product);
 
@@ -426,32 +478,9 @@ export default function TrendingProducts() {
                 product?.rating || 0
               );
 
-            const views =
-              Number(
-                product?.analytics
-                  ?.views || 0
-              );
-
-            const discount =
-              originalPrice > price
-                ? Math.round(
-                    ((originalPrice -
-                      price) /
-                      originalPrice) *
-                      100
-                  )
-                : 0;
-
             return (
               <article
-                key={
-                  product._id
-                }
-                data-aos="zoom-in"
-                data-aos-delay={
-                  index * 80
-                }
-                data-aos-once="true"
+                key={product._id}
                 onClick={() =>
                   openProduct(
                     product
@@ -468,8 +497,8 @@ export default function TrendingProducts() {
                   cursor-pointer
                   transition-all
                   duration-300
-                  hover:shadow-xl
                   hover:-translate-y-1
+                  hover:shadow-xl
                   bg-gradient-to-br
                   from-white
                   via-blue-50
@@ -477,47 +506,58 @@ export default function TrendingProducts() {
                 "
               >
 
+                {/* REMOVE */}
+
+                <button
+                  type="button"
+                  onClick={(event) =>
+                    removeProduct(
+                      event,
+                      product._id
+                    )
+                  }
+                  className="
+                    absolute
+                    right-3
+                    top-3
+                    z-30
+                    w-7
+                    h-7
+                    rounded-full
+                    bg-white
+                    shadow-md
+                    flex
+                    items-center
+                    justify-center
+                    text-gray-400
+                    hover:text-red-500
+                  "
+                >
+                  <FaTimes size={11} />
+                </button>
+
                 {/* IMAGE */}
 
                 <div className="
                   relative
+                  h-[160px]
+                  sm:h-[200px]
                   flex
                   items-center
                   justify-center
-                  h-[160px]
-                  sm:h-[210px]
                   p-4
                 ">
-
-                  {/* GLOW */}
-
-                  <div className="
-                    absolute
-                    w-28
-                    h-28
-                    bg-orange-100
-                    rounded-full
-                    blur-3xl
-                    opacity-0
-                    group-hover:opacity-100
-                    transition
-                  " />
-
-                  {/* PRODUCT IMAGE */}
 
                   <img
                     src={getImage(
                       product
                     )}
                     alt={
-                      product?.title ||
-                      "Product"
+                      product.title
                     }
                     className="
-                      relative
-                      z-10
-                      max-h-[135px]
-                      sm:max-h-[175px]
+                      max-h-[140px]
+                      sm:max-h-[170px]
                       max-w-full
                       object-contain
                       transition-transform
@@ -526,19 +566,14 @@ export default function TrendingProducts() {
                     "
                   />
 
-                  {/* HOT BADGE */}
-
                   <span className="
                     absolute
-                    top-3
                     left-3
-                    z-20
+                    top-3
                     flex
                     items-center
                     gap-1
-                    bg-gradient-to-r
-                    from-orange-500
-                    to-red-500
+                    bg-indigo-600
                     text-white
                     text-[9px]
                     sm:text-[10px]
@@ -546,32 +581,10 @@ export default function TrendingProducts() {
                     px-2
                     py-1
                     rounded-full
-                    shadow
                   ">
-                    <FaFire size={9} />
-                    HOT
+                    <FaEye size={9} />
+                    Viewed
                   </span>
-
-                  {/* DISCOUNT */}
-
-                  {discount > 0 && (
-                    <span className="
-                      absolute
-                      right-3
-                      bottom-3
-                      z-20
-                      bg-green-500
-                      text-white
-                      text-[9px]
-                      sm:text-[10px]
-                      font-bold
-                      px-2
-                      py-1
-                      rounded
-                    ">
-                      {discount}% OFF
-                    </span>
-                  )}
 
                 </div>
 
@@ -579,23 +592,19 @@ export default function TrendingProducts() {
 
                 <div className="p-3 sm:p-4">
 
-                  {/* CATEGORY */}
-
                   <p className="
                     text-[9px]
                     sm:text-xs
                     uppercase
                     tracking-wide
-                    text-indigo-500
                     font-medium
+                    text-indigo-500
                     mb-1
                   ">
                     {product?.category
                       ?.name ||
-                      "Trending"}
+                      "Product"}
                   </p>
-
-                  {/* TITLE */}
 
                   <h3 className="
                     text-sm
@@ -605,85 +614,35 @@ export default function TrendingProducts() {
                     line-clamp-2
                     min-h-[40px]
                     group-hover:text-indigo-600
-                    transition
                   ">
-                    {product?.title ||
-                      "Product"}
+                    {product.title}
                   </h3>
 
-                  {/* RATING + VIEWS */}
+                  <div className="flex items-center gap-1 mt-2">
 
-                  <div className="
-                    flex
-                    items-center
-                    justify-between
-                    mt-2
-                  ">
+                    <FaStar
+                      className="text-yellow-400"
+                      size={12}
+                    />
 
-                    <div className="
-                      flex
-                      items-center
-                      gap-1
-                    ">
+                    <span className="text-xs font-semibold">
+                      {rating > 0
+                        ? rating.toFixed(1)
+                        : "New"}
+                    </span>
 
-                      <FaStar
-                        className="text-yellow-400"
-                        size={12}
-                      />
-
-                      <span className="
-                        text-xs
-                        font-semibold
-                        text-gray-700
-                      ">
-                        {rating > 0
-                          ? rating.toFixed(
-                              1
-                            )
-                          : "New"}
-                      </span>
-
-                      <span className="
-                        text-[10px]
-                        text-gray-400
-                      ">
-                        (
-                        {product?.numReviews ||
-                          0}
-                        )
-                      </span>
-
-                    </div>
-
-                    <div className="
-                      flex
-                      items-center
-                      gap-1
-                      text-[10px]
-                      text-gray-400
-                    ">
-                      <FaEye size={10} />
-
-                      {views}
-                    </div>
+                    <span className="text-[10px] text-gray-400">
+                      (
+                      {product?.numReviews ||
+                        0}
+                      )
+                    </span>
 
                   </div>
 
-                  {/* PRICE */}
+                  <div className="flex items-center gap-2 mt-3">
 
-                  <div className="
-                    flex
-                    items-center
-                    gap-2
-                    mt-3
-                  ">
-
-                    <span className="
-                      text-base
-                      sm:text-lg
-                      font-bold
-                      text-gray-900
-                    ">
+                    <span className="text-base sm:text-lg font-bold">
                       ₹
                       {price.toLocaleString(
                         "en-IN"
@@ -692,11 +651,7 @@ export default function TrendingProducts() {
 
                     {originalPrice >
                       price && (
-                      <del className="
-                        text-[10px]
-                        sm:text-xs
-                        text-gray-400
-                      ">
+                      <del className="text-[10px] sm:text-xs text-gray-400">
                         ₹
                         {originalPrice.toLocaleString(
                           "en-IN"
@@ -714,7 +669,6 @@ export default function TrendingProducts() {
         )}
 
       </div>
-
     </section>
   );
 }

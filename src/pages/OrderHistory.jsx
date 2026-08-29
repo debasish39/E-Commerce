@@ -106,7 +106,7 @@ const OrderHistory = () => {
       )
 
     );
-
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
   // ADD THIS FUNCTION
   const handleOrderClick = (order) => {
     setSelectedOrder(order);
@@ -132,7 +132,7 @@ const OrderHistory = () => {
           const res =
             await fetch(
 
-              "https://eshop-backend-y0e7.onrender.com/api/my-orders",
+              `${BACKEND_URL}/api/my-orders`,
 
               {
 
@@ -193,10 +193,10 @@ const OrderHistory = () => {
 
       console.log("TOKEN:", token);
 
-      console.log("CANCELLING ORDER ID:", cancellingOrderId);
+      console.log("CANCELLING Order Number:", cancellingOrderId);
 
       const res = await fetch(
-        `https://eshop-backend-y0e7.onrender.com/api/order/cancel/${cancellingOrderId}`,
+        `${BACKEND_URL}/api/order/cancel/${cancellingOrderId}`,
         {
           method: "PUT",
 
@@ -323,7 +323,7 @@ const OrderHistory = () => {
       doc.setFont("helvetica", "bold");
 
       doc.text("Invoice No:", pageWidth - 80, 56);
-      doc.text("Order ID:", pageWidth - 80, 63);
+      doc.text("Order Number:", pageWidth - 80, 63);
       doc.text("Order Date:", pageWidth - 80, 70);
 
       doc.setFont("helvetica", "normal");
@@ -1141,9 +1141,9 @@ const OrderHistory = () => {
 
                             {/* Info */}
                             <div className="min-w-0 flex-1">
-                              <p className="font-bold text-indigo-950 text-sm">
-                                Order #{order._id.slice(-8).toUpperCase()}
-                              </p>
+                           <p className="font-bold text-indigo-950 text-sm">
+  Order #{order.orderNumber}
+</p>
                               <p className="text-xs text-slate-400 font-medium mt-1">
                                 Placed by <span className="text-indigo-600 font-bold">{order.deliveryAddress?.customer?.fullName}</span>
                               </p>
@@ -1186,24 +1186,25 @@ const OrderHistory = () => {
                           </div>
                         </div>
 
-                        {/* ORDER ID BOX */}
+                        {/* Order Number BOX */}
                         <div className="order-id-box">
                           <div className="flex items-center gap-2 justify-between">
                             <div className="flex items-center gap-2 min-w-0">
                               <FaBarcode size={13} style={{ color: "#4f46e5" }} />
                               <div className="min-w-0">
-                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                                  Order ID
-                                </p>
-                                <p className="text-sm font-bold text-indigo-600 break-all">
-                                  {order._id}
-                                </p>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+  Odikart Order Number
+</p>
+
+<p className="text-sm font-bold text-indigo-600 break-all">
+  {order.orderNumber}
+</p>
                               </div>
                             </div>
                             <button
                               onClick={() => {
                                 navigator.clipboard.writeText(order._id);
-                                toast.success("Order ID copied!");
+                                toast.success("Order Number copied!");
                               }}
                               className="px-2 py-1 rounded-lg bg-indigo-500 text-white text-xs font-bold hover:bg-indigo-600 transition flex-shrink-0"
                             >
@@ -1388,7 +1389,9 @@ const OrderHistory = () => {
 
                           <button
                             className="track-btn"
-                            onClick={() => window.location.href = `/track-order?id=${order._id}`}
+                            onClick={() =>
+                              window.location.href = `/track-order?id=${encodeURIComponent(order.orderNumber)}`
+                            }
                           >
                             <FaMapMarkerAlt size={11} />
                             Track

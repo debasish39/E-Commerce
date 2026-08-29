@@ -40,11 +40,11 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
 
   const token = localStorage.getItem("token");
-
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch("https://eshop-backend-y0e7.onrender.com/api/auth/me", {
+        const res = await fetch(`${BACKEND_URL}/api/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -727,7 +727,7 @@ export default function ProfilePage() {
                     if (user.imageFile) formData.append("image", user.imageFile);
 
                     const res = await fetch(
-                      "https://eshop-backend-y0e7.onrender.com/api/auth/update-profile",
+                      `${BACKEND_URL}/api/auth/update-profile`,
                       {
                         method: "PUT",
                         headers: { Authorization: `Bearer ${token}` },
@@ -830,7 +830,7 @@ export default function ProfilePage() {
                   setPasswordLoading(true);
 
                   const res = await fetch(
-                    "https://eshop-backend-y0e7.onrender.com/api/auth/change-password",
+                    `${BACKEND_URL}/api/auth/change-password`,
                     {
                       method: "PUT",
                       headers: {
@@ -934,7 +934,7 @@ export default function ProfilePage() {
                 try {
                   setDeleteLoading(true);
                   const res = await fetch(
-                    "https://eshop-backend-y0e7.onrender.com/api/auth/delete-account",
+                    `${BACKEND_URL}/api/auth/delete-account`,
                     {
                       method: "DELETE",
                       headers: { Authorization: `Bearer ${token}` },

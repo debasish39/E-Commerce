@@ -20,7 +20,7 @@ import "aos/dist/aos.css";
 ===================================== */
 
 const BACKEND_URL =
-  "https://eshop-backend-y0e7.onrender.com";
+  import.meta.env.VITE_BACKEND_URL;
 
 export default function CategoryProduct() {
 

@@ -66,7 +66,7 @@ export default function Navbar({ location, onLocationChange }) {
   const { search, setSearch } = getData();
   const [recentSearches, setRecentSearches] = useState([]);
   const routerLocation = useLocation();
-
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
   /* ===== AUTH USER ===== */
   const [authUser, setAuthUser] = useState(null);
 
@@ -76,7 +76,7 @@ export default function Navbar({ location, onLocationChange }) {
 
     const fetchUser = async () => {
       try {
-        const res = await fetch("https://eshop-backend-y0e7.onrender.com/api/auth/me", {
+        const res = await fetch(`${BACKEND_URL}/api/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
