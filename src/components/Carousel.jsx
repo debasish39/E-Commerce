@@ -1,614 +1,1086 @@
-import React, { useEffect, useCallback, useState } from "react";
+import React, {
+  useEffect,
+  useCallback,
+  useState,
+} from "react";
+
 import { getData } from "../context/DataContext";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
+
 import {
-  FaRupeeSign, FaStar, FaShoppingCart, FaBolt, FaFire,
-  FaTag, FaArrowRight, FaHeart, FaTruck, FaShieldAlt
+  FaRupeeSign,
+  FaStar,
+  FaShoppingCart,
+  FaFire,
+  FaTruck,
+  FaShieldAlt,
 } from "react-icons/fa";
-import { AiOutlineEye } from "react-icons/ai";
-import { MdFlashOn } from "react-icons/md";
+
+import { AiOutlineArrowRight } from "react-icons/ai";
+
 import { toast } from "sonner";
-import { Swiper, SwiperSlide } from "swiper/react";
-import {   Autoplay } from "swiper/modules";
+
+import {
+  Swiper,
+  SwiperSlide,
+} from "swiper/react";
+
+import {
+  Autoplay,
+  Pagination,
+} from "swiper/modules";
+
 import "swiper/css";
-import "swiper/css/navigation";
 import "swiper/css/pagination";
-import "swiper/css/effect-fade";
-import Loading from "../assets/Loading4.webm";
+
 import "./carousel.css";
-/* ── helpers ── */
+
+
+/* =====================================================
+   BADGES
+===================================================== */
+
 const BADGES = [
-  { label: "DEAL OF THE DAY", icon: "⚡", color: "#f59e0b" },
-  { label: "TOP DEAL", icon: "🔥", color: "#ef4444" },
-  { label: "BEST SELLER", icon: "🏆", color: "#6366f1" },
-  { label: "LIMITED OFFER", icon: "⏳", color: "#8b5cf6" },
-  { label: "TRENDING NOW", icon: "📈", color: "#10b981" },
+  {
+    text: "DEAL OF THE DAY",
+    icon: "⚡",
+  },
+  {
+    text: "TOP DEAL",
+    icon: "🔥",
+  },
+  {
+    text: "BEST SELLER",
+    icon: "🏆",
+  },
+  {
+    text: "LIMITED OFFER",
+    icon: "⏳",
+  },
+  {
+    text: "TRENDING",
+    icon: "📈",
+  },
 ];
 
-/* accent colours per slide — used for glows, text accents, rings */
+
+/* =====================================================
+   ACCENTS
+===================================================== */
+
 const ACCENTS = [
-  { h: "#4f46e5", l: "rgba(99,102,241,.18)", ring: "rgba(99,102,241,.35)" },
-  { h: "#be185d", l: "rgba(236,72,153,.15)", ring: "rgba(236,72,153,.30)" },
-  { h: "#0891b2", l: "rgba(6,182,212,.15)", ring: "rgba(6,182,212,.30)" },
-  { h: "#d97706", l: "rgba(245,158,11,.15)", ring: "rgba(245,158,11,.30)" },
-  { h: "#7c3aed", l: "rgba(124,58,237,.15)", ring: "rgba(124,58,237,.30)" },
+  {
+    primary: "#4f46e5",
+    secondary: "#818cf8",
+    soft: "rgba(99,102,241,.12)",
+  },
+  {
+    primary: "#db2777",
+    secondary: "#f472b6",
+    soft: "rgba(236,72,153,.12)",
+  },
+  {
+    primary: "#0891b2",
+    secondary: "#22d3ee",
+    soft: "rgba(6,182,212,.12)",
+  },
+  {
+    primary: "#d97706",
+    secondary: "#fbbf24",
+    soft: "rgba(245,158,11,.12)",
+  },
+  {
+    primary: "#7c3aed",
+    secondary: "#a78bfa",
+    soft: "rgba(139,92,246,.12)",
+  },
 ];
 
-const getDiscount = (price, seed) => {
-  const pcts = [10, 15, 20, 25, 30, 35, 40, 45, 50];
-  const pct = pcts[seed % pcts.length];
-  return { pct, original: Math.round(price / (1 - pct / 100)) };
-};
 
-const useCountdown = (h = 8, m = 32, s = 14) => {
-  const [t, setT] = useState({ h, m, s });
-  useEffect(() => {
-    const id = setInterval(() => setT(p => {
-      if (p.s > 0) return { ...p, s: p.s - 1 };
-      if (p.m > 0) return { ...p, m: p.m - 1, s: 59 };
-      if (p.h > 0) return { h: p.h - 1, m: 59, s: 59 };
-      return { h: 8, m: 32, s: 14 };
-    }), 1000);
-    return () => clearInterval(id);
-  }, []);
-  return t;
-};
+/* =====================================================
+   HELPERS
+===================================================== */
 
-const pad = n => String(n).padStart(2, "0");
 const getVariants = (item) =>
-  Array.isArray(item?.variants) ? item.variants : [];
+  Array.isArray(item?.variants)
+    ? item.variants
+    : [];
 
-const getFirstVariant = (item) => getVariants(item)[0] || null;
+
+const getFirstVariant = (item) =>
+  getVariants(item)[0] || null;
+
 
 const getProductPrice = (item) => {
-  const variant = getFirstVariant(item);
-  return Number(item?.price ?? variant?.price ?? 0);
+  const variant =
+    getFirstVariant(item);
+
+  return Number(
+    item?.price ??
+      variant?.price ??
+      0
+  );
 };
 
-const getProductOriginalPrice = (item) => {
-  const variant = getFirstVariant(item);
+
+const getOriginalPrice = (item) => {
+  const variant =
+    getFirstVariant(item);
+
   return Number(
     item?.originalPrice ??
-    variant?.originalPrice ??
-    getProductPrice(item)
+      variant?.originalPrice ??
+      getProductPrice(item)
   );
 };
 
-const getProductDiscount = (item) => {
-  const variant = getFirstVariant(item);
-  const original = getProductOriginalPrice(item);
-  const price = getProductPrice(item);
 
-  // Prefer the actual stored discount percentage.
-  const storedDiscount = Number(
-    item?.offer?.enabled
-      ? item?.offer?.value
-      : variant?.discountPercentage ?? 0
-  );
+const getDiscount = (item) => {
+  const variant =
+    getFirstVariant(item);
 
-  if (storedDiscount > 0) {
-    return { pct: storedDiscount, original };
-  }
+  const price =
+    getProductPrice(item);
 
-  if (original > price && original > 0) {
+  const original =
+    getOriginalPrice(item);
+
+  const storedDiscount =
+    Number(
+      item?.offer?.enabled
+        ? item?.offer?.value
+        : variant?.discountPercentage ??
+            0
+    );
+
+  if (
+    storedDiscount > 0
+  ) {
     return {
-      pct: Math.round(((original - price) / original) * 100),
+      pct: Math.round(
+        storedDiscount
+      ),
       original,
     };
   }
 
-  return { pct: 0, original: price };
+  if (
+    original > price &&
+    original > 0
+  ) {
+    return {
+      pct: Math.round(
+        ((original - price) /
+          original) *
+          100
+      ),
+      original,
+    };
+  }
+
+  return {
+    pct: 0,
+    original: price,
+  };
 };
 
-const getProductImage = (item) => {
-  const thumbnail = item?.media?.thumbnail;
-  const images = item?.media?.images;
 
-  if (thumbnail) return thumbnail;
+const getProductImage = (
+  item
+) => {
+  const thumbnail =
+    item?.media?.thumbnail;
 
-  if (Array.isArray(images) && images.length > 0) {
+  const images =
+    item?.media?.images;
+
+  if (thumbnail) {
+    return thumbnail;
+  }
+
+  if (
+    Array.isArray(images) &&
+    images.length
+  ) {
     return images[0];
   }
 
-  // Backward compatibility with older API response.
-  if (item?.thumbnail) return item.thumbnail;
+  if (item?.thumbnail) {
+    return item.thumbnail;
+  }
 
   return "/placeholder-product.png";
 };
 
 
-
-/* ══════════════════════════════════
+/* =====================================================
    COMPONENT
-══════════════════════════════════ */
+===================================================== */
+
 export default function Carousel() {
-  const { data, fetchAllProducts } = getData();
-  const { addToCart, cartItem } = useCart();
-  const navigate = useNavigate();
-  // const [loading, setLoading]       = useState(true);
-  const countdown = useCountdown();
- 
-/* =====================================
-   JWT TOKEN
-===================================== */
 
-const token =
-  localStorage.getItem(
-    "token"
-  );
+  const {
+    data,
+    fetchAllProducts,
+  } = getData();
 
-const isSignedIn =
-  !!token;
+  const {
+    addToCart,
+    cartItem,
+  } = useCart();
+
+  const navigate =
+    useNavigate();
 
 
-  // console.log("Carousel data:", data);
+  /* =====================================================
+     AUTH
+  ===================================================== */
+
+  const token =
+    localStorage.getItem(
+      "token"
+    );
+
+  const isSignedIn =
+    Boolean(token);
+
+
+  /* =====================================================
+     LOAD PRODUCTS
+  ===================================================== */
+
   useEffect(() => {
-    if (!data || data.length === 0) {
+
+    if (
+      !data ||
+      data.length === 0
+    ) {
       fetchAllProducts();
     }
-  }, []);
-  // useEffect(()=>{
-  //   const id = "cw-styles";
-  //   if(!document.getElementById(id)){
-  //     const el = document.createElement("style"); el.id=id; el.textContent=CSS;
-  //     document.head.appendChild(el);
-  //   }
-  //   if(!data||data.length===0) fetchAllProducts().finally(()=>setLoading(false));
-  //   else setLoading(false);
-  // },[]);
 
-  const orderedData = data || [];
+  }, [data, fetchAllProducts]);
 
-  // Products come from MongoDB and are already ordered by the API.
-  // Do not assume a numeric product id such as 83.
-  const reorderedData = [...orderedData];
-  const handleCart = useCallback((item, e) => {
-    e?.stopPropagation();
-    if (!isSignedIn) { toast.error("Please login first"); setTimeout(() => navigate("/sign-in"), 300); return; }
-    if (cartItem.some(c => String(c.productId) === String(item._id))) {
-      toast.info("Already in cart 🛒"); setTimeout(() => navigate("/cart"), 100); return;
-    }
-    addToCart(item); toast.success("Added to cart 🛒");
-  }, [isSignedIn, cartItem, addToCart, navigate]);
 
-  const inCart = item => cartItem.some(c => String(c.productId) === String(item._id));
+  const products =
+    Array.isArray(data)
+      ? data
+      : [];
 
-  const SWIPER_COMMON = {
 
-    slidesPerView: 1,
-    loop: true,
-    autoplay: { disableOnInteraction: true },
-    pagination: { clickable: true },
-    onTouchStart: sw => sw.autoplay.stop(),
-    onTouchEnd: sw => setTimeout(() => sw.autoplay.start(), 3900),
-  };
-  // if (!data || data.length === 0) {
-  //   return (
-  //     <div className="w-full h-[420px] px-4 py-4 animate-pulse">
+  /* =====================================================
+     CART
+  ===================================================== */
 
-  //       {/* Offer bar skeleton */}
-  //       <div className="h-12 w-full rounded-lg bg-indigo-200 mb-4" />
+  const isInCart = useCallback(
+    (item) =>
+      cartItem.some(
+        (cart) =>
+          String(
+            cart.productId
+          ) ===
+          String(item._id)
+      ),
+    [cartItem]
+  );
 
-  //       <div className="grid md:grid-cols-2 gap-6 items-center h-full">
 
-  //         {/* LEFT SIDE */}
-  //         <div className="space-y-4">
-  //           <div className="h-5 w-40 bg-indigo-200 rounded" />
-  //           <div className="h-8 w-3/4 bg-gray-300 rounded" />
-  //           <div className="h-4 w-full bg-gray-200 rounded" />
-  //           <div className="h-4 w-5/6 bg-gray-200 rounded" />
+  const handleCart =
+    useCallback(
+      (item, event) => {
 
-  //           <div className="flex gap-2">
-  //             <div className="h-6 w-16 bg-gray-300 rounded" />
-  //             <div className="h-6 w-20 bg-gray-200 rounded" />
-  //           </div>
+        event?.stopPropagation();
 
-  //           <div className="flex gap-3 mt-3">
-  //             <div className="h-10 w-36 bg-indigo-300 rounded-lg" />
-  //             <div className="h-10 w-24 bg-gray-200 rounded-lg" />
-  //           </div>
-  //         </div>
+        if (!isSignedIn) {
 
-  //         {/* RIGHT SIDE IMAGE */}
-  //         <div className="flex justify-center">
-  //           <div className="w-[260px] h-[260px] bg-gray-200 rounded-xl" />
-  //         </div>
+          toast.error(
+            "Please login first"
+          );
 
-  //       </div>
-  //     </div>
-  //   );
-  // }
-  if (!reorderedData.length) {
+          setTimeout(() => {
+            navigate("/sign-in");
+          }, 300);
+
+          return;
+        }
+
+        if (
+          isInCart(item)
+        ) {
+
+          toast.info(
+            "Already in cart 🛒"
+          );
+
+          setTimeout(() => {
+            navigate("/cart");
+          }, 150);
+
+          return;
+        }
+
+        addToCart(item);
+
+        toast.success(
+          "Added to cart 🛒"
+        );
+      },
+      [
+        isSignedIn,
+        isInCart,
+        addToCart,
+        navigate,
+      ]
+    );
+
+
+  /* =====================================================
+     EMPTY
+  ===================================================== */
+
+  if (!products.length) {
     return (
-      <div className="cw-root flex items-center justify-center min-h-[220px]">
-        <p className="text-gray-500">No approved products available.</p>
-      </div>
+      <section className="
+        flex
+        min-h-[180px]
+        items-center
+        justify-center
+        px-4
+      ">
+        <p className="
+          text-sm
+          text-gray-500
+        ">
+          No products available.
+        </p>
+      </section>
     );
   }
 
+
+  /* =====================================================
+     MAIN
+  ===================================================== */
+
   return (
-    <div className="cw-root">
+    <section className="
+      relative
+      w-full
+      overflow-hidden
+      bg-white
+      py-3
+      sm:py-5
+    ">
 
-      {/* ── OFFER BAR ── */}
-      {/* ── OFFER BAR ── */}
-      <div
-        className="w-full px-4 sm:px-18 py-2.5 flex items-center justify-between gap-4 flex-wrap bg-gradient-to-br 
-  from-indigo-600 via-blue-600 to-purple-600
-  backdrop-blur-xl border border-indigo-400/30
-  shadow-[0_8px_32px_rgba(79,70,229,0.15)] mt-1"
-      >
-        <div className="flex items-center gap-3 flex-no-wrap">
+      {/* =================================================
+          OFFER HEADER
+      ================================================= */}
 
-          <span className="fk-display text-yellow-300 text-sm sm:text-lg font-black tracking-widest flex items-center gap-2">
-            ⚡ BIG BILLION DEALS
-          </span>
+      <div className="
+        mx-3
+        mb-3
+        overflow-hidden
+        rounded-2xl
+        bg-gradient-to-r
+        from-indigo-600
+        via-blue-600
+        to-violet-600
+        px-3
+        py-2.5
+        shadow-[0_5px_20px_rgba(79,70,229,.16)]
+        sm:mx-5
+        sm:px-5
+        sm:py-3
+      ">
 
-          <div className="hidden sm:flex items-center gap-2 text-white text-xs">
-            {[
-              { icon: "🏷️", text: "Up to 80% Off" },
-              { icon: "🚚", text: "Free Delivery ₹499+" },
-              { icon: "💳", text: "10% Bank Cashback" },
-            ].map(({ icon, text }) => (
-              <span
-                key={text}
-                className="flex items-center gap-1 bg-white/10 border border-white/20 rounded-full px-2.5 py-0.5 font-medium"
-              >
-                {icon} {text}
-              </span>
-            ))}
+        <div className="
+          flex
+          items-center
+          justify-between
+          gap-2
+        ">
+
+          <div className="
+            flex
+            min-w-0
+            items-center
+            gap-2
+          ">
+
+            <span className="
+              flex
+              h-7
+              w-7
+              shrink-0
+              items-center
+              justify-center
+              rounded-full
+              bg-white/15
+              text-sm
+            ">
+              ⚡
+            </span>
+
+            <div className="min-w-0">
+
+              <p className="
+                truncate
+                text-[11px]
+                font-extrabold
+                uppercase
+                tracking-wide
+                text-white
+                sm:text-sm
+              ">
+                Big Deals
+              </p>
+
+              <p className="
+                truncate
+                text-[9px]
+                text-white/70
+                sm:text-[11px]
+              ">
+                Great products. Better prices.
+              </p>
+
+            </div>
+
           </div>
+
+
+          <button
+            type="button"
+            onClick={() =>
+              navigate("/products")
+            }
+            className="
+              flex
+              shrink-0
+              items-center
+              gap-1
+              rounded-full
+              bg-white
+              px-3
+              py-1.5
+              text-[10px]
+              font-bold
+              text-indigo-600
+              shadow-sm
+              transition
+              active:scale-95
+              sm:px-4
+              sm:py-2
+              sm:text-xs
+            "
+          >
+            Shop now
+            <AiOutlineArrowRight
+              size={12}
+            />
+          </button>
+
         </div>
 
-        {/* Live countdown */}
-        <div className="flex items-center gap-1.5">
+      </div>
 
-          <span className="text-white/60 text-xs font-medium hidden sm:block mr-1">
-            ⏳ Ends in
-          </span>
 
-          {[
-            { val: pad(countdown.h), label: "hrs" },
-            { val: pad(countdown.m), label: "min" },
-            { val: pad(countdown.s), label: "sec" },
-          ].map((t, i) => (
-            <React.Fragment key={i}>
+      {/* =================================================
+          PRODUCT CAROUSEL
+      ================================================= */}
 
-              {i > 0 && (
-                <span className="text-yellow-300 font-black text-base leading-none">
-                  :
-                </span>
-              )}
+      <div className="
+        px-3
+        sm:px-5
+      ">
 
-              <div className="flex flex-col items-center w-8">
-                <span
-                  className="timer-digit fk-display text-xl font-black text-yellow-300 leading-none"
-                  style={{ animationDelay: `${i * 0.35}s` }}
+        <Swiper
+          modules={[
+            Autoplay,
+            Pagination,
+          ]}
+          slidesPerView={1.08}
+          spaceBetween={10}
+          loop={
+            products.length > 2
+          }
+          speed={550}
+          grabCursor
+          pagination={{
+            clickable: true,
+            dynamicBullets: true,
+          }}
+          autoplay={{
+            delay: 3500,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true,
+          }}
+          breakpoints={{
+
+            /* Small phone */
+
+            360: {
+              slidesPerView: 1.08,
+              spaceBetween: 10,
+            },
+
+            /* Large phone */
+
+            480: {
+              slidesPerView: 1.2,
+              spaceBetween: 12,
+            },
+
+            /* Tablet */
+
+            640: {
+              slidesPerView: 2,
+              spaceBetween: 14,
+            },
+
+            /* Small desktop */
+
+            768: {
+              slidesPerView: 2,
+              spaceBetween: 16,
+            },
+
+            /* Desktop */
+
+            1024: {
+              slidesPerView: 2.2,
+              spaceBetween: 18,
+            },
+
+            1280: {
+              slidesPerView: 2.5,
+              spaceBetween: 20,
+            },
+          }}
+          className="
+            modern-product-swiper
+            !pb-7
+          "
+        >
+
+          {products.map(
+            (item, index) => {
+
+              const accent =
+                ACCENTS[
+                  index %
+                    ACCENTS.length
+                ];
+
+              const badge =
+                BADGES[
+                  index %
+                    BADGES.length
+                ];
+
+              const price =
+                getProductPrice(
+                  item
+                );
+
+              const {
+                pct,
+                original,
+              } =
+                getDiscount(item);
+
+              const rating =
+                Math.min(
+                  5,
+                  Math.max(
+                    0,
+                    Number(
+                      item?.rating || 0
+                    )
+                  )
+                );
+
+              const added =
+                isInCart(item);
+
+              return (
+                <SwiperSlide
+                  key={item._id}
                 >
-                  {t.val}
-                </span>
 
-                <span className="text-white/45 text-[9px] leading-tight">
-                  {t.label}
-                </span>
-              </div>
-            </React.Fragment>
-          ))}
-        </div>
-      </div>
+                  <article
+                    className="
+                      group
+                      relative
+                      overflow-hidden
+                      rounded-[22px]
+                      border
+                      border-gray-100
+                      bg-white
+                      shadow-[0_4px_18px_rgba(0,0,0,.055)]
+                      transition-all
+                      duration-300
+                      hover:-translate-y-0.5
+                      hover:shadow-[0_10px_30px_rgba(0,0,0,.09)]
+                    "
+                  >
 
-
-      {/* ══════════════════════════════════════
-          DESKTOP CAROUSEL
-      ══════════════════════════════════════ */}
-      <div className="cw-desktop">
-        <Swiper
-          {...SWIPER_COMMON}
-          modules={[  Autoplay]}
-          navigation
-          className="cw-desk-swiper"
-        >
-          {reorderedData.map((item, idx) => {
-            const badge = BADGES[idx % BADGES.length];
-            const accent = ACCENTS[idx % ACCENTS.length];
-            const price = getProductPrice(item);
-            const { pct, original } = getProductDiscount(item);
-            const stars = Math.min(5, Math.max(0, Math.round(Number(item.rating) || 0)));
-            const rCount = Number(item.numReviews || 0).toLocaleString("en-IN");
-            const emi = Math.round(price / 6).toLocaleString("en-IN");
-            const added = inCart(item);
-
-            return (
-              <SwiperSlide key={item._id}>
-                <div className="cw-ds">
-                  {/* giant bg number */}
-                  <div className="cw-ds-num">{String(idx + 1).padStart(2, "0")}</div>
-
-                  {/* accent glow blob */}
-                  <div style={{
-                    position: "absolute", top: -80, right: -60,
-                    width: 420, height: 420, borderRadius: "50%",
-                    background: accent.l, filter: "blur(80px)",
-                    pointerEvents: "none", zIndex: 1,
-                  }} />
-
-                  {/* ── LEFT ── */}
-                  <div className="cw-ds-left">
+                    {/* =================================================
+                        BACKGROUND GLOW
+                    ================================================= */}
 
                     <div
-                      className="cw-ds-accentline"
-                      style={{ background: accent.h }}
+                      className="
+                        pointer-events-none
+                        absolute
+                        -right-16
+                        -top-16
+                        h-44
+                        w-44
+                        rounded-full
+                        blur-3xl
+                      "
+                      style={{
+                        background:
+                          accent.soft,
+                      }}
                     />
 
-                    <div
-                      className="cw-ds-badge"
-                      style={{ background: accent.h }}
-                    >
-                      <span style={{ fontSize: 14 }}>
-                        {badge.icon}
-                      </span>
 
-                      <span
-                        className="cw-badge-label"
+                    {/* =================================================
+                        PRODUCT IMAGE
+                    ================================================= */}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate(
+                          `/products/${item._id}`
+                        )
+                      }
+                      className="
+                        relative
+                        block
+                        w-full
+                        focus:outline-none
+                      "
+                    >
+
+                      <div
+                        className="
+                          relative
+                          mx-2
+                          mt-2
+                          flex
+                          h-[205px]
+                          items-center
+                          justify-center
+                          overflow-hidden
+                          rounded-[18px]
+                          sm:h-[250px]
+                          md:h-[270px]
+                        "
                         style={{
-                          fontFamily: "var(--f-badge)",
-                          fontSize: 13,
-                          letterSpacing: ".12em"
+                          background:
+                            `linear-gradient(
+                              145deg,
+                              ${accent.soft},
+                              rgba(249,250,251,.85)
+                            )`,
                         }}
                       >
-                        {badge.label}
-                      </span>
-                    </div>
 
-                    <h2
-                      className="cw-ds-title"
-                      onClick={() => navigate(`/products/${item._id}`)}
-                    >
-                      {item.title}
-                    </h2>
+                        {/* Badge */}
 
-                    <p className="cw-ds-desc">
-                      {item.description}
-                    </p>
-
-                    {/* ⭐ Ratings */}
-                    <div className="cw-ds-stars">
-                      {[...Array(5)].map((_, i) => (
-                        <span key={i}>
-                          {i < stars ? "⭐" : "☆"}
-                        </span>
-                      ))}
-
-                      <span className="cw-ds-rpill">
-                        {Number(item.rating || 0).toFixed(1)} ⭐
-                      </span>
-
-                      <span className="cw-ds-rcount">
-                        ({rCount})
-                      </span>
-                    </div>
-
-                    {/* 💰 Price */}
-                    <div className="cw-ds-price-row">
-
-                      <span className="cw-ds-price">
-                        <span className="cw-ds-price-sym">
-                          ₹
-                        </span>
-
-                        {price.toLocaleString("en-IN")}
-                      </span>
-
-                      <span className="cw-ds-orig">
-                        ₹{original.toLocaleString("en-IN")}
-                      </span>
-
-                      <span className="cw-ds-pct">
-                        {pct}% off
-                      </span>
-                    </div>
-
-                    {/* 🚚 Features */}
-                    <div className="cw-ds-chips">
-                      {[
-                        { icon: "🚚", t: item.shipping?.freeShipping ? "Free Delivery" : "Shipping Available" },
-                        { icon: "🛡️", t: "Secure Pay" },
-                        { icon: "🔄", t: `${item.shipping?.returnDays ?? 7}-Day Return` },
-                      ].map(({ icon, t }) => (
-                        <span key={t} className="cw-ds-chip">
-                          {icon} {t}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* 💳 EMI */}
-                    <p className="cw-ds-emi">
-                      No Cost EMI from <b>₹{emi}/mo</b>
-                    </p>
-
-                    {/* 🛒 Buttons */}
-                    <div className="cw-ds-btns">
-
-                      <button
-                        className="cw-ds-btn-p"
-                        style={{
-                          background: `linear-gradient(135deg,${accent.h},#2563eb)`,
-                          boxShadow: `0 4px 22px ${accent.ring}`
-                        }}
-                        onClick={e =>
-                          added
-                            ? navigate("/cart")
-                            : handleCart(item, e)
-                        }
-                      >
-                        🛒 {added ? "Go to Cart" : "Add to Cart"}
-                      </button>
-
-                      <button
-                        className="cw-ds-btn-s"
-                        onClick={() => navigate(`/products/${item._id}`)}
-                      >
-                        👁️ Details
-                      </button>
-
-                    </div>
-                  </div>
-
-                  {/* ── RIGHT ── */}
-                  <div className="cw-ds-right">
-                    <div className="cw-ds-float" />
-                    {/* glow ring */}
-                    <div style={{
-                      position: "absolute",
-                      width: 280, height: 280, borderRadius: "50%",
-                      background: accent.l, filter: "blur(36px)",
-                      zIndex: 0, pointerEvents: "none",
-                    }} />
-                    <div className="cw-ds-ribbon sm:mr-12 rounded-2xl">
-                      <FaFire size={12} /> {pct}% OFF
-                    </div>
-                    <img
-                      src={getProductImage(item)} alt={item.title}
-                      className="cw-ds-img border rounded-full"
-                      onClick={() => navigate(`/products/${item._id}`)}
-                    />
-                  </div>
-                </div>
-
-                {/* stats strip */}
-                {/* <div className="cw-ds-strip">
-                  {[
-                    {icon:"⭐",t:`${item.rating?.toFixed(1)||"4.2"} Rating`},
-                    {icon:"🏪",t:`${item.brand||"Official"} Store`},
-                    {icon:"📦",t:"In Stock"},
-                    {icon:"🔒",t:"Secure Checkout"},
-                    {icon:"↩️",t:"Easy Returns"},
-                  ].map(({icon,t},i,arr)=>(
-                    <React.Fragment key={t}>
-                      <div className="cw-ds-strip-item"><span>{icon}</span><span>{t}</span></div>
-                      {i<arr.length-1 && <div className="cw-ds-strip-dot"/>}
-                    </React.Fragment>
-                  ))}
-                </div> */}
-
-              </SwiperSlide>
-            );
-          })}
-        </Swiper>
-      </div>
-
-      {/* ══════════════════════════════════════
-          MOBILE CAROUSEL — completely different
-          Full-bleed card, image top, info bottom
-      ══════════════════════════════════════ */}
-      <div className="cw-mobile" style={{ padding: "14px 8px 20px" }}>
-        <Swiper
-          {...SWIPER_COMMON}
-          modules={[ Autoplay]}
-          className="cw-mob-swiper"
-          style={{ paddingBottom: 36 }}
-        >
-          {reorderedData.map((item, idx) => {
-            const badge = BADGES[idx % BADGES.length];
-            const accent = ACCENTS[idx % ACCENTS.length];
-            const price = getProductPrice(item);
-            const { pct, original } = getProductDiscount(item);
-            const stars = Math.min(5, Math.max(0, Math.round(Number(item.rating) || 0)));
-            const added = inCart(item);
-
-            return (
-              <SwiperSlide key={item._id}>
-                <div className="cw-ms" style={{ animationDelay: `${idx * .03}s` }}>
-                  {/* accent glow inside card */}
-                  <div style={{
-                    position: "absolute", top: -40, right: -40,
-                    width: 200, height: 200, borderRadius: "50%",
-                    background: accent.l, filter: "blur(50px)",
-                    pointerEvents: "none", zIndex: 0,
-                  }} />
-
-                  {/* image zone */}
-                  <div className="cw-ms-img-zone">
-                    <div className="cw-ms-badge" style={{ background: accent.h }}>
-                      {badge.icon} <span style={{ fontFamily: "var(--f-badge)", fontSize: 11, letterSpacing: ".10em" }}>{badge.label}</span>
-                    </div>
-                    <div className="cw-ms-disc">
-                      <FaFire size={9} /> {pct}% OFF
-                    </div>
-                    <img
-                      src={getProductImage(item)} alt={item.title}
-                      className="cw-ms-img"
-                      onClick={() => navigate(`/products/${item._id}`)}
-                    />
-                  </div>
-
-                  {/* body */}
-                  <div className="cw-ms-body" style={{ position: "relative", zIndex: 1 }}>
-                    <div className="cw-ms-brand">{item.brand || item.category || "Brand"}</div>
-                    <div className="cw-ms-title" onClick={() => navigate(`/products/${item._id}`)}>
-                      {item.title}
-                    </div>
-
-                    <div className="cw-ms-meta">
-                      {/* stars left */}
-                      <div className="cw-ms-stars">
-                        {[...Array(5)].map((_, i) => (
-                          <FaStar key={i} size={11} color={i < stars ? "#fbbf24" : "lightgray"} />
-                        ))}
-                        <span className="cw-ms-rpill" style={{ marginLeft: 4 }}>
-                          {Number(item.rating || 0).toFixed(1)} <FaStar size={8} />
-                        </span>
-                      </div>
-                      {/* price right */}
-                      <div className="cw-ms-price-block">
-                        <span className="cw-ms-price">
-                          <span className="cw-ms-price-sym"><FaRupeeSign /></span>
-                          {price.toLocaleString("en-IN")}
-                        </span>
-                        <div className="cw-ms-price-sub">
-                          <span className="cw-ms-orig">₹{original.toLocaleString("en-IN")}</span>
-                          <span className="cw-ms-off">{pct}% off</span>
+                        <div
+                          className="
+                            absolute
+                            left-2.5
+                            top-2.5
+                            z-20
+                            rounded-full
+                            px-2.5
+                            py-1
+                            text-[8px]
+                            font-extrabold
+                            tracking-wide
+                            text-white
+                            shadow-sm
+                            sm:text-[9px]
+                          "
+                          style={{
+                            background:
+                              accent.primary,
+                          }}
+                        >
+                          {badge.icon}{" "}
+                          {badge.text}
                         </div>
+
+
+                        {/* Discount */}
+
+                        {pct > 0 && (
+                          <div className="
+                            absolute
+                            right-2.5
+                            top-2.5
+                            z-20
+                            flex
+                            items-center
+                            gap-1
+                            rounded-full
+                            bg-white
+                            px-2
+                            py-1
+                            text-[9px]
+                            font-bold
+                            text-rose-600
+                            shadow-sm
+                          ">
+                            <FaFire
+                              size={9}
+                            />
+                            {pct}% OFF
+                          </div>
+                        )}
+
+
+                        {/* Product image */}
+
+                        <img
+                          src={getProductImage(
+                            item
+                          )}
+                          alt={
+                            item?.title ||
+                            "Product"
+                          }
+                          loading={
+                            index < 2
+                              ? "eager"
+                              : "lazy"
+                          }
+                          className="
+                            relative
+                            z-10
+                            h-full
+                            w-full
+                            object-contain
+                            p-7
+                            transition-transform
+                            duration-500
+                            ease-out
+                            group-hover:scale-105
+                          "
+                        />
+
+
+                        {/* View */}
+
+                        <span className="
+                          absolute
+                          bottom-2.5
+                          right-2.5
+                          z-20
+                          flex
+                          h-7
+                          w-7
+                          items-center
+                          justify-center
+                          rounded-full
+                          bg-white/95
+                          text-gray-700
+                          opacity-0
+                          shadow-md
+                          transition
+                          group-hover:opacity-100
+                        ">
+                          <AiOutlineArrowRight
+                            size={13}
+                          />
+                        </span>
+
                       </div>
-                    </div>
 
-                    <div className="cw-ms-trust">
-                      {[
-                        { icon: <FaTruck size={9} />, t: item.shipping?.freeShipping ? "Free Delivery" : "Shipping Available" },
-                        { icon: <FaShieldAlt size={9} />, t: "Secure Pay" },
-                        { icon: "🔄", t: `${item.shipping?.returnDays ?? 7}-Day Return` },
-                      ].map(({ icon, t }) => (
-                        <span key={t} className="cw-ms-trust-item">{icon} {t}</span>
-                      ))}
-                    </div>
+                    </button>
 
-                    <div className="cw-ms-btns">
+
+                    {/* =================================================
+                        CONTENT
+                    ================================================= */}
+
+                    <div className="
+                      relative
+                      z-10
+                      p-3
+                      sm:p-4
+                    ">
+
+                      {/* Brand */}
+
+                      <p className="
+                        truncate
+                        text-[9px]
+                        font-bold
+                        uppercase
+                        tracking-wider
+                        text-gray-400
+                        sm:text-[10px]
+                      ">
+                        {item?.brand ||
+                          item?.category ||
+                          "Featured"}
+                      </p>
+
+
+                      {/* Title */}
+
                       <button
-                        className="cw-ms-btn-p"
+                        type="button"
+                        onClick={() =>
+                          navigate(
+                            `/products/${item._id}`
+                          )
+                        }
+                        className="
+                          mt-1
+                          block
+                          w-full
+                          truncate
+                          text-left
+                          text-sm
+                          font-bold
+                          leading-5
+                          text-gray-900
+                          transition-colors
+                          hover:text-indigo-600
+                          sm:text-base
+                        "
+                      >
+                        {item?.title}
+                      </button>
+
+
+                      {/* Rating */}
+
+                      <div className="
+                        mt-1.5
+                        flex
+                        items-center
+                        gap-1.5
+                      ">
+
+                        <div className="
+                          flex
+                          items-center
+                          gap-0.5
+                        ">
+                          {[...Array(5)].map(
+                            (_, star) => (
+                              <FaStar
+                                key={star}
+                                size={10}
+                                className={
+                                  star <
+                                  Math.round(
+                                    rating
+                                  )
+                                    ? "text-amber-400"
+                                    : "text-gray-200"
+                                }
+                              />
+                            )
+                          )}
+                        </div>
+
+                        <span className="
+                          rounded-full
+                          bg-emerald-50
+                          px-1.5
+                          py-0.5
+                          text-[9px]
+                          font-bold
+                          text-emerald-600
+                        ">
+                          {rating.toFixed(1)}
+                        </span>
+
+                      </div>
+
+
+                      {/* Price */}
+
+                      <div className="
+                        mt-2
+                        flex
+                        items-end
+                        gap-2
+                      ">
+
+                        <span className="
+                          flex
+                          items-center
+                          text-lg
+                          font-extrabold
+                          leading-none
+                          text-gray-900
+                          sm:text-xl
+                        ">
+                          <FaRupeeSign
+                            size={12}
+                            className="mr-0.5"
+                          />
+
+                          {price.toLocaleString(
+                            "en-IN"
+                          )}
+                        </span>
+
+                        {original >
+                          price && (
+                          <span className="
+                            text-[10px]
+                            text-gray-400
+                            line-through
+                          ">
+                            ₹
+                            {original.toLocaleString(
+                              "en-IN"
+                            )}
+                          </span>
+                        )}
+
+                        {pct > 0 && (
+                          <span className="
+                            text-[10px]
+                            font-bold
+                            text-emerald-600
+                          ">
+                            {pct}% off
+                          </span>
+                        )}
+
+                      </div>
+
+
+                      {/* Trust */}
+
+                      <div className="
+                        mt-2
+                        flex
+                        items-center
+                        gap-2
+                        overflow-hidden
+                      ">
+
+                        <span className="
+                          flex
+                          shrink-0
+                          items-center
+                          gap-1
+                          text-[8px]
+                          font-medium
+                          text-gray-500
+                          sm:text-[9px]
+                        ">
+                          <FaTruck
+                            size={9}
+                            className="text-emerald-500"
+                          />
+                          {item?.shipping
+                            ?.freeShipping
+                            ? "Free Delivery"
+                            : "Delivery Available"}
+                        </span>
+
+                        <span className="
+                          flex
+                          shrink-0
+                          items-center
+                          gap-1
+                          text-[8px]
+                          font-medium
+                          text-gray-500
+                          sm:text-[9px]
+                        ">
+                          <FaShieldAlt
+                            size={9}
+                            className="text-indigo-500"
+                          />
+                          Secure
+                        </span>
+
+                      </div>
+
+
+                      {/* CTA */}
+
+                      <button
+                        type="button"
+                        onClick={(e) =>
+                          added
+                            ? navigate(
+                                "/cart"
+                              )
+                            : handleCart(
+                                item,
+                                e
+                              )
+                        }
+                        className="
+                          mt-3
+                          flex
+                          h-10
+                          w-full
+                          items-center
+                          justify-center
+                          gap-2
+                          rounded-xl
+                          text-xs
+                          font-bold
+                          text-white
+                          shadow-sm
+                          transition-all
+                          duration-200
+                          active:scale-[0.97]
+                          sm:h-11
+                          sm:text-sm
+                        "
                         style={{
-                          background: `linear-gradient(135deg,${accent.h},#2563eb)`,
-                          boxShadow: `0 4px 18px ${accent.ring}`,
+                          background:
+                            `linear-gradient(
+                              135deg,
+                              ${accent.primary},
+                              ${accent.secondary}
+                            )`,
                         }}
-                        onClick={e => added ? navigate("/cart") : handleCart(item, e)}
                       >
-                        <FaShoppingCart size={13} />
-                        {added ? "Go to Cart" : "Add to Cart"}
+
+                        <FaShoppingCart
+                          size={13}
+                        />
+
+                        {added
+                          ? "Go to Cart"
+                          : "Add to Cart"}
+
                       </button>
-                      <button
-                        className="cw-ms-btn-s"
-                        onClick={() => navigate(`/products/${item._id}`)}
-                      >
-                        <AiOutlineEye size={16} />
-                      </button>
+
                     </div>
-                  </div>
-                </div>
-              </SwiperSlide>
-            );
-          })}
+
+                  </article>
+
+                </SwiperSlide>
+              );
+            }
+          )}
+
         </Swiper>
+
       </div>
 
-    </div>
+    </section>
   );
 }
