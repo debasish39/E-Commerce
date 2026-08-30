@@ -11,7 +11,7 @@ export default function Carousel() {
           OFFER BANNER
       ===================================================== */}
 
-      <section className="offer-section">
+      <section className="offer-section max-w-7xl mx-auto">
 
         <div className="offer-banner">
 

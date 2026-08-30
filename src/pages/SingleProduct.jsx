@@ -72,7 +72,7 @@ const CSS = `
 .sp { font-family:var(--fb); }
 .sp-bg {
   min-height:100vh; overflow-x:hidden;
-  background:linear-gradient(160deg,#f0effd 0%,#eaf0ff 45%,#f8f9ff 100%);
+  // background:linear-gradient(160deg,#f0effd 0%,#eaf0ff 45%,#f8f9ff 100%);
   position:relative;
 }
 

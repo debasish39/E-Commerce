@@ -1,14 +1,40 @@
 import React, { useEffect, useState } from "react";
 
 const MESSAGES = [
-  "Preparing your shopping experience",
-  "Loading products",
-  "Connecting to Odikart",
-  "Personalizing your experience",
-  "Almost ready",
+  "Discover something you'll love",
+  "Curating your shopping experience",
+  "Finding today's best picks",
+  "Almost ready to explore",
 ];
 
-const LOADER_CSS = `
+const PRODUCTS = [
+  {
+    emoji: "👟",
+    label: "Sneakers",
+    price: "₹1,299",
+    className: "odk-product-1",
+  },
+  {
+    emoji: "⌚",
+    label: "Smart Watch",
+    price: "₹2,499",
+    className: "odk-product-2",
+  },
+  {
+    emoji: "🎧",
+    label: "Headphones",
+    price: "₹1,899",
+    className: "odk-product-3",
+  },
+  {
+    emoji: "👜",
+    label: "Fashion",
+    price: "₹999",
+    className: "odk-product-4",
+  },
+];
+
+const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 * {
@@ -19,293 +45,376 @@ const LOADER_CSS = `
    ROOT
 ========================================================= */
 
-.odikart-loader {
+.odk-loader {
   position: fixed;
   inset: 0;
+
   z-index: 999999;
 
   width: 100%;
   height: 100dvh;
 
+  overflow: hidden;
+
   display: flex;
   align-items: center;
   justify-content: center;
 
-  overflow: hidden;
-
   font-family: "Plus Jakarta Sans", sans-serif;
+
+  color: #0f172a;
 
   background:
     radial-gradient(
-      circle at 10% 10%,
-      rgba(139, 92, 246, 0.20),
-      transparent 30%
-    ),
-    radial-gradient(
-      circle at 90% 90%,
-      rgba(37, 99, 235, 0.18),
-      transparent 32%
+      circle at 50% 45%,
+      rgba(99, 102, 241, 0.10),
+      transparent 35%
     ),
     linear-gradient(
       135deg,
-      #fafaff 0%,
-      #f5f3ff 40%,
-      #eff6ff 75%,
-      #ffffff 100%
+      #fafbff,
+      #f5f3ff 50%,
+      #eff6ff
     );
 }
 
 /* =========================================================
-   BACKGROUND GRID
+   BACKGROUND
 ========================================================= */
 
-.odikart-loader-grid {
+.odk-bg {
   position: absolute;
   inset: 0;
 
-  opacity: 0.45;
-
-  background-image:
-    linear-gradient(
-      rgba(99, 102, 241, 0.045) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      rgba(99, 102, 241, 0.045) 1px,
-      transparent 1px
-    );
-
-  background-size: 42px 42px;
-
-  mask-image: radial-gradient(
-    ellipse at center,
-    black 10%,
-    transparent 78%
-  );
-
-  -webkit-mask-image: radial-gradient(
-    ellipse at center,
-    black 10%,
-    transparent 78%
-  );
-}
-
-/* =========================================================
-   AMBIENT ORBS
-========================================================= */
-
-.odikart-orb {
-  position: absolute;
-
-  border-radius: 50%;
+  overflow: hidden;
 
   pointer-events: none;
-
-  filter: blur(90px);
-
-  animation: odikartOrbFloat 12s ease-in-out infinite;
 }
 
-.odikart-orb-1 {
-  width: 360px;
-  height: 360px;
+/* soft light */
 
-  top: -150px;
-  left: -130px;
+.odk-light {
+  position: absolute;
 
-  background: #8b5cf6;
-
-  opacity: 0.15;
-}
-
-.odikart-orb-2 {
-  width: 330px;
-  height: 330px;
-
-  right: -130px;
-  bottom: -130px;
-
-  background: #2563eb;
-
-  opacity: 0.14;
-
-  animation-delay: -4s;
-}
-
-.odikart-orb-3 {
-  width: 220px;
-  height: 220px;
+  width: 420px;
+  height: 420px;
 
   left: 50%;
   top: 50%;
 
-  margin-left: -110px;
-  margin-top: -110px;
-
-  background: #6366f1;
-
-  opacity: 0.06;
-
-  animation-delay: -8s;
-}
-
-@keyframes odikartOrbFloat {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-
-  50% {
-    transform: translate3d(25px, -20px, 0) scale(1.06);
-  }
-}
-
-/* =========================================================
-   PARTICLES
-========================================================= */
-
-.odikart-particle {
-  position: absolute;
-
-  width: 5px;
-  height: 5px;
+  transform: translate(-50%, -50%);
 
   border-radius: 50%;
 
-  background: #6366f1;
+  background:
+    radial-gradient(
+      circle,
+      rgba(99, 102, 241, 0.12),
+      transparent 65%
+    );
 
-  opacity: 0.25;
+  filter: blur(10px);
 
-  animation: odikartParticle 5s ease-in-out infinite;
+  animation:
+    odkLightPulse
+    5s
+    ease-in-out
+    infinite;
 }
 
-.odikart-particle-1 {
-  left: 13%;
-  top: 27%;
-}
-
-.odikart-particle-2 {
-  right: 15%;
-  top: 21%;
-
-  width: 4px;
-  height: 4px;
-
-  animation-delay: -1.2s;
-}
-
-.odikart-particle-3 {
-  left: 17%;
-  bottom: 23%;
-
-  width: 4px;
-  height: 4px;
-
-  animation-delay: -2.4s;
-}
-
-.odikart-particle-4 {
-  right: 18%;
-  bottom: 27%;
-
-  width: 6px;
-  height: 6px;
-
-  animation-delay: -3.5s;
-}
-
-@keyframes odikartParticle {
+@keyframes odkLightPulse {
   0%,
   100% {
-    transform: translateY(0) scale(1);
-    opacity: 0.2;
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0.5;
   }
 
   50% {
-    transform: translateY(-20px) scale(1.35);
-    opacity: 0.55;
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* grid */
+
+.odk-grid {
+  position: absolute;
+  inset: 0;
+
+  opacity: 0.3;
+
+  background-image:
+    linear-gradient(
+      rgba(99, 102, 241, 0.035) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(99, 102, 241, 0.035) 1px,
+      transparent 1px
+    );
+
+  background-size: 50px 50px;
+
+  mask-image:
+    radial-gradient(
+      ellipse at center,
+      black 5%,
+      transparent 72%
+    );
+
+  -webkit-mask-image:
+    radial-gradient(
+      ellipse at center,
+      black 5%,
+      transparent 72%
+    );
+}
+
+/* =========================================================
+   DECORATIVE CIRCLES
+========================================================= */
+
+.odk-circle {
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  border: 1px solid rgba(99, 102, 241, 0.08);
+
+  border-radius: 50%;
+
+  transform: translate(-50%, -50%);
+
+  animation:
+    odkCirclePulse
+    5s
+    ease-in-out
+    infinite;
+}
+
+.odk-circle-1 {
+  width: 300px;
+  height: 300px;
+}
+
+.odk-circle-2 {
+  width: 460px;
+  height: 460px;
+
+  animation-delay: -1s;
+}
+
+.odk-circle-3 {
+  width: 650px;
+  height: 650px;
+
+  animation-delay: -2s;
+}
+
+@keyframes odkCirclePulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1.02);
   }
 }
 
 /* =========================================================
-   MAIN CONTENT
+   PRODUCT CARDS
 ========================================================= */
 
-.odikart-loader-content {
-  position: relative;
-  z-index: 10;
+.odk-products {
+  position: absolute;
+  inset: 0;
 
-  width: min(92%, 430px);
-
-  display: flex;
-  justify-content: center;
+  pointer-events: none;
 }
 
-/* =========================================================
-   CARD
-========================================================= */
-
-.odikart-loader-card {
-  position: relative;
-
-  width: 100%;
-
-  padding: 38px 34px 30px;
-
-  border-radius: 34px;
-
-  border: 1px solid rgba(255, 255, 255, 0.85);
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255, 255, 255, 0.78),
-      rgba(255, 255, 255, 0.55)
-    );
-
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-
-  box-shadow:
-    0 35px 100px rgba(79, 70, 229, 0.12),
-    0 12px 35px rgba(15, 23, 42, 0.06);
-
-  animation:
-    odikartCardIn
-    0.8s
-    cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.odikart-loader-card::before {
-  content: "";
-
+.odk-product {
   position: absolute;
 
-  top: 0;
-  left: 12%;
+  width: 150px;
 
-  width: 76%;
-  height: 1px;
+  padding: 10px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 9px;
+
+  border: 1px solid rgba(255, 255, 255, 0.9);
+
+  border-radius: 16px;
+
+  background: rgba(255, 255, 255, 0.72);
+
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.08);
+
+  backdrop-filter: blur(20px);
+
+  -webkit-backdrop-filter: blur(20px);
+
+  opacity: 0;
+
+  animation:
+    odkProductAppear
+    1s
+    ease-out
+    forwards;
+}
+
+.odk-product-image {
+  width: 39px;
+  height: 39px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 12px;
 
   background:
     linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.95),
-      transparent
+      135deg,
+      #eef2ff,
+      #dbeafe
     );
+
+  font-size: 19px;
 }
 
-@keyframes odikartCardIn {
+.odk-product-info {
+  min-width: 0;
+
+  text-align: left;
+}
+
+.odk-product-name {
+  display: block;
+
+  overflow: hidden;
+
+  color: #475569;
+
+  font-size: 8px;
+
+  font-weight: 700;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+.odk-product-price {
+  display: block;
+
+  margin-top: 2px;
+
+  color: #0f172a;
+
+  font-size: 10px;
+
+  font-weight: 800;
+}
+
+.odk-product-1 {
+  left: 8%;
+  top: 25%;
+
+  animation-delay: 0.4s;
+}
+
+.odk-product-2 {
+  right: 7%;
+  top: 20%;
+
+  animation-delay: 0.7s;
+}
+
+.odk-product-3 {
+  left: 7%;
+  bottom: 23%;
+
+  animation-delay: 1s;
+}
+
+.odk-product-4 {
+  right: 8%;
+  bottom: 20%;
+
+  animation-delay: 1.3s;
+}
+
+@keyframes odkProductAppear {
   from {
     opacity: 0;
-    transform: translateY(22px) scale(0.96);
+
+    transform:
+      translateY(20px)
+      scale(0.85);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.odk-main {
+  position: relative;
+
+  z-index: 20;
+
+  width: min(90%, 410px);
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  text-align: center;
+
+  animation:
+    odkMainIn
+    0.9s
+    cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes odkMainIn {
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(25px)
+      scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0)
+      scale(1);
   }
 }
 
@@ -313,149 +422,130 @@ const LOADER_CSS = `
    LOGO
 ========================================================= */
 
-.odikart-logo-wrap {
+.odk-logo {
   position: relative;
 
-  width: 128px;
-  height: 128px;
-
-  margin: 0 auto;
+  width: 104px;
+  height: 104px;
 
   display: flex;
+
   align-items: center;
   justify-content: center;
 }
 
-/* Outer rotating gradient */
-
-.odikart-logo-ring {
+.odk-logo-glow {
   position: absolute;
+
+  inset: 12px;
+
+  border-radius: 30px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #6366f1,
+      #2563eb
+    );
+
+  filter: blur(30px);
+
+  opacity: 0.25;
+
+  animation:
+    odkLogoGlow
+    3s
+    ease-in-out
+    infinite;
+}
+
+.odk-logo-ring {
+  position: absolute;
+
   inset: 0;
 
-  border-radius: 36px;
+  padding: 2px;
 
-  padding: 3px;
+  border-radius: 30px;
 
   background:
     conic-gradient(
       from 0deg,
-      #8b5cf6,
       #6366f1,
+      #8b5cf6,
       #3b82f6,
       #06b6d4,
-      #6366f1,
-      #8b5cf6
+      #6366f1
     );
 
   animation:
-    odikartLogoRotate
-    4s
+    odkRing
+    5s
     linear
     infinite;
 }
 
-.odikart-logo-ring-inner {
-  position: absolute;
-  inset: 3px;
+.odk-logo-ring-inner {
+  width: 100%;
+  height: 100%;
 
-  border-radius: 33px;
+  border-radius: 28px;
 
-  background:
-    linear-gradient(
-      145deg,
-      #ffffff,
-      #f8fafc
-    );
+  background: #ffffff;
 }
 
-/* Logo glow */
-
-.odikart-logo-glow {
+.odk-logo-box {
   position: absolute;
 
-  width: 90px;
-  height: 90px;
-
-  border-radius: 30px;
-
-  background: #6366f1;
-
-  filter: blur(35px);
-
-  opacity: 0.22;
-
-  animation:
-    odikartLogoGlow
-    3s
-    ease-in-out
-    infinite;
-}
-
-/* Actual logo container */
-
-.odikart-logo {
-  position: relative;
-  z-index: 3;
-
-  width: 88px;
-  height: 88px;
-
-  border-radius: 27px;
+  inset: 9px;
 
   display: flex;
+
   align-items: center;
   justify-content: center;
 
-  // background:
-  //   linear-gradient(
-  //     135deg,
-  //     #8b5cf6 0%,
-  //     #6366f1 48%,
-  //     #2563eb 100%
-  //   );
+  overflow: hidden;
+
+  border-radius: 25px;
+
+  background: #ffffff;
 
   box-shadow:
-    0 18px 45px rgba(79, 70, 229, 0.30),
-    inset 0 1px 1px rgba(255, 255, 255, 0.45);
+    0 18px 50px rgba(79, 70, 229, 0.18);
 
   animation:
-    odikartLogoFloat
+    odkLogoFloat
     3s
     ease-in-out
     infinite;
 }
 
-.odikart-logo img {
-  width: 93px;
-  height: 93px;
+.odk-logo-box img {
+  width: 70px;
+  height: 70px;
 
   object-fit: contain;
 
   border-radius: 18px;
-
-  filter:
-    drop-shadow(
-      0 7px 14px rgba(15, 23, 42, 0.12)
-    );
 }
 
-.odikart-logo-fallback {
-  color: white;
+.odk-logo-fallback {
+  display: none;
 
-  font-size: 38px;
+  color: #4f46e5;
+
+  font-size: 32px;
 
   font-weight: 800;
-
-  letter-spacing: -3px;
 }
 
-@keyframes odikartLogoRotate {
+@keyframes odkRing {
   to {
     transform: rotate(360deg);
   }
 }
 
-@keyframes odikartLogoFloat {
+@keyframes odkLogoFloat {
   0%,
   100% {
     transform: translateY(0);
@@ -466,16 +556,16 @@ const LOADER_CSS = `
   }
 }
 
-@keyframes odikartLogoGlow {
+@keyframes odkLogoGlow {
   0%,
   100% {
-    opacity: 0.16;
     transform: scale(0.9);
+    opacity: 0.18;
   }
 
   50% {
-    opacity: 0.30;
-    transform: scale(1.08);
+    transform: scale(1.1);
+    opacity: 0.38;
   }
 }
 
@@ -483,10 +573,14 @@ const LOADER_CSS = `
    BRAND
 ========================================================= */
 
-.odikart-title {
-  margin-top: 24px;
+.odk-brand {
+  margin-top: 21px;
+}
 
-  text-align: center;
+.odk-title {
+  margin: 0;
+
+  color: #0f172a;
 
   font-size: 34px;
 
@@ -495,12 +589,14 @@ const LOADER_CSS = `
   font-weight: 800;
 
   letter-spacing: -1.8px;
+}
 
+.odk-title span {
   background:
     linear-gradient(
       135deg,
-      #8b5cf6,
-      #6366f1 45%,
+      #7c3aed,
+      #4f46e5,
       #2563eb
     );
 
@@ -511,154 +607,204 @@ const LOADER_CSS = `
   -webkit-text-fill-color: transparent;
 }
 
-.odikart-subtitle {
-  margin-top: 10px;
-
-  text-align: center;
+.odk-tagline {
+  margin: 10px 0 0;
 
   color: #64748b;
 
-  font-size: 13px;
-
-  line-height: 1.6;
+  font-size: 11px;
 
   font-weight: 500;
 }
 
 /* =========================================================
-   STATUS
+   DISCOVERY BADGES
 ========================================================= */
 
-.odikart-status {
-  min-height: 24px;
-
-  margin-top: 24px;
-
+.odk-badges {
   display: flex;
-  align-items: center;
+
   justify-content: center;
 
-  gap: 9px;
+  gap: 7px;
+
+  margin-top: 17px;
 }
 
-.odikart-status-dot {
-  position: relative;
+.odk-badge {
+  padding: 7px 10px;
 
-  width: 8px;
-  height: 8px;
+  border-radius: 999px;
 
-  flex-shrink: 0;
-}
+  color: #64748b;
 
-.odikart-status-dot::before {
-  content: "";
+  font-size: 8px;
 
-  position: absolute;
-  inset: 0;
+  font-weight: 700;
 
-  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.8);
 
-  background: #4f46e5;
+  background: rgba(255, 255, 255, 0.6);
+
+  box-shadow:
+    0 7px 20px rgba(15, 23, 42, 0.04);
 
   animation:
-    odikartPing
-    1.5s
-    ease-out
+    odkBadgeFloat
+    3s
+    ease-in-out
     infinite;
 }
 
-.odikart-status-dot::after {
-  content: "";
-
-  position: absolute;
-
-  inset: 2px;
-
-  border-radius: 50%;
-
-  background: #4f46e5;
+.odk-badge:nth-child(2) {
+  animation-delay: -0.7s;
 }
 
-.odikart-status-text {
-  color: #64748b;
+.odk-badge:nth-child(3) {
+  animation-delay: -1.4s;
+}
 
-  font-size: 12px;
+@keyframes odkBadgeFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
 
-  font-weight: 600;
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+.odk-message {
+  margin-top: 21px;
+
+  min-height: 42px;
+}
+
+.odk-message-title {
+  margin: 0;
+
+  color: #0f172a;
+
+  font-size: 14px;
+
+  font-weight: 800;
+
+  letter-spacing: -0.3px;
 
   animation:
-    odikartMessage
+    odkMessage
     0.45s
     ease;
 }
 
-@keyframes odikartPing {
-  0% {
-    transform: scale(1);
-    opacity: 0.65;
-  }
+.odk-message-subtitle {
+  margin: 5px 0 0;
 
-  75%,
-  100% {
-    transform: scale(2.5);
-    opacity: 0;
-  }
+  color: #94a3b8;
+
+  font-size: 9px;
+
+  font-weight: 500;
 }
 
-@keyframes odikartMessage {
+@keyframes odkMessage {
   from {
     opacity: 0;
-    transform: translateY(5px);
+
+    transform: translateY(7px);
   }
 
   to {
     opacity: 1;
+
     transform: translateY(0);
   }
 }
 
 /* =========================================================
-   PROGRESS
+   LOADING
 ========================================================= */
 
-.odikart-progress {
-  margin-top: 22px;
+.odk-loading {
+  width: 100%;
+
+  margin-top: 18px;
 }
 
-.odikart-progress-head {
+.odk-loading-top {
   display: flex;
 
-  align-items: center;
   justify-content: space-between;
 
-  margin-bottom: 8px;
+  align-items: center;
+
+  margin-bottom: 7px;
 }
 
-.odikart-progress-label {
+.odk-loading-label {
   color: #94a3b8;
 
-  font-size: 9px;
+  font-size: 8px;
 
   font-weight: 800;
 
-  letter-spacing: 0.18em;
+  letter-spacing: 0.12em;
 
   text-transform: uppercase;
 }
 
-.odikart-progress-value {
-  color: #4f46e5;
+.odk-loading-status {
+  display: flex;
 
-  font-size: 10px;
+  align-items: center;
+
+  gap: 5px;
+
+  color: #6366f1;
+
+  font-size: 8px;
 
   font-weight: 800;
 }
 
-.odikart-progress-track {
+.odk-status-dot {
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+
+  animation:
+    odkStatusPulse
+    1.2s
+    ease-in-out
+    infinite;
+}
+
+@keyframes odkStatusPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: scale(1.4);
+    opacity: 1;
+  }
+}
+
+.odk-track {
   position: relative;
 
   width: 100%;
-  height: 7px;
+  height: 5px;
 
   overflow: hidden;
 
@@ -667,13 +813,7 @@ const LOADER_CSS = `
   background: rgba(99, 102, 241, 0.10);
 }
 
-.odikart-progress-bar {
-  position: absolute;
-
-  top: 0;
-  left: 0;
-
-  width: 35%;
+.odk-progress {
   height: 100%;
 
   border-radius: inherit;
@@ -687,93 +827,64 @@ const LOADER_CSS = `
     );
 
   box-shadow:
-    0 0 18px rgba(99, 102, 241, 0.35);
+    0 0 15px rgba(99, 102, 241, 0.3);
 
-  animation:
-    odikartProgress
-    1.7s
-    cubic-bezier(0.65, 0.05, 0.36, 1)
-    infinite;
+  transition:
+    width
+    0.2s
+    ease-out;
 }
 
-.odikart-progress-bar::after {
-  content: "";
-
+.odk-progress-shine {
   position: absolute;
 
   top: 0;
-  bottom: 0;
 
-  width: 55px;
-
-  right: -55px;
+  width: 45px;
+  height: 100%;
 
   background:
     linear-gradient(
       90deg,
       transparent,
-      rgba(255, 255, 255, 0.75),
+      rgba(255,255,255,0.8),
       transparent
     );
 
-  transform: skewX(-20deg);
-
   animation:
-    odikartShimmer
-    1.2s
+    odkShine
+    1.5s
     linear
     infinite;
 }
 
-@keyframes odikartProgress {
-  0% {
-    transform: translateX(-130%);
-    width: 22%;
-  }
-
-  45% {
-    transform: translateX(120%);
-    width: 55%;
-  }
-
-  100% {
-    transform: translateX(420%);
-    width: 22%;
-  }
-}
-
-@keyframes odikartShimmer {
+@keyframes odkShine {
   from {
-    transform: translateX(-90px) skewX(-20deg);
+    left: -50px;
   }
 
   to {
-    transform: translateX(180px) skewX(-20deg);
+    left: 110%;
   }
 }
 
 /* =========================================================
-   FEATURE ROW
+   TRUST
 ========================================================= */
 
-.odikart-features {
+.odk-trust {
   display: flex;
 
   align-items: center;
+
   justify-content: center;
 
   gap: 13px;
 
-  margin-top: 24px;
-
-  padding-top: 19px;
-
-  border-top:
-    1px solid
-    rgba(148, 163, 184, 0.15);
+  margin-top: 16px;
 }
 
-.odikart-feature {
+.odk-trust-item {
   display: flex;
 
   align-items: center;
@@ -782,60 +893,29 @@ const LOADER_CSS = `
 
   color: #94a3b8;
 
-  font-size: 9px;
+  font-size: 8px;
 
   font-weight: 700;
 }
 
-.odikart-feature-dot {
-  width: 5px;
-  height: 5px;
-
-  border-radius: 50%;
-}
-
-.odikart-feature-green {
-  background: #22c55e;
-}
-
-.odikart-feature-blue {
-  background: #3b82f6;
-}
-
-.odikart-feature-purple {
-  background: #8b5cf6;
-}
-
-.odikart-feature-divider {
-  width: 1px;
-  height: 11px;
-
-  background: rgba(148, 163, 184, 0.22);
+.odk-trust-icon {
+  font-size: 9px;
 }
 
 /* =========================================================
    FOOTER
 ========================================================= */
 
-.odikart-loader-footer {
-  position: absolute;
+.odk-footer {
+  margin-top: 16px;
 
-  bottom: 20px;
+  color: #a1aab8;
 
-  left: 0;
-  right: 0;
-
-  z-index: 5;
-
-  text-align: center;
-
-  color: #94a3b8;
-
-  font-size: 8px;
+  font-size: 7px;
 
   font-weight: 700;
 
-  letter-spacing: 0.22em;
+  letter-spacing: 0.15em;
 
   text-transform: uppercase;
 }
@@ -844,101 +924,88 @@ const LOADER_CSS = `
    MOBILE
 ========================================================= */
 
+@media (max-width: 700px) {
+  .odk-product {
+    display: none;
+  }
+
+  .odk-circle-3 {
+    width: 480px;
+    height: 480px;
+  }
+}
+
 @media (max-width: 600px) {
-  .odikart-loader-content {
-    width: min(91%, 380px);
+  .odk-main {
+    width: min(88%, 390px);
   }
 
-  .odikart-loader-card {
-    padding: 32px 23px 27px;
-
-    border-radius: 28px;
+  .odk-logo {
+    width: 88px;
+    height: 88px;
   }
 
-  .odikart-logo-wrap {
-    width: 112px;
-    height: 112px;
+  .odk-logo-box {
+    inset: 8px;
+
+    border-radius: 22px;
   }
 
-  .odikart-logo {
-    width: 78px;
-    height: 78px;
-
-    border-radius: 23px;
+  .odk-logo-box img {
+    width: 60px;
+    height: 60px;
   }
 
-  .odikart-logo img {
-    width: 62px;
-    height: 62px;
+  .odk-logo-ring {
+    border-radius: 27px;
   }
 
-  .odikart-logo-fallback {
-    font-size: 32px;
+  .odk-logo-ring-inner {
+    border-radius: 25px;
   }
 
-  .odikart-title {
-    font-size: 29px;
-
-    margin-top: 21px;
+  .odk-title {
+    font-size: 28px;
   }
 
-  .odikart-subtitle {
-    font-size: 12px;
+  .odk-tagline {
+    font-size: 10px;
   }
 
-  .odikart-status {
-    margin-top: 20px;
+  .odk-message {
+    margin-top: 17px;
   }
 
-  .odikart-features {
-    gap: 9px;
+  .odk-loading {
+    margin-top: 16px;
   }
 
-  .odikart-feature {
-    font-size: 8px;
+  .odk-badges {
+    margin-top: 14px;
   }
 
-  .odikart-loader-footer {
-    bottom: 13px;
+  .odk-badge {
+    padding: 6px 8px;
 
     font-size: 7px;
   }
 }
 
-/* =========================================================
-   VERY SMALL DEVICES
-========================================================= */
-
 @media (max-width: 360px) {
-  .odikart-loader-card {
-    padding: 27px 17px 23px;
+  .odk-title {
+    font-size: 25px;
   }
 
-  .odikart-logo-wrap {
-    width: 96px;
-    height: 96px;
+  .odk-message-title {
+    font-size: 12px;
   }
 
-  .odikart-logo {
-    width: 68px;
-    height: 68px;
+  .odk-trust {
+    gap: 8px;
   }
 
-  .odikart-logo img {
-    width: 54px;
-    height: 54px;
-  }
-
-  .odikart-title {
-    font-size: 26px;
-  }
-
-  .odikart-feature-divider {
-    display: none;
-  }
-
-  .odikart-features {
-    gap: 7px;
+  .odk-trust-item {
+    font-size: 7px;
   }
 }
 
@@ -952,266 +1019,290 @@ const LOADER_CSS = `
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 `;
 
 export default function ModernAppLoader() {
-  const [messageIndex, setMessageIndex] =
-    useState(0);
-
-  const [progress, setProgress] =
-    useState(8);
+  const [messageIndex, setMessageIndex] = useState(0);
+  const [progress, setProgress] = useState(5);
 
   /* =======================================================
      MESSAGE ROTATION
   ======================================================= */
 
   useEffect(() => {
-    const messageTimer =
-      setInterval(() => {
-        setMessageIndex(
-          (current) =>
-            (current + 1) %
-            MESSAGES.length
-        );
-      }, 1200);
+    const timer = setInterval(() => {
+      setMessageIndex((current) => {
+        if (current >= MESSAGES.length - 1) {
+          return current;
+        }
 
-    return () => {
-      clearInterval(messageTimer);
-    };
+        return current + 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, []);
 
   /* =======================================================
-     REALISTIC PROGRESS
+     PROGRESS
   ======================================================= */
 
   useEffect(() => {
-    const progressTimer =
-      setInterval(() => {
-        setProgress((current) => {
-          if (current >= 94) {
-            return 94;
-          }
+    const timer = setInterval(() => {
+      setProgress((current) => {
+        if (current >= 94) {
+          return 94;
+        }
 
-          let increase = 1;
+        if (current < 25) {
+          return Math.min(current + 3, 94);
+        }
 
-          if (current < 25) {
-            increase = 4;
-          } else if (current < 55) {
-            increase = 2;
-          } else if (current < 80) {
-            increase = 1;
-          }
+        if (current < 60) {
+          return Math.min(current + 2, 94);
+        }
 
-          return Math.min(
-            current + increase,
-            94
-          );
-        });
-      }, 180);
+        return Math.min(current + 1, 94);
+      });
+    }, 100);
 
-    return () => {
-      clearInterval(progressTimer);
-    };
+    return () => clearInterval(timer);
   }, []);
 
   return (
     <>
-      <style>{LOADER_CSS}</style>
+      <style>{CSS}</style>
 
-      <div className="odikart-loader">
+      <div className="odk-loader">
 
         {/* =================================================
             BACKGROUND
         ================================================= */}
 
-        <div className="odikart-loader-grid" />
+        <div className="odk-bg">
 
-        <div className="odikart-orb odikart-orb-1" />
+          <div className="odk-light" />
 
-        <div className="odikart-orb odikart-orb-2" />
+          <div className="odk-grid" />
 
-        <div className="odikart-orb odikart-orb-3" />
+          <div className="odk-circle odk-circle-1" />
 
-        {/* Particles */}
+          <div className="odk-circle odk-circle-2" />
 
-        <span className="odikart-particle odikart-particle-1" />
+          <div className="odk-circle odk-circle-3" />
 
-        <span className="odikart-particle odikart-particle-2" />
+          {/* Product cards */}
 
-        <span className="odikart-particle odikart-particle-3" />
+          <div className="odk-products">
 
-        <span className="odikart-particle odikart-particle-4" />
-
-        {/* =================================================
-            CONTENT
-        ================================================= */}
-
-        <div className="odikart-loader-content">
-
-          <div className="odikart-loader-card">
-
-            {/* =================================================
-                LOGO
-            ================================================= */}
-
-            <div className="odikart-logo-wrap">
-
-              <div className="odikart-logo-ring">
-                <div className="odikart-logo-ring-inner" />
-              </div>
-
-              <div className="odikart-logo-glow" />
-
-              <div className="odikart-logo">
-
-                <img
-                  src="/logo.png"
-                  alt="Odikart"
-                  onError={(event) => {
-                    event.currentTarget.style.display =
-                      "none";
-
-                    const fallback =
-                      event.currentTarget
-                        .nextElementSibling;
-
-                    if (fallback) {
-                      fallback.style.display =
-                        "block";
-                    }
-                  }}
-                />
-
-                <span
-                  className="odikart-logo-fallback"
-                  style={{
-                    display: "none",
-                  }}
-                >
-                  O
-                </span>
-
-              </div>
-
-            </div>
-
-            {/* =================================================
-                BRAND
-            ================================================= */}
-
-            <h1 className="odikart-title">
-              Odikart
-            </h1>
-
-            <p className="odikart-subtitle">
-              Everything you love, in one place.
-            </p>
-
-            {/* =================================================
-                STATUS
-            ================================================= */}
-
-            <div className="odikart-status">
-
-              <span className="odikart-status-dot" />
-
-              <span
-                key={messageIndex}
-                className="odikart-status-text"
+            {PRODUCTS.map((product) => (
+              <div
+                key={product.label}
+                className={`odk-product ${product.className}`}
               >
-                {MESSAGES[messageIndex]}
-              </span>
 
-            </div>
+                <div className="odk-product-image">
+                  {product.emoji}
+                </div>
 
-            {/* =================================================
-                PROGRESS
-            ================================================= */}
+                <div className="odk-product-info">
 
-            <div className="odikart-progress">
+                  <span className="odk-product-name">
+                    {product.label}
+                  </span>
 
-              <div className="odikart-progress-head">
+                  <span className="odk-product-price">
+                    {product.price}
+                  </span>
 
-                <span className="odikart-progress-label">
-                  Loading
-                </span>
-
-                <span className="odikart-progress-value">
-                  {progress}%
-                </span>
+                </div>
 
               </div>
-
-              <div className="odikart-progress-track">
-
-                <div
-                  className="odikart-progress-bar"
-                  style={{
-                    animation: "none",
-                    width: `${progress}%`,
-                    transform: "translateX(0)",
-                  }}
-                />
-
-              </div>
-
-            </div>
-
-            {/* =================================================
-                FEATURES
-            ================================================= */}
-
-            <div className="odikart-features">
-
-              <div className="odikart-feature">
-                <span
-                  className="
-                    odikart-feature-dot
-                    odikart-feature-green
-                  "
-                />
-                Secure
-              </div>
-
-              <span className="odikart-feature-divider" />
-
-              <div className="odikart-feature">
-                <span
-                  className="
-                    odikart-feature-dot
-                    odikart-feature-blue
-                  "
-                />
-                Fast
-              </div>
-
-              <span className="odikart-feature-divider" />
-
-              <div className="odikart-feature">
-                <span
-                  className="
-                    odikart-feature-dot
-                    odikart-feature-purple
-                  "
-                />
-                Reliable
-              </div>
-
-            </div>
+            ))}
 
           </div>
 
         </div>
 
         {/* =================================================
-            FOOTER
+            MAIN
         ================================================= */}
 
-        <div className="odikart-loader-footer">
-          Shop smarter · Shop better · Odikart
-        </div>
+        <main className="odk-main">
+
+          {/* =================================================
+              LOGO
+          ================================================= */}
+
+          <div className="odk-logo">
+
+            <div className="odk-logo-glow" />
+
+            <div className="odk-logo-ring">
+
+              <div className="odk-logo-ring-inner" />
+
+            </div>
+
+            <div className="odk-logo-box">
+
+              <img
+                src="/logo.png"
+                alt="Odikart"
+                onError={(event) => {
+                  event.currentTarget.style.display = "none";
+
+                  const fallback =
+                    event.currentTarget.nextElementSibling;
+
+                  if (fallback) {
+                    fallback.style.display = "block";
+                  }
+                }}
+              />
+
+              <span className="odk-logo-fallback">
+                O
+              </span>
+
+            </div>
+
+          </div>
+
+          {/* =================================================
+              BRAND
+          ================================================= */}
+
+          <div className="odk-brand">
+
+            <h1 className="odk-title">
+              Shop with{" "}
+              <span>Odikart</span>
+            </h1>
+
+            <p className="odk-tagline">
+              Discover products you'll love.
+            </p>
+
+          </div>
+
+          {/* =================================================
+              DISCOVERY BADGES
+          ================================================= */}
+
+          <div className="odk-badges">
+
+            <span className="odk-badge">
+              ✨ New arrivals
+            </span>
+
+            <span className="odk-badge">
+              🔥 Trending
+            </span>
+
+            <span className="odk-badge">
+              🎁 Best deals
+            </span>
+
+          </div>
+
+          {/* =================================================
+              MESSAGE
+          ================================================= */}
+
+          <div className="odk-message">
+
+            <h2
+              key={messageIndex}
+              className="odk-message-title"
+            >
+              {MESSAGES[messageIndex]}
+            </h2>
+
+            <p className="odk-message-subtitle">
+              A better way to discover, shop and enjoy.
+            </p>
+
+          </div>
+
+          {/* =================================================
+              LOADING
+          ================================================= */}
+
+          <div className="odk-loading">
+
+            <div className="odk-loading-top">
+
+              <span className="odk-loading-label">
+                Getting things ready
+              </span>
+
+              <span className="odk-loading-status">
+
+                <span className="odk-status-dot" />
+
+                {progress}%
+
+              </span>
+
+            </div>
+
+            <div className="odk-track">
+
+              <div
+                className="odk-progress"
+                style={{
+                  width: `${progress}%`,
+                }}
+              />
+
+              <div className="odk-progress-shine" />
+
+            </div>
+
+          </div>
+
+          {/* =================================================
+              TRUST
+          ================================================= */}
+
+          <div className="odk-trust">
+
+            <div className="odk-trust-item">
+              <span className="odk-trust-icon">
+                🔒
+              </span>
+              Secure
+            </div>
+
+            <div className="odk-trust-item">
+              <span className="odk-trust-icon">
+                ⚡
+              </span>
+              Fast
+            </div>
+
+            <div className="odk-trust-item">
+              <span className="odk-trust-icon">
+                💙
+              </span>
+              Trusted
+            </div>
+
+          </div>
+
+          {/* =================================================
+              FOOTER
+          ================================================= */}
+
+          <p className="odk-footer">
+            Your shopping journey starts here
+          </p>
+
+        </main>
 
       </div>
     </>

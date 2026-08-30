@@ -415,35 +415,7 @@ export default function BestSellerProducts() {
         .bs-left { left: 9px; }
         .bs-right { right: 9px; }
 
-        .bs-dots {
-          position: absolute;
-          left: 50%;
-          bottom: 10px;
-          z-index: 25;
-          display: flex;
-          gap: 4px;
-          transform: translateX(-50%);
-          padding: 4px 7px;
-          border-radius: 999px;
-          background: rgba(255,255,255,.86);
-          backdrop-filter: blur(8px);
-        }
-
-        .bs-dot {
-          width: 5px;
-          height: 5px;
-          padding: 0;
-          border: 0;
-          border-radius: 999px;
-          background: #cbd5e1;
-          cursor: pointer;
-          transition: .2s;
-        }
-
-        .bs-dot.active {
-          width: 14px;
-          background: #4f46e5;
-        }
+        
 
         .bs-badge {
           position: absolute;
@@ -784,53 +756,11 @@ export default function BestSellerProducts() {
                       />
                     )}
 
-                  <div className="bs-overlay">
-                    <button
-                      type="button"
-                      className="bs-quick"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        openProduct(product);
-                      }}
-                    >
-                      <FaEye size={12} />
-                      Quick View
-                    </button>
-                  </div>
+                  
 
                   {images.length > 1 && (
                     <>
-                      <button
-                        type="button"
-                        className="bs-arrow bs-left"
-                        onClick={(event) =>
-                          changeImage(
-                            event,
-                            product._id,
-                            images.length,
-                            -1
-                          )
-                        }
-                        aria-label="Previous image"
-                      >
-                        ‹
-                      </button>
-
-                      <button
-                        type="button"
-                        className="bs-arrow bs-right"
-                        onClick={(event) =>
-                          changeImage(
-                            event,
-                            product._id,
-                            images.length,
-                            1
-                          )
-                        }
-                        aria-label="Next image"
-                      >
-                        ›
-                      </button>
+                    
 
                       <div className="bs-dots">
                         {images.map((_, imageIndex) => (

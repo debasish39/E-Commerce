@@ -369,7 +369,7 @@ export default function Category() {
       */
 
       const response = await fetch(
-        `${BACKEND_URL}/api/brands/subcategory/${subCategory._id}`,
+        `${BACKEND_URL}/api/brand/subcategory/${subCategory._id}`,
         {
           method: "GET",
           credentials: "include",
@@ -389,19 +389,38 @@ export default function Category() {
         );
       }
 
-      const received =
-        Array.isArray(data?.brands)
-          ? data.brands
-          : Array.isArray(data?.data)
-          ? data.data
-          : [];
+      // Backend response: { success: true, brands: [...] }
+      const received = Array.isArray(data?.brands)
+        ? data.brands
+        : Array.isArray(data?.data?.brands)
+        ? data.data.brands
+        : Array.isArray(data?.data)
+        ? data.data
+        : [];
 
-      setBrands(
-        received.filter(
+      console.log("BRANDS API RESPONSE:", data);
+      console.log("BRANDS FROM API:", received);
+
+      const normalizedBrands = received
+        .map((brand) => ({
+          ...brand,
+          _id: brand?._id || brand?.id || "",
+          name: brand?.name || brand?.brandName || brand?.title || "",
+          logo:
+            brand?.logo ||
+            brand?.image ||
+            brand?.logoUrl ||
+            brand?.imageUrl ||
+            "",
+        }))
+        .filter(
           (brand) =>
-            brand?.isActive !== false
-        )
-      );
+            Boolean(brand._id) &&
+            Boolean(brand.name) &&
+            brand.isActive !== false
+        );
+
+      setBrands(normalizedBrands);
 
     } catch (err) {
 
@@ -429,17 +448,17 @@ export default function Category() {
     brand
   ) => {
 
-    if (!brand?._id) {
+    if (!brand?._id && !brand?.id) {
       return;
     }
 
     setSelectedBrand(brand);
 
     const categoryId =
-      selectedCategory?._id;
+      selectedCategory?._id || selectedCategory?.id;
 
     const subCategoryId =
-      selectedSubCategory?._id;
+      selectedSubCategory?._id || selectedSubCategory?.id;
 
     if (
       !categoryId ||
@@ -503,9 +522,9 @@ export default function Category() {
           .toLowerCase();
 
       const items =
-        filterStep === "subcategory"
-          ? subCategories
-          : brands;
+        filterStep === "brand"
+          ? brands
+          : subCategories;
 
       if (!query) {
         return items;
@@ -638,7 +657,7 @@ export default function Category() {
 
       <section
         className="
-          w-full
+         max-w-7xl mx-auto
           border-b
           border-gray-100
           bg-white
@@ -1344,7 +1363,7 @@ export default function Category() {
 
                 <LoadingItems />
 
-              ) : filteredItems.length ? (
+              ) : brands.length ? (
 
                 <div className="space-y-1">
 
@@ -1352,9 +1371,7 @@ export default function Category() {
                     (brand) => (
 
                       <button
-                        key={
-                          brand?._id
-                        }
+                        key={brand?._id || brand?.id || brand?.name}
                         type="button"
                         onClick={() =>
                           handleBrandClick(
@@ -1474,7 +1491,13 @@ export default function Category() {
 
               ) : (
 
-                <EmptyState text="No brands found" />
+                <EmptyState
+                  text={
+                    search.trim()
+                      ? "No brands match your search"
+                      : "No brands found for this subcategory"
+                  }
+                />
 
               )}
 

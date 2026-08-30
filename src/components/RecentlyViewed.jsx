@@ -4,8 +4,6 @@ import {
   FaStar,
   FaHistory,
   FaEye,
-  FaChevronLeft,
-  FaChevronRight,
 } from "react-icons/fa";
 import { AiOutlineEye } from "react-icons/ai";
 
@@ -53,7 +51,7 @@ export default function RecentlyViewed() {
     } catch (err) {
       setError(
         err?.message ||
-          "Failed to load recently viewed products"
+        "Failed to load recently viewed products"
       );
       setProducts([]);
     } finally {
@@ -73,10 +71,10 @@ export default function RecentlyViewed() {
         : []),
       ...(Array.isArray(product?.variants)
         ? product.variants.flatMap((variant) =>
-            Array.isArray(variant?.images)
-              ? variant.images
-              : []
-          )
+          Array.isArray(variant?.images)
+            ? variant.images
+            : []
+        )
         : []),
     ].filter(Boolean);
 
@@ -85,8 +83,8 @@ export default function RecentlyViewed() {
     return unique.length
       ? unique
       : [
-          "https://via.placeholder.com/500x500?text=Product",
-        ];
+        "https://via.placeholder.com/500x500?text=Product",
+      ];
   }, []);
 
   const getVariant = useCallback((product) => {
@@ -114,8 +112,8 @@ export default function RecentlyViewed() {
     (product) =>
       Number(
         getVariant(product)?.originalPrice ||
-          getVariant(product)?.price ||
-          0
+        getVariant(product)?.price ||
+        0
       ),
     [getVariant]
   );
@@ -425,35 +423,81 @@ export default function RecentlyViewed() {
         .rv-left { left: 9px; }
         .rv-right { right: 9px; }
 
-        .rv-dots {
-          position: absolute;
-          left: 50%;
-          bottom: 10px;
-          z-index: 25;
-          display: flex;
-          gap: 4px;
-          transform: translateX(-50%);
-          padding: 4px 7px;
-          border-radius: 999px;
-          background: rgba(255,255,255,.86);
-          backdrop-filter: blur(8px);
-        }
+  
+/* =========================================
+   SIMPLE MODERN IMAGE DOTS
+========================================= */
 
-        .rv-dot {
-          width: 5px;
-          height: 5px;
-          padding: 0;
-          border: 0;
-          border-radius: 999px;
-          background: #cbd5e1;
-          cursor: pointer;
-          transition: .2s;
-        }
+.rv-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  z-index: 20;
 
-        .rv-dot.active {
-          width: 14px;
-          background: #4f46e5;
-        }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+
+  transform: translateX(-50%);
+}
+
+.rv-dot {
+  width: 5px;
+  height: 5px;
+
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.55);
+
+  cursor: pointer;
+
+  transition:
+    width 0.22s ease,
+    background 0.22s ease,
+    transform 0.22s ease;
+}
+
+.rv-dot.active {
+  width: 20px;
+  height: 2px;
+
+  border-radius: 3px;
+
+  background: #5046e4;
+
+  box-shadow: 0 0 7px rgba(80, 70, 228, 0.35);
+}
+
+.rv-dot:hover {
+  background: rgba(80, 70, 228, 0.75);
+}
+
+.rv-dot:focus-visible {
+  outline: 2px solid #5046e4;
+  outline-offset: 3px;
+}
+
+/* Mobile */
+
+@media (max-width: 640px) {
+  .rv-dots {
+    bottom: 10px;
+    gap: 4px;
+  }
+
+  .rv-dot {
+    width: 5px;
+    height: 5px;
+  }
+
+  .rv-dot.active {
+    width: 16px;
+    height: 5px;
+  }
+}
 
         .rv-badge {
           position: absolute;
@@ -560,17 +604,17 @@ export default function RecentlyViewed() {
 
             const rating = Number(
               product?.rating?.average ??
-                product?.rating ??
-                0
+              product?.rating ??
+              0
             );
 
             const discount =
               originalPrice > price
                 ? Math.round(
-                    ((originalPrice - price) /
-                      originalPrice) *
-                      100
-                  )
+                  ((originalPrice - price) /
+                    originalPrice) *
+                  100
+                )
                 : 0;
 
             return (
@@ -648,9 +692,8 @@ export default function RecentlyViewed() {
                   <div
                     className="rv-track"
                     style={{
-                      transform: `translateX(-${
-                        activeIdx * 100
-                      }%)`,
+                      transform: `translateX(-${activeIdx * 100
+                        }%)`,
                     }}
                   >
                     {images.map((image, index) => (
@@ -663,9 +706,8 @@ export default function RecentlyViewed() {
                       >
                         <img
                           src={image}
-                          alt={`${product?.title || "Product"} image ${
-                            index + 1
-                          }`}
+                          alt={`${product?.title || "Product"} image ${index + 1
+                            }`}
                           loading="lazy"
                           draggable="false"
                         />
@@ -693,7 +735,7 @@ export default function RecentlyViewed() {
                   )}
 
                   {/* QUICK VIEW — same interaction style as ProductCard */}
-                  <div className="rv-overlay">
+                  {/* <div className="rv-overlay">
                     <button
                       type="button"
                       className="rv-quick-btn"
@@ -705,55 +747,22 @@ export default function RecentlyViewed() {
                       <AiOutlineEye size={14} />
                       Quick View
                     </button>
-                  </div>
+                  </div> */}
+
+
 
                   {images.length > 1 && (
                     <>
-                      <button
-                        type="button"
-                        className="rv-arrow rv-left"
-                        onClick={(event) =>
-                          changeImage(
-                            event,
-                            product._id,
-                            images.length,
-                            -1
-                          )
-                        }
-                        aria-label="Previous image"
-                      >
-                        <FaChevronLeft size={10} />
-                      </button>
-
-                      <button
-                        type="button"
-                        className="rv-arrow rv-right"
-                        onClick={(event) =>
-                          changeImage(
-                            event,
-                            product._id,
-                            images.length,
-                            1
-                          )
-                        }
-                        aria-label="Next image"
-                      >
-                        <FaChevronRight size={10} />
-                      </button>
-
-                      <div className="rv-dots">
+                      {/* IMAGE PROGRESS */}
+                      <div className="rv-dots" aria-label="Product images">
                         {images.map((_, index) => (
                           <button
                             key={index}
                             type="button"
-                            aria-label={`Show image ${
-                              index + 1
-                            }`}
-                            className={`rv-dot ${
-                              activeIdx === index
-                                ? "active"
-                                : ""
-                            }`}
+                            aria-label={`Show image ${index + 1}`}
+                            aria-current={activeIdx === index ? "true" : "false"}
+                            className={`rv-dot ${activeIdx === index ? "active" : ""
+                              }`}
                             onClick={(event) =>
                               goToImage(
                                 event,
@@ -765,11 +774,15 @@ export default function RecentlyViewed() {
                         ))}
                       </div>
 
+                      {/* IMAGE COUNT */}
                       <div className="rv-count">
                         {activeIdx + 1}/{images.length}
                       </div>
                     </>
                   )}
+
+
+
                 </div>
 
                 {/* PRODUCT INFORMATION */}
@@ -799,9 +812,9 @@ export default function RecentlyViewed() {
                                 size={9}
                                 className={
                                   index <
-                                  Math.round(
-                                    rating
-                                  )
+                                    Math.round(
+                                      rating
+                                    )
                                     ? "text-amber-400"
                                     : "text-slate-200"
                                 }
