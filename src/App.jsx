@@ -97,18 +97,18 @@ const AppWrapper = () => {
     return () => window.removeEventListener("appinstalled", h);
   }, []);
 
-  useEffect(() => {
-    if (window.Tawk_API) return;
-    window.Tawk_API = window.Tawk_API || {};
-    window.Tawk_LoadStart = new Date();
-    const s = document.createElement("script");
-    s.async = true;
-    s.src = "https://embed.tawk.to/69084ab76435f2194e4f2aa9/1j9467o9s";
-    s.charset = "UTF-8";
-    s.setAttribute("crossorigin", "*");
-    document.body.appendChild(s);
-    return () => document.body.removeChild(s);
-  }, []);
+  // useEffect(() => {
+  //   if (window.Tawk_API) return;
+  //   window.Tawk_API = window.Tawk_API || {};
+  //   window.Tawk_LoadStart = new Date();
+  //   const s = document.createElement("script");
+  //   s.async = true;
+  //   s.src = "https://embed.tawk.to/69084ab76435f2194e4f2aa9/1j9467o9s";
+  //   s.charset = "UTF-8";
+  //   s.setAttribute("crossorigin", "*");
+  //   document.body.appendChild(s);
+  //   return () => document.body.removeChild(s);
+  // }, []);
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
@@ -169,10 +169,10 @@ const AppWrapper = () => {
 
       <Suspense fallback={<Spinner />}>
         <div className="relative min-h-screen w-full overflow-hidden text-gray-800">
-
+{/* 
           <div className="absolute inset-0 -z-30 bg-gradient-to-br from-gray-100 via-gray-200 to-blue-100" />
           <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-blue-400/30 blur-[180px] rounded-full animate-pulse -z-20" />
-          <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-blue-300/30 blur-[200px] rounded-full animate-[float_12s_ease-in-out_infinite] -z-20" />
+          <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-blue-300/30 blur-[200px] rounded-full animate-[float_12s_ease-in-out_infinite] -z-20" /> */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,_rgba(255,255,255,0.05)_1px,_transparent_0)] bg-[length:40px_40px] opacity-10 -z-20" />
 
           <div className="absolute inset-0 -z-10">

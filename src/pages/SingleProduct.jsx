@@ -1035,7 +1035,7 @@ useEffect(() => {
         <div className="sp-grid" />
 
         {/* breadcrumb */}
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 1280, margin: "0 auto", padding: "20px 22px 0" }}>
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 1280, margin: "9px auto", padding: "20px 22px 0" ,}}>
           <Breadcrums title={product.title} />
         </div>
 

@@ -1,18 +1,13 @@
-import React, {
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
-
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import {
   FaStar,
   FaHistory,
-  FaTimes,
-  FaTrash,
   FaEye,
+  FaChevronLeft,
+  FaChevronRight,
 } from "react-icons/fa";
+import { AiOutlineEye } from "react-icons/ai";
 
 const API_URL =
   import.meta.env.VITE_BACKEND_URL + "/api/products";
@@ -20,272 +15,83 @@ const API_URL =
 export default function RecentlyViewed() {
   const navigate = useNavigate();
 
-  const [products, setProducts] =
-    useState([]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [activeIndexes, setActiveIndexes] = useState({});
+  const [hoveredCard, setHoveredCard] = useState(null);
 
-  const [loading, setLoading] =
-    useState(true);
-
-  const [error, setError] =
-    useState("");
-
-  /* =====================================================
-     GET RECENTLY VIEWED
-  ===================================================== */
-
-  const fetchRecentlyViewed =
-    useCallback(async () => {
-      console.log("");
-      console.log(
-        "=========================================="
-      );
-      console.log(
-        "🔵 GET RECENTLY VIEWED"
-      );
-
-      try {
-        const url =
-          `${API_URL}/recently-viewed`;
-
-        console.log(
-          "🔵 URL:",
-          url
-        );
-
-        console.log(
-          "🔵 credentials: include"
-        );
-
-        setLoading(true);
-        setError("");
-
-        const response =
-          await fetch(url, {
-            method: "GET",
-            credentials: "include",
-
-            headers: {
-              Accept:
-                "application/json",
-            },
-          });
-
-        console.log(
-          "🟢 HTTP STATUS:",
-          response.status
-        );
-
-        console.log(
-          "🟢 RESPONSE OK:",
-          response.ok
-        );
-
-        const data =
-          await response.json();
-
-        console.log(
-          "🟢 API RESPONSE:",
-          data
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            data?.message ||
-              `HTTP ${response.status}`
-          );
-        }
-
-        const list =
-          Array.isArray(
-            data?.products
-          )
-            ? data.products
-            : [];
-
-        console.log(
-          "🟢 RECENT PRODUCTS:",
-          list.length
-        );
-
-        setProducts(list);
-
-      } catch (error) {
-        console.error(
-          "🔴 GET RECENTLY VIEWED ERROR:",
-          error
-        );
-
-        setError(
-          error?.message ||
-            "Failed to load recently viewed products"
-        );
-
-        setProducts([]);
-
-      } finally {
-        setLoading(false);
-
-        console.log(
-          "=========================================="
-        );
-      }
-    }, []);
-
-  /* =====================================================
-     LOAD
-  ===================================================== */
-
-  useEffect(() => {
-    console.log(
-      "🟣 RecentlyViewed mounted"
-    );
-
-    fetchRecentlyViewed();
-
-    return () => {
-      console.log(
-        "🟣 RecentlyViewed unmounted"
-      );
-    };
-  }, [fetchRecentlyViewed]);
-
-  /* =====================================================
-     REMOVE ONE
-  ===================================================== */
-
-  const removeProduct = async (
-    event,
-    productId
-  ) => {
-    event.stopPropagation();
-
-    console.log(
-      "🟠 REMOVE PRODUCT:",
-      productId
-    );
-
+  const fetchRecentlyViewed = useCallback(async () => {
     try {
-      const response =
-        await fetch(
-          `${API_URL}/recently-viewed/${productId}`,
-          {
-            method: "DELETE",
-            credentials: "include",
-          }
-        );
+      setLoading(true);
+      setError("");
 
-      console.log(
-        "🟠 DELETE STATUS:",
-        response.status
+      const response = await fetch(
+        `${API_URL}/recently-viewed`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            Accept: "application/json",
+          },
+        }
       );
 
-      const data =
-        await response.json();
-
-      console.log(
-        "🟠 DELETE RESPONSE:",
-        data
-      );
+      const data = await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data?.message ||
-            "Failed to remove product"
+          data?.message || `HTTP ${response.status}`
         );
       }
 
       setProducts(
-        (previous) =>
-          previous.filter(
-            (item) =>
-              item._id !== productId
-          )
+        Array.isArray(data?.products)
+          ? data.products
+          : []
       );
-
-    } catch (error) {
-      console.error(
-        "🔴 REMOVE ERROR:",
-        error
+    } catch (err) {
+      setError(
+        err?.message ||
+          "Failed to load recently viewed products"
       );
-    }
-  };
-
-  /* =====================================================
-     CLEAR ALL
-  ===================================================== */
-
-  const clearAll = async () => {
-    console.log(
-      "🔴 CLEAR ALL RECENTLY VIEWED"
-    );
-
-    try {
-      const response =
-        await fetch(
-          `${API_URL}/recently-viewed`,
-          {
-            method: "DELETE",
-            credentials: "include",
-          }
-        );
-
-      console.log(
-        "🔴 CLEAR STATUS:",
-        response.status
-      );
-
-      const data =
-        await response.json();
-
-      console.log(
-        "🔴 CLEAR RESPONSE:",
-        data
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          data?.message ||
-            "Failed to clear recently viewed"
-        );
-      }
-
       setProducts([]);
-
-    } catch (error) {
-      console.error(
-        "🔴 CLEAR ERROR:",
-        error
-      );
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
-  /* =====================================================
-     IMAGE
-  ===================================================== */
+  useEffect(() => {
+    fetchRecentlyViewed();
+  }, [fetchRecentlyViewed]);
 
-  const getImage = (
-    product
-  ) => {
-    return (
-      product?.media?.thumbnail ||
-      product?.media?.images?.[0] ||
-      product?.variants?.[0]
-        ?.images?.[0] ||
-      "https://via.placeholder.com/400x400?text=Product"
-    );
-  };
+  const getImages = useCallback((product) => {
+    const images = [
+      product?.media?.thumbnail,
+      ...(Array.isArray(product?.media?.images)
+        ? product.media.images
+        : []),
+      ...(Array.isArray(product?.variants)
+        ? product.variants.flatMap((variant) =>
+            Array.isArray(variant?.images)
+              ? variant.images
+              : []
+          )
+        : []),
+    ].filter(Boolean);
 
-  /* =====================================================
-     VARIANT
-  ===================================================== */
+    const unique = [...new Set(images)];
 
-  const getVariant = (
-    product
-  ) => {
+    return unique.length
+      ? unique
+      : [
+          "https://via.placeholder.com/500x500?text=Product",
+        ];
+  }, []);
+
+  const getVariant = useCallback((product) => {
     if (
-      !Array.isArray(
-        product?.variants
-      ) ||
+      !Array.isArray(product?.variants) ||
       !product.variants.length
     ) {
       return null;
@@ -293,382 +99,759 @@ export default function RecentlyViewed() {
 
     return (
       product.variants.find(
-        (variant) =>
-          variant?.isActive !== false
-      ) ||
-      product.variants[0]
+        (variant) => variant?.isActive !== false
+      ) || product.variants[0]
     );
+  }, []);
+
+  const getPrice = useCallback(
+    (product) =>
+      Number(getVariant(product)?.price || 0),
+    [getVariant]
+  );
+
+  const getOriginalPrice = useCallback(
+    (product) =>
+      Number(
+        getVariant(product)?.originalPrice ||
+          getVariant(product)?.price ||
+          0
+      ),
+    [getVariant]
+  );
+
+  const openProduct = (product) => {
+    if (!product?._id) return;
+    navigate(`/products/${product._id}`);
   };
 
-  /* =====================================================
-     PRICE
-  ===================================================== */
-
-  const getPrice = (
-    product
+  const changeImage = (
+    event,
+    productId,
+    imageCount,
+    direction
   ) => {
-    const variant =
-      getVariant(product);
+    event.stopPropagation();
 
-    return Number(
-      variant?.price || 0
-    );
+    if (imageCount <= 1) return;
+
+    setActiveIndexes((previous) => {
+      const current = previous[productId] || 0;
+
+      return {
+        ...previous,
+        [productId]:
+          (current + direction + imageCount) %
+          imageCount,
+      };
+    });
   };
 
-  /* =====================================================
-     ORIGINAL PRICE
-  ===================================================== */
-
-  const getOriginalPrice = (
-    product
+  const goToImage = (
+    event,
+    productId,
+    index
   ) => {
-    const variant =
-      getVariant(product);
+    event.stopPropagation();
 
-    return Number(
-      variant?.originalPrice ||
-        variant?.price ||
-        0
-    );
+    setActiveIndexes((previous) => ({
+      ...previous,
+      [productId]: index,
+    }));
   };
 
-  /* =====================================================
-     OPEN PRODUCT
-  ===================================================== */
+  const autoSwipe = useCallback((productId, imageCount) => {
+    if (imageCount <= 1) return;
 
-  const openProduct = (
-    product
-  ) => {
-    console.log(
-      "🟣 OPEN RECENT PRODUCT:",
-      product?._id
+    setActiveIndexes((previous) => {
+      const current = previous[productId] || 0;
+
+      return {
+        ...previous,
+        [productId]:
+          (current + 1) % imageCount,
+      };
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!hoveredCard) return;
+
+    const product = products.find(
+      (item) => item._id === hoveredCard
     );
 
-    if (!product?._id) {
-      console.error(
-        "❌ Product ID missing"
-      );
+    if (!product) return;
 
-      return;
-    }
+    const images = getImages(product);
 
-    navigate(
-      `/products/${product._id}`
-    );
-  };
+    if (images.length <= 1) return;
 
-  /* =====================================================
-     LOADING
-  ===================================================== */
+    const timer = setInterval(() => {
+      autoSwipe(product._id, images.length);
+    }, 1400);
+
+    return () => clearInterval(timer);
+  }, [
+    hoveredCard,
+    products,
+    getImages,
+    autoSwipe,
+  ]);
 
   if (loading) {
     return (
-      <section className="max-w-7xl mx-auto px-2 sm:px-4 py-8">
-
-        <h2 className="text-xl sm:text-3xl font-bold flex items-center gap-2 mb-6">
-          <FaHistory className="text-indigo-500" />
-          Recently Viewed
-        </h2>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {[1, 2, 3, 4].map(
-            (item) => (
-              <div
-                key={item}
-                className="h-72 rounded-2xl bg-gray-100 animate-pulse"
-              />
-            )
-          )}
+      <section className="mx-auto w-full max-w-7xl px-3 py-8 sm:px-5 lg:px-8">
+        <div className="mb-6">
+          <div className="mb-2 h-6 w-28 animate-pulse rounded-full bg-slate-200" />
+          <div className="h-8 w-56 animate-pulse rounded-lg bg-slate-200" />
+          <div className="mt-2 h-4 w-64 animate-pulse rounded bg-slate-100" />
         </div>
 
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+          {[1, 2, 3, 4, 5].map((item) => (
+            <div
+              key={item}
+              className="overflow-hidden rounded-[22px] border border-slate-100 bg-white"
+            >
+              <div className="h-52 animate-pulse bg-slate-100" />
+              <div className="space-y-3 p-4">
+                <div className="h-3 w-20 animate-pulse rounded bg-slate-100" />
+                <div className="h-4 w-full animate-pulse rounded bg-slate-100" />
+                <div className="h-4 w-3/4 animate-pulse rounded bg-slate-100" />
+                <div className="h-5 w-24 animate-pulse rounded bg-slate-100" />
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
     );
   }
-
-  /* =====================================================
-     ERROR
-  ===================================================== */
 
   if (error) {
     return (
-      <section className="max-w-7xl mx-auto px-4 py-8">
-
-        <div className="rounded-2xl bg-red-50 border border-red-100 p-8 text-center">
-
-          <FaHistory
-            className="mx-auto text-red-400 mb-3"
-            size={30}
-          />
-
-          <h2 className="text-xl font-bold">
+      <section className="mx-auto max-w-7xl px-4 py-8">
+        <div className="rounded-[22px] border border-red-100 bg-red-50 p-8 text-center">
+          <FaHistory className="mx-auto text-red-400" size={28} />
+          <h2 className="mt-3 text-xl font-bold text-slate-900">
             Recently Viewed
           </h2>
-
-          <p className="text-red-500 mt-2">
+          <p className="mt-2 text-sm text-red-600">
             {error}
           </p>
-
           <button
-            onClick={
-              fetchRecentlyViewed
-            }
-            className="mt-5 px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold"
+            type="button"
+            onClick={fetchRecentlyViewed}
+            className="mt-5 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-indigo-600"
           >
             Try Again
           </button>
-
         </div>
-
       </section>
     );
   }
 
-  /* =====================================================
-     EMPTY
-  ===================================================== */
-
-  if (!products.length) {
-    return null;
-  }
-
-  /* =====================================================
-     UI
-  ===================================================== */
+  if (!products.length) return null;
 
   return (
-    <section className="max-w-7xl mx-auto px-1.5 sm:px-4 py-8">
+    <>
+      <style>{`
+        .rv-root {
+          font-family: 'Plus Jakarta Sans', sans-serif;
+        }
 
-      <div className="flex items-center justify-between mb-6">
+        .rv-card {
+          position: relative;
+          background: rgba(255,255,255,.90);
+          backdrop-filter: blur(16px);
+          border: 1px solid rgba(99,102,241,.12);
+          border-radius: 22px;
+          overflow: hidden;
+          transition:
+            transform .32s cubic-bezier(.34,1.2,.64,1),
+            box-shadow .28s ease,
+            border-color .25s ease;
+        }
 
-        <div>
-          <h2 className="text-xl sm:text-3xl font-bold flex items-center gap-2">
-            <FaHistory className="text-indigo-500" />
+        .rv-card:hover {
+          transform: translateY(-7px) scale(1.012);
+          box-shadow:
+            0 22px 52px rgba(79,70,229,.17),
+            0 5px 18px rgba(0,0,0,.05);
+          border-color: rgba(99,102,241,.28);
+        }
+
+        .rv-track {
+          display: flex;
+          width: 100%;
+          height: 100%;
+          will-change: transform;
+          transition: transform .42s cubic-bezier(.22,1,.36,1);
+          touch-action: pan-y;
+        }
+
+        .rv-slide {
+          flex: 0 0 100%;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #f8faff;
+        }
+
+        .rv-slide img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          user-select: none;
+          -webkit-user-drag: none;
+          transition: transform .5s cubic-bezier(.22,1,.36,1);
+        }
+
+        .rv-card:hover .rv-slide img {
+          transform: scale(1.07);
+        }
+
+        .rv-overlay {
+          position: absolute;
+          inset: 0;
+          z-index: 18;
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          padding-bottom: 13px;
+          background: linear-gradient(
+            to bottom,
+            transparent 45%,
+            rgba(20,16,60,.52) 100%
+          );
+          opacity: 0;
+          transition: opacity .26s ease;
+          pointer-events: none;
+        }
+
+        .rv-card:hover .rv-overlay {
+          opacity: 1;
+        }
+
+        .rv-quick-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          border: 0;
+          border-radius: 999px;
+          padding: 7px 16px;
+          background: rgba(255,255,255,.94);
+          color: #1e1b4b;
+          font-size: 11.5px;
+          font-weight: 700;
+          box-shadow: 0 5px 18px rgba(0,0,0,.14);
+          transform: translateY(9px);
+          opacity: 0;
+          cursor: pointer;
+          transition: transform .26s .04s, opacity .26s .04s;
+          pointer-events: none;
+        }
+
+        .rv-card:hover .rv-quick-btn {
+          transform: translateY(0);
+          opacity: 1;
+          pointer-events: auto;
+        }
+
+        .rv-quick-btn:hover {
+          background: #fff;
+          color: #4f46e5;
+        }
+
+        .rv-auto-progress {
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 28;
+          height: 2px;
+          overflow: hidden;
+          background: rgba(255,255,255,.30);
+          pointer-events: none;
+        }
+
+        .rv-auto-progress::after {
+          content: "";
+          display: block;
+          width: 100%;
+          height: 100%;
+          transform-origin: left;
+          background: rgba(255,255,255,.92);
+          animation: rvProgress 1.4s linear infinite;
+        }
+
+        @keyframes rvProgress {
+          from { transform: scaleX(0); }
+          to { transform: scaleX(1); }
+        }
+
+        .rv-arrow {
+          position: absolute;
+          top: 50%;
+          z-index: 25;
+          width: 31px;
+          height: 31px;
+          transform: translateY(-50%);
+          border: 1px solid rgba(99,102,241,.18);
+          border-radius: 50%;
+          background: rgba(255,255,255,.92);
+          color: #4f46e5;
+          box-shadow: 0 3px 12px rgba(0,0,0,.12);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          opacity: 0;
+          transition: .2s;
+        }
+
+        .rv-card:hover .rv-arrow {
+          opacity: 1;
+        }
+
+        .rv-arrow:hover {
+          background: #fff;
+          transform: translateY(-50%) scale(1.08);
+        }
+
+        .rv-left { left: 9px; }
+        .rv-right { right: 9px; }
+
+        .rv-dots {
+          position: absolute;
+          left: 50%;
+          bottom: 10px;
+          z-index: 25;
+          display: flex;
+          gap: 4px;
+          transform: translateX(-50%);
+          padding: 4px 7px;
+          border-radius: 999px;
+          background: rgba(255,255,255,.86);
+          backdrop-filter: blur(8px);
+        }
+
+        .rv-dot {
+          width: 5px;
+          height: 5px;
+          padding: 0;
+          border: 0;
+          border-radius: 999px;
+          background: #cbd5e1;
+          cursor: pointer;
+          transition: .2s;
+        }
+
+        .rv-dot.active {
+          width: 14px;
+          background: #4f46e5;
+        }
+
+        .rv-badge {
+          position: absolute;
+          top: 11px;
+          left: 11px;
+          z-index: 15;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          padding: 4px 9px;
+          border-radius: 999px;
+          background: linear-gradient(135deg,#4f46e5,#2563eb);
+          color: white;
+          font-size: 8.5px;
+          font-weight: 700;
+          letter-spacing: .04em;
+          text-transform: uppercase;
+          box-shadow: 0 3px 10px rgba(79,70,229,.35);
+        }
+
+        .rv-count {
+          position: absolute;
+          right: 10px;
+          bottom: 10px;
+          z-index: 15;
+          padding: 3px 7px;
+          border-radius: 7px;
+          background: rgba(15,14,42,.55);
+          color: white;
+          font-size: 9px;
+          font-weight: 700;
+          backdrop-filter: blur(7px);
+        }
+
+        .rv-price {
+          background: linear-gradient(135deg,#4f46e5,#2563eb);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        @media (max-width: 640px) {
+          .rv-arrow {
+            opacity: 1;
+          }
+
+          .rv-overlay {
+            opacity: 1;
+            background: linear-gradient(
+              to bottom,
+              transparent 50%,
+              rgba(20,16,60,.34) 100%
+            );
+          }
+
+          .rv-quick-btn {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+            padding: 6px 13px;
+            font-size: 10px;
+          }
+
+          .rv-card:hover {
+            transform: translateY(-3px);
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .rv-card,
+          .rv-track,
+          .rv-slide img,
+          .rv-arrow {
+            transition: none !important;
+          }
+        }
+      `}</style>
+
+      <section className="rv-root mx-auto w-full max-w-7xl px-3 py-8 sm:px-5 lg:px-8">
+        <div className="mb-6">
+          <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-indigo-600">
+            <FaHistory size={10} />
+            Your activity
+          </div>
+
+          <h2 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
             Recently Viewed
           </h2>
 
-          <p className="text-xs sm:text-sm text-gray-500 mt-1">
-            Products you recently viewed
+          <p className="mt-1 text-xs text-slate-500 sm:text-sm">
+            Continue exploring products you viewed recently.
           </p>
         </div>
 
-        <button
-          onClick={clearAll}
-          className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-red-500"
-        >
-          <FaTrash size={11} />
-          Clear All
-        </button>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+          {products.map((product) => {
+            const images = getImages(product);
+            const activeIdx =
+              activeIndexes[product._id] || 0;
 
-      </div>
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-3">
-
-        {products.map(
-          (product) => {
-            const price =
-              getPrice(product);
-
+            const price = getPrice(product);
             const originalPrice =
-              getOriginalPrice(
-                product
-              );
+              getOriginalPrice(product);
 
-            const rating =
-              Number(
-                product?.rating || 0
-              );
+            const rating = Number(
+              product?.rating?.average ??
+                product?.rating ??
+                0
+            );
+
+            const discount =
+              originalPrice > price
+                ? Math.round(
+                    ((originalPrice - price) /
+                      originalPrice) *
+                      100
+                  )
+                : 0;
 
             return (
               <article
                 key={product._id}
-                onClick={() =>
-                  openProduct(
-                    product
+                className="rv-card"
+                onMouseEnter={() =>
+                  setHoveredCard(product._id)
+                }
+                onMouseLeave={() =>
+                  setHoveredCard((current) =>
+                    current === product._id
+                      ? null
+                      : current
                   )
                 }
-                className="
-                  group
-                  relative
-                  bg-white
-                  rounded-2xl
-                  border
-                  border-gray-100
-                  overflow-hidden
-                  cursor-pointer
-                  transition-all
-                  duration-300
-                  hover:-translate-y-1
-                  hover:shadow-xl
-                  bg-gradient-to-br
-                  from-white
-                  via-blue-50
-                  to-indigo-50
-                "
               >
+                {/* CAROUSEL IMAGE AREA */}
+                <div
+                  className="relative overflow-hidden"
+                  style={{
+                    height:
+                      "clamp(175px,21vw,225px)",
+                    background:
+                      "radial-gradient(circle at 50% 20%, rgba(99,102,241,.08), transparent 55%), #f8faff",
+                  }}
+                  onTouchStart={(event) => {
+                    event.currentTarget.dataset.touchX =
+                      event.touches[0].clientX;
 
-                {/* REMOVE */}
+                    setHoveredCard(product._id);
+                  }}
+                  onTouchEnd={(event) => {
+                    const start = Number(
+                      event.currentTarget.dataset.touchX || 0
+                    );
 
-                <button
-                  type="button"
-                  onClick={(event) =>
-                    removeProduct(
-                      event,
-                      product._id
+                    const end =
+                      event.changedTouches[0].clientX;
+
+                    const distance = start - end;
+
+                    if (Math.abs(distance) < 45) return;
+
+                    if (distance > 0) {
+                      changeImage(
+                        event,
+                        product._id,
+                        images.length,
+                        1
+                      );
+                    } else {
+                      changeImage(
+                        event,
+                        product._id,
+                        images.length,
+                        -1
+                      );
+                    }
+
+                    setHoveredCard((current) =>
+                      current === product._id
+                        ? null
+                        : current
+                    );
+                  }}
+                  onTouchCancel={() =>
+                    setHoveredCard((current) =>
+                      current === product._id
+                        ? null
+                        : current
                     )
                   }
-                  className="
-                    absolute
-                    right-3
-                    top-3
-                    z-30
-                    w-7
-                    h-7
-                    rounded-full
-                    bg-white
-                    shadow-md
-                    flex
-                    items-center
-                    justify-center
-                    text-gray-400
-                    hover:text-red-500
-                  "
                 >
-                  <FaTimes size={11} />
-                </button>
+                  <div
+                    className="rv-track"
+                    style={{
+                      transform: `translateX(-${
+                        activeIdx * 100
+                      }%)`,
+                    }}
+                  >
+                    {images.map((image, index) => (
+                      <div
+                        key={`${image}-${index}`}
+                        className="rv-slide"
+                        onClick={() =>
+                          openProduct(product)
+                        }
+                      >
+                        <img
+                          src={image}
+                          alt={`${product?.title || "Product"} image ${
+                            index + 1
+                          }`}
+                          loading="lazy"
+                          draggable="false"
+                        />
+                      </div>
+                    ))}
+                  </div>
 
-                {/* IMAGE */}
-
-                <div className="
-                  relative
-                  h-[160px]
-                  sm:h-[200px]
-                  flex
-                  items-center
-                  justify-center
-                  p-4
-                ">
-
-                  <img
-                    src={getImage(
-                      product
+                  {hoveredCard === product._id &&
+                    images.length > 1 && (
+                      <div
+                        className="rv-auto-progress"
+                        aria-hidden="true"
+                      />
                     )}
-                    alt={
-                      product.title
-                    }
-                    className="
-                      max-h-[140px]
-                      sm:max-h-[170px]
-                      max-w-full
-                      object-contain
-                      transition-transform
-                      duration-500
-                      group-hover:scale-110
-                    "
-                  />
 
-                  <span className="
-                    absolute
-                    left-3
-                    top-3
-                    flex
-                    items-center
-                    gap-1
-                    bg-indigo-600
-                    text-white
-                    text-[9px]
-                    sm:text-[10px]
-                    font-bold
-                    px-2
-                    py-1
-                    rounded-full
-                  ">
-                    <FaEye size={9} />
+                  <span className="rv-badge">
+                    <FaEye size={8} />
                     Viewed
                   </span>
 
+                  {discount > 0 && (
+                    <span className="absolute bottom-3 left-3 z-15 rounded-full bg-emerald-500 px-2.5 py-1 text-[9px] font-extrabold text-white shadow-md">
+                      {discount}% OFF
+                    </span>
+                  )}
+
+                  {/* QUICK VIEW — same interaction style as ProductCard */}
+                  <div className="rv-overlay">
+                    <button
+                      type="button"
+                      className="rv-quick-btn"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        openProduct(product);
+                      }}
+                    >
+                      <AiOutlineEye size={14} />
+                      Quick View
+                    </button>
+                  </div>
+
+                  {images.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        className="rv-arrow rv-left"
+                        onClick={(event) =>
+                          changeImage(
+                            event,
+                            product._id,
+                            images.length,
+                            -1
+                          )
+                        }
+                        aria-label="Previous image"
+                      >
+                        <FaChevronLeft size={10} />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="rv-arrow rv-right"
+                        onClick={(event) =>
+                          changeImage(
+                            event,
+                            product._id,
+                            images.length,
+                            1
+                          )
+                        }
+                        aria-label="Next image"
+                      >
+                        <FaChevronRight size={10} />
+                      </button>
+
+                      <div className="rv-dots">
+                        {images.map((_, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            aria-label={`Show image ${
+                              index + 1
+                            }`}
+                            className={`rv-dot ${
+                              activeIdx === index
+                                ? "active"
+                                : ""
+                            }`}
+                            onClick={(event) =>
+                              goToImage(
+                                event,
+                                product._id,
+                                index
+                              )
+                            }
+                          />
+                        ))}
+                      </div>
+
+                      <div className="rv-count">
+                        {activeIdx + 1}/{images.length}
+                      </div>
+                    </>
+                  )}
                 </div>
 
-                {/* CONTENT */}
-
+                {/* PRODUCT INFORMATION */}
                 <div className="p-3 sm:p-4">
-
-                  <p className="
-                    text-[9px]
-                    sm:text-xs
-                    uppercase
-                    tracking-wide
-                    font-medium
-                    text-indigo-500
-                    mb-1
-                  ">
-                    {product?.category
-                      ?.name ||
+                  <p className="mb-1 truncate text-[9px] font-bold uppercase tracking-[0.12em] text-indigo-500">
+                    {product?.category?.name ||
                       "Product"}
                   </p>
 
-                  <h3 className="
-                    text-sm
-                    sm:text-base
-                    font-semibold
-                    text-gray-800
-                    line-clamp-2
-                    min-h-[40px]
-                    group-hover:text-indigo-600
-                  ">
+                  <h3
+                    onClick={() =>
+                      openProduct(product)
+                    }
+                    className="min-h-[38px] cursor-pointer line-clamp-2 text-[12.5px] font-semibold leading-[1.35] text-slate-800 transition-colors hover:text-indigo-600 sm:text-sm"
+                  >
                     {product.title}
                   </h3>
 
-                  <div className="flex items-center gap-1 mt-2">
+                  <div className="mt-2 flex min-h-[18px] items-center gap-1">
+                    {rating > 0 ? (
+                      <>
+                        <div className="flex items-center gap-0.5">
+                          {[...Array(5)].map(
+                            (_, index) => (
+                              <FaStar
+                                key={index}
+                                size={9}
+                                className={
+                                  index <
+                                  Math.round(
+                                    rating
+                                  )
+                                    ? "text-amber-400"
+                                    : "text-slate-200"
+                                }
+                              />
+                            )
+                          )}
+                        </div>
 
-                    <FaStar
-                      className="text-yellow-400"
-                      size={12}
-                    />
+                        <span className="ml-1 text-[10px] font-semibold text-slate-400">
+                          {rating.toFixed(1)}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="rounded-md bg-slate-50 px-1.5 py-0.5 text-[9px] font-bold text-slate-400">
+                        New
+                      </span>
+                    )}
 
-                    <span className="text-xs font-semibold">
-                      {rating > 0
-                        ? rating.toFixed(1)
-                        : "New"}
+                    <span className="text-[9px] text-slate-400">
+                      ({product?.numReviews || 0})
                     </span>
-
-                    <span className="text-[10px] text-gray-400">
-                      (
-                      {product?.numReviews ||
-                        0}
-                      )
-                    </span>
-
                   </div>
 
-                  <div className="flex items-center gap-2 mt-3">
+                  <div className="mt-2.5 flex items-baseline gap-1.5">
+                    <span className="text-sm font-extrabold sm:text-base">
+                      <span className="mr-0.5 text-indigo-600">
+                        ₹
+                      </span>
 
-                    <span className="text-base sm:text-lg font-bold">
-                      ₹
-                      {price.toLocaleString(
-                        "en-IN"
-                      )}
+                      <span className="rv-price">
+                        {price.toLocaleString("en-IN")}
+                      </span>
                     </span>
 
-                    {originalPrice >
-                      price && (
-                      <del className="text-[10px] sm:text-xs text-gray-400">
+                    {originalPrice > price && (
+                      <del className="text-[9px] font-medium text-slate-400">
                         ₹
                         {originalPrice.toLocaleString(
                           "en-IN"
                         )}
                       </del>
                     )}
-
                   </div>
 
                 </div>
-
               </article>
             );
-          }
-        )}
-
-      </div>
-    </section>
+          })}
+        </div>
+      </section>
+    </>
   );
 }
