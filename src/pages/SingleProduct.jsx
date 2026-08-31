@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Breadcrums from "../components/Breadcrums";
-import Loading from "../assets/Loading4.webm";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/wishlistContext";
 import {
@@ -10,14 +9,9 @@ import {
   ModalContent,
   ModalHeader,
   ModalBody,
-  useDisclosure, ModalFooter, Button
+  useDisclosure
 } from "@heroui/react";
 import {
-  FaTimes,
-  FaChevronLeft,
-  FaChevronRight,
-  FaImages,
-  FaExpand,
 } from "react-icons/fa";
 import { toast } from "sonner";
 import { ChevronDown } from "lucide-react";
@@ -27,12 +21,14 @@ import {
   FaTag, FaTruck, FaUndoAlt, FaLock,
   FaIndustry, FaListAlt, FaRupeeSign,
   FaCheckCircle, FaShieldAlt,
-  FaUser, FaPaperPlane, FaThumbsUp, FaThumbsDown, FaTrash,
+  FaUser, FaThumbsUp, FaThumbsDown, FaTrash,
   FaBoxOpen, FaLayerGroup, FaInfoCircle, FaCog, FaComments,
 } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 import { SlActionRedo } from "react-icons/sl";
 import { AiOutlineZoomIn } from "react-icons/ai";
+import { Controlled as ControlledZoom } from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 import { MdVerified } from "react-icons/md";
 import ProductCard from "../components/ProductCard";
 import Spinner from "../components/Spinner";
@@ -64,470 +60,621 @@ const Stars = ({ rating = 0, size = 13, interactive = false, onRate, hover = 0, 
 
 /* ─── CSS (no :root changes) ─── */
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=JetBrains+Mono:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&family=JetBrains+Mono:wght@600;700&display=swap');
 
-/* ══ ALL NEW CLASSES — NO :root TOUCH ══ */
-
-/* base */
-.sp { font-family:var(--fb); }
+.sp {
+  --sp-primary:#4f46e5;
+  --sp-primary-2:#6366f1;
+  --sp-text:#0f172a;
+  --sp-muted:#64748b;
+  --sp-soft:#f8fafc;
+  --sp-border:#e2e8f0;
+  --sp-radius:20px;
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:var(--sp-text);
+}
 .sp-bg {
-  min-height:100vh; overflow-x:hidden;
-  // background:linear-gradient(160deg,#f0effd 0%,#eaf0ff 45%,#f8f9ff 100%);
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 8% 0%,rgba(99,102,241,.07),transparent 28%),
+    radial-gradient(circle at 94% 15%,rgba(59,130,246,.055),transparent 24%),
+    #f8fafc;
+  overflow-x:hidden;
+}
+.sp-orb,.sp-grid{display:none}
+
+@keyframes spFU{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spFR{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes spFL{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes spSpin{to{transform:rotate(360deg)}}
+@keyframes spPop{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+.sp-fu{animation:spFU .45s ease both}
+.sp-fr{animation:spFR .5s ease both}
+.sp-fl{animation:spFL .5s .06s ease both}
+
+.spx-wrap{
   position:relative;
-}
-
-/* ambient orbs */
-.sp-orb { position:fixed; border-radius:50%; filter:blur(90px); pointer-events:none; z-index:0; }
-.sp-o1 { width:500px;height:500px;top:-160px;left:-110px;background:radial-gradient(circle,rgba(80,70,228,.15) 0%,transparent 65%);animation:spO 13s ease-in-out infinite alternate; }
-.sp-o2 { width:420px;height:420px;bottom:-130px;right:-90px;background:radial-gradient(circle,rgba(59,130,246,.12) 0%,transparent 65%);animation:spO 16s ease-in-out infinite alternate reverse; }
-.sp-o3 { width:300px;height:300px;top:40%;left:60%;background:radial-gradient(circle,rgba(124,58,237,.07) 0%,transparent 65%);animation:spO 18s ease-in-out infinite alternate; }
-@keyframes spO { from{transform:translate(0,0)} to{transform:translate(18px,14px)} }
-.sp-grid { position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(circle,rgba(80,70,228,.045) 1px,transparent 1px);background-size:32px 32px; }
-
-/* animations */
-@keyframes spFU  { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
-@keyframes spFR  { from{opacity:0;transform:translateX(-22px)} to{opacity:1;transform:translateX(0)} }
-@keyframes spFL  { from{opacity:0;transform:translateX(22px)} to{opacity:1;transform:translateX(0)} }
-@keyframes spSh  { 0%{background-position:-200% center} 100%{background-position:200% center} }
-@keyframes spSpin{ to{transform:rotate(360deg)} }
-@keyframes spPop { 0%{opacity:0;transform:scale(.90)} 100%{opacity:1;transform:scale(1)} }
-@keyframes spPulse{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
-
-.sp-fu { animation:spFU .50s cubic-bezier(.22,1,.36,1) both; }
-.sp-fr { animation:spFR .55s cubic-bezier(.22,1,.36,1) both; }
-.sp-fl { animation:spFL .55s cubic-bezier(.22,1,.36,1) .09s both; }
-
-/* ══ MAIN LAYOUT — 2-col sticky ══ */
-.spx-wrap {
-  position:relative; z-index:1;
-  max-width:1280px; margin:0 auto;
-  padding:24px 22px 88px;
+  z-index:1;
+  width:min(1320px,100%);
+  margin:0 auto;
+  padding:26px 24px 90px;
   display:grid;
-  grid-template-columns:minmax(0,460px) minmax(0,1fr);
-  gap:40px; align-items:start;
+  grid-template-columns:minmax(0,560px) minmax(0,1fr);
+  gap:46px;
+  align-items:start;
 }
-@media(max-width:900px){ .spx-wrap{ grid-template-columns:1fr; gap:22px; } }
+.spx-left{position:sticky;top:76px;display:flex;flex-direction:column;gap:14px}
+.spx-right{display:flex;flex-direction:column;gap:16px}
 
-.spx-left { position:sticky; top:72px; display:flex; flex-direction:column; gap:14px; }
-@media(max-width:900px){ .spx-left{ position:static; } }
-.spx-right { display:flex; flex-direction:column; gap:16px; }
+.spx-card{
+  background:rgba(255,255,255,.96);
+  border:1px solid var(--sp-border);
+  border-radius:var(--sp-radius);
+  box-shadow:0 6px 26px rgba(15,23,42,.045);
+  transition:box-shadow .2s ease,border-color .2s ease,transform .2s ease;
+}
+.spx-card:hover{border-color:#d9e1ec;box-shadow:0 12px 34px rgba(15,23,42,.065)}
 
-.rv-toggle-wrap {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 18px;
-  background: rgba(255,255,255,.90); border: 1px solid rgba(80,70,228,.11);
-  border-radius: 18px; cursor: pointer;
-  transition: all .22s cubic-bezier(.22,1,.36,1);
-  user-select: none;
+.spx-gallery{
+  position:relative;
+  overflow:hidden;
+  border-radius:24px;
+  background:#fff;
+  border:1px solid var(--sp-border);
+  box-shadow:0 12px 38px rgba(15,23,42,.07);
 }
-.rv-toggle-wrap:hover { background: white; border-color: rgba(80,70,228,.22); box-shadow: 0 4px 16px rgba(80,70,228,.09); }
-.rv-toggle-left { display: flex; align-items: center; gap: 12px; }
-.rv-toggle-icon {
-  width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
+.spx-track{
+  display:flex;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  will-change:scroll-position;
+  touch-action:pan-x;
 }
-.rv-toggle-chevron {
-  width: 28px; height: 28px; border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(80,70,228,.07); color: #5046e4;
-  transition: transform .28s cubic-bezier(.22,1,.36,1), background .18s;
+.spx-track::-webkit-scrollbar{display:none}
+.spx-slide{
+  flex:0 0 100%;
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+  min-height:500px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:44px;
+  background:
+    radial-gradient(circle at 50% 45%,#f8faff 0%,#fff 58%);
 }
-.rv-toggle-chevron.open { transform: rotate(180deg); background: rgba(80,70,228,.13); }
- 
-.rv-form-panel {
-  overflow: hidden;
-  transition: max-height .40s cubic-bezier(.22,1,.36,1), opacity .30s ease;
+.spx-img{
+  width:100%;
+  max-height:470px;
+  object-fit:contain;
+  cursor:zoom-in;
+  transition:transform .4s ease,filter .25s ease;
+  filter:drop-shadow(0 22px 34px rgba(15,23,42,.11));
 }
-.rv-form-panel.closed { max-height: 0; opacity: 0; pointer-events: none; }
-.rv-form-panel.open   { max-height: 1200px; opacity: 1; }
- 
-.rv-upload-zone {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  height: 120px; border: 1.5px dashed rgba(80,70,228,.25); border-radius: 14px;
-  cursor: pointer; background: rgba(80,70,228,.03);
-  transition: all .20s cubic-bezier(.22,1,.36,1);
-  position: relative; overflow: hidden;
+.spx-gallery:hover .spx-img{transform:scale(1.025)}
+.spx-disc{
+  position:absolute;top:16px;left:16px;z-index:10;
+  display:inline-flex;align-items:center;gap:5px;
+  padding:7px 12px;border-radius:999px;
+  background:#eef2ff;color:#4338ca;
+  border:1px solid #c7d2fe;
+  font-size:11px;font-weight:800;
 }
-.rv-upload-zone:hover {
-  border-color: rgba(80,70,228,.50); background: rgba(80,70,228,.06);
-  transform: translateY(-1px); box-shadow: 0 4px 16px rgba(80,70,228,.10);
+.spx-acts{position:absolute;top:15px;right:15px;z-index:10;display:flex;flex-direction:column;gap:8px}
+.spx-act{
+  width:40px;height:40px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.94);
+  border:1px solid var(--sp-border);
+  box-shadow:0 4px 14px rgba(15,23,42,.08);
+  color:#64748b;cursor:pointer;
+  transition:.18s ease;
 }
-.rv-upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-.rv-upload-icon {
-  width: 40px; height: 40px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(80,70,228,.09); margin-bottom: 8px;
-  transition: transform .18s;
+.spx-act:hover{color:var(--sp-primary);border-color:#c7d2fe;transform:translateY(-1px)}
+.spx-act.wl{color:#e11d48;background:#fff1f2;border-color:#fecdd3}
+.spx-dots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:9;opacity:0}
+.spx-gallery:hover .spx-dots{opacity:1}
+.spx-dot{height:5px;border:0;border-radius:99px;padding:0;background:#c7d2fe;cursor:pointer}
+.spx-dot.on{background:var(--sp-primary)}
+.spx-cnt{
+  position:absolute;right:14px;bottom:14px;z-index:8;
+  padding:5px 9px;border-radius:8px;
+  background:rgba(255,255,255,.9);border:1px solid var(--sp-border);
+  color:#64748b;font:700 10px "JetBrains Mono",monospace;
 }
-.rv-upload-zone:hover .rv-upload-icon { transform: scale(1.10); }
- 
-.rv-thumb-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-.rv-thumb-item { position: relative; width: 76px; height: 76px; border-radius: 11px; overflow: visible; flex-shrink: 0; }
-.rv-thumb-item img { width: 76px; height: 76px; object-fit: cover; border-radius: 11px; border: 1.5px solid rgba(80,70,228,.12); display: block; }
-.rv-thumb-del {
-  position: absolute; top: -6px; right: -6px; z-index: 2;
-  width: 22px; height: 22px; border-radius: 50%;
-  background: #ef4444; border: 2px solid white;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; box-shadow: 0 2px 6px rgba(239,68,68,.30);
-  transition: transform .15s;
+.spx-thumbs{display:flex;gap:9px;overflow-x:auto;padding:2px 1px;scrollbar-width:none}
+.spx-thumbs::-webkit-scrollbar{display:none}
+.spx-thumb{
+  position:relative;flex:0 0 66px;width:66px;height:66px;border-radius:13px;overflow:hidden;
+  background:#fff;border:0;cursor:pointer;padding:0;
+  box-shadow:none;transition:.18s ease;
 }
-.rv-thumb-del:hover { transform: scale(1.15); }
- 
-.rv-vid-item { position: relative; border-radius: 12px; overflow: visible; }
-.rv-vid-item video { width: 100%; border-radius: 12px; border: 1.5px solid rgba(80,70,228,.12); display: block; background: #0f0e1a; }
-.rv-vid-del {
-  position: absolute; top: -8px; right: -8px; z-index: 2;
-  width: 24px; height: 24px; border-radius: 50%;
-  background: #ef4444; border: 2px solid white;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; box-shadow: 0 2px 8px rgba(239,68,68,.30);
-  transition: transform .15s;
+.spx-thumb:after{content:"";position:absolute;left:8px;right:8px;bottom:0;height:3px;border-radius:99px;background:transparent;transition:.2s ease}
+.spx-thumb:hover:after{background:#c7d2fe}
+.spx-thumb.on:after{background:var(--sp-primary)}
+.spx-thumb.on{transform:translateY(-1px)}
+.spx-thumb img{width:100%;height:100%;object-fit:contain}
+.spx-seller{
+  display:flex;align-items:center;gap:12px;padding:14px 16px;
+  background:#fff;border:1px solid var(--sp-border);border-radius:16px;
+  box-shadow:0 3px 12px rgba(15,23,42,.04)
 }
-.rv-vid-del:hover { transform: scale(1.15); }
- 
-.rv-star-label {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 4px 13px 4px 8px; border-radius: 40px;
-  background: rgba(80,70,228,.08); border: 1px solid rgba(80,70,228,.18);
-  font-size: 12px; font-weight: 800; color: #5046e4;
-  animation: spFU .18s ease both;
-}
- 
-@keyframes rvSlide { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
-.rv-anim { animation: rvSlide .28s cubic-bezier(.22,1,.36,1) both; }
+.spx-sel-av{width:44px;height:44px;border-radius:13px;object-fit:cover;border:1px solid #e0e7ff}
 
-/* ══ GLASS CARD ══ */
-.spx-card {
-  background:rgba(255,255,255,.88);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
-  border:1px solid rgba(255,255,255,.80);
-  border-radius:22px;
-  box-shadow:0 4px 24px rgba(80,70,228,.08), 0 1px 3px rgba(0,0,0,.04);
-  transition:box-shadow .25s;
+.spx-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 10px;border-radius:999px;
+  font-size:10.5px;font-weight:800;
 }
-.spx-card:hover { box-shadow:0 8px 36px rgba(80,70,228,.13), 0 2px 6px rgba(0,0,0,.05); }
+.pp{background:#eef2ff;border:1px solid #c7d2fe;color:#4338ca}
+.pg{background:#f8fafc;border:1px solid #e2e8f0;color:#64748b}
+.pgn{background:#ecfdf5;border:1px solid #a7f3d0;color:#047857}
+.prd{background:#fff1f2;border:1px solid #fecdd3;color:#be123c}
+.pam{background:#fffbeb;border:1px solid #fde68a;color:#b45309}
 
-/* ══ IMAGE GALLERY ══ */
-.spx-gallery {
-  position:relative; overflow:hidden; border-radius:24px;
-  background:linear-gradient(145deg,#fafbff,#f3f2fd);
-  border:1px solid rgba(255,255,255,.80);
-  box-shadow:0 12px 48px rgba(80,70,228,.10), 0 2px 8px rgba(0,0,0,.04);
-  transition:box-shadow .28s;
+.spx-title{
+  font-family:Manrope,Inter,sans-serif;
+  text-wrap:balance;
+  overflow-wrap:anywhere;
+  font-size:clamp(1.5rem,2.5vw,2.25rem);
+  font-weight:800;line-height:1.16;letter-spacing:-.035em;color:#0f172a;
 }
-.spx-gallery:hover { box-shadow:0 20px 64px rgba(80,70,228,.16), 0 4px 16px rgba(0,0,0,.06); }
+.spx-title span{display:block;max-width:34ch}
+.spx-right p{overflow-wrap:anywhere}
+.spx-card{min-width:0}
 
-.spx-track { display:flex; will-change:transform; transition:transform .42s cubic-bezier(.22,1,.36,1); }
-.spx-slide {
-  flex:0 0 100%; min-height:340px;
-  display:flex; align-items:center; justify-content:center; padding:36px 32px;
-  background:linear-gradient(155deg,#fafbff 0%,#f4f3fe 100%);
+.spx-price{
+  font-family:Manrope,Inter,sans-serif;
+  font-size:clamp(2rem,3vw,2.65rem);
+  font-weight:800;line-height:1;color:#111827;
 }
-.spx-img {
-  width:100%; max-height:380px; object-fit:contain; cursor:zoom-in;
-  transition:transform .50s cubic-bezier(.22,1,.36,1),filter .30s;
-  filter:drop-shadow(0 10px 26px rgba(80,70,228,.11));
+.spx-label{
+  margin-bottom:10px;font-size:11px;font-weight:800;
+  letter-spacing:.08em;text-transform:uppercase;color:#64748b;
 }
-.spx-gallery:hover .spx-img { transform:scale(1.045); filter:drop-shadow(0 16px 38px rgba(80,70,228,.18)); }
-
-/* discount badge */
-.spx-disc {
-  position:absolute; top:16px; left:16px; z-index:10;
-  background:linear-gradient(135deg,#5046e4,#7c3aed 55%,#3b82f6);
-  color:white; font-size:10.5px; font-weight:800; letter-spacing:.03em;
-  padding:5px 13px; border-radius:40px;
-  box-shadow:0 4px 16px rgba(80,70,228,.40);
-  border:1px solid rgba(255,255,255,.22);
-  display:inline-flex; align-items:center; gap:4px;
+.spx-size{
+  padding:9px 15px;border-radius:11px;border:1px solid #dbe3ef;
+  background:#fff;color:#475569;font-size:13px;font-weight:700;cursor:pointer;
+  transition:.18s ease;
 }
+.spx-size:hover{border-color:#a5b4fc;color:#4338ca;transform:translateY(-1px)}
+.spx-size.on{background:#4f46e5;color:#fff;border-color:#4f46e5;box-shadow:0 6px 16px rgba(79,70,229,.2)}
+.spx-size:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.spx-cd{width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:.18s ease}
+.spx-cd:hover{transform:scale(1.1)}
+.spx-cd.on{box-shadow:0 0 0 3px #fff,0 0 0 5px #4f46e5}
+.spx-qty{display:flex;align-items:center;background:#f8fafc;border:1px solid #dbe3ef;border-radius:12px;overflow:hidden}
+.spx-qb{width:40px;height:40px;border:0;background:transparent;color:#4f46e5;font-size:18px;font-weight:700;cursor:pointer}
+.spx-qb:hover{background:#eef2ff}
+.spx-qn{width:38px;text-align:center;font:800 13px "JetBrains Mono",monospace;color:#0f172a}
 
-/* gallery action buttons */
-.spx-acts { position:absolute; top:14px; right:14px; z-index:10; display:flex; flex-direction:column; gap:8px; }
-.spx-act {
-  width:38px; height:38px; border-radius:11px;
-  display:flex; align-items:center; justify-content:center;
-  background:rgba(255,255,255,.90); backdrop-filter:blur(10px);
-  border:1px solid rgba(255,255,255,.80);
-  box-shadow:0 3px 10px rgba(0,0,0,.07);
-  cursor:pointer; color:#8893a8;
-  transition:all .20s cubic-bezier(.22,1,.36,1);
+.spx-btn{
+  flex:1;min-height:54px;display:flex;align-items:center;justify-content:center;gap:9px;
+  padding:14px 20px;border:0;border-radius:14px;font:800 14px Inter,sans-serif;
+  cursor:pointer;transition:.2s ease;
 }
-.spx-act:hover { background:white; color:#5046e4; transform:scale(1.08); box-shadow:0 5px 18px rgba(80,70,228,.20); }
-.spx-act.wl { color:#f43f5e; background:#fff0f3; border-color:rgba(244,63,94,.20); }
-
-/* nav arrows */
-.spx-arr {
-  position:absolute; top:50%; transform:translateY(-50%); z-index:9;
-  width:38px; height:38px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  background:rgba(255,255,255,.94); backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,.80);
-  box-shadow:0 4px 14px rgba(80,70,228,.14);
-  cursor:pointer; opacity:0;
-  transition:opacity .20s,transform .20s,box-shadow .20s;
+.spx-add{background:#4f46e5;color:#fff;box-shadow:0 8px 20px rgba(79,70,229,.23)}
+.spx-add:hover{background:#4338ca;transform:translateY(-2px);box-shadow:0 12px 26px rgba(79,70,229,.28)}
+.spx-ic{background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe}
+.spx-wb{
+  width:54px;height:54px;border-radius:14px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:#fff;border:1px solid #fecdd3;cursor:pointer;transition:.18s ease;
 }
-.spx-arr-l { left:12px; } .spx-arr-r { right:12px; }
-.spx-gallery:hover .spx-arr { opacity:1; }
-.spx-arr:hover { box-shadow:0 6px 22px rgba(80,70,228,.26); transform:translateY(-50%) scale(1.10); background:white; }
-
-/* dots */
-.spx-dots { position:absolute; bottom:14px; left:50%; transform:translateX(-50%); display:flex; gap:5px; z-index:9; opacity:0; transition:opacity .20s; }
-.spx-gallery:hover .spx-dots { opacity:1; }
-.spx-dot { height:5px; border-radius:3px; border:none; padding:0; cursor:pointer; background:rgba(80,70,228,.22); transition:width .22s,background .22s; }
-.spx-dot.on { background:#5046e4; box-shadow:0 0 7px rgba(80,70,228,.50); }
-
-/* counter */
-.spx-cnt {
-  position:absolute; bottom:14px; right:14px; z-index:7;
-  font-family:var(--fm); font-size:9.5px; font-weight:700; letter-spacing:.08em;
-  color:rgba(80,70,228,.55); background:rgba(240,240,253,.90);
-  border:1px solid rgba(80,70,228,.11); border-radius:8px; padding:3px 9px;
-  transition:opacity .20s;
+.spx-wb:hover,.spx-wb.on{background:#fff1f2;transform:translateY(-1px)}
+.spx-tr{
+  display:flex;align-items:center;gap:9px;min-height:46px;
+  padding:11px 13px;border:1px solid var(--sp-border);border-radius:13px;
+  background:#fff;color:#334155;font-size:11.5px;font-weight:650;
+  box-shadow:0 2px 8px rgba(15,23,42,.025);transition:.18s ease;
 }
-.spx-gallery:hover .spx-cnt { opacity:0; }
-
-/* thumbnails */
-.spx-thumbs { display:flex; gap:9px; overflow-x:auto; scrollbar-width:none; padding:2px 1px; }
-.spx-thumbs::-webkit-scrollbar { display:none; }
-.spx-thumb {
-  flex-shrink:0; width:66px; height:66px; border-radius:14px; overflow:hidden;
-  cursor:pointer; border:2px solid transparent; background:white;
-  box-shadow:0 2px 8px rgba(80,70,228,.06);
-  transition:all .22s cubic-bezier(.22,1,.36,1);
+.spx-tr:hover{border-color:#cbd5e1;background:#fbfdff;transform:translateY(-1px)}
+.spx-emi{
+  display:inline-flex;align-items:center;gap:8px;padding:8px 12px;
+  border-radius:10px;background:#f5f3ff;border:1px solid #ddd6fe;
+  color:#475569;font-size:11.5px
 }
-.spx-thumb:hover { border-color:rgba(80,70,228,.35); transform:translateY(-3px); box-shadow:0 6px 18px rgba(80,70,228,.14); }
-.spx-thumb.on { border-color:#5046e4; box-shadow:0 4px 16px rgba(80,70,228,.28); transform:translateY(-3px); }
-.spx-thumb img { width:100%; height:100%; object-fit:contain; }
+.spx-tag{font-size:11px;font-weight:700;padding:5px 10px;border-radius:999px;background:#f8fafc;border:1px solid #e2e8f0;color:#64748b}
 
-/* seller */
-.spx-seller {
-  display:flex; align-items:center; gap:12px; padding:14px 16px;
-  background:rgba(255,255,255,.88); backdrop-filter:blur(14px);
-  border:1px solid rgba(255,255,255,.80); border-radius:18px;
-  box-shadow:0 3px 12px rgba(80,70,228,.06);
+.spx-toggler{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;
+  margin-bottom:22px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:14px;
 }
-.spx-sel-av { width:44px; height:44px; border-radius:13px; object-fit:cover; border:2px solid rgba(80,70,228,.15); flex-shrink:0; }
-
-/* ══ PILLS ══ */
-.spx-pill { display:inline-flex; align-items:center; gap:5px; padding:4px 12px; border-radius:40px; font-size:11px; font-weight:800; letter-spacing:.01em; }
-.pp  { background:rgba(80,70,228,.09); border:1px solid rgba(80,70,228,.20); color:#5046e4; }
-.pg  { background:rgba(148,163,184,.09); border:1px solid rgba(148,163,184,.22); color:#64748b; }
-.pgn { background:rgba(16,185,129,.09); border:1px solid rgba(16,185,129,.22); color:#059669; }
-.prd { background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.20); color:#dc2626; }
-.pam { background:rgba(245,158,11,.09); border:1px solid rgba(245,158,11,.22); color:#d97706; }
-
-/* ══ TITLE / PRICE ══ */
-.spx-title {
-  font-family:var(--fh);
-  font-size:clamp(1.35rem,2.6vw,2.05rem);
-  font-weight:900; line-height:1.14; letter-spacing:-.028em; color:#1a1535;
+.spx-tgl{
+  min-height:42px;display:flex;align-items:center;justify-content:center;gap:7px;
+  border:0;border-radius:10px;background:transparent;color:#64748b;
+  font:800 12.5px Inter,sans-serif;cursor:pointer;transition:.18s ease;
 }
-.spx-price {
-  font-family:var(--fm); font-weight:700;
-  font-size:clamp(1.75rem,3vw,2.45rem);
-  line-height:1;
-  background:linear-gradient(135deg,#5046e4,#3b82f6);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+.spx-tgl:hover{color:#4338ca;background:#eef2ff}
+.spx-tgl.on{background:#fff;color:#4338ca;box-shadow:0 2px 8px rgba(15,23,42,.08)}
+
+.spx-spec-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.spx-spec-group{
+  overflow:hidden;background:#fff;border:1px solid #e2e8f0;border-radius:16px;
+}
+.spx-spec-head{
+  display:flex;align-items:center;gap:8px;
+  padding:13px 15px;background:#f8fafc;border-bottom:1px solid #e2e8f0;
+  color:#334155;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+}
+.spx-spec-head:before{content:"";width:7px;height:7px;border-radius:50%;background:#6366f1;box-shadow:0 0 0 4px #eef2ff}
+.spx-spec-row{
+  min-height:48px;display:grid;grid-template-columns:minmax(90px,.7fr) minmax(0,1.3fr);
+  gap:14px;align-items:center;padding:11px 15px;
+  border-bottom:1px solid #f1f5f9;background:#fff;transition:.15s ease;
+}
+.spx-spec-row:last-child{border-bottom:0}
+.spx-spec-row:hover{background:#fafbff}
+.spx-spec-key{color:#64748b;font-size:12px;font-weight:600}
+.spx-spec-val{
+  color:#0f172a;font:700 12px "JetBrains Mono",monospace;text-align:right;
+  overflow:hidden;text-overflow:ellipsis;word-break:break-word;
 }
 
-/* ══ SIZE BUTTONS ══ */
-.spx-size {
-  padding:8px 16px; border-radius:10px;
-  border:1.5px solid rgba(80,70,228,.18); font-size:13px; font-weight:700;
-  cursor:pointer; background:white; color:#6b7280; font-family:var(--fb);
-  transition:all .18s cubic-bezier(.22,1,.36,1);
+.spx-rev-summary{
+  display:grid;grid-template-columns:170px 1fr;gap:24px;align-items:center;
+  padding:20px;border:1px solid #e0e7ff;border-radius:18px;
+  background:linear-gradient(135deg,#f8faff,#fff);
 }
-.spx-size:hover { border-color:#5046e4; color:#5046e4; transform:translateY(-1px); }
-.spx-size.on {
-  background:linear-gradient(135deg,#5046e4,#7c3aed 55%,#3b82f6);
-  color:white; border-color:transparent;
-  box-shadow:0 5px 18px rgba(80,70,228,.32);
+.spx-rev-big{font:800 2.7rem/1 Manrope,Inter,sans-serif;color:#111827}
+.spx-rb-w{height:7px;border-radius:99px;background:#e2e8f0;overflow:hidden}
+.spx-rb-f{height:100%;border-radius:99px;background:#f59e0b;transition:width .5s ease}
+.spx-gate{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:28px;border:1px dashed #c7d2fe;border-radius:18px;
+  background:#fafaff;text-align:center;animation:spPop .3s ease both;
 }
-.spx-size:disabled { opacity:.30; cursor:not-allowed; transform:none; }
+.spx-rv{
+  position:relative;background:#fff;border:1px solid #e2e8f0;border-radius:18px;
+  padding:18px;box-shadow:0 3px 12px rgba(15,23,42,.025);
+  transition:.2s ease;
+}
+.spx-rv:hover{border-color:#cbd5e1;box-shadow:0 10px 26px rgba(15,23,42,.065);transform:translateY(-1px)}
+.spx-rv + .spx-rv{margin-top:2px}
+.spx-rv p{max-width:850px}
+.spx-lb{
+  display:inline-flex;align-items:center;gap:6px;border:1px solid #e2e8f0;
+  background:#f8fafc;color:#64748b;cursor:pointer;font:700 11px Inter,sans-serif;
+  padding:7px 11px;border-radius:10px;transition:.18s ease;
+}
+.spx-lb:hover{background:#eef2ff;color:#4338ca;border-color:#c7d2fe}
+.spx-lb.liked{color:#dc2626;background:#fff1f2;border-color:#fecdd3}
 
-/* ══ COLOR DOTS ══ */
-.spx-cd { width:28px; height:28px; border-radius:50%; cursor:pointer; transition:all .18s; border:2.5px solid transparent; }
-.spx-cd:hover { transform:scale(1.18); }
-.spx-cd.on { box-shadow:0 0 0 3px white, 0 0 0 5.5px #5046e4; }
+.spx-in{width:100%;padding:12px 14px;background:#fff;border:1px solid #dbe3ef;border-radius:12px;font:400 13px Inter,sans-serif;color:#0f172a;outline:none;transition:.18s ease}
+.spx-in:focus{border-color:#818cf8;box-shadow:0 0 0 3px #eef2ff}
+.spx-upload-zone,.rv-upload-zone{
+  border:1.5px dashed #c7d2fe!important;border-radius:16px!important;background:#fafaff!important;
+}
+.spx-spin{width:16px;height:16px;border-radius:50%;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spSpin .7s linear infinite}
 
-/* ══ QUANTITY ══ */
-.spx-qty { display:flex; align-items:center; background:#f5f5fb; border-radius:12px; border:1.5px solid rgba(80,70,228,.11); overflow:hidden; }
-.spx-qb { width:40px; height:40px; border:none; background:none; cursor:pointer; font-size:18px; color:#5046e4; font-weight:700; transition:background .18s; }
-.spx-qb:hover { background:rgba(80,70,228,.09); }
-.spx-qn { width:38px; text-align:center; font-size:14px; font-weight:800; color:#1a1535; font-family:var(--fm); }
 
-/* ══ CTA BUTTONS ══ */
-.spx-btn {
-  flex:1; display:flex; align-items:center; justify-content:center; gap:9px;
-  padding:15px 0; border-radius:15px;
-  font-family:var(--fb); font-size:14.5px; font-weight:800;
-  border:none; cursor:pointer; position:relative; overflow:hidden;
-  transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .22s;
-  letter-spacing:.01em;
-}
-.spx-add {
-  background:linear-gradient(135deg,#5046e4,#7c3aed 55%,#3b82f6);
-  color:white; box-shadow:0 7px 28px rgba(80,70,228,.36);
-}
-.spx-add:hover { transform:translateY(-2px); box-shadow:0 12px 38px rgba(80,70,228,.48); }
-.spx-add::after {
-  content:''; position:absolute; inset:0; border-radius:inherit;
-  background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.22) 50%,transparent 65%);
-  background-size:200% 100%; animation:spSh 2.8s infinite;
-}
-.spx-btn span,.spx-btn svg { position:relative; z-index:1; }
-.spx-ic { background:#f0f0fb; border:1.5px solid rgba(80,70,228,.22); color:#5046e4; }
-.spx-ic:hover { background:#e8e7ff; transform:translateY(-1px); }
-.spx-wb {
-  width:54px; height:54px; border-radius:15px; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center;
-  background:#fff0f3; border:1.5px solid rgba(244,63,94,.18); cursor:pointer;
-  transition:all .22s cubic-bezier(.22,1,.36,1);
-}
-.spx-wb:hover { background:#ffe4e6; border-color:rgba(244,63,94,.40); transform:scale(1.06); }
-.spx-wb.on { background:#ffe4e6; border-color:rgba(244,63,94,.38); }
+.sp-detail-item{transition:.18s ease!important}
+.sp-detail-item:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(15,23,42,.05)}
+.sp-review-media{transition:.18s ease!important}
+.sp-review-media:hover{transform:scale(1.025);box-shadow:0 8px 20px rgba(15,23,42,.10)}
+.sp-review-video{background:#0f172a;max-width:260px;min-height:90px}
 
-/* ══ TRUST BADGES ══ */
-.spx-tr {
-  display:flex; align-items:center; gap:9px;
-  background:rgba(255,255,255,.80); border:1px solid rgba(255,255,255,.80);
-  border-radius:14px; padding:11px 14px;
-  font-size:12px; font-weight:600; color:#374151;
-  box-shadow:0 2px 8px rgba(80,70,228,.05);
-  transition:all .20s;
-}
-.spx-tr:hover { background:white; border-color:rgba(80,70,228,.18); transform:translateY(-1px); box-shadow:0 5px 16px rgba(80,70,228,.10); }
+.sp-mobile-buybar{display:none}
 
-/* ══ EMI CHIP ══ */
-.spx-emi {
-  display:inline-flex; align-items:center; gap:8px;
-  padding:7px 14px; border-radius:40px;
-  background:rgba(80,70,228,.07); border:1px solid rgba(80,70,228,.14);
-  font-size:12px; color:#5a6278;
+/* ── react-medium-image-zoom customization ── */
+[data-rmiz-modal-overlay="visible"]{
+  background:rgba(2,6,23,.94)!important;
+  backdrop-filter:blur(14px);
+}
+[data-rmiz-modal-img]{
+  max-width:94vw!important;
+  max-height:90vh!important;
+  object-fit:contain;
+}
+[data-rmiz-btn-unzoom]{
+  top:18px!important;
+  right:18px!important;
+  width:44px!important;
+  height:44px!important;
+  border-radius:50%!important;
+  background:rgba(255,255,255,.12)!important;
+  color:#fff!important;
+  backdrop-filter:blur(10px);
 }
 
-/* ══ TOGGLER TABS (pill switcher) ══ */
-.spx-toggler {
-  display:flex; gap:3px; padding:4px;
-  background:rgba(80,70,228,.07); border-radius:16px;
-  border:1px solid rgba(80,70,228,.10);
-  overflow-x:auto; scrollbar-width:none; margin-bottom:24px;
+/* Main image interaction */
+.spx-slide{user-select:none}
+.spx-img{user-select:none;-webkit-user-drag:none}
+
+.spx-loading{background:#f8fafc!important}
+
+@media(max-width:900px){
+  .spx-wrap{grid-template-columns:1fr;gap:22px;padding:18px 16px 100px}
+  .spx-left{position:static}
+  .spx-slide{min-height:420px;padding:30px}
+  .spx-img{max-height:390px}
+  .spx-mobile-buybar{display:flex}
+  .sp-mobile-buybar{
+    position:fixed;left:0;right:0;bottom:0;z-index:120;
+    display:flex;gap:9px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+    background:rgba(255,255,255,.94);backdrop-filter:blur(16px);
+    border-top:1px solid #e2e8f0;box-shadow:0 -8px 26px rgba(15,23,42,.09)
+  }
+  .sp-mobile-cart{
+    flex:1;min-height:50px;border:0;border-radius:13px;background:#4f46e5;color:#fff;
+    font:800 13.5px Inter,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px
+  }
+  .sp-mobile-wish{
+    width:50px;min-width:50px;border-radius:13px;border:1px solid #fecdd3;
+    background:#fff;color:#e11d48;display:flex;align-items:center;justify-content:center
+  }
 }
-.spx-toggler::-webkit-scrollbar { display:none; }
-.spx-tgl {
-  flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
-  padding:10px 14px; border-radius:12px;
-  font-size:12.5px; font-weight:800; color:#9896b8;
-  cursor:pointer; border:none; background:none; font-family:var(--fb);
-  white-space:nowrap; min-width:max-content;
-  transition:all .22s cubic-bezier(.22,1,.36,1);
-}
-.spx-tgl:hover { color:#5046e4; background:rgba(80,70,228,.06); }
-.spx-tgl.on {
-  background:white; color:#5046e4;
-  box-shadow:0 2px 14px rgba(80,70,228,.14), 0 1px 3px rgba(0,0,0,.05);
-}
-
-/* ══ SPECS TABLE — modern ══ */
-.spx-spec-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
-.spx-spec-group {
-  background:rgba(255,255,255,.80); border:1px solid rgba(80,70,228,.09);
-  border-radius:16px; overflow:hidden;
-}
-.spx-spec-head {
-  padding:10px 15px; font-size:10.5px; font-weight:900; letter-spacing:.10em;
-  text-transform:uppercase; color:white;
-  background:linear-gradient(135deg,#5046e4,#7c3aed 55%,#3b82f6);
-}
-.spx-spec-row {
-  display:flex; justify-content:space-between; align-items:center;
-  padding:10px 15px; border-bottom:1px solid rgba(80,70,228,.05);
-  font-size:12.5px; transition:background .15s;
-}
-.spx-spec-row:hover { background:rgba(80,70,228,.04); }
-.spx-spec-row:last-child { border-bottom:none; }
-.spx-spec-key { color:#8893a8; font-weight:500; }
-.spx-spec-val { font-weight:800; color:#1a1535; font-family:var(--fm); font-size:12px; text-align:right; max-width:55%; overflow:hidden; text-overflow:ellipsis; }
-
-/* ══ REVIEW SUMMARY ══ */
-.spx-rev-summary {
-  display:flex; align-items:center; gap:22px; padding:18px 20px;
-  background:linear-gradient(135deg,rgba(80,70,228,.07),rgba(59,130,246,.04));
-  border-radius:18px; border:1px solid rgba(80,70,228,.11);
-}
-.spx-rev-big { font-family:var(--fm); font-size:2.8rem; font-weight:700; color:#5046e4; line-height:1; }
-.spx-rb-w { flex:1; height:6px; border-radius:4px; background:#f0f0fb; overflow:hidden; }
-.spx-rb-f { height:100%; border-radius:4px; background:linear-gradient(90deg,#fbbf24,#f59e0b); transition:width .55s cubic-bezier(.22,1,.36,1); }
-
-/* ══ REVIEW CARD ══ */
-.spx-rv {
-  background:rgba(255,255,255,.90); border:1px solid rgba(80,70,228,.09);
-  border-radius:18px; padding:18px;
-  transition:box-shadow .22s,transform .22s;
-}
-.spx-rv:hover { box-shadow:0 6px 26px rgba(80,70,228,.10); transform:translateY(-1px); }
-
-/* ══ INPUTS ══ */
-.spx-in {
-  width:100%; padding:12px 15px;
-  background:#f7f8ff; border:1.5px solid rgba(80,70,228,.11);
-  border-radius:13px; font-size:13.5px; font-family:var(--fb); color:#1a1535;
-  outline:none; resize:vertical; transition:all .22s;
-}
-.spx-in::placeholder { color:#c4cce0; }
-.spx-in:focus { background:white; border-color:#5046e4; box-shadow:0 0 0 3px rgba(80,70,228,.09); }
-
-/* ══ GATE ══ */
-.spx-gate {
-  display:flex; flex-direction:column; align-items:center; gap:14px;
-  padding:28px; border-radius:20px; text-align:center;
-  background:linear-gradient(135deg,rgba(80,70,228,.05),rgba(59,130,246,.03));
-  border:1.5px dashed rgba(80,70,228,.22);
-  animation:spPop .35s ease both;
-}
-
-/* ══ LIKE / DISLIKE ══ */
-.spx-lb {
-  display:flex; align-items:center; gap:5px; border:none; background:none;
-  cursor:pointer; font-size:12px; font-weight:700; font-family:var(--fb);
-  padding:6px 12px; border-radius:9px; color:#8893a8; transition:all .18s;
-}
-.spx-lb:hover { background:rgba(80,70,228,.08); color:#5046e4; }
-.spx-lb.liked { color:#ef4444; background:rgba(239,68,68,.07); }
-
-/* ══ SPINNER ══ */
-.spx-spin { width:16px; height:16px; border-radius:50%; border:2.5px solid rgba(255,255,255,.30); border-top-color:white; animation:spSpin .70s linear infinite; position:relative; z-index:1; }
-
-/* ══ RELATED HEADING ══ */
-.spx-rel-h { font-family:var(--fh); font-size:clamp(1.4rem,2.3vw,1.85rem); font-weight:900; color:#1a1535; letter-spacing:-.025em; }
-
-/* ══ ZOOM ══ */
-.spx-zoom { position:fixed; inset:0; z-index:9999; background:rgba(8,7,24,.92); backdrop-filter:blur(20px); display:flex; align-items:center; justify-content:center; cursor:zoom-out; animation:spFU .18s ease; }
-.spx-zoom-img { max-width:90vw; max-height:88vh; object-fit:contain; border-radius:20px; border:1px solid rgba(255,255,255,.08); box-shadow:0 40px 100px rgba(0,0,0,.50); cursor:default; }
-.spx-zoom-x { position:absolute; top:18px; right:18px; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.18); color:white; font-size:17px; cursor:pointer; transition:background .18s; }
-.spx-zoom-x:hover { background:rgba(239,68,68,.30); }
-
-/* ══ LOADING ══ */
-.spx-loading { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:18px; background:linear-gradient(160deg,#f0effd,#eaf0ff); }
-
-/* ══ DETAIL TAG ══ */
-.spx-tag { font-size:11px; font-weight:700; padding:4px 11px; border-radius:40px; background:rgba(80,70,228,.08); border:1px solid rgba(80,70,228,.14); color:#5046e4; }
-
-/* ══ SECTION LABEL ══ */
-.spx-label { font-size:10.5px; font-weight:900; letter-spacing:.10em; text-transform:uppercase; color:#8893a8; margin-bottom:10px; }
-
-/* ══ DIVIDER ══ */
-.spx-div { height:1px; background:linear-gradient(90deg,transparent,rgba(80,70,228,.14) 20%,rgba(80,70,228,.14) 80%,transparent); }
-
-/* responsive */
 @media(max-width:600px){
-  .spx-wrap { padding:16px 14px 72px; }
-  .spx-card { border-radius:18px; }
-  .spx-gallery { border-radius:20px; }
+  .spx-wrap{padding:12px 12px 96px;gap:14px}
+  .spx-slide{min-height:350px;padding:22px}
+  .spx-img{max-height:325px}
+  .spx-card{border-radius:16px}
+  .spx-toggler{grid-template-columns:1fr 1fr 1fr}
+  .spx-tgl{font-size:11px;padding:8px 5px}
+  .spx-spec-grid{grid-template-columns:1fr}
+  .spx-spec-row{grid-template-columns:1fr;gap:4px;min-height:58px}
+  .spx-spec-val{text-align:left;font-size:11.5px}
+  .spx-rev-summary{grid-template-columns:1fr;gap:16px}
+  .spx-rv{padding:14px}
+  .spx-rv > div:first-child{gap:8px}
+  .spx-title{font-size:1.45rem}
+  .spx-price{font-size:2rem}
+}
+
+@media(prefers-reduced-motion:reduce){
+}
+
+/* =========================================================
+   FLIPKART-INSPIRED MOBILE PRODUCT PAGE
+   Compact cards, stronger hierarchy and horizontal sections
+   ========================================================= */
+@media (max-width: 768px){
+  .sp-bg{background:#f1f3f6;min-height:100vh}
+  .spx-wrap{display:block;width:100%;padding:0 0 82px}
+  .spx-left,.spx-right{display:block;width:100%}
+  .spx-left{position:static}
+
+  /* Hide desktop breadcrumb spacing on small screens */
+  .spx-wrap + *{margin:0}
+
+  .spx-gallery{border:0;border-radius:0;box-shadow:none;background:#fff}
+  .spx-slide{min-height:0;height:390px;padding:12px 30px;background:#fff}
+  .spx-img{max-height:366px;width:100%;object-fit:contain;filter:none}
+
+  .spx-disc{top:10px;left:10px;padding:5px 8px;font-size:9px}
+  .spx-acts{top:10px;right:10px;gap:7px}
+  .spx-act{width:34px;height:34px;border-radius:9px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+  .spx-cnt{bottom:9px;right:9px;font-size:9px;padding:4px 7px}
+
+  .spx-thumbs{background:#fff;border-top:1px solid #eee;border-bottom:1px solid #eee;padding:8px 10px;gap:7px;overflow-x:auto;scroll-snap-type:x proximity}
+  .spx-thumb{flex:0 0 56px;width:56px;height:56px;border-radius:8px;scroll-snap-align:start}
+
+  .spx-seller{margin:0;border-radius:0;border-left:0;border-right:0;box-shadow:none;padding:10px 12px;background:#fff}
+  .spx-sel-av{width:36px;height:36px;border-radius:9px}
+
+  .spx-right{display:flex;flex-direction:column;gap:7px}
+  .spx-card{border:0;border-radius:0;box-shadow:none;background:#fff}
+  .spx-card:hover{border-color:transparent;box-shadow:none;transform:none}
+
+  /* Product title */
+  .spx-title{font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.42;letter-spacing:-.01em;font-weight:600;color:#212121}
+  .spx-title span{display:block;max-width:none}
+  .spx-card[style*="22px 24px"]{padding:12px 12px !important}
+  .spx-card[style*="22px 24px"] > div:first-child{margin-bottom:7px !important}
+  .spx-pill{font-size:9px;padding:4px 7px}
+  .spx-card p{font-size:11.5px !important;line-height:1.55 !important;color:#666 !important}
+
+  /* Rating row */
+  .spx-title + p + div{margin-top:9px !important;padding-top:9px !important}
+
+  /* Price */
+  .spx-price{font-size:24px;line-height:1;font-family:Inter,system-ui,sans-serif;font-weight:700}
+  .spx-card[style*="20px 24px"]{padding:12px !important}
+  .spx-card[style*="20px 24px"] .spx-emi{margin-top:7px;font-size:10px;padding:6px 8px}
+
+  /* Variant / quantity area */
+  .spx-size{padding:8px 13px;border-radius:7px;font-size:11px}
+  .spx-cd{width:27px;height:27px}
+  .spx-label{font-size:10px;margin-bottom:7px}
+  .spx-qty{border-radius:8px}
+  .spx-qb{width:34px;height:34px}
+  .spx-qn{width:32px}
+
+  /* Buttons */
+  .spx-btn{min-height:48px;border-radius:8px;font-size:12px}
+  .spx-wb{width:48px;height:48px;border-radius:8px}
+
+  /* Trust information */
+  .spx-tr{min-height:42px;padding:8px 9px;border-radius:7px;font-size:10px}
+
+  /* Details / specs / reviews */
+  .spx-toggler{margin:0 0 12px;border-radius:7px;padding:3px}
+  .spx-tgl{min-height:36px;font-size:10px;border-radius:5px}
+  .spx-spec-grid{gap:7px}
+  .spx-spec-group{border-radius:8px}
+  .spx-spec-head{padding:9px 10px;font-size:9px}
+  .spx-spec-row{padding:9px 10px;min-height:42px}
+  .spx-spec-key,.spx-spec-val{font-size:10px}
+  .spx-rev-summary{padding:12px;border-radius:9px}
+  .spx-rev-big{font-size:30px}
+  .spx-rv{border-radius:9px;padding:11px}
+
+  /* Make long text safe on narrow screens */
+  .spx-right,.spx-card,.spx-card p,.spx-spec-val,.spx-rv{min-width:0;overflow-wrap:anywhere}
+
+  /* Horizontal recommendation/review media rows */
+  .sp-review-media{max-width:92px !important;height:110px !important}
+
+  /* Hide the inline Cart/Wishlist buttons on mobile.
+     Mobile uses only the fixed bottom purchase bar. */
+  .spx-inline-cta{display:none !important}
+
+  /* Mobile sticky purchase bar */
+  .sp-mobile-buybar{padding:8px 9px calc(8px + env(safe-area-inset-bottom));gap:7px}
+  .sp-mobile-cart{min-height:48px;border-radius:8px;font-size:12px}
+  .sp-mobile-wish{width:48px;min-width:48px;border-radius:8px}
+}
+
+@media (max-width: 420px){
+  .spx-slide{height:350px;padding:8px 25px}
+  .spx-img{max-height:330px}
+  .spx-thumb{flex-basis:52px;width:52px;height:52px}
+  .spx-title{font-size:14px}
+  .spx-price{font-size:22px}
+  .spx-card[style*="20px 24px"] > div:first-child{gap:9px !important}
+}
+
+
+/* =========================================================
+   PRODUCT INFORMATION ACCORDIONS
+   ========================================================= */
+.spx-accordion{
+  border:1px solid #e2e8f0;
+  border-radius:16px;
+  background:#fff;
+  overflow:hidden;
+}
+.spx-accordion + .spx-accordion{margin-top:10px}
+.spx-accordion-head{
+  width:100%;
+  min-height:58px;
+  padding:14px 17px;
+  border:0;
+  background:#fff;
+  color:#0f172a;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  text-align:left;
+  cursor:pointer;
+  font:800 14px Inter,system-ui,sans-serif;
+  transition:.18s ease;
+}
+.spx-accordion-head:hover{background:#f8fafc}
+.spx-accordion-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+.spx-accordion-icon{
+  width:34px;
+  height:34px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#eef2ff;
+  color:#4f46e5;
+  flex-shrink:0;
+}
+.spx-accordion-chevron{
+  color:#64748b;
+  transition:transform .2s ease;
+  flex-shrink:0;
+}
+.spx-accordion.open .spx-accordion-chevron{transform:rotate(180deg)}
+.spx-accordion-body{
+  padding:0 17px 17px;
+  animation:spFU .22s ease both;
+}
+.spx-accordion-meta{
+  margin-left:auto;
+  color:#64748b;
+  font-size:11px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.spx-review-preview{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.spx-review-preview-card{
+  padding:15px;
+  border:1px solid #e2e8f0;
+  border-radius:14px;
+  background:#fff;
+}
+.spx-view-all-reviews{
+  width:100%;
+  min-height:46px;
+  border:1px solid #c7d2fe;
+  border-radius:12px;
+  background:#eef2ff;
+  color:#4338ca;
+  font:800 12px Inter,sans-serif;
+  cursor:pointer;
+  transition:.18s ease;
+}
+.spx-view-all-reviews:hover{
+  background:#e0e7ff;
+  transform:translateY(-1px);
+}
+.spx-related-accordion{
+  max-width:1280px;
+  margin:0 auto;
+  padding:0 22px 88px;
+}
+.spx-related-body{
+  padding:4px 0 0;
+}
+.spx-related-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(186px,1fr));
+  gap:13px;
+}
+@media(max-width:768px){
+  .spx-accordion{
+    border-radius:0;
+    border-left:0;
+    border-right:0;
+    border-color:#e5e7eb;
+  }
+  .spx-accordion + .spx-accordion{margin-top:7px}
+  .spx-accordion-head{
+    min-height:52px;
+    padding:11px 12px;
+    font-size:13px;
+  }
+  .spx-accordion-icon{width:30px;height:30px;border-radius:8px}
+  .spx-accordion-body{padding:0 12px 13px}
+  .spx-accordion-meta{font-size:10px}
+  .spx-related-accordion{
+    padding:0 0 82px;
+    margin-top:7px;
+  }
+  .spx-related-accordion .spx-accordion{
+    border-radius:0;
+  }
+  .spx-related-body{padding:4px 10px 12px}
+  .spx-related-grid{
+    display:flex;
+    overflow-x:auto;
+    gap:9px;
+    padding:2px 0 8px;
+    scroll-snap-type:x proximity;
+    scrollbar-width:none;
+  }
+  .spx-related-grid::-webkit-scrollbar{display:none}
+  .spx-related-grid > *{
+    flex:0 0 168px;
+    min-width:168px;
+    scroll-snap-align:start;
+  }
+}
+
+/* Desktop stays spacious and card based */
+@media (min-width: 769px){
+  .spx-gallery{min-width:0}
 }
 `;
+
 
 export default function SingleProduct() {
   const { id } = useParams();
@@ -536,24 +683,16 @@ export default function SingleProduct() {
   const [product, setProduct] = useState(null);
   const [related, setRelated] = useState([]);
   const [activeIdx, setActiveIdx] = useState(0);
-  const [imgZoom, setImgZoom] = useState(false);
+  const [zoomedImageIndex, setZoomedImageIndex] = useState(null);
   const [selSize, setSelSize] = useState(null);
   const [selColor, setSelColor] = useState(null);
   const [qty, setQty] = useState(1);
-  const [tab, setTab] = useState("details");
   const [reviews, setReviews] = useState([]);
-  const [revRating, setRevRating] = useState(0);
-  const [revHover, setRevHover] = useState(0);
-  const [revText, setRevText] = useState("");
-  const [revImgs, setRevImgs] = useState([]);
-  const [revVideos, setRevVideos] = useState([]);
-  const [revLoad, setRevLoad] = useState(false);
+  const [reviewRatingFilter, setReviewRatingFilter] = useState("all");
   const [selectedReview, setSelectedReview] = useState(null);
-  const autoRef = useRef(null);
 
   const { addToCart, cartItem } = useCart();
   const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
-  const [showReviewForm, setShowReviewForm] = useState(false);
   const token = localStorage.getItem("token");
   const isSignedIn = !!token;
   const { isOpen, onOpen, onOpenChange } =
@@ -562,6 +701,7 @@ export default function SingleProduct() {
   const [selectedImage, setSelectedImage] =
     useState("");
   const galleryRef = useRef(null);
+  const mainGalleryRef = useRef(null);
 
   const [isDragging, setIsDragging] =
     useState(false);
@@ -573,9 +713,22 @@ export default function SingleProduct() {
     useState(0);
   const [galleryImages, setGalleryImages] =
     useState([]);
-  const [visibleReviews, setVisibleReviews] = useState(1);
   const [currentIndex, setCurrentIndex] =
     useState(0);
+
+  const [openInfoSections, setOpenInfoSections] = useState({
+    details: true,
+    specs: true,
+    reviews: true,
+  });
+
+  const toggleInfoSection = useCallback((section) => {
+    setOpenInfoSections(prev => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  }, []);
+  const [relatedOpen, setRelatedOpen] = useState(true);
 
   /* ── Schema-compatible variant/media helpers ── */
   const variants = product?.variants || [];
@@ -618,103 +771,6 @@ export default function SingleProduct() {
     ...(product?.media?.images || []),
   ].filter(Boolean);
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-  const {
-    isOpen: isReviewModalOpen,
-    onOpen: openReviewModal,
-    onOpenChange: onReviewModalChange,
-  } = useDisclosure();
-  const displayedReviews = reviews.slice(0, visibleReviews);
-  const [loadingMore, setLoadingMore] = useState(false);
-
-  useEffect(() => {
-    setVisibleReviews(1);
-  }, [product?._id]);
-
-  const handleLoadMore = () => {
-    setLoadingMore(true);
-
-    setTimeout(() => {
-      setVisibleReviews((prev) =>
-        Math.min(prev + 3, reviews.length)
-      );
-
-      setLoadingMore(false);
-    }, 800);
-  };
-  const showPrevImage = () => {
-
-    const newIndex =
-      currentIndex === 0
-        ? galleryImages.length - 1
-        : currentIndex - 1;
-
-    setCurrentIndex(newIndex);
-
-    setSelectedImage(
-      galleryImages[newIndex]
-    );
-
-  };
-
-  const showNextImage = () => {
-
-    const newIndex =
-      currentIndex ===
-        galleryImages.length - 1
-        ? 0
-        : currentIndex + 1;
-
-    setCurrentIndex(newIndex);
-
-    setSelectedImage(
-      galleryImages[newIndex]
-    );
-
-  };
-  const handleMouseDown = (e) => {
-
-    setIsDragging(true);
-
-    setStartX(
-      e.pageX -
-      galleryRef.current.offsetLeft
-    );
-
-    setScrollLeft(
-      galleryRef.current.scrollLeft
-    );
-
-  };
-
-  const handleMouseLeave = () => {
-
-    setIsDragging(false);
-
-  };
-
-  const handleMouseUp = () => {
-
-    setIsDragging(false);
-
-  };
-
-  const handleMouseMove = (e) => {
-
-    if (!isDragging) return;
-
-    e.preventDefault();
-
-    const x =
-      e.pageX -
-      galleryRef.current.offsetLeft;
-
-    const walk =
-      (x - startX) * 1.5;
-
-    galleryRef.current.scrollLeft =
-      scrollLeft - walk;
-
-  };
   /* fetch product */
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -882,13 +938,21 @@ useEffect(() => {
     (img, index, arr) => arr.indexOf(img) === index
   );
 
-  const startAuto = useCallback(() => {
-    if (allImgs.length <= 1) return;
-    autoRef.current = setInterval(() => setActiveIdx(p => (p + 1) % allImgs.length), 2200);
+  const handleMainGalleryScroll = useCallback((e) => {
+    const el = e.currentTarget;
+    if (!el.clientWidth) return;
+    const index = Math.round(el.scrollLeft / el.clientWidth);
+    if (allImgs.length > 0) {
+      setActiveIdx(Math.max(0, Math.min(index, allImgs.length - 1)));
+    }
   }, [allImgs.length]);
-  const stopAuto = useCallback(() => clearInterval(autoRef.current), []);
-  const prevImg = e => { e.stopPropagation(); setActiveIdx(p => (p - 1 + allImgs.length) % allImgs.length); };
-  const nextImg = e => { e.stopPropagation(); setActiveIdx(p => (p + 1) % allImgs.length); };
+
+  const scrollToImage = useCallback((index) => {
+    const el = mainGalleryRef.current;
+    if (!el) return;
+    el.scrollTo({ left: index * el.clientWidth, behavior: 'smooth' });
+  }, []);
+
 
   const isInCart = cartItem.some(c => String(c.productId) === String(product?._id));
   const isWishlisted = wishlist.some(w => String(w.productId) === String(product?._id));
@@ -936,32 +1000,6 @@ useEffect(() => {
     } catch (err) { toast.error(err?.response?.data?.message || "Failed"); }
   };
 
-  const submitReview = async e => {
-    e.preventDefault();
-    if (!token) { toast.error("Please login first"); navigate("/sign-in"); return; }
-    if (!revRating) { toast.error("Please select a rating"); return; }
-    if (!revText.trim()) { toast.error("Please write something"); return; }
-    try {
-      setRevLoad(true);
-      const fd = new FormData();
-      fd.append("rating", revRating);
-      fd.append("comment", revText);
-      revImgs.forEach(f => fd.append("images", f));
-      revVideos.forEach(f => fd.append("videos", f));
-      const res = await axios.post(
-        `${BACKEND_URL}/api/products/${product._id}/review`, fd,
-        { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
-      );
-      if (res.data.success) {
-        setReviews(res.data.reviews);
-        setRevText(""); setRevRating(0); setRevHover(0); setRevImgs([]); setRevVideos([]);
-        onReviewModalChange(false);
-        toast.success("Review submitted ✨");
-      }
-    } catch (err) { toast.error(err?.response?.data?.message || "Failed"); }
-    finally { setRevLoad(false); }
-  };
-
   const toggleLike = async (rid, type = "like") => {
     if (!token) { toast.error("Please login first"); return; }
     try {
@@ -986,8 +1024,33 @@ useEffect(() => {
   };
 
   const avgRating = reviews.length
-    ? (reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviews.length).toFixed(1)
-    : (product?.rating || 0).toFixed(1);
+    ? (reviews.reduce((s, r) => s + Number(r?.rating || 0), 0) / reviews.length).toFixed(1)
+    : Number(product?.rating || 0).toFixed(1);
+
+  /* ── Interactive review rating filter ── */
+  const reviewRatingCounts = {
+    5: reviews.filter(r => Math.round(Number(r?.rating || 0)) === 5).length,
+    4: reviews.filter(r => Math.round(Number(r?.rating || 0)) === 4).length,
+    3: reviews.filter(r => Math.round(Number(r?.rating || 0)) === 3).length,
+    2: reviews.filter(r => Math.round(Number(r?.rating || 0)) === 2).length,
+    1: reviews.filter(r => Math.round(Number(r?.rating || 0)) === 1).length,
+  };
+
+  const filteredReviews = reviewRatingFilter === "all"
+    ? reviews
+    : reviews.filter(
+        r => Math.round(Number(r?.rating || 0)) === Number(reviewRatingFilter)
+      );
+
+  const getReviewImages = (review) => {
+    const images = [
+      ...(Array.isArray(review?.images) ? review.images : []),
+      ...(Array.isArray(review?.photos) ? review.photos : []),
+      ...(Array.isArray(review?.imageUrls) ? review.imageUrls : []),
+    ];
+
+    return [...new Set(images.filter(Boolean))];
+  };
 
   /* ── Loading ── */
   if (!product) return (
@@ -997,13 +1060,6 @@ useEffect(() => {
   );
 
   const disc = Math.round(productDiscount || 0);
-
-  /* tab definitions */
-  const TABS = [
-    { key: "details", label: "Details", Icon: FaInfoCircle },
-    { key: "specs", label: "Specs", Icon: FaCog },
-    { key: "reviews", label: `Reviews (${reviews.length})`, Icon: FaComments },
-  ];
 
   /* spec rows */
   const specsA = [
@@ -1028,16 +1084,12 @@ useEffect(() => {
     <>
       <style>{CSS}</style>
       <div className="sp sp-bg">
-        {/* ambient */}
-        <div className="sp-orb sp-o1" />
-        <div className="sp-orb sp-o2" />
-        <div className="sp-orb sp-o3" />
-        <div className="sp-grid" />
+
 
         {/* breadcrumb */}
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 1280, margin: "9px auto", padding: "20px 22px 0" ,}}>
+        {/* <div style={{ position: "relative", zIndex: 1, maxWidth: 1320, margin: "0 auto", padding: "22px 24px 0" }}>
           <Breadcrums title={product.title} />
-        </div>
+        </div> */}
 
         {/* ══ MAIN ══ */}
         <div className="spx-wrap">
@@ -1046,7 +1098,9 @@ useEffect(() => {
           <div className="spx-left sp-fr">
 
             {/* Gallery */}
-            <div className="spx-gallery" onMouseEnter={startAuto} onMouseLeave={stopAuto}>
+            <div
+              className="spx-gallery"
+            >
               {disc > 0 && (
                 <div className="spx-disc">
                   <FaTag size={9} /> {disc}% OFF
@@ -1054,45 +1108,54 @@ useEffect(() => {
               )}
 
               <div className="spx-acts">
-                <button className={`spx-act${isWishlisted ? " wl" : ""}`} onClick={handleWish} title="Wishlist">
+                {/* <button className={`spx-act${isWishlisted ? " wl" : ""}`} onClick={handleWish} title="Wishlist">
                   {isWishlisted ? <FaHeart size={14} /> : <FaRegHeart size={14} />}
-                </button>
+                </button> */}
                 <button className="spx-act" onClick={handleShare} title="Share">
                   <SlActionRedo size={13} />
                 </button>
-                <button className="spx-act" onClick={() => setImgZoom(true)} title="Zoom">
+                <button className="spx-act" type="button" onClick={() => setZoomedImageIndex(activeIdx)} title="Zoom image">
                   <AiOutlineZoomIn size={15} />
                 </button>
               </div>
 
-              <div style={{ overflow: "hidden" }}>
-                <div className="spx-track" style={{ transform: `translateX(-${activeIdx * 100}%)` }}>
+              <div ref={mainGalleryRef} className="spx-track spx-main-track" onScroll={handleMainGalleryScroll}>
                   {allImgs.map((src, i) => (
                     <div key={i} className="spx-slide">
-                      <img src={src} alt={product.title} loading="lazy" className="spx-img" onClick={() => setImgZoom(true)} />
+                      <ControlledZoom
+                        isZoomed={zoomedImageIndex === i}
+                        onZoomChange={(isZoomed) => {
+                          setZoomedImageIndex(isZoomed ? i : null);
+                        }}
+                        zoomMargin={24}
+                        a11yNameButtonZoom={`Zoom ${product.title}`}
+                        a11yNameButtonUnzoom="Close image zoom"
+                        zoomImg={{
+                          src,
+                          alt: product.title,
+                        }}
+                      >
+                        <img
+                          src={src}
+                          alt={product.title}
+                          loading={i === 0 ? "eager" : "lazy"}
+                          draggable={false}
+                          className="spx-img"
+                        />
+                      </ControlledZoom>
                     </div>
                   ))}
                 </div>
-              </div>
 
-              {allImgs.length > 1 && <>
-                <button className="spx-arr spx-arr-l" onClick={prevImg}><FaChevronLeft size={11} color="#5046e4" /></button>
-                <button className="spx-arr spx-arr-r" onClick={nextImg}><FaChevronRight size={11} color="#5046e4" /></button>
-                <div className="spx-dots">
-                  {allImgs.map((_, i) => (
-                    <button key={i} className={`spx-dot${i === activeIdx ? " on" : ""}`}
-                      style={{ width: i === activeIdx ? 20 : 5 }}
-                      onClick={e => { e.stopPropagation(); setActiveIdx(i); }} />
-                  ))}
-                </div>
+              {allImgs.length > 1 && (
                 <div className="spx-cnt">{activeIdx + 1} / {allImgs.length}</div>
-              </>}
+              )}
             </div>
 
             {/* thumbs */}
             <div className="spx-thumbs">
               {allImgs.map((src, i) => (
-                <div key={i} className={`spx-thumb${i === activeIdx ? " on" : ""}`} onClick={() => setActiveIdx(i)}>
+                <div key={i} className={`spx-thumb${i === activeIdx ? " on" : ""}`} onClick={() => { setActiveIdx(i); scrollToImage(i); }}>
                   <img src={src} alt="" />
                 </div>
               ))}
@@ -1108,7 +1171,7 @@ useEffect(() => {
                   <div style={{ fontSize: 10.5, color: "#8893a8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{product.seller.email}</div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 800, color: "#5046e4", background: "rgba(80,70,228,.08)", padding: "4px 10px", borderRadius: 40, flexShrink: 0 }}>
-                  <MdVerified size={13} /> Verified
+                  <MdVerified size={13} /> Verified Seller
                 </div>
               </div>
             )}
@@ -1132,7 +1195,9 @@ useEffect(() => {
                 {product.isNewArrival && <span className="spx-pill pgn">✨ New</span>}
               </div>
 
-              <h1 className="spx-title">{product.title}</h1>
+              <h1 className="spx-title">
+                <span>{product.title}</span>
+              </h1>
               {product.shortDescription && (
                 <p style={{ fontSize: 13.5, color: "#5a6278", marginTop: 10, lineHeight: 1.70 }}>{product.shortDescription}</p>
               )}
@@ -1225,13 +1290,24 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* ── CTA row ── */}
-            <div style={{ display: "flex", gap: 10, alignItems: "stretch" }}>
-              <button className={`spx-btn ${isInCart ? "spx-ic" : "spx-add"}`} onClick={handleCart}>
+            {/* ── Desktop CTA row ──
+                 On mobile these actions are shown only in the fixed bottom bar,
+                 so there is no duplicate Add to Cart / Wishlist row. ── */}
+            <div className="spx-inline-cta" style={{ display: "flex", gap: 10, alignItems: "stretch" }}>
+              <button
+                type="button"
+                className={`spx-btn ${isInCart ? "spx-ic" : "spx-add"}`}
+                onClick={handleCart}
+              >
                 <FaShoppingCart size={15} />
                 <span>{isInCart ? "Go to Cart" : "Add to Cart"}</span>
               </button>
-              <button className={`spx-wb${isWishlisted ? " on" : ""}`} onClick={handleWish}>
+              <button
+                type="button"
+                className={`spx-wb${isWishlisted ? " on" : ""}`}
+                onClick={handleWish}
+                aria-label="Wishlist"
+              >
                 {isWishlisted
                   ? <FaHeart size={18} style={{ color: "#f43f5e" }} />
                   : <FaRegHeart size={18} style={{ color: "#f43f5e" }} />}
@@ -1250,785 +1326,516 @@ useEffect(() => {
               ))}
             </div>
 
-            {/* ══ TOGGLER + TABBED CONTENT ══ */}
-            <div className="spx-card" style={{ padding: "22px 24px" }}>
+            {/* ══ PRODUCT INFORMATION ACCORDIONS ══ */}
+            <div className="spx-card" style={{ padding: 0, overflow: "hidden" }}>
 
-              {/* pill toggler */}
-              <div className="spx-toggler">
-                {TABS.map(({ key, label, Icon }) => (
-                  <button key={key}
-                    className={`spx-tgl${tab === key ? " on" : ""}`}
-                    onClick={() => setTab(key)}>
-                    <Icon size={12} />
-                    {label}
-                  </button>
-                ))}
-              </div>
+              {/* DETAILS */}
+              {/* <div className={`spx-accordion${openInfoSections.details ? " open" : ""}`}>
+                <button
+                  type="button"
+                  className="spx-accordion-head"
+                  onClick={() => toggleInfoSection("details")}
+                  aria-expanded={openInfoSections.details}
+                >
+                  <span className="spx-accordion-title">
+                    <span className="spx-accordion-icon"><FaInfoCircle size={13} /></span>
+                    <span>Product Details</span>
+                  </span>
+                  <ChevronDown className="spx-accordion-chevron" size={17} />
+                </button>
 
-              {/* ── DETAILS tab ── */}
-              {tab === "details" && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 16, animation: "spFU .30s ease both" }}>
-                  <p style={{ fontSize: 14, color: "#5a6278", lineHeight: 1.76, margin: 0 }}>{product.description}</p>
+                {openInfoSections.details && (
+                  <div className="spx-accordion-body">
+                    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                      <p style={{ fontSize: 14, color: "#5a6278", lineHeight: 1.76, margin: 0 }}>
+                        {product.description || "No product description available."}
+                      </p>
 
-                  {/* highlights grid */}
-                  {(product.shippingInformation || product.returnPolicy || product.warrantyInformation) && (
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 10 }}>
-                      {[
-                        { label: "Shipping", val: product.shippingInformation, color: "#10b981" },
-                        { label: "Returns", val: product.returnPolicy, color: "#3b82f6" },
-                        { label: "Warranty", val: product.warrantyInformation, color: "#f59e0b" },
-                      ].filter(x => x.val).map(x => (
-                        <div key={x.label} style={{ padding: "12px 14px", borderRadius: 14, background: `${x.color}0d`, border: `1px solid ${x.color}22` }}>
-                          <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: ".08em", textTransform: "uppercase", color: x.color, marginBottom: 4 }}>{x.label}</div>
-                          <div style={{ fontSize: 12.5, fontWeight: 600, color: "#374151" }}>{x.val}</div>
+                      {(product.shippingInformation || product.returnPolicy || product.warrantyInformation) && (
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 10 }}>
+                          {[
+                            { label: "Shipping", val: product.shippingInformation, color: "#10b981" },
+                            { label: "Returns", val: product.returnPolicy, color: "#3b82f6" },
+                            { label: "Warranty", val: product.warrantyInformation, color: "#f59e0b" },
+                          ].filter(x => x.val).map(x => (
+                            <div key={x.label} className="sp-detail-item" style={{
+                              padding: "12px 14px",
+                              borderRadius: 14,
+                              background: `${x.color}0d`,
+                              border: `1px solid ${x.color}22`
+                            }}>
+                              <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: ".08em", textTransform: "uppercase", color: x.color, marginBottom: 4 }}>
+                                {x.label}
+                              </div>
+                              <div style={{ fontSize: 12.5, fontWeight: 600, color: "#374151" }}>{x.val}</div>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      )}
 
-                  {product.tags?.length > 0 && (
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
-                      {product.tags.map(t => <span key={t} className="spx-tag">#{t}</span>)}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* ── SPECS tab — modern two-column table ── */}
-              {tab === "specs" && (
-                <div className="spx-spec-grid" style={{ animation: "spFU .30s ease both" }}>
-                  {/* group A */}
-                  {specsA.length > 0 && (
-                    <div className="spx-spec-group">
-                      <div className="spx-spec-head">Product Identity</div>
-                      {specsA.map(r => (
-                        <div key={r.l} className="spx-spec-row">
-                          <span className="spx-spec-key">{r.l}</span>
-                          <span className="spx-spec-val">{r.v}</span>
+                      {product.tags?.length > 0 && (
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+                          {product.tags.map(t => <span key={t} className="spx-tag">#{t}</span>)}
                         </div>
-                      ))}
-                    </div>
-                  )}
-                  {/* group B */}
-                  {specsB.length > 0 && (
-                    <div className="spx-spec-group">
-                      <div className="spx-spec-head">Shipping &amp; Ordering</div>
-                      {specsB.map(r => (
-                        <div key={r.l} className="spx-spec-row">
-                          <span className="spx-spec-key">{r.l}</span>
-                          <span className="spx-spec-val">{r.v}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* ── REVIEWS tab ── */}
-              {tab === "reviews" && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 20, animation: "spFU .30s ease both" }}>
-
-                  {/* summary */}
-                  <div className="spx-rev-summary">
-                    <div style={{ textAlign: "center", flexShrink: 0 }}>
-                      <div className="spx-rev-big">{avgRating}</div>
-                      <Stars rating={parseFloat(avgRating)} size={13} />
-                      <div style={{ fontSize: 10.5, color: "#a0aec0", marginTop: 4 }}>{reviews.length} reviews</div>
-                    </div>
-                    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
-                      {[5, 4, 3, 2, 1].map(s => {
-                        const cnt = reviews.filter(r => Math.round(r.rating || 0) === s).length;
-                        const pct = reviews.length ? Math.round((cnt / reviews.length) * 100) : 0;
-                        return (
-                          <div key={s} style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                            <span style={{ fontSize: 10.5, fontWeight: 700, color: "#8893a8", width: 8, flexShrink: 0 }}>{s}</span>
-                            <FaStar size={9} color="#fbbf24" style={{ flexShrink: 0 }} />
-                            <div className="spx-rb-w"><div className="spx-rb-f" style={{ width: `${pct}%` }} /></div>
-                            <span style={{ fontSize: 10.5, color: "#c4cce0", width: 20, textAlign: "right", flexShrink: 0 }}>{cnt}</span>
-                          </div>
-                        );
-                      })}
+                      )}
                     </div>
                   </div>
+                )}
+              </div> */}
 
-                  {/* form / gate */}
-                  {!isSignedIn ? (
-                    <div className="spx-gate">
-                      <div style={{ width: 48, height: 48, borderRadius: 14, background: "linear-gradient(135deg,#5046e4,#3b82f6)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 20px rgba(80,70,228,.32)" }}>
-                        <FaLock size={18} color="white" />
-                      </div>
-                      <div style={{ fontFamily: "var(--fh)", fontSize: "1.05rem", fontWeight: 900, color: "#1a1535" }}>Sign in to review</div>
-                      <p style={{ fontSize: 12.5, color: "#8893a8", maxWidth: 280, lineHeight: 1.55 }}>You need to be logged in to leave a review.</p>
-                      <button onClick={() => navigate("/sign-in")}
-                        style={{ padding: "11px 26px", borderRadius: 13, background: "linear-gradient(135deg,#5046e4,#3b82f6)", color: "white", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 800, fontFamily: "var(--fb)", boxShadow: "0 5px 18px rgba(80,70,228,.30)" }}>
-                        Sign In
-                      </button>
+              {/* SPECIFICATIONS */}
+              <div className={`spx-accordion${openInfoSections.specs ? " open" : ""}`}>
+                <button
+                  type="button"
+                  className="spx-accordion-head"
+                  onClick={() => toggleInfoSection("specs")}
+                  aria-expanded={openInfoSections.specs}
+                >
+                  <span className="spx-accordion-title">
+                    <span className="spx-accordion-icon"><FaCog size={13} /></span>
+                    <span>Specifications</span>
+                  </span>
+                  <span className="spx-accordion-meta">
+                    {[...specsA, ...specsB].length} specifications
+                  </span>
+                  <ChevronDown className="spx-accordion-chevron" size={17} />
+                </button>
+
+                {openInfoSections.specs && (
+                  <div className="spx-accordion-body">
+                    <div className="spx-spec-grid">
+                      {specsA.length > 0 && (
+                        <div className="spx-spec-group">
+                          <div className="spx-spec-head">Product Identity</div>
+                          {specsA.map(r => (
+                            <div key={r.l} className="spx-spec-row">
+                              <span className="spx-spec-key">{r.l}</span>
+                              <span className="spx-spec-val">{r.v}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {specsB.length > 0 && (
+                        <div className="spx-spec-group">
+                          <div className="spx-spec-head">Shipping &amp; Ordering</div>
+                          {specsB.map(r => (
+                            <div key={r.l} className="spx-spec-row">
+                              <span className="spx-spec-key">{r.l}</span>
+                              <span className="spx-spec-val">{r.v}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <div>
+                  </div>
+                )}
+              </div>
 
-                      <button
-                        onClick={openReviewModal}
-                        style={{
-                          width: "100%",
-                          border: "none",
-                          cursor: "pointer",
-                          background: "white",
-                          borderRadius: "18px",
-                          padding: "18px",
+              {/* =========================================================
+                  RATINGS & REVIEWS
+                  ========================================================= */}
+              <div className={`spx-accordion${openInfoSections.reviews ? " open" : ""}`}>
+                <button
+                  type="button"
+                  className="spx-accordion-head"
+                  onClick={() => toggleInfoSection("reviews")}
+                  aria-expanded={openInfoSections.reviews}
+                >
+                  <span className="spx-accordion-title">
+                    <span className="spx-accordion-icon"><FaComments size={13} /></span>
+                    <span>Ratings &amp; Reviews</span>
+                  </span>
+                  <span className="spx-accordion-meta">
+                    {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
+                  </span>
+                  <ChevronDown className="spx-accordion-chevron" size={17} />
+                </button>
+
+                {openInfoSections.reviews && (
+                  <div className="spx-accordion-body">
+                    <div className="spx-review-preview">
+
+                      {/* Rating summary */}
+                      <div className="spx-rev-summary">
+                        <div style={{ textAlign: "center", flexShrink: 0 }}>
+                          <div className="spx-rev-big">{avgRating}</div>
+                          <div style={{ display: "flex", justifyContent: "center", marginTop: 6 }}>
+                            <Stars rating={parseFloat(avgRating)} size={15} />
+                          </div>
+                          <div style={{ fontSize: 10.5, color: "#94a3b8", marginTop: 5 }}>
+                            {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
+                          </div>
+                        </div>
+
+                        {/* Interactive 5★ → 1★ progress bars */}
+                        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 7 }}>
+                          {[5, 4, 3, 2, 1].map(star => {
+                            const count = reviewRatingCounts[star] || 0;
+                            const percentage = reviews.length
+                              ? Math.round((count / reviews.length) * 100)
+                              : 0;
+                            const isActive = reviewRatingFilter === String(star);
+
+                            return (
+                              <button
+                                key={star}
+                                type="button"
+                                onClick={() => setReviewRatingFilter(isActive ? "all" : String(star))}
+                                aria-pressed={isActive}
+                                title={`Show ${star}-star reviews`}
+                                style={{
+                                  width: "100%",
+                                  border: 0,
+                                  padding: "3px 5px",
+                                  margin: 0,
+                                  background: isActive ? "#eef2ff" : "transparent",
+                                  borderRadius: 8,
+                                  cursor: "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 7,
+                                  transition: "all .18s ease",
+                                }}
+                              >
+                                <span style={{
+                                  width: 10,
+                                  fontSize: 10.5,
+                                  fontWeight: 800,
+                                  color: isActive ? "#4f46e5" : "#8893a8",
+                                  textAlign: "right",
+                                }}>{star}</span>
+
+                                <FaStar size={9} color="#fbbf24" />
+
+                                <div className="spx-rb-w" style={{ flex: 1 }}>
+                                  <div className="spx-rb-f" style={{ width: `${percentage}%` }} />
+                                </div>
+
+                                <span style={{
+                                  width: 25,
+                                  fontSize: 10.5,
+                                  color: isActive ? "#4f46e5" : "#94a3b8",
+                                  textAlign: "right",
+                                  fontWeight: isActive ? 800 : 600,
+                                }}>{count}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Active filter */}
+                      {reviewRatingFilter !== "all" && (
+                        <div style={{
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "space-between",
-                          boxShadow:
-                            "0 4px 20px rgba(0,0,0,.05)",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "12px",
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: "40px",
-                              height: "40px",
-                              borderRadius: "12px",
-                              background:
-                                "linear-gradient(135deg,#10b981,#059669)",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                          >
-                            <FaComments color="white" />
-                          </div>
-
-                          <div>
-                            <div
-                              style={{
-                                fontWeight: 800,
-                                color: "#1a1535",
-                              }}
-                            >
-                              Write Review
-                            </div>
-
-                            <div
-                              style={{
-                                fontSize: 12,
-                                color: "#8893a8",
-                              }}
-                            >
-                              Upload photos & videos
-                            </div>
-                          </div>
-                        </div>
-
-                        ✍️
-                      </button>
-
-                      <div
-                        className={`rv-form-panel ${showReviewForm ? "open" : "closed"
-                          }`}
-                      >
-                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-                          <div style={{ width: 32, height: 32, borderRadius: 10, background: "linear-gradient(135deg,#10b981,#059669)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                            <FaCheckCircle size={14} color="white" />
-                          </div>
-                          <div>
-                            <div style={{ fontFamily: "var(--fh)", fontSize: "1rem", fontWeight: 900, color: "#1a1535" }}>Write a Review</div>
-                            <div style={{ fontSize: 10.5, color: "#10b981", fontWeight: 700 }}>Verified Purchase</div>
-                          </div>
-                        </div>
-
-                        <form onSubmit={submitReview} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                          <div>
-                            <div className="spx-label">Your Rating</div>
-                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                              <Stars rating={revRating} size={26} interactive onRate={r => { setRevRating(r); setRevHover(0); }} hover={revHover} setHover={setRevHover} />
-                              {(revHover || revRating) > 0 && (
-                                <span style={{ fontSize: 12.5, color: "#5046e4", fontWeight: 800 }}>
-                                  {["", "Poor", "Fair", "Good", "Great", "Excellent"][revHover || revRating]}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-
-                          <textarea
-                            placeholder="Share your experience with this product…"
-                            value={revText}
-                            onChange={e => setRevText(e.target.value)}
-                            rows={3}
-                            className="spx-in"
-                          />
-                          <div
-                            style={{
-                              display: "grid",
-                              gridTemplateColumns: "1fr 1fr",
-                              gap: "24px",
-                              marginTop: "20px",
-                            }}
-                          >
-                            {/* IMAGE SECTION */}
-                            <div
-                              style={{
-                                border: "1px solid #E5E7EB",
-                                borderRadius: "16px",
-                                padding: "20px",
-                                background: "#fff",
-                                boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-                              }}
-                            >
-                              <div
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "space-between",
-                                  marginBottom: "12px",
-                                }}
-                              >
-                                <h4 style={{ margin: 0 }}>🖼️ Review Images</h4>
-
-                                {revImgs.length > 0 && (
-                                  <span
-                                    style={{
-                                      background: "#EEF2FF",
-                                      color: "#4338CA",
-                                      padding: "4px 10px",
-                                      borderRadius: "20px",
-                                      fontSize: "12px",
-                                      fontWeight: 600,
-                                    }}
-                                  >
-                                    {revImgs.length} Selected
-                                  </span>
-                                )}
-                              </div>
-
-                              <label
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  height: "140px",
-                                  border: "2px dashed #D1D5DB",
-                                  borderRadius: "12px",
-                                  cursor: "pointer",
-                                  background: "#FAFAFA",
-                                }}
-                              >
-                                <span style={{ fontSize: "30px" }}>📸</span>
-                                <p style={{ marginTop: 8, color: "#6B7280" }}>
-                                  Click to upload images
-                                </p>
-
-                                <input
-                                  type="file"
-                                  multiple
-                                  accept="image/*"
-                                  hidden
-                                  onChange={(e) =>
-                                    setRevImgs(Array.from(e.target.files))
-                                  }
-                                />
-                              </label>
-
-                              {revImgs.length > 0 && (
-                                <div
-                                  style={{
-                                    marginTop: "16px",
-                                    display: "grid",
-                                    gridTemplateColumns:
-                                      "repeat(auto-fill,minmax(90px,1fr))",
-                                    gap: "10px",
-                                  }}
-                                >
-                                  {revImgs.map((file, i) => (
-                                    <div
-                                      key={i}
-                                      style={{
-                                        position: "relative",
-                                      }}
-                                    >
-                                      <button
-                                        type="button"
-                                        onClick={() =>
-                                          setRevImgs((prev) =>
-                                            prev.filter((_, index) => index !== i)
-                                          )
-                                        }
-                                        style={{
-                                          position: "absolute",
-                                          top: "-6px",
-                                          right: "-6px",
-                                          width: "22px",
-                                          height: "22px",
-                                          border: "none",
-                                          borderRadius: "50%",
-                                          background: "#EF4444",
-                                          color: "#fff",
-                                          cursor: "pointer",
-                                          fontSize: "12px",
-                                          fontWeight: 700,
-                                          zIndex: 1,
-                                          boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                                        }}
-                                      >
-                                        <IoClose size={14} />
-                                      </button>
-
-                                      <img
-                                        src={URL.createObjectURL(file)}
-                                        alt=""
-                                        style={{
-                                          width: "100%",
-                                          height: "90px",
-                                          objectFit: "cover",
-                                          borderRadius: "10px",
-                                        }}
-                                      />
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-
-                            {/* VIDEO SECTION */}
-                            <div
-                              style={{
-                                border: "1px solid #E5E7EB",
-                                borderRadius: "16px",
-                                padding: "20px",
-                                background: "#fff",
-                                boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-                              }}
-                            >
-                              <div
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "space-between",
-                                  marginBottom: "12px",
-                                }}
-                              >
-                                <h4 style={{ margin: 0 }}>🎥 Review Videos</h4>
-
-                                {revVideos.length > 0 && (
-                                  <div
-                                    style={{
-                                      marginTop: "16px",
-                                      display: "grid",
-                                      gridTemplateColumns:
-                                        "repeat(auto-fill,minmax(180px,1fr))",
-                                      gap: "12px",
-                                    }}
-                                  >
-                                    {revVideos.map((file, i) => (
-                                      <div
-                                        key={i}
-                                        style={{
-                                          position: "relative",
-                                        }}
-                                      >
-                                        <button
-                                          type="button"
-                                          onClick={() =>
-                                            setRevVideos((prev) =>
-                                              prev.filter((_, index) => index !== i)
-                                            )
-                                          }
-                                          style={{
-                                            position: "absolute",
-                                            top: "-8px",
-                                            right: "-8px",
-                                            width: "24px",
-                                            height: "24px",
-                                            border: "none",
-                                            borderRadius: "50%",
-                                            background: "#EF4444",
-                                            color: "#fff",
-                                            cursor: "pointer",
-                                            fontSize: "12px",
-                                            fontWeight: 700,
-                                            zIndex: 1,
-                                            boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                                          }}
-                                        >
-                                          <IoClose size={14} />
-                                        </button>
-
-                                        <video
-                                          controls
-                                          src={URL.createObjectURL(file)}
-                                          style={{
-                                            width: "100%",
-                                            borderRadius: "12px",
-                                            background: "#000",
-                                          }}
-                                        />
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-
-                              <label
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  height: "140px",
-                                  border: "2px dashed #D1D5DB",
-                                  borderRadius: "12px",
-                                  cursor: "pointer",
-                                  background: "#FAFAFA",
-                                }}
-                              >
-                                <span style={{ fontSize: "30px" }}>🎬</span>
-
-                                <p style={{ marginTop: 8, color: "#6B7280" }}>
-                                  Click to upload videos
-                                </p>
-
-                                <input
-                                  type="file"
-                                  multiple
-                                  accept="video/*"
-                                  hidden
-                                  onChange={(e) =>
-                                    setRevVideos(
-                                      Array.from(e.target.files)
-                                    )
-                                  }
-                                />
-                              </label>
-
-                              {revVideos.length > 0 && (
-                                <div
-                                  style={{
-                                    marginTop: "16px",
-                                    display: "grid",
-                                    gridTemplateColumns:
-                                      "repeat(auto-fill,minmax(180px,1fr))",
-                                    gap: "12px",
-                                  }}
-                                >
-                                  {revVideos.map((file, i) => (
-                                    <video
-                                      key={i}
-                                      controls
-                                      src={URL.createObjectURL(file)}
-                                      style={{
-                                        width: "100%",
-                                        borderRadius: "12px",
-                                        background: "#000",
-                                      }}
-                                    />
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <button type="submit" disabled={revLoad}
-                            style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "13px 0", borderRadius: 13, background: "linear-gradient(135deg,#5046e4,#7c3aed 50%,#3b82f6)", color: "white", border: "none", cursor: "pointer", fontSize: 13.5, fontWeight: 800, fontFamily: "var(--fb)", boxShadow: "0 5px 20px rgba(80,70,228,.30)", opacity: revLoad ? .7 : 1, transition: "opacity .18s" }}>
-                            {revLoad ? <><div className="spx-spin" /> Submitting…</> : <><FaPaperPlane size={12} /> Submit Review</>}
-                          </button>
-                        </form>
-                      </div>
-                    </div>
-                  )}
-
-
-                  {/* review list */}
-                  {reviews.length === 0 ? (
-                    <div
-                      style={{
-                        textAlign: "center",
-                        padding: "32px 0",
-                        color: "#c4cce0",
-                        fontSize: 13.5,
-                      }}
-                    >
-                      No reviews yet — be the first! 🌟
-                    </div>
-                  ) : (
-                    <>
-                      {displayedReviews.map((r, i) => (
-                        <div key={r._id || i} className="spx-rv">
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "flex-start",
-                              justifyContent: "space-between",
-                              marginBottom: 12,
-                            }}
-                          >
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 11,
-                              }}
-                            >
-                              <div
-                                style={{
-                                  width: 40,
-                                  height: 40,
-                                  borderRadius: 12,
-                                  background:
-                                    "linear-gradient(135deg,#5046e4,#3b82f6)",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  flexShrink: 0,
-                                }}
-                              >
-                                <FaUser size={14} color="white" />
-                              </div>
-
-                              <div>
-                                <div
-                                  style={{
-                                    fontSize: 13,
-                                    fontWeight: 800,
-                                    color: "#1a1535",
-                                  }}
-                                >
-                                  {r.reviewerName || "Anonymous"}
-                                </div>
-
-                                <div
-                                  style={{
-                                    fontSize: 10.5,
-                                    color: "#c4cce0",
-                                  }}
-                                >
-                                  {r.createdAt
-                                    ? new Date(
-                                      r.createdAt
-                                    ).toLocaleDateString("en-IN", {
-                                      day: "numeric",
-                                      month: "short",
-                                      year: "numeric",
-                                    })
-                                    : ""}
-                                </div>
-                              </div>
-                            </div>
-
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 6,
-                              }}
-                            >
-                              <Stars rating={r.rating || 0} size={12} />
-
-                              <span
-                                style={{
-                                  fontSize: 12,
-                                  fontWeight: 700,
-                                  color: "#1a1535",
-                                }}
-                              >
-                                {r.rating?.toFixed(1)}
-                              </span>
-                            </div>
-                          </div>
-
-                          {r.comment && (
-                            <p
-                              style={{
-                                fontSize: 13.5,
-                                color: "#5a6278",
-                                lineHeight: 1.68,
-                                margin: "0 0 12px",
-                              }}
-                            >
-                              {r.comment}
-                            </p>
-                          )}
-
-                          {r.images?.length > 0 && (
-                            <div
-                              style={{
-                                display: "flex",
-                                gap: 8,
-                                marginBottom: 12,
-                                flexWrap: "wrap",
-                              }}
-                            >
-                              {r.images.map((img, j) => (
-                                <img
-                                  key={j}
-                                  src={img}
-                                  alt=""
-                                  style={{
-                                    width: 76,
-                                    height: 76,
-                                    objectFit: "cover",
-                                    borderRadius: 11,
-                                    cursor: "pointer",
-                                    border:
-                                      "1px solid rgba(80,70,228,.09)",
-                                  }}
-                                  onClick={() => {
-                                    setSelectedReview(r);
-                                    setGalleryImages(r.images);
-                                    setCurrentIndex(j);
-                                    setSelectedImage(img);
-                                    onOpen();
-                                  }}
-                                />
-                              ))}
-                            </div>
-                          )}
-
-                          {r.videos?.length > 0 && (
-                            <div
-                              style={{
-                                display: "flex",
-                                gap: 8,
-                                marginBottom: 12,
-                                flexWrap: "wrap",
-                              }}
-                            >
-                              {r.videos.map((video, j) => (
-                                <video
-                                  key={j}
-                                  src={video}
-                                  controls
-                                  style={{
-                                    width: 220,
-                                    borderRadius: 12,
-                                  }}
-                                />
-                              ))}
-                            </div>
-                          )}
-
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 8,
-                              paddingTop: 11,
-                              borderTop:
-                                "1px solid rgba(80,70,228,.06)",
-                            }}
-                          >
-                            <button
-                              className="spx-lb"
-                              onClick={() =>
-                                toggleLike(r._id, "like")
-                              }
-                            >
-                              <FaThumbsUp size={11} />{" "}
-                              {r.likesCount || 0} Helpful
-                            </button>
-
-                            <button
-                              className="spx-lb"
-                              onClick={() =>
-                                toggleLike(r._id, "dislike")
-                              }
-                            >
-                              <FaThumbsDown size={11} />{" "}
-                              {r.dislikesCount || 0}
-                            </button>
-
-                            {/* <button
-            onClick={() => deleteReview(r._id)}
-            style={{
-              marginLeft: "auto",
-              border: "none",
-              background: "none",
-              cursor: "pointer",
-              color: "#c4cce0",
-            }}
-          >
-            <FaTrash size={10} /> Delete
-          </button> */}
-                          </div>
-                        </div>
-                      ))}
-
-                      {/* LOAD MORE */}
-                      {visibleReviews < reviews.length && (
-                        <div className="flex justify-center mt-8">
+                          gap: 10,
+                          padding: "8px 10px",
+                          borderRadius: 10,
+                          background: "#f8fafc",
+                          border: "1px solid #e2e8f0",
+                        }}>
+                          <span style={{ fontSize: 10.5, fontWeight: 700, color: "#64748b" }}>
+                            Showing {filteredReviews.length} {filteredReviews.length === 1 ? "review" : "reviews"} rated {reviewRatingFilter} star
+                          </span>
                           <button
-                            onClick={handleLoadMore}
-                            disabled={loadingMore}
-                            className="
-        flex items-center gap-3
-        px-7 py-3.5
-        rounded-2xl
-        bg-gradient-to-r
-        from-indigo-600
-        via-violet-600
-        to-blue-500
-        text-white
-        font-semibold
-        shadow-lg shadow-indigo-500/25
-        transition-all duration-300
-        hover:-translate-y-1
-        hover:shadow-2xl
-        disabled:hover:translate-y-0
-      "
+                            type="button"
+                            onClick={() => setReviewRatingFilter("all")}
+                            style={{
+                              border: 0,
+                              background: "transparent",
+                              color: "#4f46e5",
+                              fontSize: 10,
+                              fontWeight: 800,
+                              cursor: "pointer",
+                            }}
                           >
-                            {loadingMore ? (
-                              <>
-                                <div className="w-5 h-5 border-[2.5px] border-white/30 border-t-white rounded-full animate-spin" />
-                                Loading...
-                              </>
-                            ) : (
-                              <>
-                                <ChevronDown size={18} />
-                                Load More Reviews
-
-                                <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-white/20">
-                                  {reviews.length - visibleReviews}
-                                </span>
-                              </>
-                            )}
+                            Show All
                           </button>
                         </div>
                       )}
-                    </>
-                  )}
-                </div>
-              )}
+
+                      {/* All matching reviews */}
+                      {filteredReviews.length > 0 ? (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 4 }}>
+                          {filteredReviews.map((review, index) => {
+                            const rating = Number(review?.rating || 0);
+                            const reviewImages = getReviewImages(review);
+                            const reviewerName =
+                              review?.reviewerName ||
+                              review?.userName ||
+                              review?.user?.name ||
+                              "Anonymous";
+                            const avatar = review?.reviewerAvatar || review?.user?.avatar;
+
+                            return (
+                              <div key={review?._id || index} className="spx-review-preview-card">
+                                {/* User + rating */}
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+                                  <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                                    {avatar ? (
+                                      <img
+                                        src={avatar}
+                                        alt=""
+                                        style={{ width: 38, height: 38, borderRadius: 11, objectFit: "cover", border: "1px solid #e2e8f0", flexShrink: 0 }}
+                                      />
+                                    ) : (
+                                      <div style={{
+                                        width: 38,
+                                        height: 38,
+                                        borderRadius: 11,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        background: "#eef2ff",
+                                        color: "#4f46e5",
+                                        fontSize: 15,
+                                        fontWeight: 800,
+                                        flexShrink: 0,
+                                      }}>
+                                        {reviewerName.charAt(0).toUpperCase()}
+                                      </div>
+                                    )}
+
+                                    <div style={{ minWidth: 0 }}>
+                                      <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 5 }}>
+                                        <span style={{ fontSize: 12.5, fontWeight: 800, color: "#1a1535" }}>
+                                          {reviewerName}
+                                        </span>
+                                        {review?.verifiedPurchase && (
+                                          <span style={{
+                                            display: "inline-flex",
+                                            alignItems: "center",
+                                            gap: 3,
+                                            padding: "3px 6px",
+                                            borderRadius: 999,
+                                            background: "#ecfdf5",
+                                            color: "#059669",
+                                            fontSize: 8.5,
+                                            fontWeight: 800,
+                                          }}>
+                                            <FaCheckCircle size={8} /> Verified
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      {review?.createdAt && (
+                                        <div style={{ marginTop: 2, fontSize: 9.5, color: "#94a3b8" }}>
+                                          {new Date(review.createdAt).toLocaleDateString("en-IN", {
+                                            day: "numeric",
+                                            month: "short",
+                                            year: "numeric",
+                                          })}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <Stars rating={rating} size={11} />
+                                </div>
+
+                                {/* Comment */}
+                                {review?.comment && (
+                                  <p style={{
+                                    margin: "12px 0 0",
+                                    fontSize: 12,
+                                    color: "#64748b",
+                                    lineHeight: 1.65,
+                                    overflowWrap: "anywhere",
+                                  }}>
+                                    {review.comment}
+                                  </p>
+                                )}
+
+                                {/* Review images */}
+                                {reviewImages.length > 0 && (
+                                  <div style={{ marginTop: 12 }}>
+                                    <div style={{
+                                      marginBottom: 7,
+                                      fontSize: 9.5,
+                                      fontWeight: 800,
+                                      color: "#94a3b8",
+                                      textTransform: "uppercase",
+                                      letterSpacing: ".06em",
+                                    }}>
+                                      Review Photos
+                                    </div>
+
+                                    <div style={{ display: "flex", gap: 7, overflowX: "auto", paddingBottom: 2 }}>
+                                      {reviewImages.map((image, imageIndex) => (
+                                        <button
+                                          key={`${review?._id || index}-image-${imageIndex}`}
+                                          type="button"
+                                          onClick={() => {
+                                            const images = getReviewImages(review);
+                                            setSelectedReview(review);
+                                            setGalleryImages(images);
+                                            setCurrentIndex(imageIndex);
+                                            setSelectedImage(image);
+                                            onOpen();
+                                          }}
+                                          style={{
+                                            width: 78,
+                                            height: 78,
+                                            minWidth: 78,
+                                            padding: 0,
+                                            border: "1px solid #e2e8f0",
+                                            borderRadius: 10,
+                                            overflow: "hidden",
+                                            background: "#f8fafc",
+                                            cursor: "pointer",
+                                          }}
+                                        >
+                                          <img
+                                            src={image}
+                                            alt={`Review photo ${imageIndex + 1}`}
+                                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                          />
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Helpful */}
+                                <div style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 7,
+                                  marginTop: 12,
+                                  paddingTop: 10,
+                                  borderTop: "1px solid #f1f5f9",
+                                }}>
+                                  <span style={{ fontSize: 9, color: "#94a3b8", fontWeight: 700 }}>Helpful?</span>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleLike(review._id, "like")}
+                                    className="spx-lb"
+                                  >
+                                    <FaThumbsUp size={9} />
+                                    Helpful
+                                    <span>{review?.likesCount || 0}</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleLike(review._id, "dislike")}
+                                    className="spx-lb"
+                                  >
+                                    <FaThumbsDown size={9} />
+                                    <span>{review?.dislikesCount || 0}</span>
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div style={{
+                          padding: "28px 15px",
+                          textAlign: "center",
+                          border: "1px dashed #cbd5e1",
+                          borderRadius: 14,
+                          background: "#fafbff",
+                          marginTop: 4,
+                        }}>
+                          <FaRegStar size={24} color="#a5b4fc" />
+                          <div style={{ marginTop: 8, fontSize: 12, fontWeight: 800, color: "#334155" }}>
+                            {reviews.length === 0
+                              ? "No reviews yet"
+                              : `No ${reviewRatingFilter}-star reviews`}
+                          </div>
+                          {reviews.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => setReviewRatingFilter("all")}
+                              style={{
+                                marginTop: 10,
+                                border: 0,
+                                background: "transparent",
+                                color: "#4f46e5",
+                                fontSize: 10,
+                                fontWeight: 800,
+                                cursor: "pointer",
+                              }}
+                            >
+                              Show all reviews
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {/* View all reviews — no Write a Review button here */}
+                      {reviews.length > 0 && (
+                        <button
+                          type="button"
+                          className="spx-view-all-reviews"
+                          onClick={() => navigate(`/product/${product._id}/reviews`)}
+                          style={{ marginTop: 10 }}
+                        >
+                          View all {reviews.length} reviews →
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
             </div>
 
           </div>{/* end right */}
         </div>{/* end main */}
 
-        {/* ── Related products ── */}
+        {/* ── Related products dropdown ── */}
         {related.length > 0 && (
-          <div className="sp-fu" style={{ position: "relative", zIndex: 1, maxWidth: 1280, margin: "0 auto", padding: "0 22px 88px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 26 }}>
-              <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg,rgba(80,70,228,.18),transparent)" }} />
-              <h2 className="spx-rel-h">Related Products</h2>
-              <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg,transparent,rgba(80,70,228,.18))" }} />
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(186px,1fr))", gap: 13 }}>
-              {related.map(p => <ProductCard key={p._id} product={p} />)}
+          <div className="sp-fu spx-related-accordion">
+            <div >
+              <button
+                type="button"
+                className="spx-accordion-head"
+                aria-expanded={relatedOpen}
+              >
+                <span className="spx-accordion-title">
+                  <span className="spx-accordion-icon"><FaLayerGroup size={13} /></span>
+                  <span>Similar Products</span>
+                </span>
+                <span className="spx-accordion-meta">{related.length} products</span>
+            
+              </button>
+
+              {relatedOpen && (
+                <div className="spx-accordion-body spx-related-body">
+                  <div className="spx-related-grid">
+                    {related.map(p => <ProductCard key={p._id} product={p} />)}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* ── Zoom overlay ── */}
-        {imgZoom && (
-          <div className="spx-zoom" onClick={() => setImgZoom(false)}>
-            <button className="spx-zoom-x" onClick={() => setImgZoom(false)}><IoClose size={14} /></button>
-            <img src={allImgs[activeIdx]} alt={product.title} className="spx-zoom-img" onClick={e => e.stopPropagation()} />
-          </div>
-        )}
+        {/* ── Mobile sticky purchase bar ── */}
+        <div className="sp-mobile-buybar">
+          <button
+            type="button"
+            className="sp-mobile-wish"
+            onClick={handleWish}
+            aria-label="Wishlist"
+          >
+            {isWishlisted ? <FaHeart size={18} /> : <FaRegHeart size={18} />}
+          </button>
+          <button
+            type="button"
+            className="sp-mobile-cart"
+            onClick={handleCart}
+          >
+            <FaShoppingCart size={15} />
+            {isInCart ? "Go to Cart" : `Add to Cart · ₹${finalPrice.toLocaleString("en-IN")}`}
+          </button>
+        </div>
 
       </div>
       <Modal
@@ -2363,507 +2170,14 @@ useEffect(() => {
 
                 </div>
 
-              </div>
+             </div>
 
             </ModalBody>
 
           )}
         </ModalContent>
       </Modal>
-      <Modal
-        isOpen={isReviewModalOpen}
-        onOpenChange={onReviewModalChange}
-        size="4xl"
-        scrollBehavior="inside"
-        backdrop="blur"
-        hideCloseButton={true}
 
-      >
-
-        <ModalContent
-          style={{
-            borderRadius: "28px",
-            overflow: "hidden",
-            background: "#fff",
-            maxHeight: "92vh",
-            boxShadow: "0 30px 80px rgba(15,23,42,.25)",
-          }}
-
-        >
-
-
-          {(onClose) => (
-
-
-
-            <>
-              {/* HEADER */}
-              <ModalHeader
-                style={{
-                  background:
-                    "linear-gradient(135deg,#4F46E5,#7C3AED,#3B82F6)",
-                  color: "#fff",
-                  padding: "22px 26px",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    width: "100%",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "14px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "52px",
-                        height: "52px",
-                        borderRadius: "16px",
-                        background: "rgba(255,255,255,.15)",
-                        backdropFilter: "blur(12px)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <FaComments size={22} />
-                    </div>
-
-                    <div>
-                      <h2
-                        style={{
-                          margin: 0,
-                          fontSize: "22px",
-                          fontWeight: 800,
-                        }}
-                      >
-                        Write a Review
-                      </h2>
-
-                      <p
-                        style={{
-                          margin: "4px 0 0",
-                          opacity: 0.9,
-                          fontSize: "13px",
-                        }}
-                      >
-                        Share your experience with buyers
-                      </p>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    style={{
-                      width: "42px",
-                      height: "42px",
-                      borderRadius: "14px",
-                      border: "1px solid rgba(255,255,255,.2)",
-                      background: "rgba(255,255,255,.12)",
-                      backdropFilter: "blur(10px)",
-                      color: "#fff",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <IoClose size={20} />
-                  </button>
-                </div>
-              </ModalHeader>
-
-              {/* BODY */}
-              <ModalBody
-                style={{
-                  background:
-                    "linear-gradient(to bottom,#F8FAFC,#FFFFFF)",
-                  padding: "24px",
-                }}
-              >
-                <form
-                  id="reviewForm"
-                  onSubmit={submitReview}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "20px",
-                  }}
-                >
-                  {/* RATING CARD */}
-                  <div
-                    style={{
-                      background: "#fff",
-                      borderRadius: "22px",
-                      padding: "22px",
-                      border: "1px solid #E5E7EB",
-                      boxShadow:
-                        "0 8px 24px rgba(15,23,42,.04)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: 700,
-                        color: "#111827",
-                        marginBottom: "12px",
-                      }}
-                    >
-                      Overall Rating
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "14px",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <Stars
-                        rating={revRating}
-                        size={30}
-                        interactive
-                        onRate={(r) => {
-                          setRevRating(r);
-                          setRevHover(0);
-                        }}
-                        hover={revHover}
-                        setHover={setRevHover}
-                      />
-
-                      {(revHover || revRating) > 0 && (
-                        <span
-                          style={{
-                            background: "#EEF2FF",
-                            color: "#4338CA",
-                            padding: "6px 14px",
-                            borderRadius: "999px",
-                            fontSize: "13px",
-                            fontWeight: 700,
-                          }}
-                        >
-                          {
-                            [
-                              "",
-                              "Poor",
-                              "Fair",
-                              "Good",
-                              "Great",
-                              "Excellent",
-                            ][revHover || revRating]
-                          }
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* REVIEW TEXT */}
-                  <div
-                    style={{
-                      background: "#fff",
-                      borderRadius: "22px",
-                      border: "1px solid #E5E7EB",
-                      padding: "20px",
-                      boxShadow:
-                        "0 8px 24px rgba(15,23,42,.04)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: 700,
-                        marginBottom: "12px",
-                      }}
-                    >
-                      Your Review
-                    </div>
-
-                    <textarea
-                      rows={5}
-                      value={revText}
-                      onChange={(e) =>
-                        setRevText(e.target.value)
-                      }
-                      placeholder="Tell others about product quality, delivery, packaging and your overall experience..."
-                      style={{
-                        width: "100%",
-                        border: "none",
-                        outline: "none",
-                        resize: "none",
-                        fontSize: "15px",
-                        lineHeight: "1.7",
-                        background: "transparent",
-                        color: "#111827",
-                      }}
-                    />
-
-                    <div
-                      style={{
-                        textAlign: "right",
-                        fontSize: "12px",
-                        color: "#94A3B8",
-                        marginTop: "10px",
-                      }}
-                    >
-                      {revText.length}/500
-                    </div>
-                  </div>
-
-                  {/* IMAGE UPLOAD */}
-                  <div
-                    style={{
-                      background: "#fff",
-                      borderRadius: "22px",
-                      padding: "20px",
-                      border: "1px solid #E5E7EB",
-                      boxShadow:
-                        "0 8px 24px rgba(15,23,42,.04)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        marginBottom: "16px",
-                      }}
-                    >
-                      <div>
-                        <div
-                          style={{
-                            fontWeight: 700,
-                            color: "#111827",
-                          }}
-                        >
-                          Review Photos
-                        </div>
-
-                        <div
-                          style={{
-                            fontSize: "13px",
-                            color: "#6B7280",
-                            marginTop: "4px",
-                          }}
-                        >
-                          Add photos to help other buyers
-                        </div>
-                      </div>
-
-                      {revImgs.length > 0 && (
-                        <div
-                          style={{
-                            background: "#EEF2FF",
-                            color: "#4338CA",
-                            padding: "8px 12px",
-                            borderRadius: "999px",
-                            fontWeight: 700,
-                            fontSize: "12px",
-                          }}
-                        >
-                          {revImgs.length} Selected
-                        </div>
-                      )}
-                    </div>
-
-                    <label
-                      style={{
-                        border: "2px dashed #C7D2FE",
-                        borderRadius: "18px",
-                        padding: "24px",
-                        background:
-                          "linear-gradient(180deg,#F8FAFF,#EEF4FF)",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "16px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: "60px",
-                          height: "60px",
-                          borderRadius: "50%",
-                          background:
-                            "linear-gradient(135deg,#4F46E5,#6366F1)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: "#fff",
-                          fontSize: "26px",
-                        }}
-                      >
-                        📷
-                      </div>
-
-                      <div>
-                        <div
-                          style={{
-                            fontWeight: 700,
-                            color: "#111827",
-                          }}
-                        >
-                          Upload Images
-                        </div>
-
-                        <div
-                          style={{
-                            fontSize: "13px",
-                            color: "#6B7280",
-                            marginTop: "4px",
-                          }}
-                        >
-                          JPG, PNG, WEBP • Multiple files supported
-                        </div>
-                      </div>
-
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        hidden
-                        onChange={(e) =>
-                          setRevImgs(
-                            Array.from(e.target.files || [])
-                          )
-                        }
-                      />
-                    </label>
-
-                    {revImgs.length > 0 && (
-                      <div
-                        style={{
-                          marginTop: "18px",
-                          display: "grid",
-                          gridTemplateColumns:
-                            "repeat(auto-fill,minmax(110px,1fr))",
-                          gap: "12px",
-                        }}
-                      >
-                        {revImgs.map((file, i) => (
-                          <div
-                            key={i}
-                            style={{
-                              position: "relative",
-                              borderRadius: "16px",
-                              overflow: "hidden",
-                              background: "#fff",
-                              boxShadow:
-                                "0 8px 20px rgba(0,0,0,.08)",
-                            }}
-                          >
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setRevImgs((prev) =>
-                                  prev.filter(
-                                    (_, index) =>
-                                      index !== i
-                                  )
-                                )
-                              }
-                              style={{
-                                position: "absolute",
-                                top: "8px",
-                                right: "8px",
-                                width: "28px",
-                                height: "28px",
-                                borderRadius: "50%",
-                                border: "none",
-                                background:
-                                  "rgba(17,24,39,.8)",
-                                color: "#fff",
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                zIndex: 2,
-                              }}
-                            >
-                              <IoClose size={14} />
-                            </button>
-
-                            <img
-                              src={URL.createObjectURL(file)}
-                              alt=""
-                              style={{
-                                width: "100%",
-                                height: "110px",
-                                objectFit: "cover",
-                              }}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </form>
-              </ModalBody>
-
-              {/* FOOTER */}
-              <ModalFooter
-                style={{
-                  borderTop: "1px solid #E5E7EB",
-                  padding: "18px 24px",
-                  background: "#fff",
-                }}
-              >
-                <Button
-                  variant="light"
-                  onPress={onClose}
-                >
-                  Cancel
-                </Button>
-
-                <button
-                  form="reviewForm"
-                  type="submit"
-                  disabled={revLoad}
-                  style={{
-                    minWidth: "180px",
-                    height: "52px",
-                    border: "none",
-                    borderRadius: "16px",
-                    background:
-                      "linear-gradient(135deg,#4F46E5,#7C3AED,#3B82F6)",
-                    color: "#fff",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    boxShadow:
-                      "0 12px 30px rgba(79,70,229,.3)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                  }}
-                >
-                  {revLoad ? (
-                    <>
-                      <div className="spx-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      <FaPaperPlane size={14} />
-                      Submit Review
-                    </>
-                  )}
-                </button>
-              </ModalFooter>
-            </>
-          )}
-
-
-        </ModalContent>
-      </Modal>
 
     </>
   );

@@ -43,6 +43,7 @@
     "react-icons": "^5.6.0",
     "react-leaflet": "^5.0.0",
     "react-loading-skeleton": "^3.5.0",
+    "react-medium-image-zoom": "^5.4.9",
     "react-parallax-tilt": "^1.7.319",
     "react-router-dom": "^7.7.0",
     "react-slick": "^0.30.3",

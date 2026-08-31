@@ -541,9 +541,9 @@ export default function Products() {
 
         {/* Background Decoration */}
 
-        <div className="pointer-events-none absolute -right-40 -top-40 h-96 w-96 rounded-full blur-3xl" />
+        <div className="pointer-events-none absolute -right-40 -top-40 h-8.56 w-96 rounded-full blur-3xl" />
 
-        <div className="pointer-events-none absolute -left-40 top-[700px] h-96 w-96 rounded-full blur-3xl" />
+        <div className="pointer-events-none absolute -left-40 top-[700px] h-8.56 w-96 rounded-full blur-3xl" />
 
         <div className="relative mx-auto max-w-[1600px] px-3 pb-12 pt-4 sm:px-5 sm:pt-6 lg:px-8">
 
@@ -551,7 +551,7 @@ export default function Products() {
               CATEGORY BANNER
           ================================================= */}
 
-          {category !== "All" ? (
+          {/* {category !== "All" ? (
             <CategoryBanner
               categoryName={
                 categoryName
@@ -587,7 +587,7 @@ export default function Products() {
                 products.length
               }
             />
-          )}
+          )} */}
 
           {/* =================================================
               CATEGORY NAVIGATION
@@ -694,11 +694,16 @@ export default function Products() {
               Values are taken from the actual filter state
           ================================================= */}
 
+          {/* =================================================
+              MODERN COMPACT FILTER TOOLBAR
+          ================================================= */}
+
           <section className="mb-5">
             <div
               className="
                 flex
-                gap-2.5
+                items-center
+                gap-2
                 overflow-x-auto
                 px-0.5
                 pb-1
@@ -712,42 +717,64 @@ export default function Products() {
               <button
                 type="button"
                 onClick={() => openFilterSection("all")}
+                aria-label="Open all filters"
                 className={`
-                  flex
-                  h-14
-                  min-w-[116px]
+                  group
+                  inline-flex
+                  h-10
                   shrink-0
                   items-center
-                  justify-center
-                  gap-2.5
-                  rounded-2xl
+                  gap-2
+                  rounded-xl
                   border
                   px-3
+                  text-[10px]
+                  font-black
                   transition-all
                   duration-200
-                  active:scale-[0.96]
+                  active:scale-95
                   ${
                     activeFiltersCount > 0
-                      ? "border-slate-300 bg-slate-100 text-slate-900"
-                      : "border-slate-200 bg-white text-slate-700"
+                      ? "border-indigo-200 bg-indigo-600 text-white shadow-md shadow-indigo-100"
+                      : "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-indigo-200 hover:text-indigo-600"
                   }
                 `}
               >
-                <span className="flex h-7 min-w-7 items-center justify-center rounded-lg bg-slate-800 px-1.5 text-[10px] font-black text-white">
+                <span
+                  className={`
+                    flex
+                    h-5
+                    min-w-5
+                    items-center
+                    justify-center
+                    rounded-md
+                    px-1
+                    text-[8px]
+                    font-black
+                    ${
+                      activeFiltersCount > 0
+                        ? "bg-white/20 text-white"
+                        : "bg-slate-100 text-slate-600"
+                    }
+                  `}
+                >
                   {activeFiltersCount}
                 </span>
 
                 <FaFilter
-                  size={13}
-                  className="shrink-0 text-slate-600"
+                  size={10}
+                  className={
+                    activeFiltersCount > 0
+                      ? "text-white"
+                      : "text-slate-500"
+                  }
                 />
 
-                <span className="text-[11px] font-black">
-                  Filters
-                </span>
+                <span>Filters</span>
               </button>
 
-              {/* CATEGORY - actual selected dropdown value */}
+
+              {/* CATEGORY */}
 
               <FilterChipButton
                 label={
@@ -755,11 +782,17 @@ export default function Products() {
                     ? categoryName
                     : "Category"
                 }
-                active={category && category !== "All"}
-                onClick={() => openFilterSection("category")}
+                active={
+                  category &&
+                  category !== "All"
+                }
+                onClick={() =>
+                  openFilterSection("category")
+                }
               />
 
-              {/* BRAND - actual selected dropdown value */}
+
+              {/* BRAND */}
 
               <FilterChipButton
                 label={
@@ -767,11 +800,17 @@ export default function Products() {
                     ? brand
                     : "Brand"
                 }
-                active={brand && brand !== "All"}
-                onClick={() => openFilterSection("brand")}
+                active={
+                  brand &&
+                  brand !== "All"
+                }
+                onClick={() =>
+                  openFilterSection("brand")
+                }
               />
 
-              {/* PRICE - actual selected range */}
+
+              {/* PRICE */}
 
               <FilterChipButton
                 label={
@@ -784,25 +823,33 @@ export default function Products() {
                     : "Price"
                 }
                 active={priceIsFiltered}
-                onClick={() => openFilterSection("price")}
+                onClick={() =>
+                  openFilterSection("price")
+                }
               />
 
-              {/* SORT - actual selected dropdown value */}
+
+              {/* SORT */}
 
               <FilterChipButton
                 label={
                   sort && sort !== "default"
                     ? sort === "low-high"
-                      ? "Price: Low → High"
+                      ? "Low → High"
                       : sort === "high-low"
-                        ? "Price: High → Low"
+                        ? "High → Low"
                         : sort === "rating"
-                          ? "Rating"
+                          ? "Top Rated"
                           : sort
                     : "Sort By"
                 }
-                active={!!sort && sort !== "default"}
-                onClick={() => openFilterSection("sort")}
+                active={
+                  !!sort &&
+                  sort !== "default"
+                }
+                onClick={() =>
+                  openFilterSection("sort")
+                }
               />
 
             </div>
@@ -1054,7 +1101,7 @@ export default function Products() {
           )
         }
         aria-label="Open filters"
-        className="fixed bottom-5 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-white bg-indigo-600 text-white shadow-xl shadow-indigo-300 transition active:scale-90 sm:hidden"
+        className="fixed bottom-5 right-5 z-30 flex h-12 w-12 items-center justify-center rounded-2xl border-2 border-white bg-indigo-600 text-white shadow-xl shadow-indigo-300 transition active:scale-90 sm:hidden"
       >
 
         <FaFilter
@@ -1094,6 +1141,10 @@ export default function Products() {
 // CATEGORY BANNER
 // =============================================================
 
+// =============================================================
+// MODERN CATEGORY BANNER
+// =============================================================
+
 function CategoryBanner({
   categoryName,
   description,
@@ -1105,96 +1156,285 @@ function CategoryBanner({
   return (
     <section className="mb-5">
 
-      <div className="group relative isolate min-h-[230px] overflow-hidden rounded-[30px] bg-slate-950 shadow-xl sm:min-h-[300px] lg:min-h-[350px]">
+      <div
+        className="
+          group
+          relative
+          isolate
+          min-h-[220px]
+          overflow-hidden
+          rounded-[26px]
+          bg-slate-950
+          shadow-lg
+          sm:min-h-[270px]
+          lg:min-h-[320px]
+        "
+      >
 
-        {/* IMAGE */}
+        {/* =================================================
+            CATEGORY IMAGE
+        ================================================= */}
 
-        <img
-          src={image}
-          alt={categoryName}
-          className="absolute inset-0 -z-20 h-full w-full object-cover transition duration-1000 ease-out group-hover:scale-105"
-        />
+        {image && (
+          <img
+            src={image}
+            alt={categoryName}
+            className="
+              absolute
+              inset-0
+              -z-30
+              h-full
+              w-full
+              object-cover
+              object-center
+              transition-transform
+              duration-700
+              ease-out
+              group-hover:scale-[1.04]
+            "
+          />
+        )}
 
-        {/* DARK OVERLAY */}
-
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-slate-950 via-slate-950/70 to-slate-950/10" />
-
-        {/* BOTTOM OVERLAY */}
-
-        <div className="absolute inset-x-0 bottom-0 -z-[9] h-44 bg-gradient-to-t from-slate-950/80 to-transparent" />
-
-        {/* CATEGORY COLOR GLOW */}
+        {/* =================================================
+            DARK OVERLAY
+        ================================================= */}
 
         <div
-          className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full opacity-30 blur-3xl"
+          className="
+            absolute
+            inset-0
+            -z-20
+            bg-gradient-to-r
+            from-slate-950
+            via-slate-950/80
+            to-slate-950/20
+          "
+        />
+
+        {/* =================================================
+            MOBILE OVERLAY
+        ================================================= */}
+
+        <div
+          className="
+            absolute
+            inset-0
+            -z-10
+            bg-gradient-to-t
+            from-slate-950/80
+            via-transparent
+            to-slate-950/20
+            lg:hidden
+          "
+        />
+
+        {/* =================================================
+            CATEGORY COLOR GLOW
+        ================================================= */}
+
+        <div
+          className="
+            pointer-events-none
+            absolute
+            -right-24
+            -top-24
+            h-72
+            w-72
+            rounded-full
+            opacity-25
+            blur-3xl
+            transition-opacity
+            duration-500
+            group-hover:opacity-40
+          "
           style={{
-            backgroundColor:
-              color,
+            backgroundColor: color,
           }}
         />
 
-        {/* CONTENT */}
+        {/* =================================================
+            CONTENT
+        ================================================= */}
 
-        <div className="relative flex min-h-[230px] items-center px-5 py-8 sm:min-h-[300px] sm:px-8 lg:min-h-[350px] lg:px-12">
+        <div
+          className="
+            relative
+            flex
+            min-h-[220px]
+            items-end
+            px-5
+            py-6
+            sm:min-h-[270px]
+            sm:px-8
+            sm:py-8
+            lg:min-h-[320px]
+            lg:items-center
+            lg:px-10
+          "
+        >
 
-          <div className="max-w-2xl">
+          <div className="w-full max-w-2xl">
 
-            {/* LABEL */}
+            {/* =================================================
+                BADGE
+            ================================================= */}
 
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 backdrop-blur-md">
+            <div
+              className="
+                mb-3
+                inline-flex
+                items-center
+                gap-2
+                rounded-full
+                border
+                border-white/15
+                bg-white/10
+                px-3
+                py-1.5
+                backdrop-blur-md
+              "
+            >
 
               <span
                 className="h-1.5 w-1.5 rounded-full"
                 style={{
-                  backgroundColor:
-                    color,
+                  backgroundColor: color,
                 }}
               />
 
-              <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/80 sm:text-[9px]">
-                Featured Category
+              <span
+                className="
+                  text-[8px]
+                  font-black
+                  uppercase
+                  tracking-[0.18em]
+                  text-white/75
+                "
+              >
+                Explore Collection
               </span>
 
             </div>
 
-            {/* CATEGORY NAME */}
+            {/* =================================================
+                TITLE
+            ================================================= */}
 
-            <h1 className="max-w-xl text-3xl font-black leading-[1.05] tracking-tight text-white sm:text-4xl lg:text-5xl xl:text-6xl">
+            <h1
+              className="
+                max-w-xl
+                text-3xl
+                font-black
+                leading-[1.05]
+                tracking-tight
+                text-white
+                sm:text-4xl
+                lg:text-5xl
+              "
+            >
               {categoryName}
             </h1>
 
-            {/* DESCRIPTION */}
+            {/* =================================================
+                DESCRIPTION
+            ================================================= */}
 
-            <p className="mt-3 max-w-xl text-[11px] leading-5 text-white/70 sm:text-sm sm:leading-6">
+            <p
+              className="
+                mt-2
+                max-w-lg
+                text-[10px]
+                leading-5
+                text-white/65
+                sm:text-xs
+                sm:leading-6
+              "
+            >
               {description}
             </p>
 
-            {/* ACTIONS */}
+            {/* =================================================
+                ACTION ROW
+            ================================================= */}
 
-            <div className="mt-5 flex flex-wrap items-center gap-2.5">
+            <div
+              className="
+                mt-4
+                flex
+                flex-wrap
+                items-center
+                gap-2
+              "
+            >
 
-              <div className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-3.5 backdrop-blur-md">
+              {/* PRODUCT COUNT */}
+
+              <div
+                className="
+                  inline-flex
+                  min-h-9
+                  items-center
+                  gap-2
+                  rounded-xl
+                  border
+                  border-white/10
+                  bg-white/10
+                  px-3
+                  backdrop-blur-md
+                "
+              >
 
                 <MdShoppingBag
-                  size={14}
-                  className="text-white"
+                  size={13}
+                  className="text-white/80"
                 />
 
-                <span className="text-[9px] font-black text-white sm:text-[10px]">
+                <span
+                  className="
+                    text-[9px]
+                    font-black
+                    text-white
+                  "
+                >
                   {productCount} Products
                 </span>
 
               </div>
 
+              {/* SHOP BUTTON */}
+
               <button
                 type="button"
                 onClick={onShopNow}
-                className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-4 text-[9px] font-black text-slate-900 shadow-lg transition hover:bg-indigo-50 active:scale-95 sm:text-[10px]"
+                className="
+                  group/button
+                  inline-flex
+                  min-h-9
+                  items-center
+                  gap-2
+                  rounded-xl
+                  bg-white
+                  px-4
+                  text-[9px]
+                  font-black
+                  text-slate-900
+                  shadow-lg
+                  transition-all
+                  duration-200
+                  hover:bg-slate-100
+                  active:scale-95
+                "
               >
-                Shop Now
+
+                Shop Collection
 
                 <FaArrowRight
                   size={8}
+                  className="
+                    transition-transform
+                    duration-200
+                    group-hover/button:translate-x-0.5
+                  "
                 />
 
               </button>
@@ -1205,24 +1445,70 @@ function CategoryBanner({
 
         </div>
 
-        {/* CATEGORY IMAGE INDICATOR */}
+        {/* =================================================
+            CATEGORY IMAGE PREVIEW
+        ================================================= */}
 
-        <div className="absolute bottom-4 right-4 hidden h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-white/10 p-2 backdrop-blur-md sm:flex lg:bottom-6 lg:right-6 lg:h-28 lg:w-28">
+        {image && (
+          <div
+            className="
+              absolute
+              bottom-5
+              right-5
+              hidden
+              h-20
+              w-20
+              items-center
+              justify-center
+              overflow-hidden
+              rounded-2xl
+              border
+              border-white/15
+              bg-white/10
+              p-2
+              backdrop-blur-md
+              sm:flex
+              lg:bottom-7
+              lg:right-7
+              lg:h-24
+              lg:w-24
+            "
+          >
 
-          <img
-            src={image}
-            alt=""
-            className="h-full w-full object-contain"
-          />
+            <img
+              src={image}
+              alt=""
+              className="
+                h-full
+                w-full
+                object-contain
+                transition-transform
+                duration-500
+                group-hover:scale-110
+              "
+            />
 
-        </div>
+          </div>
+        )}
 
-        {/* ACCENT */}
+        {/* =================================================
+            BOTTOM ACCENT
+        ================================================= */}
 
         <div
-          className="absolute bottom-0 left-0 h-1 w-full"
+          className="
+            absolute
+            bottom-0
+            left-0
+            h-[3px]
+            w-full
+          "
           style={{
-            background: `linear-gradient(90deg, ${color}, transparent)`,
+            background: `linear-gradient(
+              90deg,
+              ${color},
+              transparent
+            )`,
           }}
         />
 
@@ -1446,34 +1732,34 @@ function FilterChipButton({
       type="button"
       onClick={onClick}
       className={`
-        flex
-        h-14
-        min-w-[112px]
-        max-w-[190px]
+        inline-flex
+        h-10
+        min-w-[82px]
+        max-w-[155px]
         shrink-0
         items-center
         justify-between
-        gap-3
-        rounded-2xl
+        gap-2
+        rounded-xl
         border
-        px-4
+        px-3
         text-left
         transition-all
         duration-200
-        active:scale-[0.96]
+        active:scale-95
         ${
           active
-            ? "border-indigo-200 bg-indigo-50 text-indigo-700"
-            : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+            ? "border-indigo-200 bg-indigo-50 text-indigo-700 shadow-sm"
+            : "border-slate-200 bg-white text-slate-600 shadow-sm hover:border-slate-300 hover:text-slate-900"
         }
       `}
     >
-      <span className="min-w-0 flex-1 truncate text-[11px] font-bold">
+      <span className="min-w-0 flex-1 truncate text-[9px] font-extrabold">
         {label}
       </span>
 
       <FaChevronDown
-        size={9}
+        size={7}
         className={`shrink-0 ${
           active
             ? "text-indigo-500"
