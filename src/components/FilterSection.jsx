@@ -1,626 +1,1572 @@
-import React, { useState } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
 import { getData } from "../context/DataContext";
 
-import { MdCategory, MdOutlineCurrencyRupee } from "react-icons/md";
-import { RiMoneyRupeeCircleLine } from "react-icons/ri";
 import {
   FaTimes,
-  FaChevronDown,
   FaCheck,
-  FaSortAmountDown,
-  FaTags,
+  FaSlidersH,
 } from "react-icons/fa";
 
-import { FaSliders } from "react-icons/fa6";
-export default function FilterSection({ open, setOpen }) {
+import { MdTune } from "react-icons/md";
+
+const BACKEND_URL =
+  import.meta.env.VITE_BACKEND_URL ||
+  import.meta.env.VITE_API_URL ||
+  "";
+
+export default function FilterSection({
+  open,
+  setOpen,
+  initialSection = "category",
+}) {
+  // =========================================================
+  // CONTEXT
+  // =========================================================//
   const {
-    category, setCategory,
-    brand, setBrand,
-    priceRange, setPriceRange,
-    categoryOnlyData, brandOnlyData, sort, setSort
+    category,
+    setCategory,
+
+    subCategory,
+    setSubCategory,
+
+    brand,
+    setBrand,
+
+    priceRange,
+    setPriceRange,
+
+    categoryOnlyData,
+    brandOnlyData,
+
+    sort,
+    setSort,
   } = getData();
-  const [openSort, setOpenSort] = useState(true);
-  const [openCategory, setOpenCategory] = useState(true);
-  const [openBrand, setOpenBrand] = useState(true);
-console.log("FilterSection Rendered");
+
+  // =========================================================
+  // STATE
+  // =========================================================
+
+  const [activeFilter, setActiveFilter] =
+    useState(
+      initialSection === "all"
+        ? "category"
+        : initialSection
+    );
+
+  // Open the popup on the exact filter selected
+  // from the Products toolbar.
+  useEffect(() => {
+    if (!open) return;
+
+    const nextSection =
+      initialSection === "all"
+        ? "category"
+        : initialSection;
+
+    const validSections = [
+      "category",
+      "subcategory",
+      "brand",
+      "price",
+      "sort",
+    ];
+
+    setActiveFilter(
+      validSections.includes(nextSection)
+        ? nextSection
+        : "category"
+    );
+  }, [open, initialSection]);
+
+  const [subCategories, setSubCategories] =
+    useState([]);
+
+  const [
+    loadingSubCategories,
+    setLoadingSubCategories,
+  ] = useState(false);
+
+  // =========================================================
+  // PREVENT BACKGROUND SCROLL
+  // =========================================================
+
+  useEffect(() => {
+    if (!open) return;
+
+    const previousOverflow =
+      document.body.style.overflow;
+
+    document.body.style.overflow =
+      "hidden";
+
+    return () => {
+      document.body.style.overflow =
+        previousOverflow;
+    };
+  }, [open]);
+
+  // =========================================================
+  // LOAD SUBCATEGORIES
+  // =========================================================
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadSubCategories =
+      async () => {
+        if (
+          !category ||
+          category === "All"
+        ) {
+          setSubCategories([]);
+          return;
+        }
+
+        try {
+          setLoadingSubCategories(
+            true
+          );
+
+          const response =
+            await fetch(
+              `${BACKEND_URL}/api/category/${encodeURIComponent(
+                category
+              )}/subcategories`,
+              {
+                method: "GET",
+                credentials:
+                  "include",
+                headers: {
+                  Accept:
+                    "application/json",
+                },
+              }
+            );
+
+          const result =
+            await response.json();
+
+          if (!response.ok) {
+            throw new Error(
+              result?.message ||
+                "Unable to load subcategories"
+            );
+          }
+
+          const list =
+            Array.isArray(
+              result?.subCategories
+            )
+              ? result.subCategories
+              : Array.isArray(
+                  result?.subcategories
+                )
+              ? result.subcategories
+              : Array.isArray(
+                  result?.data
+                )
+              ? result.data
+              : Array.isArray(result)
+              ? result
+              : [];
+
+          if (mounted) {
+            setSubCategories(
+              list.filter(
+                (item) =>
+                  item?.isActive !==
+                  false
+              )
+            );
+          }
+        } catch (error) {
+          console.error(
+            "SUBCATEGORY ERROR:",
+            error
+          );
+
+          if (mounted) {
+            setSubCategories([]);
+          }
+        } finally {
+          if (mounted) {
+            setLoadingSubCategories(
+              false
+            );
+          }
+        }
+      };
+
+    loadSubCategories();
+
+    return () => {
+      mounted = false;
+    };
+  }, [category]);
+
+  // =========================================================
+  // BRANDS
+  // =========================================================
+
+  const brands = useMemo(() => {
+    if (
+      !Array.isArray(
+        brandOnlyData
+      )
+    ) {
+      return [];
+    }
+
+    return brandOnlyData.filter(
+      (item) =>
+        item !== null &&
+        item !== undefined &&
+        String(item).trim() !== ""
+    );
+  }, [brandOnlyData]);
+
+  // =========================================================
+  // SAFE PRICE RANGE
+  // =========================================================
+
+  const safePriceRange =
+    Array.isArray(priceRange) &&
+    priceRange.length === 2
+      ? priceRange
+      : [0, 5000];
+
+  const minPrice =
+    Number(
+      safePriceRange[0]
+    ) || 0;
+
+  const maxPrice =
+    Number(
+      safePriceRange[1]
+    ) || 5000;
+
+  // =========================================================
+  // ACTIVE FILTER COUNTS
+  // =========================================================
+
+  const activeCount = {
+    category:
+      category &&
+      category !== "All"
+        ? 1
+        : 0,
+
+    subcategory:
+      subCategory &&
+      subCategory !== "All"
+        ? 1
+        : 0,
+
+    brand:
+      brand &&
+      brand !== "All"
+        ? 1
+        : 0,
+
+    price:
+      minPrice !== 0 ||
+      maxPrice !== 5000
+        ? 1
+        : 0,
+
+    sort:
+      sort &&
+      sort !== "default"
+        ? 1
+        : 0,
+  };
+
+  const totalActive =
+    Object.values(
+      activeCount
+    ).reduce(
+      (total, value) =>
+        total + value,
+      0
+    );
+
+  // =========================================================
+  // FILTER MENU
+  // =========================================================
+
+  const filterMenu = [
+    {
+      id: "category",
+      title: "Category",
+      description:
+        "Choose category",
+      count:
+        activeCount.category,
+    },
+
+    {
+      id: "subcategory",
+      title: "Subcategory",
+      description:
+        "Refine category",
+      count:
+        activeCount.subcategory,
+    },
+
+    {
+      id: "brand",
+      title: "Brand",
+      description:
+        "Choose brand",
+      count:
+        activeCount.brand,
+    },
+
+    {
+      id: "price",
+      title: "Price Range",
+      description:
+        "Set your budget",
+      count:
+        activeCount.price,
+    },
+
+    {
+      id: "sort",
+      title: "Sort By",
+      description:
+        "Arrange products",
+      count:
+        activeCount.sort,
+    },
+  ];
+
+  // =========================================================
+  // CATEGORY HANDLER
+  // =========================================================
+
+  const handleCategory =
+    (id) => {
+      setCategory(id);
+
+      setSubCategory(
+        "All"
+      );
+
+      setBrand("All");
+
+      setActiveFilter(
+        "subcategory"
+      );
+    };
+
+  // =========================================================
+  // PRICE HANDLERS
+  // =========================================================
+
+  const updateMinPrice =
+    (value) => {
+      const next =
+        Number(value);
+
+      if (
+        next < maxPrice
+      ) {
+        setPriceRange([
+          next,
+          maxPrice,
+        ]);
+      }
+    };
+
+  const updateMaxPrice =
+    (value) => {
+      const next =
+        Number(value);
+
+      if (
+        next > minPrice
+      ) {
+        setPriceRange([
+          minPrice,
+          next,
+        ]);
+      }
+    };
+
+  // =========================================================
+  // RESET
+  // =========================================================
+
+  const resetFilters = () => {
+    setCategory("All");
+
+    setSubCategory(
+      "All"
+    );
+
+    setBrand("All");
+
+    setPriceRange([
+      0,
+      5000,
+    ]);
+
+    setSort("default");
+
+    setActiveFilter(
+      "category"
+    );
+  };
+
+  // =========================================================
+  // CLOSE
+  // =========================================================
+
+  const closeFilter = () => {
+    setOpen(false);
+  };
+
+  // =========================================================
+  // RENDER
+  // =========================================================
+
   return (
     <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+      {/* =====================================================
+          BACKDROP
+      ===================================================== */}
 
-        .fs-root * { font-family:'Plus Jakarta Sans',sans-serif; }
-        .fs-serif { font-family:'Playfair Display',serif; }
-
-        @keyframes fsSlideIn {
-          from { opacity:0; transform:translateX(100px); }
-          to { opacity:1; transform:translateX(0); }
-        }
-        @keyframes fsBackdropIn {
-          from { opacity:0; }
-          to { opacity:1; }
-        }
-        @keyframes fsExpandOpen {
-          from { max-height:0; opacity:0; }
-          to { max-height:1000px; opacity:1; }
-        }
-        @keyframes fsExpandClose {
-          from { max-height:1000px; opacity:1; }
-          to { max-height:0; opacity:0; }
-        }
-
-        .fs-backdrop {
-          animation: fsBackdropIn 0.3s cubic-bezier(0.22,1,0.36,1);
-        }
-        .fs-drawer {
-          animation: fsSlideIn 0.4s cubic-bezier(0.22,1,0.36,1);
-        }
-        .fs-expand-open { animation: fsExpandOpen 0.3s cubic-bezier(0.22,1,0.36,1) forwards; }
-        .fs-expand-close { animation: fsExpandClose 0.3s cubic-bezier(0.22,1,0.36,1) forwards; }
-
-        /* scrollbar */
-        .fs-scrollable::-webkit-scrollbar { width:6px; }
-        .fs-scrollable::-webkit-scrollbar-track { background:transparent; }
-        .fs-scrollable::-webkit-scrollbar-thumb {
-          background:linear-gradient(180deg,#6366f1,#3b82f6);
-          border-radius:3px;
-          transition:background 0.2s;
-        }
-        .fs-scrollable::-webkit-scrollbar-thumb:hover {
-          background:linear-gradient(180deg,#4f46e5,#2563eb);
-        }
-
-        /* filter section card */
-        .fs-section {
-          background:rgba(255,255,255,0.85);
-          backdrop-filter:blur(14px);
-          border:1px solid rgba(99,102,241,0.12);
-          border-radius:16px;
-          padding:16px;
-          transition:all 0.2s;
-        }
-        .fs-section:hover {
-          background:rgba(255,255,255,0.92);
-          border-color:rgba(99,102,241,0.2);
-          box-shadow:0 4px 16px rgba(99,102,241,0.08);
-        }
-
-        /* section header */
-        .fs-section-header {
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-          width:100%;
-          padding:8px 12px;
-          border-radius:12px;
-          cursor:pointer;
-          transition:all 0.2s;
-        }
-        .fs-section-header:hover {
-          background:rgba(99,102,241,0.05);
-        }
-
-        .fs-section-title {
-          display:flex;
-          align-items:center;
-          gap:10px;
-          font-size:14px;
-          font-weight:700;
-          color:#1e1b4b;
-          letter-spacing:0.02em;
-        }
-
-        .fs-section-icon {
-          color:#6366f1;
-          font-size:14px;
-        }
-
-        .fs-chevron {
-          color:#a5b4fc;
-          transition:transform 0.3s cubic-bezier(0.22,1,0.36,1);
-          font-size:12px;
-        }
-        .fs-chevron.open { transform:rotate(180deg); }
-
-        /* list items */
-        .fs-list {
-          display:flex;
-          flex-direction:column;
-          gap:8px;
-          margin-top:12px;
-          max-height:200px;
-          overflow-y:auto;
-        }
-
-        .fs-item {
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-          padding:10px 12px;
-          border-radius:11px;
-          cursor:pointer;
-          transition:all 0.2s;
-          font-size:13px;
-          color:#4b5563;
-          border:1px solid transparent;
-          background:transparent;
-        }
-
-        .fs-item:hover {
-          background:rgba(99,102,241,0.06);
-          border-color:rgba(99,102,241,0.12);
-          color:#4f46e5;
-        }
-
-        .fs-item.active {
-          background:linear-gradient(135deg,rgba(99,102,241,0.14),rgba(37,99,235,0.08));
-          border-color:rgba(99,102,241,0.25);
-          color:#4f46e5;
-          font-weight:600;
-          box-shadow:inset 0 2px 6px rgba(99,102,241,0.08);
-        }
-
-        .fs-checkmark {
-          width:16px;
-          height:16px;
-          border-radius:4px;
-          background:linear-gradient(135deg,#4f46e5,#2563eb);
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          color:white;
-          font-size:10px;
-          flex-shrink:0;
-          animation:scaleIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
-        }
-        @keyframes scaleIn { from { transform:scale(0.6); opacity:0; } to { transform:scale(1); opacity:1; } }
-
-        /* price section */
-        .fs-price-header {
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-          margin-bottom:16px;
-        }
-
-        .fs-price-label {
-          display:flex;
-          align-items:center;
-          gap:8px;
-          font-size:13px;
-          font-weight:700;
-          color:#4b5563;
-        }
-
-        .fs-price-value {
-          display:flex;
-          align-items:center;
-          gap:4px;
-          font-weight:700;
-          color:#4f46e5;
-          font-size:13px;
-          letter-spacing:0.02em;
-        }
-
-        /* range slider */
-        .fs-range-wrapper {
-          position:relative;
-          width:100%;
-        }
-
-        .fs-range-input {
-          width:100%;
-          height:6px;
-          border-radius:3px;
-          background:linear-gradient(90deg,#e0e7ff 0%,#bfdbfe 100%);
-          outline:none;
-          -webkit-appearance:none;
-          appearance:none;
-          cursor:pointer;
-        }
-
-        .fs-range-input::-webkit-slider-thumb {
-          -webkit-appearance:none;
-          appearance:none;
-          width:20px;
-          height:20px;
-          border-radius:50%;
-          background:linear-gradient(135deg,#4f46e5,#2563eb);
-          cursor:pointer;
-          box-shadow:0 2px 8px rgba(79,70,229,0.35),inset 0 1px 2px rgba(255,255,255,0.4);
-          border:2px solid white;
-          transition:all 0.2s;
-        }
-
-        .fs-range-input::-webkit-slider-thumb:hover {
-          transform:scale(1.15);
-          box-shadow:0 4px 14px rgba(79,70,229,0.45),inset 0 1px 2px rgba(255,255,255,0.4);
-        }
-
-        .fs-range-input::-moz-range-thumb {
-          width:20px;
-          height:20px;
-          border-radius:50%;
-          background:linear-gradient(135deg,#4f46e5,#2563eb);
-          cursor:pointer;
-          box-shadow:0 2px 8px rgba(79,70,229,0.35),inset 0 1px 2px rgba(255,255,255,0.4);
-          border:2px solid white;
-          transition:all 0.2s;
-        }
-
-        .fs-range-input::-moz-range-thumb:hover {
-          transform:scale(1.15);
-          box-shadow:0 4px 14px rgba(79,70,229,0.45),inset 0 1px 2px rgba(255,255,255,0.4);
-        }
-
-        /* footer buttons */
-        .fs-footer {
-          display:flex;
-          gap:10px;
-        }
-
-        .fs-btn {
-          flex:1;
-          padding:13px 0;
-          border-radius:12px;
-          font-size:14px;
-          font-weight:700;
-          cursor:pointer;
-          transition:all 0.2s;
-          letter-spacing:0.02em;
-          border:none;
-          position:relative;
-          overflow:hidden;
-        }
-
-        .fs-btn-reset {
-          background:rgba(255,255,255,0.8);
-          border:1.5px solid rgba(99,102,241,0.2);
-          color:#4f46e5;
-          backdrop-filter:blur(8px);
-        }
-        .fs-btn-reset:hover {
-          background:rgba(99,102,241,0.08);
-          border-color:rgba(99,102,241,0.3);
-          transform:translateY(-2px);
-          box-shadow:0 4px 12px rgba(99,102,241,0.15);
-        }
-        .fs-btn-reset:active { transform:scale(0.97); }
-
-        .fs-btn-apply {
-          background:linear-gradient(135deg,#4f46e5,#2563eb);
-          color:white;
-          box-shadow:0 4px 18px rgba(79,70,229,0.35);
-        }
-        .fs-btn-apply:hover {
-          transform:translateY(-2px);
-          box-shadow:0 6px 24px rgba(79,70,229,0.45);
-        }
-        .fs-btn-apply::before {
-          content:'';
-          position:absolute;
-          inset:0;
-          background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,0.2) 50%,transparent 70%);
-          background-size:200% 100%;
-          animation:fsShimmer 2.6s ease-in-out infinite;
-        }
-        @keyframes fsShimmer { 0% { background-position:-200% center; } 100% { background-position:200% center; } }
-        .fs-btn-apply:active { transform:scale(0.96); }
-
-        /* header close button */
-        .fs-close-btn {
-          width:32px;
-          height:32px;
-          border-radius:10px;
-          background:rgba(99,102,241,0.08);
-          border:none;
-          color:#6366f1;
-          cursor:pointer;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          transition:all 0.2s;
-          font-size:16px;
-        }
-        .fs-close-btn:hover {
-          background:rgba(99,102,241,0.15);
-          color:#4f46e5;
-        }
-        .fs-close-btn:active { transform:scale(0.92); }
-
-        /* header */
-        .fs-header {
-          display:flex;
-          align-items:center;
-          justify-content:space-between;
-          padding:16px 24px;
-          border-bottom:1px solid rgba(99,102,241,0.12);
-          background:rgba(255,255,255,0.9);
-          backdrop-filter:blur(12px);
-        }
-
-        .fs-header-title {
-          font-family:'Playfair Display',serif;
-          font-size:22px;
-          font-weight:800;
-          background:linear-gradient(90deg,#4f46e5,#2563eb);
-          -webkit-background-clip:text;
-          -webkit-text-fill-color:transparent;
-          letter-spacing:-0.02em;
-        }
-
-        /* decorative glows */
-        .fs-glow {
-          position:absolute;
-          pointer-events:none;
-          border-radius:50%;
-          filter:blur(100px);
-        }
-        .fs-glow-1 {
-          width:300px;
-          height:300px;
-          background:rgba(99,102,241,0.15);
-          top:-100px;
-          left:-100px;
-        }
-        .fs-glow-2 {
-          width:300px;
-          height:300px;
-          background:rgba(37,99,235,0.12);
-          bottom:-120px;
-          right:-120px;
-        }
-      `}</style>
-
-      {/* Backdrop */}
-      {open && (
-        <div
-          onClick={() => setOpen(false)}
-          className="fs-backdrop fixed inset-0 z-40 bg-black/25 backdrop-blur-md"
-        />
-      )}
-
-      {/* Drawer */}
       <div
-        className={`fs-drawer fixed top-0 right-0 z-50 h-full w-[92%] sm:w-[420px] transform transition-transform duration-300 ${
-          open ? "translate-x-0" : "translate-x-full"
-        }`}
-        style={{
-          background: "linear-gradient(135deg,rgba(255,255,255,0.97),rgba(248,250,255,0.95))",
-          backdropFilter: "blur(20px)",
-        }}
+        onClick={closeFilter}
+        className={`
+          fixed inset-0 z-[90]
+          bg-slate-950/50
+          backdrop-blur-sm
+          transition-all
+          duration-300
+          ${
+            open
+              ? "visible opacity-100"
+              : "pointer-events-none invisible opacity-0"
+          }
+        `}
+      />
+
+      {/* =====================================================
+          FILTER BOTTOM SHEET
+      ===================================================== */}
+
+      <div
+        className={`
+          fixed
+          inset-x-0
+          bottom-0
+          z-[100]
+          mx-auto
+          flex
+          h-[88dvh]
+          max-h-[850px]
+          w-full
+          flex-col
+          overflow-hidden
+          rounded-t-[28px]
+          bg-white
+          shadow-[0_-25px_80px_rgba(15,23,42,0.28)]
+          transition-transform
+          duration-500
+          ease-[cubic-bezier(0.22,1,0.36,1)]
+          ${
+            open
+              ? "translate-y-0"
+              : "translate-y-full"
+          }
+        `}
       >
-        {/* Glows */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="fs-glow fs-glow-1" />
-          <div className="fs-glow fs-glow-2" />
+
+        {/* ===================================================
+            DRAG HANDLE
+        =================================================== */}
+
+        <div className="flex shrink-0 justify-center bg-white pt-3">
+
+          <div className="h-1.5 w-12 rounded-full bg-slate-200" />
+
         </div>
 
-        {/* Header */}
-        <div className="fs-header sticky top-0 z-10">
-          <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-400 to-blue-500 flex items-center justify-center text-white"
-              style={{ fontSize: "16px" }}
-            >
-              <FaSliders />
+        {/* ===================================================
+            HEADER
+        =================================================== */}
+
+        <header className="flex shrink-0 items-center justify-between border-b border-slate-100 bg-white px-4 py-3.5 sm:px-7 sm:py-4">
+
+          <div className="flex min-w-0 items-center gap-3">
+
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl  text-indigo-600  shadow-md shadow-indigo-600 sm:h-11 sm:w-11">
+
+              <FaSlidersH
+                size={15}
+              />
+
             </div>
-            <h2 className="fs-header-title">Filters</h2>
+
+            <div className="min-w-0">
+
+              <div className="flex items-center gap-2">
+
+                <h2 className="text-base font-black text-slate-900 sm:text-xl">
+                  Filters
+                </h2>
+
+                {totalActive >
+                  0 && (
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1.5 text-[8px] font-black text-white">
+                    {
+                      totalActive
+                    }
+                  </span>
+                )}
+
+              </div>
+
+              <p className="mt-0.5 truncate text-[9px] font-semibold text-slate-400 sm:text-xs">
+                Refine your products
+              </p>
+
+            </div>
+
           </div>
-          <button onClick={() => setOpen(false)} className="fs-close-btn">
-            <FaTimes />
+
+          <button
+            type="button"
+            onClick={
+              closeFilter
+            }
+            aria-label="Close filters"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition hover:bg-slate-200 active:scale-90 sm:h-10 sm:w-10"
+          >
+
+            <FaTimes
+              size={12}
+            />
+
           </button>
+
+        </header>
+
+        {/* ===================================================
+            MAIN DASHBOARD AREA
+        =================================================== */}
+
+        <div className="min-h-0 flex-1 overflow-hidden bg-slate-50">
+
+          <div className="flex h-full">
+
+            {/* =================================================
+                LEFT FILTER MENU
+            ================================================= */}
+
+            <aside className="w-[132px] shrink-0 border-r border-slate-200 bg-white sm:w-[190px] md:w-[220px] lg:w-[240px]">
+
+              <div className="h-full overflow-y-auto px-2 py-4 sm:px-3 sm:py-5">
+
+                {/* Small heading */}
+
+                <div className="mb-4 px-2 sm:px-3">
+
+                  <p className="text-[8px] font-black uppercase tracking-[0.14em] text-slate-400 sm:text-[9px]">
+                    Filter By
+                  </p>
+
+                </div>
+
+                {/* Filter navigation */}
+
+                <nav className="space-y-1">
+
+                  {filterMenu.map(
+                    (item) => {
+
+                      const active =
+                        activeFilter ===
+                        item.id;
+
+                      return (
+                        <button
+                          key={
+                            item.id
+                          }
+                          type="button"
+                          onClick={() =>
+                            setActiveFilter(
+                              item.id
+                            )
+                          }
+                          className={`
+                            relative
+                            flex
+                            min-h-[55px]
+                            w-full
+                            items-center
+                            rounded-xl
+                            px-3
+                            py-2.5
+                            text-left
+                            transition-all
+                            duration-200
+                            sm:min-h-[62px]
+                            sm:px-4
+                            ${
+                              active
+                                ? "bg-indigo-50"
+                                : "bg-transparent hover:bg-slate-50"
+                            }
+                          `}
+                        >
+
+                          {/* Active indicator */}
+
+                          {active && (
+                            <span className="absolute left-0 top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-full bg-indigo-600" />
+                          )}
+
+                          {/* Text only */}
+
+                          <span className="min-w-0 flex-1">
+
+                            <span
+                              className={`
+                                block
+                                whitespace-normal
+                                break-words
+                                text-[10px]
+                                font-black
+                                leading-4
+                                sm:text-xs
+                                ${
+                                  active
+                                    ? "text-indigo-700"
+                                    : "text-slate-700"
+                                }
+                              `}
+                            >
+                              {
+                                item.title
+                              }
+                            </span>
+
+                            <span
+                              className={`
+                                mt-0.5
+                                block
+                                whitespace-normal
+                                break-words
+                                text-[7px]
+                                font-semibold
+                                leading-3
+                                sm:text-[9px]
+                                ${
+                                  active
+                                    ? "text-indigo-400"
+                                    : "text-slate-400"
+                                }
+                              `}
+                            >
+                              {
+                                item.description
+                              }
+                            </span>
+
+                          </span>
+
+                          {/* Count */}
+
+                          {item.count >
+                            0 && (
+                            <span className="ml-1 flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-indigo-600 px-1.5 text-[8px] font-black text-white">
+                              {
+                                item.count
+                              }
+                            </span>
+                          )}
+
+                        </button>
+                      );
+                    }
+                  )}
+
+                </nav>
+
+              </div>
+
+            </aside>
+
+            {/* =================================================
+                RIGHT CONTENT
+            ================================================= */}
+
+            <main className="min-w-0 flex-1 overflow-y-auto bg-slate-50">
+
+              <div className="mx-auto w-full max-w-5xl p-4 sm:p-6 md:p-8">
+
+                {/* =================================================
+                    CATEGORY
+                ================================================= */}
+
+                {activeFilter ===
+                  "category" && (
+                  <ContentSection
+                    title="Category"
+                    description="Select the category you want to browse"
+                  >
+
+                    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+
+                      {/* All */}
+
+                      <SelectionCard
+                        label="All Categories"
+                        active={
+                          category ===
+                          "All"
+                        }
+                        onClick={() =>
+                          handleCategory(
+                            "All"
+                          )
+                        }
+                      />
+
+                      {/* Categories */}
+
+                      {(
+                        categoryOnlyData ||
+                        []
+                      ).map(
+                        (item) => (
+                          <CategoryCard
+                            key={
+                              item?._id
+                            }
+                            item={
+                              item
+                            }
+                            active={
+                              category ===
+                              item?._id
+                            }
+                            onClick={() =>
+                              handleCategory(
+                                item?._id
+                              )
+                            }
+                          />
+                        )
+                      )}
+
+                    </div>
+
+                  </ContentSection>
+                )}
+
+                {/* =================================================
+                    SUBCATEGORY
+                ================================================= */}
+
+                {activeFilter ===
+                  "subcategory" && (
+                  <ContentSection
+                    title="Subcategory"
+                    description={
+                      category ===
+                      "All"
+                        ? "Select a category first"
+                        : "Choose a more specific product group"
+                    }
+                  >
+
+                    {category ===
+                    "All" ? (
+
+                      <EmptyState>
+                        Select a category
+                        from the left
+                        menu to view
+                        subcategories.
+                      </EmptyState>
+
+                    ) : loadingSubCategories ? (
+
+                      <LoadingGrid />
+
+                    ) : subCategories.length ===
+                      0 ? (
+
+                      <EmptyState>
+                        No subcategories
+                        available for
+                        this category.
+                      </EmptyState>
+
+                    ) : (
+
+                      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+
+                        <SelectionCard
+                          label="All Subcategories"
+                          active={
+                            subCategory ===
+                            "All"
+                          }
+                          onClick={() =>
+                            setSubCategory(
+                              "All"
+                            )
+                          }
+                        />
+
+                        {subCategories.map(
+                          (item) => (
+                            <SelectionCard
+                              key={
+                                item?._id
+                              }
+                              label={
+                                item?.name
+                              }
+                              active={
+                                subCategory ===
+                                item?._id
+                              }
+                              onClick={() =>
+                                setSubCategory(
+                                  item?._id
+                                )
+                              }
+                            />
+                          )
+                        )}
+
+                      </div>
+
+                    )}
+
+                  </ContentSection>
+                )}
+
+                {/* =================================================
+                    BRAND
+                ================================================= */}
+
+                {activeFilter ===
+                  "brand" && (
+                  <ContentSection
+                    title="Brand"
+                    description="Choose your preferred brand"
+                  >
+
+                    {brands.length ===
+                    0 ? (
+
+                      <EmptyState>
+                        No brands available.
+                      </EmptyState>
+
+                    ) : (
+
+                      <div className="flex flex-wrap gap-2">
+
+                        <BrandChip
+                          label="All Brands"
+                          active={
+                            brand ===
+                            "All"
+                          }
+                          onClick={() =>
+                            setBrand(
+                              "All"
+                            )
+                          }
+                        />
+
+                        {brands.map(
+                          (item) => (
+                            <BrandChip
+                              key={
+                                item
+                              }
+                              label={
+                                item
+                              }
+                              active={
+                                brand ===
+                                item
+                              }
+                              onClick={() =>
+                                setBrand(
+                                  item
+                                )
+                              }
+                            />
+                          )
+                        )}
+
+                      </div>
+
+                    )}
+
+                  </ContentSection>
+                )}
+
+                {/* =================================================
+                    PRICE
+                ================================================= */}
+
+                {activeFilter ===
+                  "price" && (
+                  <ContentSection
+                    title="Price Range"
+                    description="Set the price range that fits your budget"
+                  >
+
+                    <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-7">
+
+                      {/* Current price */}
+
+                      <div className="mb-7 flex items-end justify-between gap-3">
+
+                        <div>
+
+                          <p className="text-[8px] font-black uppercase tracking-wider text-slate-400 sm:text-[9px]">
+                            Selected budget
+                          </p>
+
+                          <h3 className="mt-1 text-xl font-black text-slate-900 sm:text-3xl">
+
+                            ₹
+                            {minPrice.toLocaleString(
+                              "en-IN"
+                            )}
+
+                            <span className="mx-1.5 text-slate-300">
+                              —
+                            </span>
+
+                            ₹
+                            {maxPrice.toLocaleString(
+                              "en-IN"
+                            )}
+
+                          </h3>
+
+                        </div>
+
+                        <div className="rounded-xl bg-indigo-50 px-3 py-2 sm:rounded-2xl sm:px-4 sm:py-3">
+
+                          <p className="text-[8px] font-bold text-indigo-400">
+                            Maximum
+                          </p>
+
+                          <p className="text-xs font-black text-indigo-700 sm:text-sm">
+                            ₹5,000+
+                          </p>
+
+                        </div>
+
+                      </div>
+
+                      {/* Minimum */}
+
+                      <PriceInput
+                        label="Minimum Price"
+                        value={
+                          minPrice
+                        }
+                        onChange={
+                          updateMinPrice
+                        }
+                      />
+
+                      <div className="my-6 border-t border-dashed border-slate-200" />
+
+                      {/* Maximum */}
+
+                      <PriceInput
+                        label="Maximum Price"
+                        value={
+                          maxPrice
+                        }
+                        onChange={
+                          updateMaxPrice
+                        }
+                      />
+
+                      <div className="mt-4 flex justify-between text-[8px] font-bold text-slate-400 sm:text-[9px]">
+
+                        <span>
+                          ₹0
+                        </span>
+
+                        <span>
+                          ₹5,000+
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </ContentSection>
+                )}
+
+                {/* =================================================
+                    SORT
+                ================================================= */}
+
+                {activeFilter ===
+                  "sort" && (
+                  <ContentSection
+                    title="Sort Products"
+                    description="Choose how you want products to appear"
+                  >
+
+                    <div className="grid max-w-3xl grid-cols-1 gap-2.5 sm:grid-cols-2">
+
+                      <SortCard
+                        title="Default"
+                        description="Recommended products"
+                        active={
+                          sort ===
+                          "default"
+                        }
+                        onClick={() =>
+                          setSort(
+                            "default"
+                          )
+                        }
+                      />
+
+                      <SortCard
+                        title="Price: Low to High"
+                        description="Cheapest products first"
+                        active={
+                          sort ===
+                          "low-high"
+                        }
+                        onClick={() =>
+                          setSort(
+                            "low-high"
+                          )
+                        }
+                      />
+
+                      <SortCard
+                        title="Price: High to Low"
+                        description="Most expensive products first"
+                        active={
+                          sort ===
+                          "high-low"
+                        }
+                        onClick={() =>
+                          setSort(
+                            "high-low"
+                          )
+                        }
+                      />
+
+                      <SortCard
+                        title="Highest Rated"
+                        description="Best rated products first"
+                        active={
+                          sort ===
+                          "rating"
+                        }
+                        onClick={() =>
+                          setSort(
+                            "rating"
+                          )
+                        }
+                      />
+
+                    </div>
+
+                  </ContentSection>
+                )}
+
+              </div>
+
+            </main>
+
+          </div>
+
         </div>
 
-        {/* Body */}
-        <div className="fs-scrollable p-6 space-y-5 overflow-y-auto h-[calc(100%-140px)]">
+        {/* ===================================================
+            FOOTER
+        =================================================== */}
 
-          {/* SORT */}
-          <div className="fs-section">
-            <button
-              onClick={() => setOpenSort(!openSort)}
-              className="fs-section-header"
-            >
-              <span className="fs-section-title">
-                <FaSortAmountDown className="fs-section-icon" />
-                Sort By
-              </span>
-              <FaChevronDown
-                className={`fs-chevron transition-transform duration-300 ${openSort ? "open rotate-180" : ""}`}
-              />
-            </button>
+        <footer className="shrink-0 border-t border-slate-200 bg-white px-3 py-3.5 shadow-[0_-8px_25px_rgba(15,23,42,0.06)] sm:px-7 sm:py-4">
 
-            <div style={{
-              maxHeight: openSort ? "500px" : "0",
-              overflow: "hidden",
-              transition: "max-height 0.3s cubic-bezier(0.22,1,0.36,1)",
-              marginTop: openSort ? "12px" : "0"
-            }}>
-              <div className="fs-list">
-                {[
-                  { label: "Default", value: "default" },
-                  { label: "Price: Low → High", value: "low-high" },
-                  { label: "Price: High → Low", value: "high-low" },
-                  { label: "Rating", value: "rating" },
-                ].map((item) => {
-                  const active = sort === item.value;
-                  return (
-                    <div
-                      key={item.value}
-                      onClick={() => {
-                        setSort(item.value);
-                        setOpenSort(false);
-                      }}
-                      className={`fs-item ${active ? "active" : ""}`}
-                    >
-                      <span>{item.label}</span>
-                      {active && (
-                        <div className="fs-checkmark">
-                          <FaCheck style={{ fontSize: "8px" }} />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+          <div className="mx-auto flex max-w-7xl items-center gap-2.5 sm:gap-3">
 
-          {/* CATEGORY */}
-          <div className="fs-section">
-            <button
-              onClick={() => setOpenCategory(!openCategory)}
-              className="fs-section-header"
-            >
-              <span className="fs-section-title">
-                <MdCategory className="fs-section-icon" style={{ fontSize: "16px" }} />
-                Category
-              </span>
-              <FaChevronDown
-                className={`fs-chevron transition-transform duration-300 ${openCategory ? "open rotate-180" : ""}`}
-              />
-            </button>
+            {/* Desktop status */}
 
-            <div style={{
-              maxHeight: openCategory ? "500px" : "0",
-              overflow: "hidden",
-              transition: "max-height 0.3s cubic-bezier(0.22,1,0.36,1)",
-              marginTop: openCategory ? "12px" : "0"
-            }}>
-              <div className="fs-list">
-               <div className="fs-list">
+            <div className="hidden flex-1 sm:block">
 
-  <div
-    className={`fs-item ${category === "All" ? "active" : ""}`}
-    onClick={() => setCategory("All")}
-  >
-    <span>All</span>
-  </div>
+              <p className="text-[10px] font-bold text-slate-400">
 
-  {categoryOnlyData.map((cat) => (
+                {totalActive ===
+                0
+                  ? "No filters applied"
+                  : `${totalActive} filter${
+                      totalActive >
+                      1
+                        ? "s"
+                        : ""
+                    } applied`}
 
-    <div
-      key={cat._id}
-      onClick={() => {
-        setCategory(cat._id);
-        setOpenCategory(false);
-      }}
-      className={`fs-item ${
-        category === cat._id ? "active" : ""
-      }`}
-    >
-      <span>{cat.name}</span>
+              </p>
 
-      {category === cat._id && (
-        <div className="fs-checkmark">
-          <FaCheck size={8} />
-        </div>
-      )}
-
-    </div>
-
-  ))}
-
-</div>
-              </div>
-            </div>
-          </div>
-
-          {/* BRAND */}
-          <div className="fs-section">
-            <button
-              onClick={() => setOpenBrand(!openBrand)}
-              className="fs-section-header"
-            >
-              <span className="fs-section-title">
-                <FaTags className="fs-section-icon" />
-                Brand
-              </span>
-              <FaChevronDown
-                className={`fs-chevron transition-transform duration-300 ${openBrand ? "open rotate-180" : ""}`}
-              />
-            </button>
-
-            <div style={{
-              maxHeight: openBrand ? "500px" : "0",
-              overflow: "hidden",
-              transition: "max-height 0.3s cubic-bezier(0.22,1,0.36,1)",
-              marginTop: openBrand ? "12px" : "0"
-            }}>
-              <div className="fs-list">
-                {["All", ...brandOnlyData].map((b) => {
-                  const active = brand === b;
-                  return (
-                    <div
-                      key={b}
-                      onClick={() => {
-                        setBrand(b);
-                        setOpenBrand(false);
-                      }}
-                      className={`fs-item ${active ? "active" : ""}`}
-                    >
-                      <span>{b}</span>
-                      {active && (
-                        <div className="fs-checkmark">
-                          <FaCheck style={{ fontSize: "8px" }} />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* PRICE */}
-          <div className="fs-section">
-            <div className="fs-price-header">
-              <span className="fs-price-label">
-                <RiMoneyRupeeCircleLine style={{ fontSize: "16px", color: "#6366f1" }} />
-                Price Range
-              </span>
-              <span className="fs-price-value">
-                ₹{priceRange[0]} – ₹{priceRange[1]}
-              </span>
             </div>
 
-            <div className="fs-range-wrapper">
-              <input
-                type="range"
-                min="0"
-                max="5000"
-                step="100"
-                value={priceRange[1]}
-                onChange={(e) =>
-                  setPriceRange([priceRange[0], Number(e.target.value)])
+            {/* Buttons */}
+
+            <div className="flex w-full gap-2.5 sm:w-auto sm:min-w-[330px]">
+
+              <button
+                type="button"
+                onClick={
+                  resetFilters
                 }
-                className="fs-range-input"
-              />
+                className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-[10px] font-black text-slate-600 transition hover:bg-slate-50 active:scale-[0.97] sm:h-12 sm:rounded-2xl sm:text-xs"
+              >
+
+                <MdTune
+                  size={15}
+                />
+
+                Reset
+
+              </button>
+
+              <button
+                type="button"
+                onClick={
+                  closeFilter
+                }
+                className="flex h-11 flex-[2] items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 text-[10px] font-black text-white shadow-lg shadow-indigo-100 transition hover:bg-indigo-700 active:scale-[0.97] sm:h-12 sm:rounded-2xl sm:text-xs"
+              >
+
+                <FaCheck
+                  size={9}
+                />
+
+                Show Products
+
+                {totalActive >
+                  0 && (
+                  <span className="rounded-full bg-white/20 px-2 py-0.5 text-[8px]">
+                    {
+                      totalActive
+                    }
+                  </span>
+                )}
+
+              </button>
+
             </div>
+
           </div>
 
-        </div>
+        </footer>
 
-        {/* Footer */}
-        <div className="sticky bottom-0 fs-footer p-6 bg-white/80 backdrop-blur-xl border-t border-indigo-100">
-          <button
-            onClick={() => {
-              setCategory("All");
-              setBrand("All");
-              setPriceRange([0, 5000]);
-            }}
-            className="fs-btn fs-btn-reset"
-          >
-            Reset Filters
-          </button>
-
-          <button
-            onClick={() => setOpen(false)}
-            className="fs-btn fs-btn-apply relative z-10"
-          >
-            Apply Filters
-          </button>
-        </div>
       </div>
     </>
   );
 }
+
+// =============================================================
+// CONTENT SECTION
+// =============================================================
+
+function ContentSection({
+  title,
+  description,
+  children,
+}) {
+  return (
+    <section>
+
+      <div className="mb-5 sm:mb-7">
+
+        <h2 className="text-lg font-black tracking-tight text-slate-900 sm:text-2xl">
+          {title}
+        </h2>
+
+        <p className="mt-1 text-[9px] font-semibold leading-4 text-slate-400 sm:text-xs">
+          {description}
+        </p>
+
+      </div>
+
+      {children}
+
+    </section>
+  );
+}
+
+// =============================================================
+// SELECTION CARD
+// =============================================================
+
+function SelectionCard({
+  label,
+  active,
+  onClick,
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`
+        relative
+        flex
+        min-h-[48px]
+        w-full
+        items-center
+        justify-between
+        rounded-xl
+        border
+        px-3
+        py-2.5
+        text-left
+        transition-all
+        duration-200
+        active:scale-[0.97]
+        sm:min-h-[55px]
+        sm:rounded-2xl
+        sm:px-4
+        ${
+          active
+            ? "border-indigo-300 bg-indigo-50 text-indigo-700 shadow-sm"
+            : "border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:shadow-sm"
+        }
+      `}
+    >
+
+      <span className="pr-7 text-[10px] font-extrabold leading-4 sm:text-[11px]">
+        {label}
+      </span>
+
+      {active && (
+        <span className="absolute right-2.5 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-indigo-600 text-white">
+          <FaCheck
+            size={8}
+          />
+        </span>
+      )}
+
+    </button>
+  );
+}
+
+// =============================================================
+// CATEGORY CARD
+// =============================================================
+
+function CategoryCard({
+  item,
+  active,
+  onClick,
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`
+        relative
+        flex
+        min-h-[58px]
+        w-full
+        items-center
+        gap-2.5
+        rounded-xl
+        border
+        p-2
+        text-left
+        transition-all
+        duration-200
+        active:scale-[0.97]
+        sm:min-h-[68px]
+        sm:rounded-2xl
+        sm:p-2.5
+        ${
+          active
+            ? "border-indigo-300 bg-indigo-50 shadow-sm"
+            : "border-slate-200 bg-white hover:border-indigo-200 hover:shadow-sm"
+        }
+      `}
+    >
+
+      {/* Category image */}
+{/* 
+      {item?.image ? (
+        <img
+          src={item.image}
+          alt={
+            item?.name ||
+            "Category"
+          }
+          className="h-9 w-9 shrink-0 rounded-xl bg-slate-50 object-contain p-1 sm:h-11 sm:w-11"
+        />
+      ) : (
+        <div className="h-9 w-9 shrink-0 rounded-xl bg-slate-100 sm:h-11 sm:w-11" />
+      )} */}
+
+      {/* Name */}
+
+      <span className="min-w-0 flex-1 break-words pr-5 text-[9px] font-extrabold leading-4 text-slate-700 sm:text-[11px]">
+        {item?.name ||
+          "Category"}
+      </span>
+
+      {/* Check */}
+
+      {active && (
+        <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-white">
+          <FaCheck
+            size={8}
+          />
+        </span>
+      )}
+
+    </button>
+  );
+}
+
+// =============================================================
+// BRAND CHIP
+// =============================================================
+
+function BrandChip({
+  label,
+  active,
+  onClick,
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`
+        rounded-full
+        border
+        px-3.5
+        py-2.5
+        text-[9px]
+        font-extrabold
+        transition-all
+        active:scale-95
+        sm:px-4
+        sm:text-[10px]
+        ${
+          active
+            ? "border-indigo-600 bg-indigo-600 text-white shadow-md shadow-indigo-100"
+            : "border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+        }
+      `}
+    >
+      {label}
+    </button>
+  );
+}
+
+// =============================================================
+// SORT CARD
+// =============================================================
+
+function SortCard({
+  title,
+  description,
+  active,
+  onClick,
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`
+        flex
+        min-h-[65px]
+        w-full
+        items-center
+        justify-between
+        rounded-xl
+        border
+        p-3
+        text-left
+        transition-all
+        active:scale-[0.98]
+        sm:min-h-[80px]
+        sm:rounded-2xl
+        sm:p-4
+        ${
+          active
+            ? "border-indigo-300 bg-indigo-50"
+            : "border-slate-200 bg-white hover:border-indigo-200"
+        }
+      `}
+    >
+
+      <div className="min-w-0">
+
+        <p
+          className={`
+            text-[10px]
+            font-black
+            sm:text-xs
+            ${
+              active
+                ? "text-indigo-700"
+                : "text-slate-700"
+            }
+          `}
+        >
+          {title}
+        </p>
+
+        <p className="mt-1 text-[8px] font-semibold leading-4 text-slate-400 sm:text-[10px]">
+          {description}
+        </p>
+
+      </div>
+
+      <span
+        className={`
+          ml-3
+          flex
+          h-6
+          w-6
+          shrink-0
+          items-center
+          justify-center
+          rounded-full
+          ${
+            active
+              ? "bg-indigo-600 text-white"
+              : "border border-slate-200"
+          }
+        `}
+      >
+        {active && (
+          <FaCheck
+            size={8}
+          />
+        )}
+      </span>
+
+    </button>
+  );
+}
+
+// =============================================================
+// PRICE INPUT
+// =============================================================
+
+function PriceInput({
+  label,
+  value,
+  onChange,
+}) {
+  return (
+    <div>
+
+      <div className="mb-2.5 flex items-center justify-between">
+
+        <span className="text-[9px] font-black text-slate-500 sm:text-[10px]">
+          {label}
+        </span>
+
+        <span className="rounded-lg bg-indigo-50 px-2.5 py-1 text-[9px] font-black text-indigo-600 sm:text-[10px]">
+          ₹
+          {Number(
+            value
+          ).toLocaleString(
+            "en-IN"
+          )}
+        </span>
+
+      </div>
+
+      <input
+        type="range"
+        min="0"
+        max="5000"
+        step="100"
+        value={value}
+        onChange={(event) =>
+          onChange(
+            event.target.value
+          )
+        }
+        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-indigo-100 accent-indigo-600"
+      />
+
+    </div>
+  );
+}
+
+// =============================================================
+// LOADING
+// =============================================================
+
+function LoadingGrid() {
+  return (
+    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+
+      {[1, 2, 3, 4, 5, 6].map(
+        (item) => (
+          <div
+            key={item}
+            className="h-12 animate-pulse rounded-xl bg-white sm:h-14 sm:rounded-2xl"
+          />
+        )
+      )}
+
+    </div>
+  );
+}
+
+// =============================================================
+// EMPTY STATE
+// =============================================================
+
+function EmptyState({
+  children,
+}) {
+  return (
+    <div className="flex min-h-[180px] items-center justify-center rounded-2xl bg-white px-5 sm:rounded-3xl">
+
+      <div className="max-w-xs text-center">
+
+        <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-400 sm:h-12 sm:w-12">
+
+          <MdTune
+            size={19}
+          />
+
+        </div>
+
+        <p className="mt-3 text-[9px] font-bold leading-5 text-slate-400 sm:text-[10px]">
+          {children}
+        </p>
+
+      </div>
+
+    </div>
+  );
+}
+
