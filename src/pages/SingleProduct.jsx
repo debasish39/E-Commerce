@@ -687,6 +687,15 @@ export default function SingleProduct() {
   const [selSize, setSelSize] = useState(null);
   const [selColor, setSelColor] = useState(null);
   const [qty, setQty] = useState(1);
+
+  // ── Product PIN-code serviceability ──
+  const [servicePincode, setServicePincode] = useState("");
+  const [serviceability, setServiceability] = useState({
+    checking: false,
+    checked: false,
+    serviceable: null,
+    message: "",
+  });
   const [reviews, setReviews] = useState([]);
   const [reviewRatingFilter, setReviewRatingFilter] = useState("all");
   const [selectedReview, setSelectedReview] = useState(null);
@@ -963,6 +972,115 @@ useEffect(() => {
       ? Math.round(finalPrice / (1 - productDiscount / 100))
       : finalPrice
   );
+
+  // ── CHECK WHETHER THIS PRODUCT CAN BE DELIVERED ──
+  const checkProductServiceability = async () => {
+    const pincode = String(servicePincode || "").replace(/\D/g, "").slice(0, 6);
+
+    if (!/^[1-9][0-9]{5}$/.test(pincode)) {
+      setServiceability({
+        checking: false,
+        checked: false,
+        serviceable: null,
+        message: "Enter a valid 6-digit PIN code.",
+      });
+      toast.error("Enter a valid 6-digit PIN code");
+      return false;
+    }
+
+    setServiceability({
+      checking: true,
+      checked: false,
+      serviceable: null,
+      message: "",
+    });
+
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/api/serviceability/cart`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            pincode,
+            postalCode: pincode,
+            items: [{
+              productId: product._id,
+              variantSku: selectedVariant?.sku || "",
+              quantity: Number(qty || 1),
+              sellerId: product.seller?._id || product.sellerId || null,
+            }],
+          }),
+        }
+      );
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || data.success === false) {
+        throw new Error(
+          data.message || data.error || "Unable to check delivery availability"
+        );
+      }
+
+      const unavailableItems = Array.isArray(data.unavailableItems)
+        ? data.unavailableItems
+        : Array.isArray(data.items)
+          ? data.items.filter(item => item.serviceable === false)
+          : [];
+
+      const serviceableItems = Array.isArray(data.serviceableItems)
+        ? data.serviceableItems
+        : Array.isArray(data.items)
+          ? data.items.filter(item => item.serviceable !== false)
+          : [];
+
+      const isServiceable =
+        unavailableItems.length === 0 && serviceableItems.length > 0;
+
+      setServiceability({
+        checking: false,
+        checked: true,
+        serviceable: isServiceable,
+        message:
+          data.message ||
+          (isServiceable
+            ? `Delivery is available to ${pincode}.`
+            : `This product cannot be delivered to ${pincode}.`),
+      });
+
+      if (isServiceable) {
+        toast.success(`Delivery available to ${pincode}`);
+        return true;
+      }
+
+      toast.error(`This product is not deliverable to ${pincode}`);
+      return false;
+    } catch (error) {
+      console.error("PRODUCT SERVICEABILITY ERROR:", error);
+      setServiceability({
+        checking: false,
+        checked: false,
+        serviceable: null,
+        message: error?.message || "Unable to check delivery availability.",
+      });
+      toast.error(error?.message || "Unable to check delivery availability");
+      return false;
+    }
+  };
+
+  const handleServicePincodeChange = (e) => {
+    const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+    setServicePincode(value);
+    setServiceability({
+      checking: false,
+      checked: false,
+      serviceable: null,
+      message: "",
+    });
+  };
 
  const handleCart = () => {
   if (!isSignedIn) {
@@ -1293,6 +1411,99 @@ useEffect(() => {
             {/* ── Desktop CTA row ──
                  On mobile these actions are shown only in the fixed bottom bar,
                  so there is no duplicate Add to Cart / Wishlist row. ── */}
+            {/* ── Delivery PIN checker ── */}
+            <div
+              className="spx-card"
+              style={{
+                padding: "16px 18px",
+                border: serviceability.checked
+                  ? serviceability.serviceable
+                    ? "1px solid #a7f3d0"
+                    : "1px solid #fecaca"
+                  : "1px solid #e2e8f0",
+                background: serviceability.checked
+                  ? serviceability.serviceable
+                    ? "#f0fdf4"
+                    : "#fef2f2"
+                  : "#fff",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 10 }}>
+                <FaTruck size={14} style={{ color: "#5046e4" }} />
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: "#111827" }}>
+                    Check delivery availability
+                  </div>
+                  <div style={{ fontSize: 10.5, color: "#64748b", marginTop: 2 }}>
+                    Enter your PIN code to check whether this product is deliverable.
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: 8, alignItems: "stretch" }}>
+                <input
+                  className="spx-in"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder="Enter 6-digit PIN code"
+                  value={servicePincode}
+                  onChange={handleServicePincodeChange}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") checkProductServiceability();
+                  }}
+                  aria-label="Delivery PIN code"
+                />
+
+                <button
+                  type="button"
+                  onClick={checkProductServiceability}
+                  disabled={
+                    serviceability.checking ||
+                    !/^[1-9][0-9]{5}$/.test(servicePincode)
+                  }
+                  style={{
+                    minWidth: 105,
+                    border: 0,
+                    borderRadius: 12,
+                    padding: "0 14px",
+                    background: "#4f46e5",
+                    color: "#fff",
+                    fontSize: 12,
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    opacity:
+                      serviceability.checking ||
+                      !/^[1-9][0-9]{5}$/.test(servicePincode)
+                        ? 0.55
+                        : 1,
+                  }}
+                >
+                  {serviceability.checking ? "Checking..." : "Check"}
+                </button>
+              </div>
+
+              {serviceability.message && (
+                <div
+                  style={{
+                    marginTop: 10,
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    color:
+                      serviceability.serviceable === true
+                        ? "#047857"
+                        : serviceability.serviceable === false
+                          ? "#b91c1c"
+                          : "#64748b",
+                  }}
+                >
+                  {serviceability.serviceable === true ? "✓ " : ""}
+                  {serviceability.serviceable === false ? "✕ " : ""}
+                  {serviceability.message}
+                </div>
+              )}
+            </div>
+
             <div className="spx-inline-cta" style={{ display: "flex", gap: 10, alignItems: "stretch" }}>
               <button
                 type="button"
