@@ -57,7 +57,13 @@ const [errors, setErrors] =
   const inputsRef = useRef([]);
 
   const validateEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
-  const validatePassword = (p) => p.length >= 6;
+  const validatePassword = (p) => {
+    if (p.length < 8 || p.length > 128) return false;
+    if (!/[A-Z]/.test(p)) return false;
+    if (!/[a-z]/.test(p)) return false;
+    if (!/[0-9]/.test(p)) return false;
+    return true;
+  };
 const BACKEND_URL = `${import.meta.env.VITE_BACKEND_URL}/api/auth`;
 
 const validateField =
@@ -80,8 +86,17 @@ const validateField =
         if (!value)
           return "Password is required";
 
-        if (value.length < 6)
-          return "Minimum 6 characters";
+        if (value.length < 8 || value.length > 128)
+          return "Password must be 8-128 characters";
+
+        if (!/[A-Z]/.test(value))
+          return "Add uppercase letter";
+
+        if (!/[a-z]/.test(value))
+          return "Add lowercase letter";
+
+        if (!/[0-9]/.test(value))
+          return "Add number";
 
         return "";
 
@@ -110,11 +125,14 @@ const validateField =
         if (!value)
           return "New password required";
 
-        if (value.length < 6)
-          return "Minimum 6 characters";
+        if (value.length < 8 || value.length > 128)
+          return "Password must be 8-128 characters";
 
         if (!/[A-Z]/.test(value))
           return "Add uppercase letter";
+
+        if (!/[a-z]/.test(value))
+          return "Add lowercase letter";
 
         if (!/[0-9]/.test(value))
           return "Add number";
@@ -367,12 +385,8 @@ async (e) => {
 
   } catch (error) {
 
-    console.error(
-      error
-    );
-
     toast.error(
-      error.message
+      error.message || "Login failed. Please try again."
     );
 
   } finally {
@@ -684,12 +698,8 @@ async () => {
 
   } catch (error) {
 
-    console.error(
-      error
-    );
-
     toast.error(
-      error.message
+      error.message || "Failed to send reset OTP. Please try again."
     );
 
   } finally {
@@ -751,7 +761,7 @@ async (e) => {
 
     toast.error(
 
-      "Password must be 6+ characters"
+      "Password must be 8-128 characters and contain uppercase, lowercase and a number"
 
     );
 
@@ -1255,7 +1265,7 @@ className={`
               : "password"
           }
 
-          placeholder="6+ characters"
+          placeholder="8+ characters, uppercase, lowercase & number"
 
           value={password}
 
@@ -1430,7 +1440,7 @@ className={`
               <div className="relative">
                 <input
                   type={showNewPassword?"text":"password"}
-                  placeholder="6+ characters"
+                  placeholder="8+ characters, uppercase, lowercase & number"
                   value={newPassword}
                   onChange={e => setNewPassword(e.target.value)}
                   className="form-input"

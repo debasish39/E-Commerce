@@ -34,8 +34,29 @@ const BACKEND_URL = `${import.meta.env.VITE_BACKEND_URL}/api/auth`;
       case "email":
         if (!value) return "Email is required";
         return validateEmail(value) ? "" : "Enter a valid email";
-      case "password":
-        return value ? (value.length >= 6 ? "" : "Password must be 6+ characters") : "Password is required";
+     
+case "password":
+  if (!value) return "Password is required";
+
+  if (value.length < 8 || value.length > 128) {
+    return "Password must be 8-128 characters";
+  }
+
+  if (!/[A-Z]/.test(value)) {
+    return "Password must contain an uppercase letter";
+  }
+
+  if (!/[a-z]/.test(value)) {
+    return "Password must contain a lowercase letter";
+  }
+
+  if (!/[0-9]/.test(value)) {
+    return "Password must contain a number";
+  }
+
+  return "";
+
+
       default:
         return "";
     }
@@ -501,7 +522,7 @@ async (e) => {
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
-                placeholder="6+ characters"
+               placeholder="8+ characters, uppercase, lowercase & number"
                 value={form.password}
                 onChange={handleChange}
                 onBlur={handleBlur}
