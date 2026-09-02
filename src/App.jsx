@@ -24,7 +24,21 @@ import Spinner from "./components/Spinner";
 import SignInPage from "./pages/SignIn";
 import SignUpPage from "./pages/SignUp";
 import VerifySignIn from "./pages/VerifySignIn";
-import ProfilePage from "./pages/ProfilePage";
+import ProfilePage from "./pages/account/ProfilePage";
+import PersonalInfoPage from "./pages/account/PersonalInfoPage";
+import AddressesPage from "./pages/account/AddressesPage";
+import AddAddressPage from "./pages/account/AddAddressPage";
+import EditAddressPage from "./pages/account/EditAddressPage";
+import AccountOrdersPage from "./pages/account/OrdersPage";
+import AccountOrderDetailsPage from "./pages/account/OrderDetailsPage";
+import AccountTrackOrderPage from "./pages/account/TrackOrderPage";
+import AccountWishlistPage from "./pages/account/WishlistPage";
+import PaymentMethodsPage from "./pages/account/PaymentMethodsPage";
+import SecurityPage from "./pages/account/SecurityPage";
+import NotificationsPage from "./pages/account/NotificationsPage";
+import HelpSupportPage from "./pages/account/HelpSupportPage";
+import AccountLegalPage from "./pages/account/LegalPage";
+import DeleteAccountPage from "./pages/account/DeleteAccountPage";
 import Offline from "./pages/Offline";
 import TrackOrder from "./pages/TrackOrder";
 import SingleOrderPage from "./pages/SingleOrderPage.jsx";
@@ -198,7 +212,6 @@ const AppWrapper = () => {
       404
                         -> No Navbar
   */
-
   const pathname = location.pathname;
 
   const isHomePage =
@@ -214,6 +227,21 @@ const AppWrapper = () => {
     pathname === "/order-success" ||
     pathname.startsWith("/legal");
 
+  /* =========================================
+     PROFILE / ACCOUNT PAGES
+     No Navbar
+     No SearchNavbar
+  ========================================= */
+
+  const isProfilePage =
+    pathname === "/profile" ||
+    pathname === "/account" ||
+    pathname.startsWith("/account/");
+
+  /* =========================================
+     ECOMMERCE PAGES
+  ========================================= */
+
   const isEcommercePage =
     isHomePage ||
     pathname === "/search" ||
@@ -221,11 +249,14 @@ const AppWrapper = () => {
     pathname.startsWith("/category") ||
     pathname === "/cart" ||
     pathname === "/wishlist" ||
-    pathname === "/profile" ||
     pathname === "/order-history" ||
     pathname.startsWith("/orders") ||
     pathname === "/track-order" ||
     pathname === "/contact";
+
+  /* =========================================
+     NAVBAR VISIBILITY
+  ========================================= */
 
   const showFullNavbar =
     isHomePage;
@@ -235,7 +266,9 @@ const AppWrapper = () => {
     pathname !== "/search" &&
     !isAuthPage &&
     !isStandalonePage &&
+    !isProfilePage &&
     isEcommercePage;
+
 
   /* =======================================================
      APP LOADING
@@ -330,7 +363,7 @@ const AppWrapper = () => {
         if (
           last &&
           Date.now() - last <
-            60 * 60 * 1000
+          60 * 60 * 1000
         ) {
           return;
         }
@@ -424,7 +457,7 @@ const AppWrapper = () => {
               response.data
                 .features?.[0]
                 ?.properties ||
-                null
+              null
             );
 
           } catch (error) {
@@ -919,7 +952,7 @@ const AppWrapper = () => {
                 }
               />
               <Route path="/product/:id/reviews"
-              element={<ReviewsPage />}
+                element={<ReviewsPage />}
               />
               <Route
                 path="/verify-signin"
@@ -1023,6 +1056,145 @@ const AppWrapper = () => {
                 path="/profile"
                 element={
                   <ProfilePage />
+                }
+              />
+
+              {/* =================================================
+                  ACCOUNT / PROFILE SUB-PAGES
+              ================================================= */}
+
+              <Route
+                path="/account"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/account/personal-information"
+                element={
+                  <ProtectedRoute>
+                    <PersonalInfoPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/account/addresses"
+                element={
+                  <ProtectedRoute>
+                    <AddressesPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/account/addresses/add"
+                element={
+                  <ProtectedRoute>
+                    <AddAddressPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/account/addresses/:id/edit"
+                element={
+                  <ProtectedRoute>
+                    <EditAddressPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/account/orders"
+                element={
+                  <ProtectedRoute>
+                    <AccountOrdersPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/account/orders/:id"
+                element={
+                  <ProtectedRoute>
+                    <AccountOrderDetailsPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/account/orders/:id/track"
+                element={
+                  <ProtectedRoute>
+                    <AccountTrackOrderPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/account/wishlist"
+                element={
+                  <ProtectedRoute>
+                    <AccountWishlistPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/account/payment-methods"
+                element={
+                  <ProtectedRoute>
+                    <PaymentMethodsPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/account/security"
+                element={
+                  <ProtectedRoute>
+                    <SecurityPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/account/notifications"
+                element={
+                  <ProtectedRoute>
+                    <NotificationsPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/account/help"
+                element={
+                  <ProtectedRoute>
+                    <HelpSupportPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/account/legal"
+                element={
+                  <ProtectedRoute>
+                    <AccountLegalPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/account/delete"
+                element={
+                  <ProtectedRoute>
+                    <DeleteAccountPage />
+                  </ProtectedRoute>
                 }
               />
 

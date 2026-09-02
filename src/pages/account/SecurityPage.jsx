@@ -1,0 +1,10 @@
+import React,{useState} from "react";
+import {FaLock,FaEye,FaEyeSlash} from "react-icons/fa";
+import {toast} from "react-toastify";
+import {api} from "./AccountShell";
+import {AccountShell} from "./AccountShell";
+export default function SecurityPage(){
+ const [f,setF]=useState({currentPassword:"",newPassword:"",confirmPassword:""}),[show,setShow]=useState({}),[loading,setLoading]=useState(false);
+ const save=async()=>{if(!f.currentPassword||!f.newPassword)return toast.error("Fill all password fields");if(f.newPassword!==f.confirmPassword)return toast.error("Passwords do not match");if(f.newPassword.length<8)return toast.error("New password must be at least 8 characters");setLoading(true);try{const d=await api("/api/auth/change-password",{method:"PUT",body:JSON.stringify({currentPassword:f.currentPassword,newPassword:f.newPassword})});if(!d.success)throw new Error(d.message||"Password update failed");toast.success("Password changed");setF({currentPassword:"",newPassword:"",confirmPassword:""})}catch(e){toast.error(e.message)}finally{setLoading(false)}};
+ return <AccountShell title="Security"><div className="ok-card" style={{padding:20,marginTop:20}}><div className="ok-row" style={{marginBottom:20}}><div className="ok-circle"><FaLock/></div><div><b>Password</b><div className="ok-small">Keep your account protected</div></div></div>{["currentPassword","newPassword","confirmPassword"].map((k,i)=><div className="ok-field" key={k}><label>{["Current password","New password","Confirm new password"][i]}</label><div style={{position:"relative"}}><input className="ok-input" type={show[k]?"text":"password"} value={f[k]} onChange={e=>setF({...f,[k]:e.target.value})}/><button className="ok-icon-btn" style={{position:"absolute",right:2,top:3}} onClick={()=>setShow({...show,[k]:!show[k]})}>{show[k]?<FaEyeSlash/>:<FaEye/>}</button></div></div>)}<button className="ok-btn ok-primary ok-full" disabled={loading} onClick={save}>{loading?"Updating...":"Change password"}</button></div></AccountShell>
+}
