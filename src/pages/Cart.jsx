@@ -408,6 +408,471 @@ const Cart = ({
 
 
   /* =======================================================
+     SAVED DELIVERY ADDRESSES
+  ======================================================= */
+
+  const [savedAddresses, setSavedAddresses] =
+    useState([]);
+
+  const [selectedAddressId, setSelectedAddressId] =
+    useState(null);
+
+  const [addressLoading, setAddressLoading] =
+    useState(false);
+
+  const [addressSaving, setAddressSaving] =
+    useState(false);
+
+  const [editingAddressId, setEditingAddressId] =
+    useState(null);
+
+  const [showAddressForm, setShowAddressForm] =
+    useState(true);
+
+  const [addressLabel, setAddressLabel] =
+    useState("Home");
+
+  const ADDRESS_URL =
+    `${BACKEND_URL}/api/addresses`;
+
+
+  /* =======================================================
+     SAVED ADDRESS HELPERS
+  ======================================================= */
+
+  const normalizeSavedAddress = (item) => {
+
+    const source = item?.address || item || {};
+
+    return {
+      ...item,
+      _id: item?._id || item?.id,
+      label: item?.label || "Home",
+      fullName:
+        item?.fullName ||
+        item?.name ||
+        source?.fullName ||
+        "",
+      phone:
+        item?.phone ||
+        source?.phone ||
+        "",
+      email:
+        item?.email ||
+        source?.email ||
+        user?.email ||
+        "",
+      addressLine1:
+        item?.addressLine1 ||
+        item?.street ||
+        source?.addressLine1 ||
+        source?.street ||
+        "",
+      addressLine2:
+        item?.addressLine2 ||
+        source?.addressLine2 ||
+        "",
+      landmark:
+        item?.landmark ||
+        source?.landmark ||
+        "",
+      area:
+        item?.area ||
+        source?.area ||
+        "",
+      city:
+        item?.city ||
+        source?.city ||
+        "",
+      district:
+        item?.district ||
+        source?.district ||
+        "",
+      state:
+        item?.state ||
+        source?.state ||
+        "",
+      postalCode:
+        item?.postalCode ||
+        item?.postcode ||
+        source?.postalCode ||
+        source?.postcode ||
+        "",
+      country:
+        item?.country ||
+        source?.country ||
+        "India",
+      location:
+        item?.location ||
+        source?.location ||
+        {},
+      isDefault: item?.isDefault === true,
+    };
+  };
+
+
+  const loadSavedAddresses = async () => {
+
+    if (!token) return;
+
+    try {
+
+      setAddressLoading(true);
+
+      const res = await fetch(ADDRESS_URL, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(
+          data.message ||
+          data.error ||
+          "Failed to load saved addresses"
+        );
+      }
+
+      const list = Array.isArray(data.addresses)
+        ? data.addresses
+        : Array.isArray(data.data)
+        ? data.data
+        : [];
+
+      const normalized = list.map(normalizeSavedAddress);
+      setSavedAddresses(normalized);
+
+      const defaultAddress =
+        normalized.find((item) => item.isDefault) ||
+        normalized[0];
+
+      if (defaultAddress) {
+        setSelectedAddressId(String(defaultAddress._id));
+      }
+
+    } catch (error) {
+
+      console.error("LOAD SAVED ADDRESSES ERROR:", error);
+
+    } finally {
+
+      setAddressLoading(false);
+
+    }
+
+  };
+
+
+  useEffect(() => {
+    loadSavedAddresses();
+  }, [token, ADDRESS_URL]);
+
+
+  const fillAddressFromSaved = (item) => {
+
+    const saved = normalizeSavedAddress(item);
+
+    setSelectedAddressId(String(saved._id));
+
+    setEditingAddressId(null);
+    setAddressLabel(saved.label || "Home");
+
+    setAddress({
+      name: saved.fullName || "",
+      email: saved.email || user?.email || "",
+      phone: String(saved.phone || "").replace(/\D/g, "").slice(0, 10),
+      street: saved.addressLine1 || "",
+      addressLine1: saved.addressLine1 || "",
+      addressLine2: saved.addressLine2 || "",
+      landmark: saved.landmark || "",
+      area: saved.area || "",
+      city: saved.city || "",
+      district: saved.district || "",
+      state: saved.state || "",
+      postcode: String(saved.postalCode || "").replace(/\D/g, "").slice(0, 6),
+      country: saved.country || "India",
+      latitude: saved.location?.latitude ?? "",
+      longitude: saved.location?.longitude ?? "",
+      deliveryPreference: saved.deliveryPreference || "",
+    });
+
+    setServiceability((prev) => ({
+      ...prev,
+      checked: false,
+      postalCode: String(saved.postalCode || ""),
+      serviceableItems: [],
+      unavailableItems: [],
+      message: "",
+    }));
+
+    setShowAddressForm(false);
+  };
+
+
+  const startNewAddress = () => {
+
+    setEditingAddressId(null);
+    setSelectedAddressId(null);
+    setAddressLabel("Home");
+    setShowAddressForm(true);
+
+    setAddress((prev) => ({
+      ...prev,
+      name: user
+        ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
+        : prev.name,
+      email: user?.email || prev.email || "",
+      phone: user?.phone || prev.phone || "",
+      street: "",
+      addressLine1: "",
+      addressLine2: "",
+      landmark: "",
+      area: "",
+      city: "",
+      district: "",
+      state: "",
+      postcode: "",
+      country: "India",
+      latitude: "",
+      longitude: "",
+      deliveryPreference: "",
+    }));
+
+    setServiceability((prev) => ({
+      ...prev,
+      checked: false,
+      postalCode: "",
+      serviceableItems: [],
+      unavailableItems: [],
+      message: "",
+    }));
+  };
+
+
+  const startEditAddress = (item) => {
+    const saved = normalizeSavedAddress(item);
+    setEditingAddressId(String(saved._id));
+    setAddressLabel(saved.label || "Home");
+    fillAddressFromSaved(saved);
+    setEditingAddressId(String(saved._id));
+    setShowAddressForm(true);
+  };
+
+
+  const saveCurrentAddress = async () => {
+
+    if (!token) {
+      toast.error("Please login first");
+      return false;
+    }
+
+    if (!validateDelivery()) {
+      return false;
+    }
+
+    const payload = {
+      label: addressLabel || "Home",
+      fullName: String(address.name || "").trim(),
+      email: String(address.email || "").trim(),
+      phone: String(address.phone || "").trim(),
+      addressLine1: String(
+        address.addressLine1 || address.street || ""
+      ).trim(),
+      addressLine2: String(address.addressLine2 || "").trim(),
+      landmark: String(address.landmark || "").trim(),
+      area: String(address.area || "").trim(),
+      city: String(address.city || "").trim(),
+      district: String(address.district || "").trim(),
+      state: String(address.state || "").trim(),
+      postalCode: String(address.postcode || "").trim(),
+      country: String(address.country || "India").trim(),
+      location: {
+        latitude:
+          address.latitude !== "" &&
+          address.latitude !== null &&
+          address.latitude !== undefined
+            ? Number(address.latitude)
+            : undefined,
+        longitude:
+          address.longitude !== "" &&
+          address.longitude !== null &&
+          address.longitude !== undefined
+            ? Number(address.longitude)
+            : undefined,
+      },
+      isDefault: savedAddresses.length === 0,
+    };
+
+    try {
+
+      setAddressSaving(true);
+
+      const isEditing = Boolean(editingAddressId);
+      const url = isEditing
+        ? `${ADDRESS_URL}/${editingAddressId}`
+        : ADDRESS_URL;
+
+      const res = await fetch(url, {
+        method: isEditing ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(
+          data.message ||
+          data.error ||
+          "Failed to save address"
+        );
+      }
+
+      const returnedAddress =
+        data.address || data.data || null;
+
+      if (returnedAddress) {
+        const normalized = normalizeSavedAddress(returnedAddress);
+        setSavedAddresses((prev) => {
+          const exists = prev.some(
+            (item) => String(item._id) === String(normalized._id)
+          );
+          return exists
+            ? prev.map((item) =>
+                String(item._id) === String(normalized._id)
+                  ? normalized
+                  : item
+              )
+            : [...prev, normalized];
+        });
+        setSelectedAddressId(String(normalized._id));
+      }
+
+      await loadSavedAddresses();
+      setEditingAddressId(null);
+      setShowAddressForm(false);
+      toast.success(
+        isEditing
+          ? "Address updated successfully"
+          : "Address saved successfully"
+      );
+      return true;
+
+    } catch (error) {
+
+      console.error("SAVE ADDRESS ERROR:", error);
+      toast.error(
+        error.message || "Failed to save address"
+      );
+      return false;
+
+    } finally {
+      setAddressSaving(false);
+    }
+  };
+
+
+  const deleteSavedAddress = async (id) => {
+
+    if (!id || !token) return;
+
+    try {
+
+      const res = await fetch(
+        `${ADDRESS_URL}/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(
+          data.message ||
+          data.error ||
+          "Failed to delete address"
+        );
+      }
+
+      setSavedAddresses((prev) =>
+        prev.filter(
+          (item) => String(item._id) !== String(id)
+        )
+      );
+
+      if (String(selectedAddressId) === String(id)) {
+        setSelectedAddressId(null);
+        startNewAddress();
+      }
+
+      toast.success("Address deleted");
+
+    } catch (error) {
+      console.error("DELETE ADDRESS ERROR:", error);
+      toast.error(
+        error.message || "Failed to delete address"
+      );
+    }
+  };
+
+
+  const setDefaultSavedAddress = async (id) => {
+
+    if (!id || !token) return;
+
+    try {
+
+      const res = await fetch(
+        `${ADDRESS_URL}/${id}/default`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(
+          data.message ||
+          data.error ||
+          "Failed to set default address"
+        );
+      }
+
+      setSavedAddresses((prev) =>
+        prev.map((item) => ({
+          ...item,
+          isDefault: String(item._id) === String(id),
+        }))
+      );
+
+      setSelectedAddressId(String(id));
+      toast.success("Default address updated");
+
+    } catch (error) {
+      console.error("DEFAULT ADDRESS ERROR:", error);
+      toast.error(
+        error.message || "Failed to set default address"
+      );
+    }
+  };
+
+
+  /* =======================================================
      LOCATION → ADDRESS
   ======================================================= */
 
@@ -3803,6 +4268,111 @@ total:
 
         }
 
+
+        /* =========================================================
+           MODERN ECOMMERCE POLISH
+        ========================================================= */
+
+        .cart-root {
+          background:
+            radial-gradient(circle at 8% 5%, rgba(99,102,241,.16), transparent 28%),
+            radial-gradient(circle at 92% 20%, rgba(59,130,246,.10), transparent 26%),
+            linear-gradient(180deg,#f8faff 0%,#f5f7fb 48%,#ffffff 100%) !important;
+        }
+
+        .cart-root::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          background: linear-gradient(120deg,rgba(255,255,255,.65),transparent 45%);
+        }
+
+        .cart-trust-strip {
+          display:grid;
+          grid-template-columns:repeat(4,minmax(0,1fr));
+          gap:12px;
+        }
+
+        .cart-trust-item {
+          display:flex;
+          align-items:center;
+          gap:11px;
+          min-height:64px;
+          padding:12px 14px;
+          border:1px solid rgba(148,163,184,.16);
+          border-radius:18px;
+          background:rgba(255,255,255,.76);
+          box-shadow:0 8px 30px rgba(15,23,42,.045);
+          backdrop-filter:blur(14px);
+        }
+
+        .cart-trust-item > span {
+          width:36px; height:36px; flex:none;
+          display:flex; align-items:center; justify-content:center;
+          border-radius:12px; background:#f1f5ff;
+          font-size:16px;
+        }
+
+        .cart-trust-item strong { display:block; font-size:11px; color:#1e293b; }
+        .cart-trust-item small { display:block; margin-top:2px; font-size:9px; color:#94a3b8; }
+
+        .cart-item-card {
+          position:relative;
+          border-color:rgba(148,163,184,.16);
+          background:rgba(255,255,255,.88);
+          box-shadow:0 10px 35px rgba(15,23,42,.055);
+        }
+
+        .cart-item-card img {
+          width:92px !important;
+          height:92px !important;
+          border-radius:16px !important;
+          border-color:#eef2ff !important;
+          background:#f8fafc;
+          padding:3px;
+        }
+
+        .cart-item-card:hover {
+          transform:translateY(-3px);
+          box-shadow:0 18px 42px rgba(79,70,229,.10);
+        }
+
+        .cart-summary-card {
+          position:sticky;
+          top:20px;
+          z-index:20;
+          border-color:rgba(99,102,241,.18);
+          background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(248,250,255,.94));
+          box-shadow:0 18px 50px rgba(79,70,229,.10);
+        }
+
+        .cart-summary-card::before {
+          content:'';
+          position:absolute;
+          left:0; right:0; top:0; height:3px;
+          border-radius:20px 20px 0 0;
+          background:linear-gradient(90deg,#4f46e5,#2563eb,#7c3aed);
+        }
+
+        .cart-root .step-panel > h2 {
+          letter-spacing:-.025em;
+        }
+
+        .cart-root button {
+          -webkit-tap-highlight-color:transparent;
+        }
+
+        @media (max-width: 767px) {
+          .cart-trust-strip { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+          .cart-trust-item { min-height:58px; padding:9px 10px; border-radius:15px; }
+          .cart-trust-item > span { width:31px; height:31px; border-radius:10px; font-size:14px; }
+          .cart-trust-item strong { font-size:10px; }
+          .cart-trust-item small { font-size:8px; }
+          .cart-summary-card { position:relative; top:auto; }
+          .cart-item-card img { width:76px !important; height:76px !important; }
+        }
+
       `}</style>
 
 
@@ -3887,7 +4457,7 @@ total:
           className="
             relative
             z-10
-            max-w-4xl
+            max-w-7xl
             mx-auto
             px-4
             py-10
@@ -4169,6 +4739,18 @@ total:
 
 
               {/* =================================================
+                  TRUST STRIP
+              ================================================= */}
+
+              <div className="cart-trust-strip mb-7">
+                <div className="cart-trust-item"><span>🔒</span><div><strong>Secure checkout</strong><small>Your data is protected</small></div></div>
+                <div className="cart-trust-item"><span>🚚</span><div><strong>Reliable delivery</strong><small>Track your order easily</small></div></div>
+                <div className="cart-trust-item"><span>↩️</span><div><strong>Easy returns</strong><small>Simple return experience</small></div></div>
+                <div className="cart-trust-item hidden sm:flex"><span>💳</span><div><strong>Safe payments</strong><small>Powered by Razorpay</small></div></div>
+              </div>
+
+
+              {/* =================================================
                   STEP 1 — CART
               ================================================= */}
 
@@ -4177,6 +4759,7 @@ total:
                 <div
                   className="
                     step-panel
+                    step-one-panel
                     space-y-5
                   "
                 >
@@ -4780,6 +5363,7 @@ total:
                           }
                           className={`
                             cart-card
+                            cart-item-card
                             flex
                             flex-col
                             sm:flex-row
@@ -5069,6 +5653,7 @@ total:
                   <div
                     className="
                       cart-card
+                      cart-summary-card
                       p-5
                     "
                   >
@@ -5478,6 +6063,193 @@ total:
                       </div>
 
                     </div>
+
+
+                    {/* =================================================
+                        SAVED ADDRESSES
+                    ================================================= */}
+
+                    {savedAddresses.length > 0 && (
+
+                      <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4 space-y-3">
+
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-bold text-indigo-900">
+                              Saved Delivery Addresses
+                            </p>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Choose where you want this order delivered.
+                            </p>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={startNewAddress}
+                            className="btn-secondary px-3 py-2 text-xs whitespace-nowrap"
+                          >
+                            + Add New
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+                          {savedAddresses.map((saved) => {
+
+                            const active =
+                              String(selectedAddressId) === String(saved._id);
+
+                            return (
+                              <div
+                                key={saved._id}
+                                className={`rounded-2xl border p-4 transition ${
+                                  active
+                                    ? "border-indigo-500 bg-white shadow-md"
+                                    : "border-slate-200 bg-white hover:border-indigo-200"
+                                }`}
+                              >
+
+                                <button
+                                  type="button"
+                                  onClick={() => fillAddressFromSaved(saved)}
+                                  className="w-full text-left"
+                                >
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs font-bold px-2 py-1 rounded-lg bg-indigo-100 text-indigo-700">
+                                        {saved.label || "Address"}
+                                      </span>
+
+                                      {saved.isDefault && (
+                                        <span className="text-[10px] font-bold text-emerald-600">
+                                          DEFAULT
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    {active && (
+                                      <FaCheckCircle className="text-indigo-600" />
+                                    )}
+                                  </div>
+
+                                  <p className="text-sm font-bold text-slate-800 mt-3">
+                                    {saved.fullName || "Customer"}
+                                  </p>
+
+                                  <p className="text-xs text-slate-500 mt-1 leading-5">
+                                    {saved.addressLine1}
+                                    {saved.addressLine2 ? `, ${saved.addressLine2}` : ""}
+                                    {saved.area ? `, ${saved.area}` : ""}
+                                    {saved.city ? `, ${saved.city}` : ""}
+                                    {saved.district ? `, ${saved.district}` : ""}
+                                    {saved.state ? `, ${saved.state}` : ""}
+                                    {saved.postalCode ? ` - ${saved.postalCode}` : ""}
+                                  </p>
+
+                                  <p className="text-xs text-slate-500 mt-2">
+                                    +91 {saved.phone || ""}
+                                  </p>
+                                </button>
+
+                                <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-100">
+
+                                  <button
+                                    type="button"
+                                    onClick={() => startEditAddress(saved)}
+                                    className="text-xs font-semibold text-indigo-600 hover:underline"
+                                  >
+                                    Edit
+                                  </button>
+
+                                  {!saved.isDefault && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setDefaultSavedAddress(saved._id)}
+                                      className="text-xs font-semibold text-emerald-600 hover:underline"
+                                    >
+                                      Set Default
+                                    </button>
+                                  )}
+
+                                  <button
+                                    type="button"
+                                    onClick={() => deleteSavedAddress(saved._id)}
+                                    className="text-xs font-semibold text-rose-500 hover:underline"
+                                  >
+                                    Delete
+                                  </button>
+
+                                </div>
+
+                              </div>
+                            );
+                          })}
+
+                        </div>
+
+                      </div>
+                    )}
+
+                    {savedAddresses.length === 0 && !addressLoading && (
+                      <div className="rounded-2xl border border-dashed border-indigo-200 bg-indigo-50/40 p-4 flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-bold text-indigo-900">
+                            No saved addresses yet
+                          </p>
+                          <p className="text-xs text-slate-500 mt-1">
+                            Enter your delivery address below and save it for your next order.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {showAddressForm && (
+
+                      <div className="rounded-2xl border border-indigo-100 bg-white p-4 space-y-4">
+
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-bold text-indigo-900">
+                              {editingAddressId ? "Edit Address" : "New Delivery Address"}
+                            </p>
+                            <p className="text-xs text-slate-400 mt-1">
+                              Add a different location for delivery.
+                            </p>
+                          </div>
+
+                          {savedAddresses.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowAddressForm(false);
+                                setEditingAddressId(null);
+                              }}
+                              className="text-xs font-semibold text-slate-500 hover:text-indigo-600"
+                            >
+                              Cancel
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2">
+                          {["Home", "Work", "Other"].map((label) => (
+                            <button
+                              key={label}
+                              type="button"
+                              onClick={() => setAddressLabel(label)}
+                              className={`rounded-xl border py-2.5 text-xs font-bold transition ${
+                                addressLabel === label
+                                  ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                                  : "border-slate-200 bg-white text-slate-500 hover:border-indigo-200"
+                              }`}
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+
+                      </div>
+                    )}
 
 
                     {/* NAME */}
@@ -5897,7 +6669,7 @@ total:
                             text-slate-600
                           "
                         >
-                          Apartment / Flat / ing
+                          Apartment / Flat / Building
                         </label>
 
 
@@ -5911,7 +6683,7 @@ total:
                       <input
                         className="f-input-bare"
                         type="text"
-                        placeholder="Flat / Apartment / ing"
+                        placeholder="Flat / Apartment / Building"
                         value={
                           address.addressLine2 ||
                           ""
@@ -6513,6 +7285,24 @@ total:
                       />
 
                     </div>
+
+
+                    {/* SAVE ADDRESS */}
+
+                    {showAddressForm && (
+                      <button
+                        type="button"
+                        onClick={saveCurrentAddress}
+                        disabled={addressSaving}
+                        className="btn-secondary w-full py-3 text-sm disabled:opacity-50"
+                      >
+                        {addressSaving
+                          ? "Saving Address..."
+                          : editingAddressId
+                          ? "Update Saved Address"
+                          : "Save This Address"}
+                      </button>
+                    )}
 
 
                     {/* AUTO DETECT */}
