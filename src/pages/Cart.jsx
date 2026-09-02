@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useCart } from "../context/CartContext";
 
 import {
@@ -213,7 +213,19 @@ const Cart = ({
   ======================================================= */
 
   const [step, setStep] =
-    useState(1);
+    useState(() => {
+      try {
+        const raw = sessionStorage.getItem("odicart_checkout_return");
+        const parsed = raw ? JSON.parse(raw) : null;
+
+        if (parsed?.path === "/cart" && Number(parsed?.step) === 2) {
+          sessionStorage.removeItem("odicart_checkout_return");
+          return 2;
+        }
+      } catch (_) {}
+
+      return 1;
+    });
 
   const [paymentType, setPaymentType] =
     useState(null);
@@ -365,6 +377,16 @@ const Cart = ({
   ]);
 
 
+  useEffect(() => {
+    if (!user?.email) return;
+
+    setAddress((prev) => ({
+      ...prev,
+      email: user.email,
+    }));
+  }, [user?.email]);
+
+
   /* =======================================================
      ADDRESS
   ======================================================= */
@@ -387,6 +409,8 @@ const Cart = ({
       landmark: "",
 
       area: "",
+
+      village: "",
 
       city: "",
 
@@ -420,20 +444,43 @@ const Cart = ({
   const [addressLoading, setAddressLoading] =
     useState(false);
 
+  const [addressesLoaded, setAddressesLoaded] =
+    useState(false);
+
   const [addressSaving, setAddressSaving] =
     useState(false);
+
+  const [postalLookupLoading, setPostalLookupLoading] =
+    useState(false);
+
+  const postalLookupTimerRef = useRef(null);
+  const postalLookupRequestRef = useRef(0);
 
   const [editingAddressId, setEditingAddressId] =
     useState(null);
 
   const [showAddressForm, setShowAddressForm] =
-    useState(true);
+    useState(false);
 
   const [addressLabel, setAddressLabel] =
     useState("Home");
 
   const ADDRESS_URL =
     `${BACKEND_URL}/api/addresses`;
+
+  const redirectToSavedAddresses = () => {
+    try {
+      sessionStorage.setItem(
+        "odicart_checkout_return",
+        JSON.stringify({
+          path: "/cart",
+          step: 2,
+        })
+      );
+    } catch (_) {}
+
+    navigate("/account/addresses");
+  };
 
 
   /* =======================================================
@@ -458,8 +505,6 @@ const Cart = ({
         source?.phone ||
         "",
       email:
-        item?.email ||
-        source?.email ||
         user?.email ||
         "",
       addressLine1:
@@ -479,6 +524,10 @@ const Cart = ({
       area:
         item?.area ||
         source?.area ||
+        "",
+      village:
+        item?.village ||
+        source?.village ||
         "",
       city:
         item?.city ||
@@ -550,7 +599,7 @@ const Cart = ({
         normalized[0];
 
       if (defaultAddress) {
-        setSelectedAddressId(String(defaultAddress._id));
+        fillAddressFromSaved(defaultAddress);
       }
 
     } catch (error) {
@@ -560,6 +609,7 @@ const Cart = ({
     } finally {
 
       setAddressLoading(false);
+      setAddressesLoaded(true);
 
     }
 
@@ -569,6 +619,24 @@ const Cart = ({
   useEffect(() => {
     loadSavedAddresses();
   }, [token, ADDRESS_URL]);
+
+  useEffect(() => {
+    if (
+      step === 2 &&
+      token &&
+      addressesLoaded &&
+      !addressLoading &&
+      savedAddresses.length === 0
+    ) {
+      redirectToSavedAddresses();
+    }
+  }, [
+    step,
+    token,
+    addressLoading,
+    addressesLoaded,
+    savedAddresses.length,
+  ]);
 
 
   const fillAddressFromSaved = (item) => {
@@ -582,13 +650,14 @@ const Cart = ({
 
     setAddress({
       name: saved.fullName || "",
-      email: saved.email || user?.email || "",
+      email: user?.email || "",
       phone: String(saved.phone || "").replace(/\D/g, "").slice(0, 10),
       street: saved.addressLine1 || "",
       addressLine1: saved.addressLine1 || "",
       addressLine2: saved.addressLine2 || "",
       landmark: saved.landmark || "",
       area: saved.area || "",
+      village: saved.village || "",
       city: saved.city || "",
       district: saved.district || "",
       state: saved.state || "",
@@ -613,52 +682,29 @@ const Cart = ({
 
 
   const startNewAddress = () => {
-
-    setEditingAddressId(null);
-    setSelectedAddressId(null);
-    setAddressLabel("Home");
-    setShowAddressForm(true);
-
-    setAddress((prev) => ({
-      ...prev,
-      name: user
-        ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
-        : prev.name,
-      email: user?.email || prev.email || "",
-      phone: user?.phone || prev.phone || "",
-      street: "",
-      addressLine1: "",
-      addressLine2: "",
-      landmark: "",
-      area: "",
-      city: "",
-      district: "",
-      state: "",
-      postcode: "",
-      country: "India",
-      latitude: "",
-      longitude: "",
-      deliveryPreference: "",
-    }));
-
-    setServiceability((prev) => ({
-      ...prev,
-      checked: false,
-      postalCode: "",
-      serviceableItems: [],
-      unavailableItems: [],
-      message: "",
-    }));
+    redirectToSavedAddresses();
   };
 
 
   const startEditAddress = (item) => {
     const saved = normalizeSavedAddress(item);
-    setEditingAddressId(String(saved._id));
-    setAddressLabel(saved.label || "Home");
-    fillAddressFromSaved(saved);
-    setEditingAddressId(String(saved._id));
-    setShowAddressForm(true);
+
+    if (!saved._id) {
+      redirectToSavedAddresses();
+      return;
+    }
+
+    try {
+      sessionStorage.setItem(
+        "odicart_checkout_return",
+        JSON.stringify({
+          path: "/cart",
+          step: 2,
+        })
+      );
+    } catch (_) {}
+
+    navigate(`/account/addresses/${saved._id}/edit`);
   };
 
 
@@ -676,7 +722,7 @@ const Cart = ({
     const payload = {
       label: addressLabel || "Home",
       fullName: String(address.name || "").trim(),
-      email: String(address.email || "").trim(),
+      email: String(user?.email || "").trim(),
       phone: String(address.phone || "").trim(),
       addressLine1: String(
         address.addressLine1 || address.street || ""
@@ -684,6 +730,7 @@ const Cart = ({
       addressLine2: String(address.addressLine2 || "").trim(),
       landmark: String(address.landmark || "").trim(),
       area: String(address.area || "").trim(),
+      village: String(address.village || "").trim(),
       city: String(address.city || "").trim(),
       district: String(address.district || "").trim(),
       state: String(address.state || "").trim(),
@@ -776,6 +823,231 @@ const Cart = ({
       setAddressSaving(false);
     }
   };
+
+
+
+  /* =======================================================
+     POSTAL CODE → ADDRESS AUTO UPDATE + AUTO SAVE
+  ======================================================= */
+
+  const handlePostalCodeChange = (event) => {
+    const value = String(event?.target?.value || "")
+      .replace(/[^0-9]/g, "")
+      .slice(0, 6);
+
+    setAddress((prev) => ({
+      ...prev,
+      postcode: value,
+    }));
+
+    setServiceability((prev) => ({
+      ...prev,
+      checked: false,
+      postalCode: value,
+      serviceableItems: [],
+      unavailableItems: [],
+      message: "",
+    }));
+
+    if (postalLookupTimerRef.current) {
+      clearTimeout(postalLookupTimerRef.current);
+    }
+
+    if (value.length !== 6) {
+      setPostalLookupLoading(false);
+      return;
+    }
+
+    const requestId = ++postalLookupRequestRef.current;
+
+    postalLookupTimerRef.current = setTimeout(async () => {
+      try {
+        setPostalLookupLoading(true);
+
+        const response = await fetch(
+          `https://api.postalpincode.in/pincode/${value}`
+        );
+
+        const data = await response.json().catch(() => null);
+
+        if (requestId !== postalLookupRequestRef.current) return;
+
+        const result = Array.isArray(data) ? data[0] : null;
+        const postOffice = result?.PostOffice?.[0];
+
+        if (
+          !response.ok ||
+          result?.Status !== "Success" ||
+          !postOffice
+        ) {
+          throw new Error(
+            result?.Message ||
+            "No address found for this PIN code"
+          );
+        }
+
+        // Keep the checkout fields aligned with the saved Address model.
+        // A PIN lookup should only replace fields that the PIN service can
+        // reliably provide. Manual address lines / landmark are preserved.
+        const updatedAddress = {
+          ...address,
+          postcode: value,
+          area: postOffice.Name || "",
+          village: postOffice.Block || address.village || "",
+          city:
+            postOffice.Block ||
+            postOffice.Division ||
+            postOffice.Region ||
+            "",
+          district: postOffice.District || "",
+          state: postOffice.State || "",
+          country: postOffice.Country || "India",
+        };
+
+        setAddress((prev) => ({
+          ...prev,
+          postcode: value,
+          area: postOffice.Name || "",
+          village: postOffice.Block || prev.village || "",
+          city:
+            postOffice.Block ||
+            postOffice.Division ||
+            postOffice.Region ||
+            "",
+          district: postOffice.District || "",
+          state: postOffice.State || "",
+          country: postOffice.Country || "India",
+        }));
+
+        if (selectedAddressId && token) {
+          const payload = {
+            label: addressLabel || "Home",
+            fullName: String(updatedAddress.name || "").trim(),
+            email: String(user?.email || "").trim(),
+            phone: String(updatedAddress.phone || "").trim(),
+            addressLine1: String(
+              updatedAddress.addressLine1 ||
+              updatedAddress.street ||
+              ""
+            ).trim(),
+            addressLine2: String(
+              updatedAddress.addressLine2 || ""
+            ).trim(),
+            landmark: String(
+              updatedAddress.landmark || ""
+            ).trim(),
+            area: String(updatedAddress.area || "").trim(),
+            village: String(updatedAddress.village || "").trim(),
+            city: String(updatedAddress.city || "").trim(),
+            district: String(
+              updatedAddress.district || ""
+            ).trim(),
+            state: String(updatedAddress.state || "").trim(),
+            postalCode: value,
+            country: String(
+              updatedAddress.country || "India"
+            ).trim() || "India",
+            location: {
+              latitude:
+                updatedAddress.latitude !== "" &&
+                updatedAddress.latitude !== null &&
+                updatedAddress.latitude !== undefined
+                  ? Number(updatedAddress.latitude)
+                  : undefined,
+              longitude:
+                updatedAddress.longitude !== "" &&
+                updatedAddress.longitude !== null &&
+                updatedAddress.longitude !== undefined
+                  ? Number(updatedAddress.longitude)
+                  : undefined,
+            },
+            isDefault:
+              savedAddresses.find(
+                (item) =>
+                  String(item._id) ===
+                  String(selectedAddressId)
+              )?.isDefault === true,
+          };
+
+          const saveResponse = await fetch(
+            `${ADDRESS_URL}/${selectedAddressId}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify(payload),
+            }
+          );
+
+          const saveData = await saveResponse
+            .json()
+            .catch(() => ({}));
+
+          if (
+            requestId !== postalLookupRequestRef.current
+          ) {
+            return;
+          }
+
+          if (!saveResponse.ok) {
+            throw new Error(
+              saveData.message ||
+              saveData.error ||
+              "Address details found, but saving failed"
+            );
+          }
+
+          setSavedAddresses((prev) =>
+            prev.map((item) =>
+              String(item._id) ===
+              String(selectedAddressId)
+                ? {
+                    ...item,
+                    ...normalizeSavedAddress(
+                      saveData.address ||
+                      saveData.data ||
+                      payload
+                    ),
+                    postalCode: value,
+                    area: updatedAddress.area,
+                    city: updatedAddress.city,
+                    district: updatedAddress.district,
+                    state: updatedAddress.state,
+                    country: updatedAddress.country,
+                  }
+                : item
+            )
+          );
+
+          toast.success(`Address updated for PIN ${value}`);
+        } else {
+          toast.success(`Address found for PIN ${value}`);
+        }
+      } catch (error) {
+        if (requestId === postalLookupRequestRef.current) {
+          console.error("POSTAL CODE LOOKUP ERROR:", error);
+          toast.error(
+            error?.message ||
+            "Unable to find address for this PIN code"
+          );
+        }
+      } finally {
+        if (requestId === postalLookupRequestRef.current) {
+          setPostalLookupLoading(false);
+        }
+      }
+    }, 450);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (postalLookupTimerRef.current) {
+        clearTimeout(postalLookupTimerRef.current);
+      }
+    };
+  }, []);
 
 
   const deleteSavedAddress = async (id) => {
@@ -2074,6 +2346,14 @@ const Cart = ({
   const handleContinueToPayment =
     async () => {
 
+      if (!selectedAddressId) {
+        toast.error(
+          "Please select a saved delivery address first."
+        );
+        redirectToSavedAddresses();
+        return;
+      }
+
       if (!validateDelivery()) {
         return;
       }
@@ -2124,6 +2404,14 @@ const Cart = ({
       paymentData = {}
     ) => {
 
+      if (!selectedAddressId) {
+        toast.error(
+          "Please select a saved delivery address before placing the order."
+        );
+        redirectToSavedAddresses();
+        return;
+      }
+
       if (!token || !user) {
 
         toast.error(
@@ -2135,8 +2423,8 @@ const Cart = ({
 
 
       if (
-        !address.email ||
-        !address.email.includes("@")
+        !user?.email ||
+        !user.email.includes("@")
       ) {
 
         toast.error(
@@ -2592,6 +2880,12 @@ console.log(
             area:
               String(
                 address.area ||
+                ""
+              ).trim(),
+
+            village:
+              String(
+                address.village ||
                 ""
               ).trim(),
 
@@ -3069,7 +3363,7 @@ total:
               address.name,
 
             email:
-              address.email,
+              user?.email || "",
 
             contact:
               address.phone
@@ -3340,12 +3634,14 @@ total:
 
   const canProceedStep2 =
 
+    Boolean(selectedAddressId) &&
+
     String(
       address.name || ""
     ).trim() &&
 
     String(
-      address.email || ""
+      user?.email || ""
     ).includes("@") &&
 
     String(
@@ -3386,14 +3682,14 @@ total:
   const emailValid =
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
       String(
-        address.email || ""
+        user?.email || ""
       ).trim()
     );
 
 
   const emailTouched =
     String(
-      address.email || ""
+      user?.email || ""
     ).length > 0;
 
 
@@ -3402,6 +3698,16 @@ total:
   ======================================================= */
 
   const validateDelivery = () => {
+
+    if (!selectedAddressId) {
+      toast.error(
+        "Please select a saved delivery address first."
+      );
+
+      redirectToSavedAddresses();
+
+      return false;
+    }
 
     if (
       !String(
@@ -6066,29 +6372,61 @@ total:
 
 
                     {/* =================================================
-                        SAVED ADDRESSES
+                        SAVED DELIVERY ADDRESS — REQUIRED
                     ================================================= */}
 
-                    {savedAddresses.length > 0 && (
+                    {addressLoading ? (
+
+                      <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-5 text-sm text-indigo-700">
+                        Loading your saved delivery addresses...
+                      </div>
+
+                    ) : savedAddresses.length === 0 ? (
+
+                      <div className="rounded-2xl border-2 border-dashed border-indigo-200 bg-indigo-50/50 p-5 space-y-4">
+
+                        <div>
+                          <p className="text-sm font-bold text-indigo-900">
+                            Add a saved delivery address
+                          </p>
+
+                          <p className="text-xs text-slate-500 mt-1 leading-5">
+                            Checkout uses a saved address so the delivery
+                            location stays separate from your current pickup location.
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={redirectToSavedAddresses}
+                          className="btn-primary w-full py-3 text-sm"
+                        >
+                          Add Delivery Address →
+                        </button>
+
+                      </div>
+
+                    ) : (
 
                       <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4 space-y-3">
 
                         <div className="flex items-center justify-between gap-3">
                           <div>
                             <p className="text-sm font-bold text-indigo-900">
-                              Saved Delivery Addresses
+                              Select Delivery Address
                             </p>
+
                             <p className="text-xs text-slate-500 mt-0.5">
-                              Choose where you want this order delivered.
+                              Select the saved address where this order should be delivered.
                             </p>
                           </div>
 
                           <button
                             type="button"
-                            onClick={startNewAddress}
+                            onClick={redirectToSavedAddresses}
                             className="btn-secondary px-3 py-2 text-xs whitespace-nowrap"
                           >
-                            + Add New
+                            Manage Addresses
                           </button>
                         </div>
 
@@ -6114,7 +6452,9 @@ total:
                                   onClick={() => fillAddressFromSaved(saved)}
                                   className="w-full text-left"
                                 >
+
                                   <div className="flex items-start justify-between gap-3">
+
                                     <div className="flex items-center gap-2">
                                       <span className="text-xs font-bold px-2 py-1 rounded-lg bg-indigo-100 text-indigo-700">
                                         {saved.label || "Address"}
@@ -6130,6 +6470,7 @@ total:
                                     {active && (
                                       <FaCheckCircle className="text-indigo-600" />
                                     )}
+
                                   </div>
 
                                   <p className="text-sm font-bold text-slate-800 mt-3">
@@ -6149,6 +6490,7 @@ total:
                                   <p className="text-xs text-slate-500 mt-2">
                                     +91 {saved.phone || ""}
                                   </p>
+
                                 </button>
 
                                 <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-100">
@@ -6158,7 +6500,7 @@ total:
                                     onClick={() => startEditAddress(saved)}
                                     className="text-xs font-semibold text-indigo-600 hover:underline"
                                   >
-                                    Edit
+                                    Edit in Saved Addresses
                                   </button>
 
                                   {!saved.isDefault && (
@@ -6171,14 +6513,6 @@ total:
                                     </button>
                                   )}
 
-                                  <button
-                                    type="button"
-                                    onClick={() => deleteSavedAddress(saved._id)}
-                                    className="text-xs font-semibold text-rose-500 hover:underline"
-                                  >
-                                    Delete
-                                  </button>
-
                                 </div>
 
                               </div>
@@ -6187,70 +6521,15 @@ total:
 
                         </div>
 
-                      </div>
-                    )}
-
-                    {savedAddresses.length === 0 && !addressLoading && (
-                      <div className="rounded-2xl border border-dashed border-indigo-200 bg-indigo-50/40 p-4 flex items-center justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-bold text-indigo-900">
-                            No saved addresses yet
-                          </p>
-                          <p className="text-xs text-slate-500 mt-1">
-                            Enter your delivery address below and save it for your next order.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    {showAddressForm && (
-
-                      <div className="rounded-2xl border border-indigo-100 bg-white p-4 space-y-4">
-
-                        <div className="flex items-center justify-between gap-3">
-                          <div>
-                            <p className="text-sm font-bold text-indigo-900">
-                              {editingAddressId ? "Edit Address" : "New Delivery Address"}
-                            </p>
-                            <p className="text-xs text-slate-400 mt-1">
-                              Add a different location for delivery.
-                            </p>
+                        {!selectedAddressId && (
+                          <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-xs font-semibold text-amber-700">
+                            Please select an address before continuing.
                           </div>
-
-                          {savedAddresses.length > 0 && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setShowAddressForm(false);
-                                setEditingAddressId(null);
-                              }}
-                              className="text-xs font-semibold text-slate-500 hover:text-indigo-600"
-                            >
-                              Cancel
-                            </button>
-                          )}
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-2">
-                          {["Home", "Work", "Other"].map((label) => (
-                            <button
-                              key={label}
-                              type="button"
-                              onClick={() => setAddressLabel(label)}
-                              className={`rounded-xl border py-2.5 text-xs font-bold transition ${
-                                addressLabel === label
-                                  ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                                  : "border-slate-200 bg-white text-slate-500 hover:border-indigo-200"
-                              }`}
-                            >
-                              {label}
-                            </button>
-                          ))}
-                        </div>
+                        )}
 
                       </div>
-                    )}
 
+                    )}
 
                     {/* NAME */}
 
@@ -6414,7 +6693,7 @@ total:
                           }
                         `}
                         type="email"
-                        placeholder="e.g. customer@example.com"
+                        placeholder="Account email"
                         value={
                           address.email ||
                           ""
@@ -6751,6 +7030,48 @@ total:
                     </div>
 
 
+                    {/* VILLAGE */}
+
+                    <div>
+
+                      <div
+                        className="
+                          flex
+                          items-center
+                          gap-2
+                          mb-1.5
+                        "
+                      >
+                        <label
+                          className="
+                            text-xs
+                            font-semibold
+                            text-slate-600
+                          "
+                        >
+                          Village
+                        </label>
+
+                        <span className="opt-badge">
+                          Optional
+                        </span>
+                      </div>
+
+                      <input
+                        className="f-input-bare"
+                        type="text"
+                        placeholder="e.g. Village name"
+                        value={address.village || ""}
+                        onChange={(e) =>
+                          setAddress({
+                            ...address,
+                            village: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+
+
                     {/* LANDMARK */}
 
                     <div>
@@ -7049,57 +7370,14 @@ total:
                             address.postcode ||
                             ""
                           }
-                          onChange={(e) => {
-
-                            const value =
-                              e.target.value
-                                .replace(
-                                  /[^0-9]/g,
-                                  ""
-                                )
-                                .slice(
-                                  0,
-                                  6
-                                );
-
-
-                            setAddress({
-                              ...address,
-                              postcode:
-                                value,
-                            });
-
-
-                            /*
-                             * Any PIN change invalidates
-                             * the previous serviceability result.
-                             */
-
-                            setServiceability(
-                              (prev) => ({
-
-                                ...prev,
-
-                                checked:
-                                  false,
-
-                                postalCode:
-                                  value,
-
-                                serviceableItems:
-                                  [],
-
-                                unavailableItems:
-                                  [],
-
-                                message:
-                                  "",
-
-                              })
-                            );
-
-                          }}
+                          onChange={handlePostalCodeChange}
                         />
+
+                        {postalLookupLoading && (
+                          <p className="mt-1.5 text-xs text-indigo-600">
+                            🔎 Finding address details for PIN {address.postcode}...
+                          </p>
+                        )}
 
                       </div>
 
@@ -7287,86 +7565,12 @@ total:
                     </div>
 
 
-                    {/* SAVE ADDRESS */}
+                    {/* DELIVERY ADDRESS MUST COME FROM SAVED ADDRESSES */}
 
-                    {showAddressForm && (
-                      <button
-                        type="button"
-                        onClick={saveCurrentAddress}
-                        disabled={addressSaving}
-                        className="btn-secondary w-full py-3 text-sm disabled:opacity-50"
-                      >
-                        {addressSaving
-                          ? "Saving Address..."
-                          : editingAddressId
-                          ? "Update Saved Address"
-                          : "Save This Address"}
-                      </button>
-                    )}
-
-
-                    {/* AUTO DETECT */}
-
-                    <button
-                      type="button"
-                      onClick={() => {
-
-                        if (
-                          !navigator.geolocation
-                        ) {
-
-                          toast.error(
-                            "Geolocation not supported"
-                          );
-
-                          return;
-
-                        }
-
-
-                        navigator.geolocation.getCurrentPosition(
-
-                          (p) => {
-
-                            onLocationChange(
-                              p.coords.latitude,
-                              p.coords.longitude
-                            );
-
-
-                            toast.success(
-                              "Location updated"
-                            );
-
-                          },
-
-                          () => {
-
-                            toast.error(
-                              "Could not get location"
-                            );
-
-                          }
-
-                        );
-
-                      }}
-                      className="
-                        btn-secondary
-                        w-full
-                        py-3
-                        text-sm
-                        mt-1
-                      "
-                    >
-
-                      <MdMyLocation
-                        size={16}
-                      />
-
-                      Auto-detect My Location
-
-                    </button>
+                    <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-3 text-xs text-slate-500">
+                      Delivery address is taken only from the selected saved address.
+                      Your current GPS location should be used only as the pickup location.
+                    </div>
 
                   </div>
 
@@ -8479,7 +8683,7 @@ total:
 
                                 "Do not close payment window",
 
-                                `Confirmation sent to ${address.email}`,
+                                `Confirmation sent to ${user?.email || ""}`,
 
                               ]
 
@@ -8491,7 +8695,7 @@ total:
 
                                 "Keep exact amount ready",
 
-                                `Confirmation sent to ${address.email}`,
+                                `Confirmation sent to ${user?.email || ""}`,
 
                               ]
 
@@ -9048,7 +9252,7 @@ total:
 
                       "Do not close the payment window",
 
-                      `Confirmation sent to ${address.email}`,
+                      `Confirmation sent to ${user?.email || ""}`,
 
                     ].map(
                       (text) => (

@@ -1,6 +1,7 @@
 import React,{useEffect,useState} from "react";
 import {FaUser,FaMapMarkerAlt,FaShoppingBag,FaHeart,FaCreditCard,FaShieldAlt,FaBell,FaQuestionCircle,FaSignOutAlt,FaTrash,FaChevronRight,FaCheck} from "react-icons/fa";
 import {AccountShell,api} from "./AccountShell";
+import { MdVerified } from "react-icons/md";
 
 const go=p=>window.location.href=p;
 
@@ -23,10 +24,24 @@ export default function ProfilePage(){
     <div className="ok-profile-name-row">
       <h2>{name}</h2>
 
-      <span className="ok-chip success">
-        <FaCheck size={9} />
-        Verified
-      </span>
+     <span
+  title="Verified account"
+  aria-label="Verified account"
+  style={{
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    // background: "#2563eb",
+    color: "indigo",
+    flexShrink: 0,
+    // boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
+  }}
+>
+  <MdVerified size={39} />
+</span>
     </div>
 
     <div className="ok-muted">

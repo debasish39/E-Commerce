@@ -1,1073 +1,592 @@
 import React, { useEffect, useState } from "react";
 
-const MESSAGES = [
-  "Discover something you'll love",
-  "Curating your shopping experience",
-  "Finding today's best picks",
-  "Almost ready to explore",
-];
-
-const PRODUCTS = [
-  {
-    emoji: "👟",
-    label: "Sneakers",
-    price: "₹1,299",
-    className: "odk-product-1",
-  },
-  {
-    emoji: "⌚",
-    label: "Smart Watch",
-    price: "₹2,499",
-    className: "odk-product-2",
-  },
-  {
-    emoji: "🎧",
-    label: "Headphones",
-    price: "₹1,899",
-    className: "odk-product-3",
-  },
-  {
-    emoji: "👜",
-    label: "Fashion",
-    price: "₹999",
-    className: "odk-product-4",
-  },
+const LOADING_STEPS = [
+  "Preparing your shopping experience",
+  "Discovering products for you",
+  "Finding the best deals",
+  "Almost ready to shop",
 ];
 
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+* { box-sizing: border-box; }
 
-* {
-  box-sizing: border-box;
-}
-
-/* =========================================================
-   ROOT
-========================================================= */
-
-.odk-loader {
+.odk-app-loader {
   position: fixed;
   inset: 0;
-
   z-index: 999999;
-
   width: 100%;
   height: 100dvh;
-
+  min-height: 100svh;
   overflow: hidden;
-
+  isolation: isolate;
   display: flex;
   align-items: center;
   justify-content: center;
-
-  font-family: "Plus Jakarta Sans", sans-serif;
-
+  padding:
+    max(24px, env(safe-area-inset-top))
+    max(18px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom))
+    max(18px, env(safe-area-inset-left));
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: #0f172a;
-
   background:
-    radial-gradient(
-      circle at 50% 45%,
-      rgba(99, 102, 241, 0.10),
-      transparent 35%
-    ),
-    linear-gradient(
-      135deg,
-      #fafbff,
-      #f5f3ff 50%,
-      #eff6ff
-    );
+    radial-gradient(circle at 50% 36%, rgba(99,102,241,.075), transparent 34%),
+    linear-gradient(180deg, #fff 0%, #fafbff 52%, #f7f8fc 100%);
 }
 
-/* =========================================================
-   BACKGROUND
-========================================================= */
+.odk-app-loader::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,.45) 48%, transparent 58%);
+  transform: translateX(-120%);
+  animation: odkScreenSheen 7s ease-in-out infinite;
+}
+
+@keyframes odkScreenSheen {
+  0%,65%,100% { transform: translateX(-120%); }
+  80% { transform: translateX(120%); }
+}
 
 .odk-bg {
   position: absolute;
   inset: 0;
-
   overflow: hidden;
-
   pointer-events: none;
+  z-index: -1;
 }
 
-/* soft light */
-
-.odk-light {
+.odk-bg-glow {
   position: absolute;
-
-  width: 420px;
-  height: 420px;
-
   left: 50%;
-  top: 50%;
-
-  transform: translate(-50%, -50%);
-
+  top: 40%;
+  width: min(82vw,390px);
+  aspect-ratio: 1;
+  transform: translate(-50%,-50%);
   border-radius: 50%;
-
-  background:
-    radial-gradient(
-      circle,
-      rgba(99, 102, 241, 0.12),
-      transparent 65%
-    );
-
-  filter: blur(10px);
-
-  animation:
-    odkLightPulse
-    5s
-    ease-in-out
-    infinite;
+  background: radial-gradient(circle, rgba(99,102,241,.11), rgba(99,102,241,.035) 42%, transparent 72%);
+  filter: blur(14px);
+  animation: odkAmbientGlow 4.5s ease-in-out infinite;
 }
 
-@keyframes odkLightPulse {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) scale(0.9);
-    opacity: 0.5;
-  }
-
-  50% {
-    transform: translate(-50%, -50%) scale(1.2);
-    opacity: 1;
-  }
+@keyframes odkAmbientGlow {
+  0%,100% { transform: translate(-50%,-50%) scale(.9); opacity:.55; }
+  50% { transform: translate(-50%,-50%) scale(1.08); opacity:1; }
 }
 
-/* grid */
-
-.odk-grid {
+.odk-orb {
   position: absolute;
-  inset: 0;
-
-  opacity: 0.3;
-
-  background-image:
-    linear-gradient(
-      rgba(99, 102, 241, 0.035) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      rgba(99, 102, 241, 0.035) 1px,
-      transparent 1px
-    );
-
-  background-size: 50px 50px;
-
-  mask-image:
-    radial-gradient(
-      ellipse at center,
-      black 5%,
-      transparent 72%
-    );
-
-  -webkit-mask-image:
-    radial-gradient(
-      ellipse at center,
-      black 5%,
-      transparent 72%
-    );
-}
-
-/* =========================================================
-   DECORATIVE CIRCLES
-========================================================= */
-
-.odk-circle {
-  position: absolute;
-
-  left: 50%;
-  top: 50%;
-
-  border: 1px solid rgba(99, 102, 241, 0.08);
-
   border-radius: 50%;
-
-  transform: translate(-50%, -50%);
-
-  animation:
-    odkCirclePulse
-    5s
-    ease-in-out
-    infinite;
+  filter: blur(3px);
+  opacity: .55;
+  animation: odkOrbFloat 8s ease-in-out infinite;
 }
 
-.odk-circle-1 {
-  width: 300px;
-  height: 300px;
+.odk-orb-1 {
+  width:130px; height:130px; left:-58px; top:10%;
+  background:radial-gradient(circle,rgba(129,140,248,.13),transparent 70%);
+}
+.odk-orb-2 {
+  width:165px; height:165px; right:-72px; bottom:8%;
+  background:radial-gradient(circle,rgba(59,130,246,.10),transparent 70%);
+  animation-delay:-2s;
+}
+.odk-orb-3 {
+  width:92px; height:92px; right:8%; top:15%;
+  background:radial-gradient(circle,rgba(139,92,246,.075),transparent 70%);
+  animation-delay:-4s;
 }
 
-.odk-circle-2 {
-  width: 460px;
-  height: 460px;
-
-  animation-delay: -1s;
+@keyframes odkOrbFloat {
+  0%,100% { transform:translate3d(0,0,0); }
+  50% { transform:translate3d(0,-16px,0); }
 }
 
-.odk-circle-3 {
-  width: 650px;
-  height: 650px;
-
-  animation-delay: -2s;
+.odk-loader-content {
+  position:relative;
+  z-index:2;
+  width:min(100%,380px);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  animation:odkContentEnter .7s cubic-bezier(.22,1,.36,1);
 }
 
-@keyframes odkCirclePulse {
-  0%,
-  100% {
-    opacity: 0.35;
-    transform: translate(-50%, -50%) scale(0.96);
-  }
-
-  50% {
-    opacity: 0.8;
-    transform: translate(-50%, -50%) scale(1.02);
-  }
+@keyframes odkContentEnter {
+  from { opacity:0; transform:translateY(18px) scale(.975); }
+  to { opacity:1; transform:translateY(0) scale(1); }
 }
 
-/* =========================================================
-   PRODUCT CARDS
-========================================================= */
-
-.odk-products {
-  position: absolute;
-  inset: 0;
-
-  pointer-events: none;
-}
-
-.odk-product {
-  position: absolute;
-
-  width: 150px;
-
-  padding: 10px;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 9px;
-
-  border: 1px solid rgba(255, 255, 255, 0.9);
-
-  border-radius: 16px;
-
-  background: rgba(255, 255, 255, 0.72);
-
-  box-shadow:
-    0 18px 45px rgba(15, 23, 42, 0.08);
-
-  backdrop-filter: blur(20px);
-
-  -webkit-backdrop-filter: blur(20px);
-
-  opacity: 0;
-
-  animation:
-    odkProductAppear
-    1s
-    ease-out
-    forwards;
-}
-
-.odk-product-image {
-  width: 39px;
-  height: 39px;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  flex-shrink: 0;
-
-  border-radius: 12px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #eef2ff,
-      #dbeafe
-    );
-
-  font-size: 19px;
-}
-
-.odk-product-info {
-  min-width: 0;
-
-  text-align: left;
-}
-
-.odk-product-name {
-  display: block;
-
-  overflow: hidden;
-
-  color: #475569;
-
-  font-size: 8px;
-
-  font-weight: 700;
-
-  text-overflow: ellipsis;
-
-  white-space: nowrap;
-}
-
-.odk-product-price {
-  display: block;
-
-  margin-top: 2px;
-
-  color: #0f172a;
-
-  font-size: 10px;
-
-  font-weight: 800;
-}
-
-.odk-product-1 {
-  left: 8%;
-  top: 25%;
-
-  animation-delay: 0.4s;
-}
-
-.odk-product-2 {
-  right: 7%;
-  top: 20%;
-
-  animation-delay: 0.7s;
-}
-
-.odk-product-3 {
-  left: 7%;
-  bottom: 23%;
-
-  animation-delay: 1s;
-}
-
-.odk-product-4 {
-  right: 8%;
-  bottom: 20%;
-
-  animation-delay: 1.3s;
-}
-
-@keyframes odkProductAppear {
-  from {
-    opacity: 0;
-
-    transform:
-      translateY(20px)
-      scale(0.85);
-  }
-
-  to {
-    opacity: 1;
-
-    transform:
-      translateY(0)
-      scale(1);
-  }
-}
-
-/* =========================================================
-   MAIN
-========================================================= */
-
-.odk-main {
-  position: relative;
-
-  z-index: 20;
-
-  width: min(90%, 410px);
-
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-
-  text-align: center;
-
-  animation:
-    odkMainIn
-    0.9s
-    cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@keyframes odkMainIn {
-  from {
-    opacity: 0;
-
-    transform:
-      translateY(25px)
-      scale(0.96);
-  }
-
-  to {
-    opacity: 1;
-
-    transform:
-      translateY(0)
-      scale(1);
-  }
-}
-
-/* =========================================================
-   LOGO
-========================================================= */
-
-.odk-logo {
-  position: relative;
-
-  width: 104px;
-  height: 104px;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
+.odk-logo-area {
+  position:relative;
+  width:104px;
+  height:104px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 .odk-logo-glow {
-  position: absolute;
-
-  inset: 12px;
-
-  border-radius: 30px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #6366f1,
-      #2563eb
-    );
-
-  filter: blur(30px);
-
-  opacity: 0.25;
-
-  animation:
-    odkLogoGlow
-    3s
-    ease-in-out
-    infinite;
-}
-
-.odk-logo-ring {
-  position: absolute;
-
-  inset: 0;
-
-  padding: 2px;
-
-  border-radius: 30px;
-
-  background:
-    conic-gradient(
-      from 0deg,
-      #6366f1,
-      #8b5cf6,
-      #3b82f6,
-      #06b6d4,
-      #6366f1
-    );
-
-  animation:
-    odkRing
-    5s
-    linear
-    infinite;
-}
-
-.odk-logo-ring-inner {
-  width: 100%;
-  height: 100%;
-
-  border-radius: 28px;
-
-  background: #ffffff;
-}
-
-.odk-logo-box {
-  position: absolute;
-
-  inset: 9px;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  overflow: hidden;
-
-  border-radius: 25px;
-
-  background: #ffffff;
-
-  box-shadow:
-    0 18px 50px rgba(79, 70, 229, 0.18);
-
-  animation:
-    odkLogoFloat
-    3s
-    ease-in-out
-    infinite;
-}
-
-.odk-logo-box img {
-  width: 70px;
-  height: 70px;
-
-  object-fit: contain;
-
-  border-radius: 18px;
-}
-
-.odk-logo-fallback {
-  display: none;
-
-  color: #4f46e5;
-
-  font-size: 32px;
-
-  font-weight: 800;
-}
-
-@keyframes odkRing {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes odkLogoFloat {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-6px);
-  }
+  position:absolute;
+  inset:10px;
+  border-radius:30px;
+  background:linear-gradient(135deg,#6366f1,#8b5cf6,#2563eb);
+  filter:blur(25px);
+  opacity:.16;
+  animation:odkLogoGlow 3s ease-in-out infinite;
 }
 
 @keyframes odkLogoGlow {
-  0%,
-  100% {
-    transform: scale(0.9);
-    opacity: 0.18;
-  }
-
-  50% {
-    transform: scale(1.1);
-    opacity: 0.38;
-  }
+  0%,100% { transform:scale(.88); opacity:.11; }
+  50% { transform:scale(1.08); opacity:.25; }
 }
 
-/* =========================================================
-   BRAND
-========================================================= */
-
-.odk-brand {
-  margin-top: 21px;
+.odk-logo-border {
+  position:absolute;
+  inset:0;
+  padding:2px;
+  border-radius:30px;
+  background:conic-gradient(from 0deg,#6366f1,#8b5cf6,#3b82f6,#06b6d4,#6366f1);
+  animation:odkLogoRotate 5s linear infinite;
 }
+
+.odk-logo-border-inner {
+  width:100%;
+  height:100%;
+  border-radius:28px;
+  background:#fff;
+}
+
+@keyframes odkLogoRotate { to { transform:rotate(360deg); } }
+
+.odk-logo-card {
+  position:absolute;
+  inset:9px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  border-radius:24px;
+  background:rgba(255,255,255,.98);
+  box-shadow:0 22px 48px rgba(15,23,42,.09),0 5px 14px rgba(15,23,42,.055);
+  animation:odkLogoFloat 3.2s ease-in-out infinite;
+}
+
+.odk-logo-card::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  background:linear-gradient(135deg,rgba(255,255,255,.7),transparent 48%,rgba(99,102,241,.025));
+  pointer-events:none;
+}
+
+.odk-logo-card img {
+  position:relative;
+  z-index:2;
+  width:66px;
+  height:66px;
+  object-fit:contain;
+  border-radius:16px;
+}
+
+.odk-logo-fallback {
+  display:none;
+  position:relative;
+  z-index:2;
+  color:#4f46e5;
+  font-size:32px;
+  font-weight:850;
+  letter-spacing:-1px;
+}
+
+@keyframes odkLogoFloat {
+  0%,100% { transform:translateY(0); }
+  50% { transform:translateY(-5px); }
+}
+
+.odk-brand { margin-top:23px; }
 
 .odk-title {
-  margin: 0;
-
-  color: #0f172a;
-
-  font-size: 34px;
-
-  line-height: 1;
-
-  font-weight: 800;
-
-  letter-spacing: -1.8px;
+  margin:0;
+  color:#111827;
+  font-size:clamp(26px,7vw,31px);
+  line-height:1.05;
+  font-weight:850;
+  letter-spacing:-1.55px;
 }
 
 .odk-title span {
-  background:
-    linear-gradient(
-      135deg,
-      #7c3aed,
-      #4f46e5,
-      #2563eb
-    );
-
-  background-clip: text;
-  -webkit-background-clip: text;
-
-  color: transparent;
-  -webkit-text-fill-color: transparent;
+  background:linear-gradient(90deg,#4f46e5,#7c3aed,#2563eb);
+  background-clip:text;
+  -webkit-background-clip:text;
+  color:transparent;
+  -webkit-text-fill-color:transparent;
 }
 
 .odk-tagline {
-  margin: 10px 0 0;
-
-  color: #64748b;
-
-  font-size: 11px;
-
-  font-weight: 500;
+  margin:9px 0 0;
+  color:#94a3b8;
+  font-size:11px;
+  line-height:1.45;
+  font-weight:550;
 }
 
-/* =========================================================
-   DISCOVERY BADGES
-========================================================= */
-
-.odk-badges {
-  display: flex;
-
-  justify-content: center;
-
-  gap: 7px;
-
-  margin-top: 17px;
-}
-
-.odk-badge {
-  padding: 7px 10px;
-
-  border-radius: 999px;
-
-  color: #64748b;
-
-  font-size: 8px;
-
-  font-weight: 700;
-
-  border: 1px solid rgba(255, 255, 255, 0.8);
-
-  background: rgba(255, 255, 255, 0.6);
-
-  box-shadow:
-    0 7px 20px rgba(15, 23, 42, 0.04);
-
-  animation:
-    odkBadgeFloat
-    3s
-    ease-in-out
-    infinite;
-}
-
-.odk-badge:nth-child(2) {
-  animation-delay: -0.7s;
-}
-
-.odk-badge:nth-child(3) {
-  animation-delay: -1.4s;
-}
-
-@keyframes odkBadgeFloat {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-4px);
-  }
-}
-
-/* =========================================================
-   MESSAGE
-========================================================= */
-
-.odk-message {
-  margin-top: 21px;
-
-  min-height: 42px;
-}
-
-.odk-message-title {
-  margin: 0;
-
-  color: #0f172a;
-
-  font-size: 14px;
-
-  font-weight: 800;
-
-  letter-spacing: -0.3px;
-
-  animation:
-    odkMessage
-    0.45s
-    ease;
-}
-
-.odk-message-subtitle {
-  margin: 5px 0 0;
-
-  color: #94a3b8;
-
-  font-size: 9px;
-
-  font-weight: 500;
-}
-
-@keyframes odkMessage {
-  from {
-    opacity: 0;
-
-    transform: translateY(7px);
-  }
-
-  to {
-    opacity: 1;
-
-    transform: translateY(0);
-  }
-}
-
-/* =========================================================
-   LOADING
-========================================================= */
-
-.odk-loading {
-  width: 100%;
-
-  margin-top: 18px;
-}
-
-.odk-loading-top {
-  display: flex;
-
-  justify-content: space-between;
-
-  align-items: center;
-
-  margin-bottom: 7px;
-}
-
-.odk-loading-label {
-  color: #94a3b8;
-
-  font-size: 8px;
-
-  font-weight: 800;
-
-  letter-spacing: 0.12em;
-
-  text-transform: uppercase;
-}
-
-.odk-loading-status {
-  display: flex;
-
-  align-items: center;
-
-  gap: 5px;
-
-  color: #6366f1;
-
-  font-size: 8px;
-
-  font-weight: 800;
+.odk-status {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin-top:25px;
+  color:#64748b;
+  font-size:10px;
+  line-height:1.4;
+  font-weight:650;
 }
 
 .odk-status-dot {
-  width: 5px;
-  height: 5px;
-
-  border-radius: 50%;
-
-  background: #22c55e;
-
-  animation:
-    odkStatusPulse
-    1.2s
-    ease-in-out
-    infinite;
+  width:7px;
+  height:7px;
+  flex:0 0 auto;
+  border-radius:50%;
+  background:#22c55e;
+  box-shadow:0 0 0 4px rgba(34,197,94,.08);
+  animation:odkStatusPulse 1.5s ease-in-out infinite;
 }
 
 @keyframes odkStatusPulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.5;
-  }
-
-  50% {
-    transform: scale(1.4);
-    opacity: 1;
-  }
+  0%,100% { transform:scale(.82); opacity:.55; }
+  50% { transform:scale(1); opacity:1; }
 }
 
-.odk-track {
-  position: relative;
-
-  width: 100%;
-  height: 5px;
-
-  overflow: hidden;
-
-  border-radius: 999px;
-
-  background: rgba(99, 102, 241, 0.10);
+.odk-shopping {
+  position:relative;
+  width:190px;
+  height:76px;
+  margin-top:10px;
 }
 
-.odk-progress {
-  height: 100%;
+.odk-road {
+  position:absolute;
+  left:9px;
+  right:9px;
+  bottom:17px;
+  height:2px;
+  overflow:hidden;
+  border-radius:999px;
+  background:#e9edff;
+}
 
-  border-radius: inherit;
+.odk-road::after {
+  content:"";
+  position:absolute;
+  top:0;
+  left:-60px;
+  width:60px;
+  height:100%;
+  background:linear-gradient(90deg,transparent,rgba(99,102,241,.35),transparent);
+  animation:odkRoadShine 1.8s linear infinite;
+}
 
-  background:
-    linear-gradient(
-      90deg,
-      #8b5cf6,
-      #6366f1,
-      #3b82f6
-    );
+@keyframes odkRoadShine {
+  from { left:-60px; } to { left:110%; }
+}
 
-  box-shadow:
-    0 0 15px rgba(99, 102, 241, 0.3);
+.odk-cart {
+  position:absolute;
+  left:5px;
+  bottom:12px;
+  width:43px;
+  height:29px;
+  border-radius:7px 7px 11px 11px;
+  background:linear-gradient(135deg,#6366f1,#4f46e5);
+  box-shadow:0 8px 20px rgba(79,70,229,.22);
+  animation:odkCartTravel 2.8s cubic-bezier(.65,0,.35,1) infinite;
+}
 
-  transition:
-    width
-    0.2s
-    ease-out;
+.odk-cart::before {
+  content:"";
+  position:absolute;
+  left:-9px;
+  top:-8px;
+  width:17px;
+  height:14px;
+  border-left:3px solid #4f46e5;
+  border-top:3px solid #4f46e5;
+  border-radius:5px 0 0 0;
+  transform:rotate(-8deg);
+}
+
+.odk-cart::after {
+  content:"";
+  position:absolute;
+  left:7px;
+  top:7px;
+  width:29px;
+  height:2px;
+  border-radius:99px;
+  background:rgba(255,255,255,.45);
+}
+
+.odk-wheel {
+  position:absolute;
+  bottom:-6px;
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#1e1b4b;
+  border:2px solid #fff;
+}
+.odk-wheel-left { left:7px; }
+.odk-wheel-right { right:7px; }
+
+@keyframes odkCartTravel {
+  0% { left:5px; opacity:0; transform:scale(.82); }
+  12% { opacity:1; }
+  70% { left:125px; opacity:1; transform:scale(1); }
+  88% { left:145px; opacity:0; transform:scale(.88); }
+  100% { left:145px; opacity:0; }
+}
+
+.odk-product {
+  position:absolute;
+  bottom:40px;
+  width:25px;
+  height:25px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(255,255,255,.9);
+  border-radius:8px;
+  background:rgba(255,255,255,.94);
+  box-shadow:0 7px 18px rgba(15,23,42,.065);
+  font-size:12px;
+  opacity:0;
+  animation:odkProductMove 2.8s cubic-bezier(.65,0,.35,1) infinite;
+}
+.odk-product-1 { left:45px; animation-delay:.15s; }
+.odk-product-2 { left:73px; animation-delay:.52s; }
+.odk-product-3 { left:101px; animation-delay:.89s; }
+
+@keyframes odkProductMove {
+  0% { opacity:0; transform:translateY(10px) scale(.65); }
+  15% { opacity:1; transform:translateY(0) scale(1); }
+  65% { opacity:1; transform:translateY(0) scale(1); }
+  80% { opacity:0; transform:translateY(10px) scale(.7); }
+  100% { opacity:0; }
+}
+
+.odk-message {
+  width:100%;
+  min-height:21px;
+  margin-top:1px;
+}
+
+.odk-message-text {
+  margin:0;
+  color:#475569;
+  font-size:11px;
+  line-height:1.4;
+  font-weight:650;
+  animation:odkMessageIn .4s ease;
+}
+
+@keyframes odkMessageIn {
+  from { opacity:0; transform:translateY(5px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+.odk-progress-section {
+  width:100%;
+  margin-top:18px;
+}
+
+.odk-progress-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:8px;
+}
+
+.odk-progress-label {
+  color:#94a3b8;
+  font-size:8px;
+  font-weight:750;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.odk-progress-value {
+  color:#4f46e5;
+  font-size:9px;
+  font-weight:850;
+  font-variant-numeric:tabular-nums;
+}
+
+.odk-progress-track {
+  position:relative;
+  width:100%;
+  height:5px;
+  overflow:hidden;
+  border-radius:999px;
+  background:#ecefff;
+}
+
+.odk-progress-bar {
+  position:relative;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#6366f1,#7c3aed,#2563eb);
+  box-shadow:0 0 15px rgba(99,102,241,.24);
+  transition:width .25s cubic-bezier(.22,1,.36,1);
 }
 
 .odk-progress-shine {
-  position: absolute;
-
-  top: 0;
-
-  width: 45px;
-  height: 100%;
-
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(255,255,255,0.8),
-      transparent
-    );
-
-  animation:
-    odkShine
-    1.5s
-    linear
-    infinite;
+  position:absolute;
+  inset-block:0;
+  left:-60px;
+  width:55px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent);
+  animation:odkProgressShine 1.25s linear infinite;
 }
 
-@keyframes odkShine {
-  from {
-    left: -50px;
-  }
-
-  to {
-    left: 110%;
-  }
+@keyframes odkProgressShine {
+  from { left:-60px; } to { left:110%; }
 }
-
-/* =========================================================
-   TRUST
-========================================================= */
 
 .odk-trust {
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  gap: 13px;
-
-  margin-top: 16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:15px;
+  margin-top:16px;
 }
 
 .odk-trust-item {
-  display: flex;
-
-  align-items: center;
-
-  gap: 5px;
-
-  color: #94a3b8;
-
-  font-size: 8px;
-
-  font-weight: 700;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  color:#a1aab8;
+  font-size:8px;
+  font-weight:750;
 }
 
-.odk-trust-icon {
-  font-size: 9px;
+.odk-trust-icon { font-size:9px; }
+
+.odk-dots {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  margin-top:15px;
 }
 
-/* =========================================================
-   FOOTER
-========================================================= */
+.odk-dot {
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:#cbd5e1;
+  animation:odkDot 1.2s ease-in-out infinite;
+}
+
+.odk-dot:nth-child(2) { animation-delay:.15s; }
+.odk-dot:nth-child(3) { animation-delay:.3s; }
+
+@keyframes odkDot {
+  0%,60%,100% { transform:translateY(0); opacity:.35; }
+  30% { transform:translateY(-4px); opacity:1; background:#6366f1; }
+}
 
 .odk-footer {
-  margin-top: 16px;
-
-  color: #a1aab8;
-
-  font-size: 7px;
-
-  font-weight: 700;
-
-  letter-spacing: 0.15em;
-
-  text-transform: uppercase;
+  margin:14px 0 0;
+  color:#c0c6d0;
+  font-size:7px;
+  line-height:1.4;
+  font-weight:750;
+  letter-spacing:.14em;
+  text-transform:uppercase;
 }
 
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media (max-width: 700px) {
-  .odk-product {
-    display: none;
-  }
-
-  .odk-circle-3 {
-    width: 480px;
-    height: 480px;
-  }
+@media (max-width:600px) {
+  .odk-loader-content { width:min(100%,350px); }
+  .odk-logo-area { width:92px; height:92px; }
+  .odk-logo-card { inset:8px; border-radius:22px; }
+  .odk-logo-border { border-radius:27px; }
+  .odk-logo-border-inner { border-radius:25px; }
+  .odk-logo-card img { width:59px; height:59px; }
+  .odk-brand { margin-top:20px; }
+  .odk-status { margin-top:22px; }
+  .odk-trust { gap:11px; }
 }
 
-@media (max-width: 600px) {
-  .odk-main {
-    width: min(88%, 390px);
-  }
-
-  .odk-logo {
-    width: 88px;
-    height: 88px;
-  }
-
-  .odk-logo-box {
-    inset: 8px;
-
-    border-radius: 22px;
-  }
-
-  .odk-logo-box img {
-    width: 60px;
-    height: 60px;
-  }
-
-  .odk-logo-ring {
-    border-radius: 27px;
-  }
-
-  .odk-logo-ring-inner {
-    border-radius: 25px;
-  }
-
-  .odk-title {
-    font-size: 28px;
-  }
-
-  .odk-tagline {
-    font-size: 10px;
-  }
-
-  .odk-message {
-    margin-top: 17px;
-  }
-
-  .odk-loading {
-    margin-top: 16px;
-  }
-
-  .odk-badges {
-    margin-top: 14px;
-  }
-
-  .odk-badge {
-    padding: 6px 8px;
-
-    font-size: 7px;
-  }
+@media (max-width:380px) {
+  .odk-app-loader { padding-left:14px; padding-right:14px; }
+  .odk-loader-content { width:min(100%,330px); }
+  .odk-logo-area { width:82px; height:82px; }
+  .odk-logo-card { inset:7px; border-radius:20px; }
+  .odk-logo-card img { width:53px; height:53px; }
+  .odk-brand { margin-top:18px; }
+  .odk-title { font-size:24px; }
+  .odk-tagline { font-size:9px; }
+  .odk-status { margin-top:20px; font-size:9px; }
+  .odk-trust { gap:8px; }
+  .odk-trust-item { font-size:7px; }
 }
 
-@media (max-width: 360px) {
-  .odk-title {
-    font-size: 25px;
+@media (max-height:680px) {
+  .odk-logo-area {
+    transform:scale(.84);
+    margin-bottom:-10px;
   }
-
-  .odk-message-title {
-    font-size: 12px;
+  .odk-brand { margin-top:10px; }
+  .odk-status { margin-top:15px; }
+  .odk-shopping {
+    margin-top:4px;
+    transform:scale(.88);
+    margin-bottom:-6px;
   }
-
-  .odk-trust {
-    gap: 8px;
-  }
-
-  .odk-trust-item {
-    font-size: 7px;
-  }
+  .odk-progress-section { margin-top:10px; }
+  .odk-trust { margin-top:10px; }
+  .odk-dots,.odk-footer { margin-top:9px; }
 }
 
-/* =========================================================
-   REDUCED MOTION
-========================================================= */
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+@media (prefers-reduced-motion:reduce) {
+  .odk-app-loader *,
+  .odk-app-loader *::before,
+  .odk-app-loader *::after {
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+    scroll-behavior:auto !important;
   }
 }
 `;
 
 export default function ModernAppLoader() {
-  const [messageIndex, setMessageIndex] = useState(0);
-  const [progress, setProgress] = useState(5);
-
-  /* =======================================================
-     MESSAGE ROTATION
-  ======================================================= */
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setMessageIndex((current) => {
-        if (current >= MESSAGES.length - 1) {
-          return current;
-        }
-
-        return current + 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  /* =======================================================
-     PROGRESS
-  ======================================================= */
+  const [progress, setProgress] = useState(8);
+  const [step, setStep] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setProgress((current) => {
-        if (current >= 94) {
-          return 94;
-        }
-
-        if (current < 25) {
-          return Math.min(current + 3, 94);
-        }
-
-        if (current < 60) {
-          return Math.min(current + 2, 94);
-        }
-
+        if (current >= 94) return 94;
+        if (current < 30) return Math.min(current + 3, 94);
+        if (current < 65) return Math.min(current + 2, 94);
         return Math.min(current + 1, 94);
       });
     }, 100);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setStep((current) => (current + 1) % LOADING_STEPS.length);
+    }, 1500);
 
     return () => clearInterval(timer);
   }, []);
@@ -1076,236 +595,121 @@ export default function ModernAppLoader() {
     <>
       <style>{CSS}</style>
 
-      <div className="odk-loader">
-
-        {/* =================================================
-            BACKGROUND
-        ================================================= */}
-
-        <div className="odk-bg">
-
-          <div className="odk-light" />
-
-          <div className="odk-grid" />
-
-          <div className="odk-circle odk-circle-1" />
-
-          <div className="odk-circle odk-circle-2" />
-
-          <div className="odk-circle odk-circle-3" />
-
-          {/* Product cards */}
-
-          <div className="odk-products">
-
-            {PRODUCTS.map((product) => (
-              <div
-                key={product.label}
-                className={`odk-product ${product.className}`}
-              >
-
-                <div className="odk-product-image">
-                  {product.emoji}
-                </div>
-
-                <div className="odk-product-info">
-
-                  <span className="odk-product-name">
-                    {product.label}
-                  </span>
-
-                  <span className="odk-product-price">
-                    {product.price}
-                  </span>
-
-                </div>
-
-              </div>
-            ))}
-
-          </div>
-
+      <div
+        className="odk-app-loader"
+        role="status"
+        aria-live="polite"
+        aria-label="Loading Odikart"
+      >
+        <div className="odk-bg" aria-hidden="true">
+          <div className="odk-bg-glow" />
+          <div className="odk-orb odk-orb-1" />
+          <div className="odk-orb odk-orb-2" />
+          <div className="odk-orb odk-orb-3" />
         </div>
 
-        {/* =================================================
-            MAIN
-        ================================================= */}
-
-        <main className="odk-main">
-
-          {/* =================================================
-              LOGO
-          ================================================= */}
-
-          <div className="odk-logo">
-
+        <main className="odk-loader-content">
+          <div className="odk-logo-area" aria-hidden="true">
             <div className="odk-logo-glow" />
-
-            <div className="odk-logo-ring">
-
-              <div className="odk-logo-ring-inner" />
-
+            <div className="odk-logo-border">
+              <div className="odk-logo-border-inner" />
             </div>
 
-            <div className="odk-logo-box">
-
+            <div className="odk-logo-card">
               <img
                 src="/logo.png"
                 alt="Odikart"
+                draggable="false"
                 onError={(event) => {
                   event.currentTarget.style.display = "none";
-
-                  const fallback =
-                    event.currentTarget.nextElementSibling;
-
-                  if (fallback) {
-                    fallback.style.display = "block";
-                  }
+                  const fallback = event.currentTarget.nextElementSibling;
+                  if (fallback) fallback.style.display = "block";
                 }}
               />
-
-              <span className="odk-logo-fallback">
-                O
-              </span>
-
+              <span className="odk-logo-fallback">O</span>
             </div>
-
           </div>
-
-          {/* =================================================
-              BRAND
-          ================================================= */}
 
           <div className="odk-brand">
-
             <h1 className="odk-title">
-              Shop with{" "}
-              <span>Odikart</span>
+              Welcome to <span>Odikart</span>
             </h1>
-
             <p className="odk-tagline">
-              Discover products you'll love.
+              Everything you love. One place to shop.
             </p>
-
           </div>
 
-          {/* =================================================
-              DISCOVERY BADGES
-          ================================================= */}
-
-          <div className="odk-badges">
-
-            <span className="odk-badge">
-              ✨ New arrivals
-            </span>
-
-            <span className="odk-badge">
-              🔥 Trending
-            </span>
-
-            <span className="odk-badge">
-              🎁 Best deals
-            </span>
-
+          <div className="odk-status">
+            <span className="odk-status-dot" />
+            <span>Your shopping experience is loading</span>
           </div>
 
-          {/* =================================================
-              MESSAGE
-          ================================================= */}
+          <div className="odk-shopping" aria-hidden="true">
+            <div className="odk-road" />
+            <div className="odk-product odk-product-1">👟</div>
+            <div className="odk-product odk-product-2">⌚</div>
+            <div className="odk-product odk-product-3">🎧</div>
+            <div className="odk-cart">
+              <span className="odk-wheel odk-wheel-left" />
+              <span className="odk-wheel odk-wheel-right" />
+            </div>
+          </div>
 
           <div className="odk-message">
-
-            <h2
-              key={messageIndex}
-              className="odk-message-title"
-            >
-              {MESSAGES[messageIndex]}
-            </h2>
-
-            <p className="odk-message-subtitle">
-              A better way to discover, shop and enjoy.
+            <p key={step} className="odk-message-text">
+              {LOADING_STEPS[step]}
             </p>
-
           </div>
 
-          {/* =================================================
-              LOADING
-          ================================================= */}
-
-          <div className="odk-loading">
-
-            <div className="odk-loading-top">
-
-              <span className="odk-loading-label">
-                Getting things ready
-              </span>
-
-              <span className="odk-loading-status">
-
-                <span className="odk-status-dot" />
-
-                {progress}%
-
-              </span>
-
+          <div className="odk-progress-section">
+            <div className="odk-progress-header">
+              <span className="odk-progress-label">Loading store</span>
+              <span className="odk-progress-value">{progress}%</span>
             </div>
 
-            <div className="odk-track">
-
+            <div
+              className="odk-progress-track"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow={progress}
+              aria-label="Loading store"
+            >
               <div
-                className="odk-progress"
-                style={{
-                  width: `${progress}%`,
-                }}
-              />
-
-              <div className="odk-progress-shine" />
-
+                className="odk-progress-bar"
+                style={{ width: `${progress}%` }}
+              >
+                <div className="odk-progress-shine" />
+              </div>
             </div>
-
           </div>
 
-          {/* =================================================
-              TRUST
-          ================================================= */}
-
-          <div className="odk-trust">
-
+          <div className="odk-trust" aria-label="Odikart benefits">
             <div className="odk-trust-item">
-              <span className="odk-trust-icon">
-                🔒
-              </span>
-              Secure
+              <span className="odk-trust-icon">🔒</span>
+              <span>Secure</span>
             </div>
-
             <div className="odk-trust-item">
-              <span className="odk-trust-icon">
-                ⚡
-              </span>
-              Fast
+              <span className="odk-trust-icon">⚡</span>
+              <span>Fast</span>
             </div>
-
             <div className="odk-trust-item">
-              <span className="odk-trust-icon">
-                💙
-              </span>
-              Trusted
+              <span className="odk-trust-icon">💙</span>
+              <span>Trusted</span>
             </div>
-
           </div>
 
-          {/* =================================================
-              FOOTER
-          ================================================= */}
+          <div className="odk-dots" aria-hidden="true">
+            <span className="odk-dot" />
+            <span className="odk-dot" />
+            <span className="odk-dot" />
+          </div>
 
           <p className="odk-footer">
-            Your shopping journey starts here
+            Your everyday shopping destination
           </p>
-
         </main>
-
       </div>
     </>
   );
 }
-

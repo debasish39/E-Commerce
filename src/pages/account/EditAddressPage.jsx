@@ -13,29 +13,101 @@ export default function EditAddressPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Load address
+  // ============================================================
+  // LOAD ADDRESS
+  // ============================================================
+
   useEffect(() => {
     const loadAddress = async () => {
       try {
         setLoading(true);
 
-        // Backend currently provides GET /api/addresses
+        // Backend: GET /api/addresses
         const d = await api("/api/addresses");
 
-        const addresses = d.addresses || d.data || [];
+        const addresses =
+          d.addresses ||
+          d.data ||
+          [];
 
         const address = addresses.find(
-          (item) => String(item._id || item.id) === String(id)
+          (item) =>
+            String(item._id || item.id) ===
+            String(id),
         );
 
         if (!address) {
-          throw new Error("Address not found");
+          throw new Error(
+            "Address not found",
+          );
         }
 
-        setF(address);
+        // Normalize backend address into
+        // the exact fields expected by AddressForm.
+        setF({
+          label:
+            address.label || "Home",
+
+          fullName:
+            address.fullName || "",
+
+          phone:
+            address.phone || "",
+
+          alternatePhone:
+            address.alternatePhone || "",
+
+          addressLine1:
+            address.addressLine1 || "",
+
+          addressLine2:
+            address.addressLine2 || "",
+
+          landmark:
+            address.landmark || "",
+
+          area:
+            address.area || "",
+
+          // IMPORTANT:
+          // Keep village editable.
+          village:
+            address.village || "",
+
+          city:
+            address.city || "",
+
+          district:
+            address.district || "",
+
+          state:
+            address.state || "",
+
+          postalCode:
+            address.postalCode || "",
+
+          country:
+            address.country || "India",
+
+          location:
+            address.location || {
+              latitude: null,
+              longitude: null,
+            },
+
+          isDefault:
+            Boolean(address.isDefault),
+        });
       } catch (e) {
-        console.error("Load address error:", e);
-        toast.error(e.message || "Failed to load address");
+        console.error(
+          "Load address error:",
+          e,
+        );
+
+        toast.error(
+          e.message ||
+            "Failed to load address",
+        );
       } finally {
         setLoading(false);
       }
@@ -45,9 +117,16 @@ export default function EditAddressPage() {
       loadAddress();
     } else {
       setLoading(false);
-      toast.error("Invalid address ID");
+
+      toast.error(
+        "Invalid address ID",
+      );
     }
   }, [id]);
+
+  // ============================================================
+  // UPDATE FORM FIELD
+  // ============================================================
 
   const set = (key, value) => {
     setF((current) => ({
@@ -56,54 +135,194 @@ export default function EditAddressPage() {
     }));
   };
 
-  // Update address
+  // ============================================================
+  // SAVE / UPDATE ADDRESS
+  // ============================================================
+
   const save = async () => {
     if (!id) {
-      toast.error("Invalid address ID");
+      toast.error(
+        "Invalid address ID",
+      );
       return;
     }
+
+    if (!f) {
+      toast.error(
+        "Address data is not available",
+      );
+      return;
+    }
+
+    if (saving) return;
 
     setSaving(true);
 
     try {
-      const d = await api(`/api/addresses/${id}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          label: f.label || "Home",
-          fullName: f.fullName,
-          phone: f.phone,
-          alternatePhone: f.alternatePhone || "",
-          addressLine1: f.addressLine1,
-          addressLine2: f.addressLine2 || "",
-          landmark: f.landmark || "",
-          area: f.area,
-          city: f.city,
-          district: f.district,
-          state: f.state,
-          postalCode: f.postalCode,
-          country: f.country || "India",
-          location: f.location || {
+      const payload = {
+        label:
+          String(
+            f.label || "Home",
+          ).trim(),
+
+        fullName:
+          String(
+            f.fullName || "",
+          ).trim(),
+
+        phone:
+          String(
+            f.phone || "",
+          ).trim(),
+
+        alternatePhone:
+          String(
+            f.alternatePhone || "",
+          ).trim(),
+
+        addressLine1:
+          String(
+            f.addressLine1 || "",
+          ).trim(),
+
+        addressLine2:
+          String(
+            f.addressLine2 || "",
+          ).trim(),
+
+        landmark:
+          String(
+            f.landmark || "",
+          ).trim(),
+
+        area:
+          String(
+            f.area || "",
+          ).trim(),
+
+        // IMPORTANT:
+        // Village is sent to the backend.
+        village:
+          String(
+            f.village || "",
+          ).trim(),
+
+        city:
+          String(
+            f.city || "",
+          ).trim(),
+
+        district:
+          String(
+            f.district || "",
+          ).trim(),
+
+        state:
+          String(
+            f.state || "",
+          ).trim(),
+
+        postalCode:
+          String(
+            f.postalCode || "",
+          ).trim(),
+
+        country:
+          String(
+            f.country || "India",
+          ).trim(),
+
+        location:
+          f.location || {
             latitude: null,
             longitude: null,
           },
-          isDefault: Boolean(f.isDefault),
-        }),
-      });
 
-      toast.success(
-        d.message || "Address updated successfully"
+        isDefault:
+          Boolean(f.isDefault),
+      };
+
+      const d = await api(
+        `/api/addresses/${id}`,
+        {
+          method: "PUT",
+
+          body: JSON.stringify(
+            payload,
+          ),
+        },
       );
 
+      if (!d || d.success === false) {
+        throw new Error(
+          d?.message ||
+            "Failed to update address",
+        );
+      }
+
+      toast.success(
+        d.message ||
+          "Address updated successfully",
+      );
+
+      // --------------------------------------------------------
+      // Return to checkout if the user came from checkout.
+      // Otherwise return to saved addresses.
+      // --------------------------------------------------------
+
+      let returnPath =
+        "/account/addresses";
+
+      try {
+        const stored =
+          sessionStorage.getItem(
+            "odicart_checkout_return",
+          );
+
+        if (stored) {
+          const returnData =
+            JSON.parse(stored);
+
+          if (
+            returnData?.path === "/cart"
+          ) {
+            returnPath = "/cart";
+
+            // Clear it after consuming it.
+            sessionStorage.removeItem(
+              "odicart_checkout_return",
+            );
+          }
+        }
+      } catch (error) {
+        console.warn(
+          "Unable to read checkout return path:",
+          error,
+        );
+      }
+
       setTimeout(() => {
-        window.location.href = "/account/addresses";
+        window.location.href =
+          returnPath;
       }, 500);
     } catch (e) {
-      console.error("Update address error:", e);
-      toast.error(e.message || "Failed to update address");
-    } finally {
+      console.error(
+        "Update address error:",
+        e,
+      );
+
+      toast.error(
+        e.message ||
+          "Failed to update address",
+      );
+
       setSaving(false);
     }
   };
+
+  // ============================================================
+  // LOADING
+  // ============================================================
 
   if (loading) {
     return (
@@ -115,20 +334,30 @@ export default function EditAddressPage() {
     );
   }
 
+  // ============================================================
+  // ADDRESS NOT FOUND
+  // ============================================================
+
   if (!f) {
     return (
       <AccountShell title="Edit address">
         <div className="ok-card ok-empty">
           <h3>Address not found</h3>
+
           <p className="ok-muted">
-            This address may have been deleted or is no longer available.
+            This address may have been
+            deleted or is no longer
+            available.
           </p>
 
           <button
             className="ok-btn ok-primary"
-            style={{ marginTop: 18 }}
+            style={{
+              marginTop: 18,
+            }}
             onClick={() => {
-              window.location.href = "/account/addresses";
+              window.location.href =
+                "/account/addresses";
             }}
           >
             Back to addresses
@@ -137,6 +366,10 @@ export default function EditAddressPage() {
       </AccountShell>
     );
   }
+
+  // ============================================================
+  // EDIT ADDRESS FORM
+  // ============================================================
 
   return (
     <AccountShell title="Edit address">

@@ -4,13 +4,17 @@ import {
   FaBriefcase,
   FaMapMarkerAlt,
   FaUser,
-  FaPhone,
+  FaPhoneAlt,
   FaCity,
   FaCheck,
   FaSave,
 } from "react-icons/fa";
 import { toast } from "sonner";
 import { AccountShell, api } from "./AccountShell";
+
+/* ============================================================
+   ADD ADDRESS PAGE
+============================================================ */
 
 export default function AddAddressPage() {
   const [f, setF] = useState({
@@ -22,6 +26,7 @@ export default function AddAddressPage() {
     addressLine2: "",
     landmark: "",
     area: "",
+    village: "",
     city: "",
     district: "",
     state: "",
@@ -86,11 +91,6 @@ export default function AddAddressPage() {
       return false;
     }
 
-    if (!f.postalCode.trim()) {
-      toast.error("Please enter your PIN code");
-      return false;
-    }
-
     if (!/^[1-9][0-9]{5}$/.test(f.postalCode)) {
       toast.error("Please enter a valid 6-digit PIN code");
       return false;
@@ -118,6 +118,7 @@ export default function AddAddressPage() {
           addressLine2: f.addressLine2.trim(),
           landmark: f.landmark.trim(),
           area: f.area.trim(),
+          village: f.village.trim(),
           city: f.city.trim(),
           district: f.district.trim(),
           state: f.state.trim(),
@@ -136,6 +137,8 @@ export default function AddAddressPage() {
         window.location.href = "/account/addresses";
       }, 700);
     } catch (error) {
+      console.error("Save address error:", error);
+
       toast.error(
         error?.message || "Failed to save address"
       );
@@ -156,6 +159,13 @@ export default function AddAddressPage() {
   );
 }
 
+
+/* ============================================================
+   REUSABLE ADDRESS FORM
+   IMPORTANT:
+   This is a NAMED EXPORT because EditAddressPage imports it.
+============================================================ */
+
 export function AddressForm({
   title,
   f,
@@ -164,6 +174,176 @@ export function AddressForm({
   saving,
   submit,
 }) {
+  const [pinLoading, setPinLoading] = useState(false);
+  const [postOffices, setPostOffices] = useState([]);
+
+  /* ==========================================================
+     PIN LOOKUP
+  ========================================================== */
+
+  const fetchPinDetails = async (pin) => {
+    if (!/^[1-9][0-9]{5}$/.test(pin)) {
+      return;
+    }
+
+    setPinLoading(true);
+    setPostOffices([]);
+
+    try {
+      const response = await fetch(
+        `https://api.postalpincode.in/pincode/${pin}`
+      );
+
+      if (!response.ok) {
+        throw new Error("PIN lookup failed");
+      }
+
+      const data = await response.json();
+
+      if (
+        !Array.isArray(data) ||
+        !data[0] ||
+        data[0].Status !== "Success" ||
+        !Array.isArray(data[0].PostOffice) ||
+        data[0].PostOffice.length === 0
+      ) {
+        toast.error("PIN code not found");
+
+        set({
+          area: "",
+        });
+
+        set("city", "");
+        set("district", "");
+        set("state", "");
+
+        return;
+      }
+
+      const offices = data[0].PostOffice;
+
+      setPostOffices(offices);
+
+      const firstOffice = offices[0];
+
+      set("area", firstOffice.Name || "");
+
+      set(
+        "city",
+        firstOffice.Block ||
+          firstOffice.Division ||
+          firstOffice.District ||
+          ""
+      );
+
+      set("district", firstOffice.District || "");
+
+      set("state", firstOffice.State || "");
+
+      set(
+        "country",
+        firstOffice.Country || "India"
+      );
+
+      toast.success(
+        offices.length > 1
+          ? `${offices.length} locations found`
+          : "Location found"
+      );
+    } catch (error) {
+      console.error("PIN lookup error:", error);
+
+      toast.error(
+        "Unable to fetch PIN code details"
+      );
+
+      setPostOffices([]);
+    } finally {
+      setPinLoading(false);
+    }
+  };
+
+
+  /* ==========================================================
+     PIN CHANGE
+  ========================================================== */
+
+  const handlePinChange = (value) => {
+    const pin = value
+      .replace(/\D/g, "")
+      .slice(0, 6);
+
+    set("postalCode", pin);
+
+    /*
+     * Clear automatically populated fields
+     * until a complete PIN is entered.
+     */
+    if (pin.length < 6) {
+      setPostOffices([]);
+
+      set("area", "");
+      set("city", "");
+      set("district", "");
+      set("state", "");
+
+      return;
+    }
+
+    /*
+     * Fetch information once 6 digits are entered.
+     */
+    if (pin.length === 6) {
+      fetchPinDetails(pin);
+    }
+  };
+
+
+  /* ==========================================================
+     POST OFFICE SELECTION
+  ========================================================== */
+
+  const handlePostOfficeChange = (officeName) => {
+    const selectedOffice = postOffices.find(
+      (office) => office.Name === officeName
+    );
+
+    if (!selectedOffice) return;
+
+    set(
+      "area",
+      selectedOffice.Name || ""
+    );
+
+    set(
+      "city",
+      selectedOffice.Block ||
+        selectedOffice.Division ||
+        selectedOffice.District ||
+        ""
+    );
+
+    set(
+      "district",
+      selectedOffice.District || ""
+    );
+
+    set(
+      "state",
+      selectedOffice.State || ""
+    );
+
+    set(
+      "country",
+      selectedOffice.Country || "India"
+    );
+  };
+
+
+  /* ==========================================================
+     ADDRESS TYPES
+  ========================================================== */
+
   const addressTypes = [
     {
       value: "Home",
@@ -182,39 +362,60 @@ export function AddressForm({
     },
   ];
 
+
+  /* ==========================================================
+     UI
+  ========================================================== */
+
   return (
     <AccountShell title={title}>
       <div className="address-form-page">
 
         {/* INTRO */}
+
         <div className="address-form-intro">
+
           <div className="address-form-intro-icon">
             <FaMapMarkerAlt size={19} />
           </div>
 
           <div>
             <h2>Delivery address</h2>
+
             <p>
-              Add your details so we can deliver your orders
-              to the right place.
+              Add your details so we can deliver your
+              orders to the right place.
             </p>
           </div>
+
         </div>
+
 
         <div className="address-form-card">
 
-          {/* ADDRESS TYPE */}
+          {/* ==================================================
+              ADDRESS TYPE
+          ================================================== */}
+
           <section className="form-section">
+
             <div className="form-section-heading">
+
               <h3>Address type</h3>
+
               <p>
                 Choose a label to identify this address
               </p>
+
             </div>
 
+
             <div className="address-type-grid">
+
               {addressTypes.map((item) => {
-                const active = f.label === item.value;
+
+                const active =
+                  f.label === item.value;
 
                 return (
                   <button
@@ -227,41 +428,63 @@ export function AddressForm({
                       set("label", item.value)
                     }
                   >
+
                     <div className="address-type-icon">
                       {item.icon}
                     </div>
 
                     <div className="address-type-text">
-                      <strong>{item.value}</strong>
-                      <span>{item.description}</span>
+
+                      <strong>
+                        {item.value}
+                      </strong>
+
+                      <span>
+                        {item.description}
+                      </span>
+
                     </div>
+
 
                     {active && (
                       <div className="address-type-check">
                         <FaCheck size={8} />
                       </div>
                     )}
+
                   </button>
                 );
               })}
+
             </div>
+
           </section>
 
-          {/* CONTACT DETAILS */}
+
+          {/* ==================================================
+              CONTACT DETAILS
+          ================================================== */}
+
           <section className="form-section">
+
             <div className="form-section-heading">
+
               <h3>Contact details</h3>
+
               <p>
                 Who should receive the delivery?
               </p>
+
             </div>
 
+
             <div className="form-grid">
+
               <Field
                 icon={<FaUser />}
                 label="Full name"
                 required
-                value={f.fullName}
+                value={f.fullName || ""}
                 onChange={(value) =>
                   set("fullName", value)
                 }
@@ -269,15 +492,18 @@ export function AddressForm({
                 autoComplete="name"
               />
 
+
               <Field
-                icon={<FaPhone />}
+                icon={<FaPhoneAlt />}
                 label="Phone number"
                 required
-                value={f.phone}
+                value={f.phone || ""}
                 onChange={(value) =>
                   set(
                     "phone",
-                    value.replace(/\D/g, "").slice(0, 10)
+                    value
+                      .replace(/\D/g, "")
+                      .slice(0, 10)
                   )
                 }
                 placeholder="10-digit phone number"
@@ -286,36 +512,50 @@ export function AddressForm({
                 autoComplete="tel"
               />
 
+
               <Field
-                icon={<FaPhone />}
+                icon={<FaPhoneAlt />}
                 label="Alternate phone"
-                value={f.alternatePhone}
+                value={f.alternatePhone || ""}
                 onChange={(value) =>
                   set(
                     "alternatePhone",
-                    value.replace(/\D/g, "").slice(0, 10)
+                    value
+                      .replace(/\D/g, "")
+                      .slice(0, 10)
                   )
                 }
                 placeholder="Optional"
                 type="tel"
                 inputMode="numeric"
               />
+
             </div>
+
           </section>
 
-          {/* ADDRESS DETAILS */}
+
+          {/* ==================================================
+              ADDRESS DETAILS
+          ================================================== */}
+
           <section className="form-section">
+
             <div className="form-section-heading">
+
               <h3>Address details</h3>
+
               <p>
                 Enter your complete delivery address
               </p>
+
             </div>
+
 
             <Field
               label="Address line 1"
               required
-              value={f.addressLine1}
+              value={f.addressLine1 || ""}
               onChange={(value) =>
                 set("addressLine1", value)
               }
@@ -323,52 +563,124 @@ export function AddressForm({
               autoComplete="street-address"
             />
 
+
             <Field
               label="Address line 2"
-              value={f.addressLine2}
+              value={f.addressLine2 || ""}
               onChange={(value) =>
                 set("addressLine2", value)
               }
               placeholder="Apartment, floor, block, etc. (optional)"
             />
 
+
             <div className="form-grid">
+
               <Field
                 label="Landmark"
-                value={f.landmark}
+                value={f.landmark || ""}
                 onChange={(value) =>
                   set("landmark", value)
                 }
                 placeholder="Nearby landmark"
               />
 
+
+              {/* AREA */}
+
+              <div className="ok-field">
+
+                <label>
+                  Area/Post
+                  <span className="required-star">
+                    *
+                  </span>
+                </label>
+
+
+                {postOffices.length > 1 ? (
+
+                  <select
+                    className="ok-input area-select"
+                    value={f.area || ""}
+                    onChange={(e) =>
+                      handlePostOfficeChange(
+                        e.target.value
+                      )
+                    }
+                  >
+
+                    {postOffices.map((office) => (
+
+                      <option
+                        key={`${office.Name}-${office.Pincode}`}
+                        value={office.Name}
+                      >
+                        {office.Name}
+                      </option>
+
+                    ))}
+
+                  </select>
+
+                ) : (
+
+                  <input
+                    className="ok-input"
+                    value={f.area || ""}
+                    onChange={(e) =>
+                      set(
+                        "area",
+                        e.target.value
+                      )
+                    }
+                    placeholder="Locality / area"
+                  />
+
+                )}
+
+              </div>
+
               <Field
-                label="Area"
-                required
-                value={f.area}
+                label="Village"
+                value={f.village || ""}
                 onChange={(value) =>
-                  set("area", value)
+                  set("village", value)
                 }
-                placeholder="Locality / area"
+                placeholder="Enter village"
               />
+
             </div>
+
           </section>
 
-          {/* LOCATION */}
+
+          {/* ==================================================
+              LOCATION
+          ================================================== */}
+
           <section className="form-section">
+
             <div className="form-section-heading">
+
               <h3>Location</h3>
+
               <p>
-                Tell us where this address is located
+                PIN code automatically fills location details
               </p>
+
             </div>
 
+
             <div className="form-grid">
+
+              {/* CITY */}
+
               <Field
                 icon={<FaCity />}
                 label="City"
                 required
-                value={f.city}
+                value={f.city || ""}
                 onChange={(value) =>
                   set("city", value)
                 }
@@ -376,20 +688,26 @@ export function AddressForm({
                 autoComplete="address-level2"
               />
 
+
+              {/* DISTRICT */}
+
               <Field
                 label="District"
                 required
-                value={f.district}
+                value={f.district || ""}
                 onChange={(value) =>
                   set("district", value)
                 }
                 placeholder="Enter district"
               />
 
+
+              {/* STATE */}
+
               <Field
                 label="State"
                 required
-                value={f.state}
+                value={f.state || ""}
                 onChange={(value) =>
                   set("state", value)
                 }
@@ -397,40 +715,132 @@ export function AddressForm({
                 autoComplete="address-level1"
               />
 
-              <Field
-                label="PIN code"
-                required
-                value={f.postalCode}
-                onChange={(value) =>
-                  set(
-                    "postalCode",
-                    value.replace(/\D/g, "").slice(0, 6)
-                  )
-                }
-                placeholder="6-digit PIN"
-                type="text"
-                inputMode="numeric"
-                autoComplete="postal-code"
-              />
+
+              {/* PIN CODE */}
+
+              <div className="ok-field">
+
+                <label>
+                  PIN code
+                  <span className="required-star">
+                    *
+                  </span>
+                </label>
+
+
+                <div className="pin-input-wrapper">
+
+                  <input
+                    className="ok-input"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="postal-code"
+                    maxLength={6}
+                    value={f.postalCode || ""}
+                    onChange={(e) =>
+                      handlePinChange(
+                        e.target.value
+                      )
+                    }
+                    placeholder={
+                      pinLoading
+                        ? "Finding location..."
+                        : "6-digit PIN"
+                    }
+                  />
+
+
+                  {pinLoading && (
+                    <span className="pin-spinner" />
+                  )}
+
+                </div>
+
+
+                {pinLoading && (
+                  <small className="pin-status">
+                    Finding address details...
+                  </small>
+                )}
+
+
+                {!pinLoading &&
+                  String(f.postalCode || "").length === 6 &&
+                  f.state && (
+                    <small className="pin-success">
+                      ✓ Location found
+                    </small>
+                  )}
+
+              </div>
+
             </div>
+
           </section>
 
-          {/* DEFAULT ADDRESS */}
+
+          {/* ==================================================
+              COUNTRY
+          ================================================== */}
+
+          <section className="form-section country-section">
+
+            <div className="form-section-heading">
+
+              <h3>Country</h3>
+
+              <p>
+                Delivery country
+              </p>
+
+            </div>
+
+
+            <Field
+              label="Country"
+              required
+              value={f.country || "India"}
+              onChange={(value) =>
+                set("country", value)
+              }
+              placeholder="Country"
+              autoComplete="country-name"
+            />
+
+          </section>
+
+
+          {/* ==================================================
+              DEFAULT ADDRESS
+          ================================================== */}
+
           <section className="default-address-section">
+
             <label className="default-address-toggle">
+
               <input
                 type="checkbox"
-                checked={f.isDefault}
+                checked={Boolean(f.isDefault)}
                 onChange={(e) =>
-                  set("isDefault", e.target.checked)
+                  set(
+                    "isDefault",
+                    e.target.checked
+                  )
                 }
               />
 
+
               <span className="custom-checkbox">
-                {f.isDefault && <FaCheck size={9} />}
+
+                {f.isDefault && (
+                  <FaCheck size={9} />
+                )}
+
               </span>
 
+
               <span className="default-address-content">
+
                 <strong>
                   Make this my default address
                 </strong>
@@ -439,12 +849,20 @@ export function AddressForm({
                   Use this address automatically during
                   checkout
                 </small>
+
               </span>
+
             </label>
+
           </section>
 
-          {/* ACTIONS */}
+
+          {/* ==================================================
+              ACTIONS
+          ================================================== */}
+
           <div className="address-form-actions">
+
             <button
               type="button"
               className="ok-btn ok-outline cancel-btn"
@@ -457,33 +875,44 @@ export function AddressForm({
               Cancel
             </button>
 
+
             <button
               type="button"
               className="ok-btn ok-primary save-address-btn"
-              disabled={saving}
+              disabled={saving || pinLoading}
               onClick={save}
             >
+
               {saving ? (
+
                 <>
                   <span className="save-spinner" />
                   Saving...
                 </>
+
               ) : (
+
                 <>
                   <FaSave size={12} />
                   {submit}
                 </>
+
               )}
+
             </button>
+
           </div>
+
         </div>
+
       </div>
 
-      <style>{`
 
-        /* =====================================================
-           PAGE
-        ===================================================== */
+      {/* ========================================================
+          STYLES
+      ======================================================== */}
+
+      <style>{`
 
         .address-form-page {
           width: 100%;
@@ -523,21 +952,14 @@ export function AddressForm({
           line-height: 1.5;
         }
 
-        /* =====================================================
-           MAIN CARD
-        ===================================================== */
-
         .address-form-card {
           overflow: hidden;
           background: #fff;
           border: 1px solid #e8e8ef;
           border-radius: 20px;
-          box-shadow: 0 3px 16px rgba(20,20,40,.05);
+          box-shadow:
+            0 3px 16px rgba(20,20,40,.05);
         }
-
-        /* =====================================================
-           SECTIONS
-        ===================================================== */
 
         .form-section {
           padding: 21px;
@@ -561,13 +983,10 @@ export function AddressForm({
           font-size: 10px;
         }
 
-        /* =====================================================
-           ADDRESS TYPE
-        ===================================================== */
-
         .address-type-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns:
+            repeat(3, 1fr);
           gap: 9px;
         }
 
@@ -599,7 +1018,8 @@ export function AddressForm({
           border-color: #6366f1;
           background: #f7f7ff;
           box-shadow:
-            0 0 0 2px rgba(99,102,241,.08);
+            0 0 0 2px
+            rgba(99,102,241,.08);
         }
 
         .address-type-icon {
@@ -613,7 +1033,8 @@ export function AddressForm({
           color: #64748b;
         }
 
-        .address-type.active .address-type-icon {
+        .address-type.active
+        .address-type-icon {
           background: #eeedff;
           color: #4f46e5;
         }
@@ -648,10 +1069,6 @@ export function AddressForm({
           color: #fff;
         }
 
-        /* =====================================================
-           FORM GRID
-        ===================================================== */
-
         .form-grid {
           display: grid;
           grid-template-columns:
@@ -663,7 +1080,8 @@ export function AddressForm({
           margin-bottom: 15px;
         }
 
-        .address-form-card .ok-field label {
+        .address-form-card
+        .ok-field label {
           display: block;
           margin-bottom: 7px;
           color: #4b5563;
@@ -677,23 +1095,32 @@ export function AddressForm({
         }
 
         .address-form-card .ok-input {
+          width: 100%;
           height: 45px;
+          padding: 0 12px;
+          box-sizing: border-box;
+          border: 1px solid #e1e3ea;
           border-radius: 11px;
-          border-color: #e1e3ea;
+          background: #fff;
+          color: #111827;
           font-size: 12px;
+          outline: none;
           transition:
             border-color .16s ease,
             box-shadow .16s ease;
         }
 
-        .address-form-card .ok-input::placeholder {
+        .address-form-card
+        .ok-input::placeholder {
           color: #a1a5af;
         }
 
-        .address-form-card .ok-input:focus {
+        .address-form-card
+        .ok-input:focus {
           border-color: #6366f1;
           box-shadow:
-            0 0 0 3px rgba(99,102,241,.09);
+            0 0 0 3px
+            rgba(99,102,241,.09);
         }
 
         .field-with-icon {
@@ -703,18 +1130,70 @@ export function AddressForm({
         .field-icon {
           position: absolute;
           left: 13px;
-          bottom: 14px;
+          top: 50%;
+          transform: translateY(-50%);
           color: #9ca3af;
           pointer-events: none;
+          z-index: 1;
         }
 
         .field-with-icon .ok-input {
           padding-left: 35px;
         }
 
-        /* =====================================================
-           DEFAULT
-        ===================================================== */
+        /* PIN */
+
+        .pin-input-wrapper {
+          position: relative;
+        }
+
+        .pin-input-wrapper .ok-input {
+          padding-right: 42px;
+        }
+
+        .pin-spinner {
+          position: absolute;
+          right: 14px;
+          top: 50%;
+          width: 15px;
+          height: 15px;
+          margin-top: -8px;
+          border: 2px solid #e5e7eb;
+          border-top-color: #4f46e5;
+          border-radius: 50%;
+          animation:
+            pinSpin .7s linear infinite;
+        }
+
+        .pin-status {
+          display: block;
+          margin-top: 5px;
+          color: #6b7280;
+          font-size: 9px;
+        }
+
+        .pin-success {
+          display: block;
+          margin-top: 5px;
+          color: #16a34a;
+          font-size: 9px;
+          font-weight: 700;
+        }
+
+        @keyframes pinSpin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        .area-select {
+          cursor: pointer;
+          appearance: auto;
+        }
+
+        .country-section {
+          padding-bottom: 6px;
+        }
 
         .default-address-section {
           padding: 18px 21px;
@@ -769,10 +1248,6 @@ export function AddressForm({
           font-size: 9px;
         }
 
-        /* =====================================================
-           ACTIONS
-        ===================================================== */
-
         .address-form-actions {
           display: flex;
           justify-content: flex-end;
@@ -803,17 +1278,15 @@ export function AddressForm({
           cursor: not-allowed;
         }
 
-        /* =====================================================
-           SPINNER
-        ===================================================== */
-
         .save-spinner {
           width: 12px;
           height: 12px;
-          border: 2px solid rgba(255,255,255,.4);
+          border: 2px solid
+            rgba(255,255,255,.4);
           border-top-color: #fff;
           border-radius: 50%;
-          animation: saveSpin .7s linear infinite;
+          animation:
+            saveSpin .7s linear infinite;
         }
 
         @keyframes saveSpin {
@@ -821,10 +1294,6 @@ export function AddressForm({
             transform: rotate(360deg);
           }
         }
-
-        /* =====================================================
-           MOBILE
-        ===================================================== */
 
         @media (max-width: 600px) {
 
@@ -905,6 +1374,7 @@ export function AddressForm({
             margin-left: 5px;
           }
         }
+
       `}</style>
     </AccountShell>
   );
@@ -928,15 +1398,25 @@ function Field({
 }) {
   return (
     <div className="ok-field">
+
       <label>
         {label}
 
         {required && (
-          <span className="required-star">*</span>
+          <span className="required-star">
+            *
+          </span>
         )}
       </label>
 
-      <div className={icon ? "field-with-icon" : ""}>
+      <div
+        className={
+          icon
+            ? "field-with-icon"
+            : ""
+        }
+      >
+
         {icon && (
           <span className="field-icon">
             {React.cloneElement(icon, {
@@ -949,14 +1429,17 @@ function Field({
           className="ok-input"
           type={type}
           inputMode={inputMode}
-          value={value}
+          value={value || ""}
           onChange={(e) =>
             onChange(e.target.value)
           }
           placeholder={placeholder}
           autoComplete={autoComplete}
         />
+
       </div>
+
     </div>
   );
 }
+
