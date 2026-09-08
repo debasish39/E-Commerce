@@ -459,817 +459,398 @@ export default function BestSellerProducts() {
   return (
     <>
       <style>{`
-
-        /* =====================================================
-           ROOT
-        ===================================================== */
-
         .bs-root {
-          font-family:
-            'Plus Jakarta Sans',
-            sans-serif;
+          font-family: 'Plus Jakarta Sans', sans-serif;
         }
-
-
-        /* =====================================================
-           HORIZONTAL PRODUCT SCROLL
-        ===================================================== */
 
         .bs-products-scroll {
           display: flex;
-
-          gap: 14px;
-
+          gap: 12px;
           width: 100%;
-
           overflow-x: auto;
           overflow-y: hidden;
-
-          padding-bottom: 12px;
-
+          padding: 3px 3px 9px;
           scroll-behavior: smooth;
-
-          -webkit-overflow-scrolling:
-            touch;
-
-          scrollbar-width: thin;
-
-          scrollbar-color:
-            rgba(99,102,241,.35)
-            rgba(99,102,241,.06);
+          scroll-snap-type: x proximity;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
         }
-
 
         .bs-products-scroll::-webkit-scrollbar {
-          height: 6px;
+          display: none;
         }
-
-
-        .bs-products-scroll::-webkit-scrollbar-track {
-          background:
-            rgba(99,102,241,.06);
-
-          border-radius: 999px;
-        }
-
-
-        .bs-products-scroll::-webkit-scrollbar-thumb {
-          background:
-            rgba(99,102,241,.35);
-
-          border-radius: 999px;
-        }
-
-
-        .bs-products-scroll::-webkit-scrollbar-thumb:hover {
-          background:
-            rgba(79,70,229,.55);
-        }
-
-
-        /* =====================================================
-           PRODUCT CARD WIDTH
-        ===================================================== */
 
         .bs-product-item {
-          flex:
-            0 0 210px;
-
-          width: 210px;
-
-          min-width: 210px;
+          flex: 0 0 190px;
+          width: 190px;
+          min-width: 190px;
+          scroll-snap-align: start;
         }
-
-
-        /* =====================================================
-           CARD
-        ===================================================== */
 
         .bs-card {
           position: relative;
-
-          background:
-            rgba(255,255,255,.90);
-
-          backdrop-filter:
-            blur(16px);
-
-          border:
-            1px solid
-            rgba(99,102,241,.12);
-
-          border-radius:
-            22px;
-
-          overflow:
-            hidden;
-
-          cursor:
-            pointer;
-
-          transition:
-            transform .32s
-              cubic-bezier(.34,1.2,.64,1),
-            box-shadow .28s ease,
-            border-color .25s ease;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          background: rgba(255,255,255,.97);
+          border: 1px solid rgba(15,23,42,.07);
+          border-radius: 20px;
+          cursor: pointer;
+          box-shadow: 0 7px 24px rgba(15,23,42,.06), 0 2px 8px rgba(79,70,229,.04);
+          transition: transform .25s cubic-bezier(.34,1.2,.64,1), box-shadow .25s ease, border-color .2s ease;
         }
-
 
         .bs-card:hover {
-          transform:
-            translateY(-7px)
-            scale(1.012);
-
-          box-shadow:
-            0 22px 52px
-              rgba(79,70,229,.17),
-            0 5px 18px
-              rgba(0,0,0,.05);
-
-          border-color:
-            rgba(99,102,241,.28);
+          transform: translateY(-5px);
+          border-color: rgba(99,102,241,.20);
+          // box-shadow: 0 16px 34px rgba(15,23,42,.10), 0 5px 16px rgba(79,70,229,.08);
         }
-
-
-        /* =====================================================
-           IMAGE TRACK
-        ===================================================== */
 
         .bs-track {
           display: flex;
-
           width: 100%;
           height: 100%;
-
-          will-change:
-            transform;
-
-          transition:
-            transform .42s
-              cubic-bezier(.22,1,.36,1);
-
-          touch-action:
-            pan-y;
+          will-change: transform;
+          transition: transform .38s cubic-bezier(.22,1,.36,1);
+          touch-action: pan-y;
         }
-
 
         .bs-slide {
-          flex:
-            0 0 100%;
-
+          flex: 0 0 100%;
           width: 100%;
           height: 100%;
-
           display: flex;
-
           align-items: center;
           justify-content: center;
-
-          background:
-            #f8faff;
+          padding: 5px;
+          background: radial-gradient(circle at 50% 20%, rgba(99,102,241,.09), transparent 58%), #f8faff;
         }
-
 
         .bs-slide img {
           width: 100%;
           height: 100%;
-
-          object-fit:
-            contain;
-
-          user-select:
-            none;
-
-          -webkit-user-drag:
-            none;
-
-          transition:
-            transform .5s
-              cubic-bezier(.22,1,.36,1);
+          object-fit: contain;
+          user-select: none;
+          -webkit-user-drag: none;
+          transition: transform .4s cubic-bezier(.22,1,.36,1);
+          filter: drop-shadow(0 7px 10px rgba(15,23,42,.06));
         }
 
-
-        .bs-card:hover
-        .bs-slide img {
-          transform:
-            scale(1.07);
+        .bs-card:hover .bs-slide img {
+          transform: scale(1.045);
         }
-
-
-        /* =====================================================
-           ARROWS
-        ===================================================== */
 
         .bs-arrow {
-          position:
-            absolute;
-
-          top:
-            50%;
-
-          z-index:
-            25;
-
-          width:
-            31px;
-
-          height:
-            31px;
-
-          transform:
-            translateY(-50%);
-
-          border:
-            1px solid
-            rgba(99,102,241,.18);
-
-          border-radius:
-            50%;
-
-          background:
-            rgba(255,255,255,.92);
-
-          color:
-            #4f46e5;
-
-          box-shadow:
-            0 3px 12px
-              rgba(0,0,0,.12);
-
-          display:
-            flex;
-
-          align-items:
-            center;
-
-          justify-content:
-            center;
-
-          cursor:
-            pointer;
-
-          opacity:
-            0;
-
-          transition:
-            .2s;
+          position: absolute;
+          top: 50%;
+          z-index: 25;
+          width: 28px;
+          height: 28px;
+          transform: translateY(-50%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid rgba(255,255,255,.9);
+          border-radius: 50%;
+          background: rgba(255,255,255,.90);
+          color: #4f46e5;
+          box-shadow: 0 4px 12px rgba(15,23,42,.13);
+          cursor: pointer;
+          opacity: 0;
+          transition: opacity .2s ease, transform .2s ease;
         }
 
-
-        .bs-card:hover
-        .bs-arrow {
-          opacity:
-            1;
+        .bs-card:hover .bs-arrow {
+          opacity: 1;
         }
-
 
         .bs-arrow:hover {
-          background:
-            #fff;
-
-          transform:
-            translateY(-50%)
-            scale(1.08);
+          transform: translateY(-50%) scale(1.08);
         }
 
-
-        .bs-left {
-          left:
-            9px;
-        }
-
-
-        .bs-right {
-          right:
-            9px;
-        }
-
-
-        /* =====================================================
-           BADGE
-        ===================================================== */
+        .bs-left { left: 7px; }
+        .bs-right { right: 7px; }
 
         .bs-badge {
-          position:
-            absolute;
-
-          top:
-            11px;
-
-          left:
-            11px;
-
-          z-index:
-            15;
-
-          display:
-            inline-flex;
-
-          align-items:
-            center;
-
-          gap:
-            5px;
-
-          padding:
-            4px 9px;
-
-          border-radius:
-            999px;
-
-          background:
-            linear-gradient(
-              135deg,
-              #4f46e5,
-              #7c3aed
-            );
-
-          color:
-            white;
-
-          font-size:
-            8.5px;
-
-          font-weight:
-            800;
-
-          letter-spacing:
-            .04em;
-
-          text-transform:
-            uppercase;
-
-          box-shadow:
-            0 3px 10px
-              rgba(79,70,229,.35);
+          position: absolute;
+          top: 8px;
+          left: 8px;
+          z-index: 15;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          padding: 4px 7px;
+          border: 1px solid rgba(255,255,255,.28);
+          border-radius: 999px;
+          background: linear-gradient(135deg,#4f46e5,#7c3aed);
+          color: white;
+          font-size: 7.5px;
+          font-weight: 800;
+          letter-spacing: .03em;
+          text-transform: uppercase;
+          box-shadow: 0 4px 10px rgba(79,70,229,.25);
+          backdrop-filter: blur(8px);
         }
-
-
-        /* =====================================================
-           DISCOUNT
-        ===================================================== */
-
-        .bs-card:hover
-        .bs-discount {
-          transform:
-            translateY(-1px)
-            scale(1.03);
-        }
-
-
-        .bs-discount {
-          transition:
-            transform .2s ease;
-        }
-
-
-        /* =====================================================
-           PRODUCT COUNT
-        ===================================================== */
 
         .bs-count {
-          position:
-            absolute;
-
-          right:
-            10px;
-
-          bottom:
-            10px;
-
-          z-index:
-            15;
-
-          padding:
-            3px 7px;
-
-          border-radius:
-            7px;
-
-          background:
-            rgba(15,14,42,.55);
-
-          color:
-            white;
-
-          font-size:
-            9px;
-
-          font-weight:
-            700;
-
-          backdrop-filter:
-            blur(7px);
+          position: absolute;
+          right: 8px;
+          bottom: 8px;
+          z-index: 15;
+          padding: 3px 6px;
+          border: 1px solid rgba(255,255,255,.2);
+          border-radius: 999px;
+          background: rgba(15,23,42,.55);
+          color: white;
+          font-size: 8px;
+          font-weight: 700;
+          backdrop-filter: blur(7px);
         }
 
-
-        /* =====================================================
-           OVERLAY
-        ===================================================== */
-
-        .bs-overlay {
-          position:
-            absolute;
-
-          inset:
-            0;
-
-          z-index:
-            18;
-
-          display:
-            flex;
-
-          align-items:
-            flex-end;
-
-          justify-content:
-            center;
-
-          padding-bottom:
-            13px;
-
-          background:
-            linear-gradient(
-              to bottom,
-              transparent 45%,
-              rgba(20,16,60,.52) 100%
-            );
-
-          opacity:
-            0;
-
-          transition:
-            opacity .26s ease;
-
-          pointer-events:
-            none;
+        .bs-dots {
+          position: absolute;
+          left: 50%;
+          bottom: 8px;
+          z-index: 20;
+          display: flex;
+          gap: 3px;
+          align-items: center;
+          transform: translateX(-50%);
+          padding: 3px 5px;
+          border-radius: 999px;
+          background: rgba(15,23,42,.20);
+          backdrop-filter: blur(6px);
         }
 
-
-        .bs-card:hover
-        .bs-overlay {
-          opacity:
-            1;
+        .bs-dot {
+          width: 4px;
+          height: 4px;
+          padding: 0;
+          border: 0;
+          border-radius: 999px;
+          background: rgba(255,255,255,.65);
+          cursor: pointer;
+          transition: width .2s ease, background .2s ease;
         }
 
-
-        /* =====================================================
-           QUICK VIEW
-        ===================================================== */
-
-        .bs-quick {
-          display:
-            inline-flex;
-
-          align-items:
-            center;
-
-          justify-content:
-            center;
-
-          gap:
-            6px;
-
-          border:
-            0;
-
-          border-radius:
-            999px;
-
-          padding:
-            7px 16px;
-
-          background:
-            rgba(255,255,255,.94);
-
-          color:
-            #1e1b4b;
-
-          font-size:
-            11.5px;
-
-          font-weight:
-            700;
-
-          box-shadow:
-            0 5px 18px
-              rgba(0,0,0,.14);
-
-          transform:
-            translateY(9px);
-
-          opacity:
-            0;
-
-          cursor:
-            pointer;
-
-          transition:
-            transform .26s .04s,
-            opacity .26s .04s;
-
-          pointer-events:
-            none;
+        .bs-dot.active {
+          width: 12px;
+          background: #6366f1;
         }
-
-
-        .bs-card:hover
-        .bs-quick {
-          transform:
-            translateY(0);
-
-          opacity:
-            1;
-
-          pointer-events:
-            auto;
-        }
-
-
-        .bs-quick:hover {
-          background:
-            #fff;
-
-          color:
-            #4f46e5;
-        }
-
-
-        /* =====================================================
-           PRICE
-        ===================================================== */
-
-        .bs-price {
-          background:
-            linear-gradient(
-              135deg,
-              #4f46e5,
-              #2563eb
-            );
-
-          -webkit-background-clip:
-            text;
-
-          -webkit-text-fill-color:
-            transparent;
-
-          background-clip:
-            text;
-        }
-
-
-        /* =====================================================
-           PROGRESS
-        ===================================================== */
 
         .bs-progress {
-          position:
-            absolute;
-
-          left:
-            0;
-
-          right:
-            0;
-
-          bottom:
-            0;
-
-          z-index:
-            30;
-
-          height:
-            2px;
-
-          overflow:
-            hidden;
-
-          background:
-            rgba(255,255,255,.3);
-
-          pointer-events:
-            none;
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 30;
+          height: 2px;
+          overflow: hidden;
+          background: rgba(255,255,255,.28);
+          pointer-events: none;
         }
-
 
         .bs-progress::after {
-          content:
-            "";
-
-          display:
-            block;
-
-          width:
-            100%;
-
-          height:
-            100%;
-
-          background:
-            rgba(255,255,255,.95);
-
-          transform-origin:
-            left;
-
-          animation:
-            bsProgress
-            1.4s linear infinite;
+          content: "";
+          display: block;
+          width: 100%;
+          height: 100%;
+          background: rgba(255,255,255,.95);
+          transform-origin: left;
+          animation: bsProgress 1.4s linear infinite;
         }
-
 
         @keyframes bsProgress {
-
-          from {
-            transform:
-              scaleX(0);
-          }
-
-          to {
-            transform:
-              scaleX(1);
-          }
-
+          from { transform: scaleX(0); }
+          to { transform: scaleX(1); }
         }
 
+        .bs-info {
+          padding: 8px 9px 9px;
+        }
 
-        /* =====================================================
-           LOADING SCROLL
-        ===================================================== */
+        .bs-category {
+          margin-bottom: 3px;
+          overflow: hidden;
+          color: #6366f1;
+          font-size: 7.5px;
+          font-weight: 800;
+          letter-spacing: .09em;
+          text-transform: uppercase;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+
+        .bs-title {
+          min-height: 31px;
+          margin: 0;
+          overflow: hidden;
+          color: #0f172a;
+          font-size: 11px;
+          font-weight: 750;
+          line-height: 1.4;
+          letter-spacing: -.01em;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          transition: color .18s ease;
+        }
+
+        .bs-title:hover {
+          color: #4f46e5;
+        }
+
+        .bs-meta {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 5px;
+          margin-top: 4px;
+          min-height: 15px;
+        }
+
+        .bs-meta .ml-1 {
+          margin-left: 2px;
+        }
+
+        .bs-meta .text-slate-500 {
+          color: #64748b;
+          font-size: 8px;
+          font-weight: 700;
+        }
+
+        .bs-meta .text-slate-400 {
+          color: #94a3b8;
+          font-size: 7.5px;
+        }
+
+        .bs-meta .text-amber-400 {
+          color: #fbbf24;
+        }
+
+        .bs-meta .text-slate-200 {
+          color: #e2e8f0;
+        }
+
+        .bs-price-row {
+          display: flex;
+          align-items: baseline;
+          gap: 6px;
+          margin-top: 5px;
+        }
+
+        .bs-price-value {
+          font-size: 14px;
+          font-weight: 900;
+          color: #4f46e5;
+        }
+
+        .bs-price {
+          background: linear-gradient(135deg,#4f46e5,#2563eb);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .bs-original {
+          color: #94a3b8;
+          font-size: 7.5px;
+          font-weight: 600;
+        }
+
+        .bs-orders {
+          display: flex;
+          align-items: center;
+          gap: 3px;
+          margin-top: 4px;
+          color: #059669;
+          font-size: 7.5px;
+          font-weight: 700;
+        }
 
         .bs-loading-scroll {
-          display:
-            flex;
-
-          gap:
-            14px;
-
-          width:
-            100%;
-
-          overflow-x:
-            auto;
-
-          overflow-y:
-            hidden;
-
-          padding-bottom:
-            12px;
-
-          scrollbar-width:
-            thin;
-
-          scrollbar-color:
-            rgba(99,102,241,.35)
-            rgba(99,102,241,.06);
+          display: flex;
+          gap: 12px;
+          overflow-x: hidden;
+          padding-bottom: 9px;
         }
-
 
         .bs-loading-card {
-          flex:
-            0 0 210px;
-
-          width:
-            210px;
-
-          min-width:
-            210px;
+          flex: 0 0 190px;
+          width: 190px;
+          min-width: 190px;
+          overflow: hidden;
+          border: 1px solid rgba(15,23,42,.06);
+          border-radius: 20px;
+          background: white;
+          box-shadow: 0 6px 20px rgba(15,23,42,.05);
         }
-
-
-        /* =====================================================
-           MOBILE
-        ===================================================== */
 
         @media (max-width: 640px) {
+          .bs-root {
+            padding-top: 1.25rem;
+            padding-bottom: 1.25rem;
+          }
 
           .bs-products-scroll {
-            gap:
-              10px;
-
-            padding-bottom:
-              8px;
-
-            scrollbar-width:
-              none;
+            gap: 9px;
+            padding-bottom: 7px;
+            scroll-padding-left: 3px;
           }
 
-
-          .bs-products-scroll::-webkit-scrollbar {
-            display:
-              none;
-          }
-
-
-          .bs-product-item {
-            flex:
-              0 0 175px;
-
-            width:
-              175px;
-
-            min-width:
-              175px;
-          }
-
-
-          .bs-loading-scroll {
-            gap:
-              10px;
-
-            padding-bottom:
-              8px;
-
-            scrollbar-width:
-              none;
-          }
-
-
-          .bs-loading-scroll::-webkit-scrollbar {
-            display:
-              none;
-          }
-
-
+          .bs-product-item,
           .bs-loading-card {
-            flex:
-              0 0 175px;
-
-            width:
-              175px;
-
-            min-width:
-              175px;
+            flex: 0 0 165px;
+            width: 165px;
+            min-width: 165px;
           }
 
+          .bs-card {
+            border-radius: 17px;
+          }
 
           .bs-arrow {
-            opacity:
-              1;
+            opacity: 1;
+            width: 26px;
+            height: 26px;
           }
 
-
-          .bs-overlay {
-            opacity:
-              1;
-
-            background:
-              linear-gradient(
-                to bottom,
-                transparent 50%,
-                rgba(20,16,60,.34) 100%
-              );
+          .bs-info {
+            padding: 7px 8px 8px;
           }
 
-
-          .bs-quick {
-            opacity:
-              1;
-
-            transform:
-              translateY(0);
-
-            pointer-events:
-              auto;
-
-            padding:
-              6px 13px;
-
-            font-size:
-              10px;
+          .bs-title {
+            font-size: 10px;
+            min-height: 28px;
           }
 
-
-          .bs-card:hover {
-            transform:
-              translateY(-3px);
+          .bs-price-value {
+            font-size: 13px;
           }
 
+          .bs-header .text-xl {
+            font-size: 1.05rem;
+          }
+
+          .bs-header .text-2xl {
+            font-size: 1.2rem;
+          }
         }
 
-
-        /* =====================================================
-           REDUCED MOTION
-        ===================================================== */
-
-        @media (
-          prefers-reduced-motion: reduce
-        ) {
-
+        @media (prefers-reduced-motion: reduce) {
           .bs-card,
           .bs-track,
           .bs-slide img,
           .bs-arrow,
           .bs-products-scroll {
-            transition:
-              none !important;
-
-            scroll-behavior:
-              auto !important;
+            transition: none !important;
+            scroll-behavior: auto !important;
           }
 
+          .bs-progress::after {
+            animation: none !important;
+          }
         }
-
       `}</style>
 
 
@@ -1279,7 +860,7 @@ export default function BestSellerProducts() {
             HEADER
         ===================================================== */}
 
-        <div className="mb-6 flex items-end justify-between gap-4">
+        <div className="bs-header mb-4 flex items-end justify-between gap-3">
 
           <div>
 
@@ -1369,17 +950,6 @@ export default function BestSellerProducts() {
                     ?.orders || 0,
                 );
 
-              const discount =
-                originalPrice > price
-                  ? Math.round(
-                      ((originalPrice -
-                        price) /
-                        originalPrice) *
-                        100,
-                    )
-                  : 0;
-
-
               return (
                 <article
                   key={
@@ -1422,7 +992,7 @@ export default function BestSellerProducts() {
 
                     style={{
                       height:
-                        "clamp(175px,21vw,225px)",
+                        "clamp(125px,15vw,155px)",
 
                       background:
                         "radial-gradient(circle at 50% 20%, rgba(99,102,241,.08), transparent 55%), #f8faff",
@@ -1571,18 +1141,6 @@ export default function BestSellerProducts() {
                     </span>
 
 
-                    {/* DISCOUNT */}
-
-                    {discount > 0 && (
-                      <span className="bs-discount absolute right-3 top-3 z-20 inline-flex items-center rounded-full border border-emerald-100 bg-emerald-500 px-2.5 py-1 text-[9px] font-extrabold tracking-wide text-white shadow-lg shadow-emerald-500/20">
-
-                        {discount}%
-                        OFF
-
-                      </span>
-                    )}
-
-
                     {/* AUTO PROGRESS */}
 
                     {hoveredCard ===
@@ -1674,9 +1232,9 @@ export default function BestSellerProducts() {
                       CONTENT
                   ================================================= */}
 
-                  <div className="p-3 sm:p-4">
+                  <div className="bs-info">
 
-                    <p className="mb-1 truncate text-[9px] font-bold uppercase tracking-[0.12em] text-indigo-500">
+                    <p className="bs-category">
 
                       {product
                         ?.category
@@ -1693,7 +1251,7 @@ export default function BestSellerProducts() {
                         )
                       }
 
-                      className="min-h-[38px] cursor-pointer line-clamp-2 text-[12.5px] font-semibold leading-[1.35] text-slate-800 transition-colors hover:text-indigo-600 sm:text-sm"
+                      className="bs-title"
                     >
 
                       {product?.title ||
@@ -1704,7 +1262,7 @@ export default function BestSellerProducts() {
 
                     {/* RATING */}
 
-                    <div className="mt-1 flex min-h-[1px] items-center justify-between gap-2">
+                    <div className="bs-meta">
 
                       <div className="flex items-center gap-1">
 
@@ -1793,9 +1351,9 @@ export default function BestSellerProducts() {
 
                     {/* PRICE */}
 
-                    <div className="mt-2.5 flex items-baseline gap-1.5">
+                    <div className="bs-price-row">
 
-                      <span className="text-sm font-extrabold sm:text-base">
+                      <span className="bs-price-value">
 
                         <span className="mr-0.5 text-indigo-600">
                           ₹
@@ -1815,7 +1373,7 @@ export default function BestSellerProducts() {
                       {originalPrice >
                         price && (
 
-                        <del className="text-[9px] font-medium text-slate-400">
+                        <del className="bs-original">
 
                           ₹
                           {originalPrice.toLocaleString(
@@ -1832,7 +1390,7 @@ export default function BestSellerProducts() {
                     {/* ORDERS */}
 
                     {orders > 0 && (
-                      <div className="mt-2 flex items-center gap-1 text-[9px] font-semibold text-emerald-600">
+                      <div className="bs-orders">
 
                         <FaEye
                           size={9}

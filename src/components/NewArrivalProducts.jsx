@@ -357,77 +357,72 @@ export default function NewArrivalProducts() {
   }
 
   /* =====================================================
-     UI — MODERN NEW ARRIVAL PRODUCT CARD
+     UI — COMPACT MODERN NEW ARRIVALS
   ===================================================== */
 
   return (
     <>
       <style>{`
         .na-root {
-          font-family: 'Plus Jakarta Sans', sans-serif;
           position: relative;
+          width: 100%;
         }
 
-        .na-glow {
-          position: absolute;
-          inset: 0 5% auto;
-          height: 180px;
-          border-radius: 999px;
-          background: radial-gradient(
-            ellipse,
-            rgba(99,102,241,.10),
-            transparent 68%
-          );
-          filter: blur(30px);
-          pointer-events: none;
+        .na-scroll {
+          display: flex;
+          gap: 10px;
+          width: 100%;
+          overflow-x: auto;
+          overflow-y: hidden;
+          padding: 3px 3px 8px;
+          scroll-snap-type: x proximity;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
         }
 
-        .na-line {
-          width: 42px;
-          height: 4px;
-          border-radius: 999px;
-          background: linear-gradient(90deg,#4f46e5,#7c3aed);
+        .na-scroll::-webkit-scrollbar {
+          display: none;
+        }
+
+        .na-item {
+          flex: 0 0 178px;
+          width: 178px;
+          min-width: 178px;
+          scroll-snap-align: start;
         }
 
         .na-card {
           position: relative;
           overflow: hidden;
+          height: 100%;
+          border: 1px solid rgba(99,102,241,.10);
+          border-radius: 17px;
+          background: rgba(255,255,255,.97);
+          box-shadow: 0 5px 18px rgba(15,23,42,.055);
           cursor: pointer;
-          border: 1px solid rgba(99,102,241,.12);
-          border-radius: 24px;
-          background: rgba(255,255,255,.92);
-          backdrop-filter: blur(16px);
-          box-shadow: 0 8px 28px rgba(15,23,42,.045);
-          transition:
-            transform .32s cubic-bezier(.34,1.2,.64,1),
-            box-shadow .28s ease,
-            border-color .25s ease;
-        }
-
-        .na-card::after {
-          content: "";
-          position: absolute;
-          inset: 0;
-          z-index: 45;
-          pointer-events: none;
-          border-radius: inherit;
-          box-shadow: inset 0 1px 0 rgba(255,255,255,.78);
+          transition: transform .25s ease, box-shadow .25s ease, border-color .2s ease;
         }
 
         .na-card:hover {
-          transform: translateY(-7px) scale(1.012);
-          border-color: rgba(99,102,241,.28);
-          box-shadow:
-            0 22px 52px rgba(79,70,229,.17),
-            0 5px 18px rgba(0,0,0,.05);
+          transform: translateY(-4px);
+          border-color: rgba(99,102,241,.22);
+          // box-shadow: 0 13px 28px rgba(15,23,42,.10);
+        }
+
+        .na-image {
+          position: relative;
+          height: 142px;
+          overflow: hidden;
+          background:
+            radial-gradient(circle at 50% 20%, rgba(99,102,241,.08), transparent 55%),
+            linear-gradient(145deg,#fafbff,#f1f5ff);
         }
 
         .na-track {
           display: flex;
           width: 100%;
           height: 100%;
-          will-change: transform;
-          transition: transform .42s cubic-bezier(.22,1,.36,1);
+          transition: transform .35s cubic-bezier(.22,1,.36,1);
           touch-action: pan-y;
         }
 
@@ -438,199 +433,95 @@ export default function NewArrivalProducts() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background:
-            radial-gradient(
-              circle at 50% 15%,
-              rgba(99,102,241,.10),
-              transparent 52%
-            ),
-            linear-gradient(145deg,#f8faff,#f4f6ff);
         }
 
         .na-slide img {
           width: 100%;
           height: 100%;
-          padding: 8px;
+          padding: 7px;
           object-fit: contain;
           user-select: none;
           -webkit-user-drag: none;
-          transition: transform .5s cubic-bezier(.22,1,.36,1);
+          transition: transform .35s ease;
         }
 
         .na-card:hover .na-slide img {
-          transform: scale(1.07);
+          transform: scale(1.045);
         }
 
         .na-badge {
           position: absolute;
-          top: 11px;
-          left: 11px;
-          z-index: 20;
+          top: 8px;
+          left: 8px;
+          z-index: 3;
           display: inline-flex;
           align-items: center;
-          gap: 5px;
-          padding: 5px 10px;
-          border: 1px solid rgba(255,255,255,.25);
+          gap: 4px;
+          padding: 4px 7px;
           border-radius: 999px;
           background: linear-gradient(135deg,#4f46e5,#7c3aed);
-          color: white;
-          font-size: 8.5px;
+          color: #fff;
+          font-size: 7px;
           font-weight: 800;
           letter-spacing: .05em;
-          text-transform: uppercase;
-          box-shadow: 0 5px 14px rgba(79,70,229,.28);
+          box-shadow: 0 4px 11px rgba(79,70,229,.2);
         }
 
         .na-discount {
           position: absolute;
-          top: 11px;
-          right: 11px;
-          z-index: 21;
-          display: inline-flex;
-          align-items: center;
-          padding: 5px 9px;
-          border: 1px solid rgba(255,255,255,.35);
-          border-radius: 999px;
-          background: #10b981;
-          color: white;
-          font-size: 9px;
+          right: 8px;
+          bottom: 8px;
+          z-index: 3;
+          padding: 3px 6px;
+          border-radius: 6px;
+          background: rgba(16,185,129,.93);
+          color: #fff;
+          font-size: 7px;
           font-weight: 800;
-          letter-spacing: .02em;
-          box-shadow: 0 6px 15px rgba(16,185,129,.25);
-          transition: transform .2s ease;
+          backdrop-filter: blur(6px);
         }
-
-        .na-card:hover .na-discount {
-          transform: scale(1.04) translateY(-1px);
-        }
-
-        .na-arrow {
-          position: absolute;
-          top: 50%;
-          z-index: 27;
-          width: 31px;
-          height: 31px;
-          transform: translateY(-50%);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: 1px solid rgba(99,102,241,.18);
-          border-radius: 50%;
-          background: rgba(255,255,255,.93);
-          color: #4f46e5;
-          box-shadow: 0 3px 12px rgba(0,0,0,.12);
-          cursor: pointer;
-          opacity: 0;
-          transition: .2s;
-        }
-
-        .na-card:hover .na-arrow {
-          opacity: 1;
-        }
-
-        .na-arrow:hover {
-          background: white;
-          transform: translateY(-50%) scale(1.08);
-        }
-
-        .na-left { left: 9px; }
-        .na-right { right: 9px; }
 
         .na-dots {
           position: absolute;
           left: 50%;
-          bottom: 10px;
-          z-index: 27;
+          bottom: 7px;
+          z-index: 4;
           display: flex;
-          gap: 4px;
+          gap: 3px;
           transform: translateX(-50%);
-          padding: 4px 7px;
+          padding: 3px 5px;
           border-radius: 999px;
-          background: rgba(255,255,255,.86);
-          backdrop-filter: blur(8px);
+          background: rgba(255,255,255,.84);
+          backdrop-filter: blur(7px);
         }
 
         .na-dot {
-          width: 5px;
-          height: 5px;
+          width: 4px;
+          height: 4px;
           padding: 0;
           border: 0;
           border-radius: 999px;
           background: #cbd5e1;
           cursor: pointer;
-          transition: .2s;
         }
 
         .na-dot.active {
-          width: 14px;
+          width: 11px;
           background: #4f46e5;
         }
 
         .na-count {
           position: absolute;
-          right: 10px;
-          bottom: 10px;
-          z-index: 27;
-          padding: 3px 7px;
-          border-radius: 7px;
-          background: rgba(15,14,42,.55);
-          color: white;
-          font-size: 9px;
+          right: 7px;
+          bottom: 7px;
+          z-index: 4;
+          padding: 2px 5px;
+          border-radius: 5px;
+          background: rgba(15,23,42,.55);
+          color: #fff;
+          font-size: 7px;
           font-weight: 700;
-          backdrop-filter: blur(7px);
-        }
-
-        .na-overlay {
-          position: absolute;
-          inset: 0;
-          z-index: 22;
-          display: flex;
-          align-items: flex-end;
-          justify-content: center;
-          padding-bottom: 13px;
-          background: linear-gradient(
-            to bottom,
-            transparent 45%,
-            rgba(20,16,60,.52) 100%
-          );
-          opacity: 0;
-          transition: opacity .26s ease;
-          pointer-events: none;
-        }
-
-        .na-card:hover .na-overlay {
-          opacity: 1;
-        }
-
-        .na-quick {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-          padding: 7px 16px;
-          border: 0;
-          border-radius: 999px;
-          background: rgba(255,255,255,.95);
-          color: #1e1b4b;
-          font-size: 11.5px;
-          font-weight: 700;
-          box-shadow: 0 5px 18px rgba(0,0,0,.14);
-          transform: translateY(9px);
-          opacity: 0;
-          cursor: pointer;
-          transition: transform .26s .04s, opacity .26s .04s;
-          pointer-events: none;
-        }
-
-        .na-card:hover .na-quick {
-          transform: translateY(0);
-          opacity: 1;
-          pointer-events: auto;
-        }
-
-        .na-quick:hover {
-          color: #4f46e5;
-          box-shadow: 0 8px 24px rgba(79,70,229,.18);
+          backdrop-filter: blur(6px);
         }
 
         .na-progress {
@@ -638,11 +529,10 @@ export default function NewArrivalProducts() {
           left: 0;
           right: 0;
           bottom: 0;
-          z-index: 35;
+          z-index: 5;
           height: 2px;
           overflow: hidden;
-          background: rgba(255,255,255,.3);
-          pointer-events: none;
+          background: rgba(255,255,255,.35);
         }
 
         .na-progress::after {
@@ -660,130 +550,184 @@ export default function NewArrivalProducts() {
           to { transform: scaleX(1); }
         }
 
+        .na-content {
+          padding: 9px 10px 10px;
+        }
+
+        .na-category {
+          margin-bottom: 3px;
+          overflow: hidden;
+          color: #6366f1;
+          font-size: 7px;
+          font-weight: 800;
+          letter-spacing: .1em;
+          text-transform: uppercase;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+
+        .na-title {
+          min-height: 32px;
+          display: -webkit-box;
+          overflow: hidden;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+          color: #1e293b;
+          font-size: 11px;
+          font-weight: 700;
+          line-height: 1.38;
+        }
+
+        .na-meta {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 5px;
+          min-height: 16px;
+          margin-top: 5px;
+        }
+
+        .na-rating {
+          display: flex;
+          align-items: center;
+          gap: 3px;
+          min-width: 0;
+        }
+
+        .na-rating-text {
+          color: #475569;
+          font-size: 8px;
+          font-weight: 800;
+        }
+
+        .na-reviews {
+          color: #94a3b8;
+          font-size: 7px;
+        }
+
+        .na-just-in {
+          padding: 3px 5px;
+          border-radius: 999px;
+          background: #eef2ff;
+          color: #6366f1;
+          font-size: 6.5px;
+          font-weight: 800;
+          white-space: nowrap;
+        }
+
+        .na-price-row {
+          display: flex;
+          align-items: baseline;
+          gap: 5px;
+          margin-top: 6px;
+          padding-top: 6px;
+          border-top: 1px solid #f1f5f9;
+        }
+
         .na-price {
-          background: linear-gradient(135deg,#4f46e5,#2563eb);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+          font-size: 13px;
+          font-weight: 900;
+          color: #4f46e5;
+        }
+
+        .na-original {
+          color: #94a3b8;
+          font-size: 7px;
+          font-weight: 600;
         }
 
         .na-view-all {
           display: inline-flex;
           align-items: center;
+          gap: 3px;
+          flex-shrink: 0;
           border: 1px solid rgba(99,102,241,.14);
           border-radius: 999px;
-          background: rgba(255,255,255,.9);
-          padding: 9px 14px;
+          padding: 7px 10px;
+          background: rgba(255,255,255,.92);
           color: #4f46e5;
-          font-size: 11px;
-          font-weight: 700;
-          box-shadow: 0 3px 12px rgba(15,23,42,.05);
-          transition: .2s;
+          font-size: 9px;
+          font-weight: 800;
+          box-shadow: 0 3px 10px rgba(15,23,42,.045);
         }
 
         .na-view-all:hover {
-          transform: translateY(-1px);
           background: #eef2ff;
-          border-color: rgba(99,102,241,.25);
-          box-shadow: 0 8px 20px rgba(79,70,229,.10);
-        }
-
-        .na-quick:focus-visible,
-        .na-arrow:focus-visible,
-        .na-dot:focus-visible,
-        .na-view-all:focus-visible {
-          outline: 2px solid rgba(79,70,229,.45);
-          outline-offset: 2px;
         }
 
         @media (max-width: 640px) {
+          .na-scroll {
+            gap: 8px;
+          }
+
+          .na-item {
+            flex-basis: 155px;
+            width: 155px;
+            min-width: 155px;
+          }
+
+          .na-image {
+            height: 124px;
+          }
+
+          .na-content {
+            padding: 8px 9px 9px;
+          }
+
           .na-card {
-            border-radius: 20px;
-          }
-
-          .na-arrow {
-            opacity: 1;
-          }
-
-          .na-overlay {
-            opacity: 1;
-            background: linear-gradient(
-              to bottom,
-              transparent 52%,
-              rgba(20,16,60,.32) 100%
-            );
-          }
-
-          .na-quick {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
-            padding: 6px 13px;
-            font-size: 10px;
-          }
-
-          .na-card:hover {
-            transform: translateY(-3px);
+            border-radius: 15px;
           }
         }
 
         @media (prefers-reduced-motion: reduce) {
           .na-card,
           .na-track,
-          .na-slide img,
-          .na-arrow,
-          .na-quick {
+          .na-slide img {
             transition: none !important;
+          }
+
+          .na-progress::after {
+            animation: none;
           }
         }
       `}</style>
 
-      <section className="na-root mx-auto w-full max-w-7xl px-3 py-8 sm:px-5 lg:px-8">
-        <div className="na-glow" />
-
-        <div
-          className="relative z-10 mb-6 flex items-end justify-between gap-4"
-        >
-          <div>
-            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white/80 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-indigo-600 shadow-sm backdrop-blur">
-              <FaMagic size={10} />
-              Fresh collection
+      <section className="na-root mx-auto w-full max-w-7xl px-3 py-5 sm:px-5 sm:py-6 lg:px-8">
+        <div className="relative z-10 mb-3 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-indigo-100 bg-indigo-50 px-2 py-0.5 text-[7px] font-extrabold uppercase tracking-wider text-indigo-600">
+              <FaMagic size={8} />
+              Fresh
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="na-line hidden sm:block" />
+            <h2 className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-slate-900 sm:text-xl">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 text-indigo-500">
+                <FaMagic size={13} />
+              </span>
+              New Arrivals
+            </h2>
 
-              <h2 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
-                New Arrivals
-              </h2>
-            </div>
-
-            <p className="mt-1 text-xs text-slate-500 sm:text-sm">
-              Fresh products just added to the collection.
+            <p className="mt-0.5 text-[9px] text-slate-500 sm:text-[10px]">
+              Fresh products just added.
             </p>
           </div>
 
           <button
             type="button"
             onClick={() => navigate("/products")}
-            className="na-view-all group"
+            className="na-view-all"
           >
-            View All
-            <span className="ml-1 transition-transform group-hover:translate-x-0.5">
-              →
-            </span>
+            View All <span aria-hidden="true">→</span>
           </button>
         </div>
 
-        <div className="relative z-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4 xl:grid-cols-5">
-          {products.map((product, index) => {
+        <div className="na-scroll">
+          {products.map((product) => {
             const images = getImages(product);
-            const activeIdx =
-              activeIndexes[product._id] || 0;
+            const activeIdx = activeIndexes[product._id] || 0;
 
             const price = getPrice(product);
-            const originalPrice =
-              getOriginalPrice(product);
+            const originalPrice = getOriginalPrice(product);
 
             const rating = Number(
               product?.rating?.average ??
@@ -791,282 +735,171 @@ export default function NewArrivalProducts() {
                 0
             );
 
-            const reviews = Number(
-              product?.numReviews || 0
-            );
+            const reviews = Number(product?.numReviews || 0);
 
             const discount =
-              originalPrice > price
+              originalPrice > price && originalPrice > 0
                 ? Math.round(
-                    ((originalPrice - price) /
-                      originalPrice) *
-                      100
+                    ((originalPrice - price) / originalPrice) * 100
                   )
                 : 0;
 
             return (
-              <article
-                key={product._id}
-                className="na-card"
-                onMouseEnter={() =>
-                  setHoveredCard(product._id)
-                }
-                onMouseLeave={() =>
-                  setHoveredCard((current) =>
-                    current === product._id
-                      ? null
-                      : current
-                  )
-                }
-              >
-                {/* IMAGE CAROUSEL */}
+              <article key={product._id} className="na-item">
                 <div
-                  className="relative overflow-hidden"
-                  style={{
-                    height:
-                      "clamp(185px,22vw,235px)",
-                  }}
-                  onTouchStart={(event) => {
-                    event.currentTarget.dataset.touchX =
-                      event.touches[0].clientX;
-
-                    setHoveredCard(product._id);
-                  }}
-                  onTouchEnd={(event) => {
-                    const start = Number(
-                      event.currentTarget.dataset.touchX || 0
-                    );
-
-                    const end =
-                      event.changedTouches[0].clientX;
-
-                    const distance = start - end;
-
-                    if (Math.abs(distance) > 45) {
-                      changeImage(
-                        event,
-                        product._id,
-                        images.length,
-                        distance > 0 ? 1 : -1
-                      );
-                    }
-
+                  className="na-card"
+                  onMouseEnter={() => setHoveredCard(product._id)}
+                  onMouseLeave={() =>
                     setHoveredCard((current) =>
-                      current === product._id
-                        ? null
-                        : current
-                    );
-                  }}
-                  onTouchCancel={() =>
-                    setHoveredCard((current) =>
-                      current === product._id
-                        ? null
-                        : current
+                      current === product._id ? null : current
                     )
                   }
                 >
                   <div
-                    className="na-track"
-                    style={{
-                      transform: `translateX(-${
-                        activeIdx * 100
-                      }%)`,
+                    className="na-image"
+                    onTouchStart={(event) => {
+                      event.currentTarget.dataset.touchX =
+                        event.touches[0].clientX;
+                      setHoveredCard(product._id);
                     }}
+                    onTouchEnd={(event) => {
+                      const start = Number(
+                        event.currentTarget.dataset.touchX || 0
+                      );
+                      const end = event.changedTouches[0].clientX;
+                      const distance = start - end;
+
+                      if (Math.abs(distance) > 45) {
+                        changeImage(
+                          event,
+                          product._id,
+                          images.length,
+                          distance > 0 ? 1 : -1
+                        );
+                      }
+
+                      setHoveredCard((current) =>
+                        current === product._id ? null : current
+                      );
+                    }}
+                    onTouchCancel={() =>
+                      setHoveredCard((current) =>
+                        current === product._id ? null : current
+                      )
+                    }
                   >
-                    {images.map((image, imageIndex) => (
-                      <div
-                        key={`${image}-${imageIndex}`}
-                        className="na-slide"
-                        onClick={() =>
-                          openProduct(product)
-                        }
-                      >
-                        <img
-                          src={image}
-                          alt={`${product?.title || "Product"} image ${
-                            imageIndex + 1
-                          }`}
-                          loading="lazy"
-                          draggable="false"
-                        />
-                      </div>
-                    ))}
-                  </div>
-
-                  <span className="na-badge">
-                    <FaMagic size={8} />
-                    New
-                  </span>
-
-                  {discount > 0 && (
-                    <span className="na-discount">
-                      {discount}% OFF
-                    </span>
-                  )}
-
-                  {hoveredCard === product._id &&
-                    images.length > 1 && (
-                      <div
-                        className="na-progress"
-                        aria-hidden="true"
-                      />
-                    )}
-
-                  <div className="na-overlay">
-                    <button
-                      type="button"
-                      className="na-quick"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        openProduct(product);
+                    <div
+                      className="na-track"
+                      style={{
+                        transform: `translateX(-${activeIdx * 100}%)`,
                       }}
                     >
-                      <FaEye size={12} />
-                      Quick View
-                    </button>
-                  </div>
-
-                  {images.length > 1 && (
-                    <>
-                      <button
-                        type="button"
-                        className="na-arrow na-left"
-                        onClick={(event) =>
-                          changeImage(
-                            event,
-                            product._id,
-                            images.length,
-                            -1
-                          )
-                        }
-                        aria-label="Previous image"
-                      >
-                        ‹
-                      </button>
-
-                      <button
-                        type="button"
-                        className="na-arrow na-right"
-                        onClick={(event) =>
-                          changeImage(
-                            event,
-                            product._id,
-                            images.length,
-                            1
-                          )
-                        }
-                        aria-label="Next image"
-                      >
-                        ›
-                      </button>
-
-                      <div className="na-dots">
-                        {images.map((_, imageIndex) => (
-                          <button
-                            key={imageIndex}
-                            type="button"
-                            aria-label={`Show image ${
-                              imageIndex + 1
-                            }`}
-                            className={`na-dot ${
-                              activeIdx === imageIndex
-                                ? "active"
-                                : ""
-                            }`}
-                            onClick={(event) =>
-                              goToImage(
-                                event,
-                                product._id,
-                                imageIndex
-                              )
-                            }
+                      {images.map((image, imageIndex) => (
+                        <div
+                          key={`${image}-${imageIndex}`}
+                          className="na-slide"
+                          onClick={() => openProduct(product)}
+                        >
+                          <img
+                            src={image}
+                            alt={`${product?.title || "Product"} image ${imageIndex + 1}`}
+                            loading="lazy"
+                            decoding="async"
+                            draggable="false"
                           />
-                        ))}
-                      </div>
-
-                      <div className="na-count">
-                        {activeIdx + 1}/{images.length}
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                {/* CONTENT */}
-                <div className="p-3 sm:p-4">
-                  <p className="mb-1 truncate text-[9px] font-bold uppercase tracking-[0.12em] text-indigo-500">
-                    {product?.category?.name ||
-                      "New Arrival"}
-                  </p>
-
-                  <h3
-                    onClick={() =>
-                      openProduct(product)
-                    }
-                    className="min-h-[38px] cursor-pointer line-clamp-2 text-[12.5px] font-semibold leading-[1.35] text-slate-800 transition-colors hover:text-indigo-600 sm:text-sm"
-                  >
-                    {product?.title || "Product"}
-                  </h3>
-
-                  <div className="mt-2 flex min-h-[18px] items-center justify-between gap-2">
-                    <div className="flex items-center gap-1">
-                      {rating > 0 ? (
-                        <>
-                          <div className="flex items-center gap-0.5">
-                            {[...Array(5)].map(
-                              (_, starIndex) => (
-                                <FaStar
-                                  key={starIndex}
-                                  size={10}
-                                  className={
-                                    starIndex <
-                                    Math.round(rating)
-                                      ? "text-amber-400"
-                                      : "text-slate-200"
-                                  }
-                                />
-                              )
-                            )}
-                          </div>
-
-                          <span className="ml-1 text-[10px] font-semibold text-slate-500">
-                            {rating.toFixed(1)}
-                          </span>
-                        </>
-                      ) : (
-                        <span className="rounded-md bg-slate-50 px-1.5 py-0.5 text-[9px] font-bold text-slate-400">
-                          New
-                        </span>
-                      )}
-
-                      <span className="text-[9px] text-slate-400">
-                        ({reviews})
-                      </span>
+                        </div>
+                      ))}
                     </div>
 
-                    <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[9px] font-semibold text-indigo-500">
-                      Just In
+                    <span className="na-badge">
+                      <FaMagic size={7} />
+                      NEW
                     </span>
+
+                    {/* {discount > 0 && (
+                      <span className="na-discount">
+                        {discount}% OFF
+                      </span>
+                    )} */}
+
+                    {hoveredCard === product._id && images.length > 1 && (
+                      <div className="na-progress" aria-hidden="true" />
+                    )}
+
+                    {images.length > 1 && (
+                      <>
+                        <div className="na-dots">
+                          {images.map((_, imageIndex) => (
+                            <button
+                              key={imageIndex}
+                              type="button"
+                              aria-label={`Show image ${imageIndex + 1}`}
+                              className={`na-dot ${
+                                activeIdx === imageIndex ? "active" : ""
+                              }`}
+                              onClick={(event) =>
+                                goToImage(
+                                  event,
+                                  product._id,
+                                  imageIndex
+                                )
+                              }
+                            />
+                          ))}
+                        </div>
+
+                        <div className="na-count">
+                          {activeIdx + 1}/{images.length}
+                        </div>
+                      </>
+                    )}
                   </div>
 
-                  <div className="mt-3 flex items-baseline gap-1.5 border-t border-slate-100 pt-2.5">
-                    <span className="text-sm font-extrabold sm:text-base">
-                      <span className="mr-0.5 text-indigo-600">
-                        ₹
-                      </span>
+                  <div className="na-content">
+                    <p className="na-category">
+                      {product?.category?.name || "New Arrival"}
+                    </p>
 
-                      <span className="na-price">
-                        {price.toLocaleString("en-IN")}
-                      </span>
-                    </span>
+                    <h3
+                      className="na-title cursor-pointer"
+                      onClick={() => openProduct(product)}
+                    >
+                      {product?.title || "Product"}
+                    </h3>
 
-                    {originalPrice > price && (
-                      <del className="text-[9px] font-medium text-slate-400">
-                        ₹
-                        {originalPrice.toLocaleString(
-                          "en-IN"
+                    <div className="na-meta">
+                      <div className="na-rating">
+                        {rating > 0 ? (
+                          <>
+                            <FaStar className="text-amber-400" size={8} />
+                            <span className="na-rating-text">
+                              {rating.toFixed(1)}
+                            </span>
+                            <span className="na-reviews">
+                              ({reviews})
+                            </span>
+                          </>
+                        ) : (
+                          <span className="rounded bg-slate-50 px-1.5 py-0.5 text-[7px] font-bold text-slate-400">
+                            New
+                          </span>
                         )}
-                      </del>
-                    )}
+                      </div>
+
+                      <span className="na-just-in">JUST IN</span>
+                    </div>
+
+                    <div className="na-price-row">
+                      <span className="na-price">
+                        ₹{price.toLocaleString("en-IN")}
+                      </span>
+
+                      {originalPrice > price && (
+                        <del className="na-original">
+                          ₹{originalPrice.toLocaleString("en-IN")}
+                        </del>
+                      )}
+                    </div>
                   </div>
                 </div>
               </article>

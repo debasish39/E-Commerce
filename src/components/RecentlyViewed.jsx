@@ -311,7 +311,7 @@ export default function RecentlyViewed() {
   if (loading) {
     return (
       <section className="mx-auto w-full max-w-7xl px-3 py-8 sm:px-5 lg:px-8">
-        <div className="mb-6">
+        <div className="mb-4">
           <div className="mb-2 h-6 w-28 animate-pulse rounded-full bg-slate-200" />
 
           <div className="h-8 w-56 animate-pulse rounded-lg bg-slate-200" />
@@ -327,9 +327,9 @@ export default function RecentlyViewed() {
                 key={item}
                 className="rv-loading-card overflow-hidden rounded-[22px] border border-slate-100 bg-white"
               >
-                <div className="h-52 animate-pulse bg-slate-100" />
+                <div className="h-40 animate-pulse bg-slate-100" />
 
-                <div className="space-y-3 p-4">
+                <div className="space-y-2.5 p-3">
                   <div className="h-3 w-20 animate-pulse rounded bg-slate-100" />
 
                   <div className="h-4 w-full animate-pulse rounded bg-slate-100" />
@@ -396,796 +396,384 @@ export default function RecentlyViewed() {
   return (
     <>
       <style>{`
-
-        /* ======================================================
-           ROOT
-        ====================================================== */
-
         .rv-root {
-          font-family:
-            'Plus Jakarta Sans',
-            sans-serif;
+          font-family: 'Plus Jakarta Sans', sans-serif;
         }
-
-
-        /* ======================================================
-           HORIZONTAL PRODUCT SCROLL
-        ====================================================== */
 
         .rv-products-scroll {
           display: flex;
-
           gap: 14px;
-
           width: 100%;
-
           overflow-x: auto;
           overflow-y: hidden;
-
-          padding-bottom: 12px;
-
+          padding: 3px 3px 10px;
           scroll-behavior: smooth;
-
-          -webkit-overflow-scrolling:
-            touch;
-
-          scrollbar-width: thin;
-
-          scrollbar-color:
-            rgba(99,102,241,.35)
-            rgba(99,102,241,.06);
+          scroll-snap-type: x proximity;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
         }
-
 
         .rv-products-scroll::-webkit-scrollbar {
-          height: 6px;
+          display: none;
         }
-
-
-        .rv-products-scroll::-webkit-scrollbar-track {
-          background:
-            rgba(99,102,241,.06);
-
-          border-radius: 999px;
-        }
-
-
-        .rv-products-scroll::-webkit-scrollbar-thumb {
-          background:
-            rgba(99,102,241,.35);
-
-          border-radius: 999px;
-        }
-
-
-        .rv-products-scroll::-webkit-scrollbar-thumb:hover {
-          background:
-            rgba(79,70,229,.55);
-        }
-
-
-        /* ======================================================
-           PRODUCT ITEM
-        ====================================================== */
 
         .rv-product-item {
-          flex:
-            0 0 210px;
-
-          width: 210px;
-
-          min-width: 210px;
+          flex: 0 0 218px;
+          width: 218px;
+          min-width: 218px;
+          scroll-snap-align: start;
         }
-
-
-        /* ======================================================
-           CARD
-        ====================================================== */
 
         .rv-card {
           position: relative;
-
-          background:
-            rgba(255,255,255,.90);
-
-          backdrop-filter:
-            blur(16px);
-
-          border:
-            1px solid
-            rgba(99,102,241,.12);
-
-          border-radius: 22px;
-
+          display: flex;
+          flex-direction: column;
+          min-height: 100%;
           overflow: hidden;
-
-          transition:
-            transform .32s
-              cubic-bezier(.34,1.2,.64,1),
-            box-shadow .28s ease,
-            border-color .25s ease;
+          background: rgba(255,255,255,.97);
+          border: 1px solid rgba(15,23,42,.07);
+          border-radius: 20px;
+          box-shadow: 0 8px 28px rgba(15,23,42,.06), 0 2px 7px rgba(79,70,229,.04);
+          transition: transform .28s cubic-bezier(.34,1.2,.64,1), box-shadow .28s ease, border-color .22s ease;
         }
-
 
         .rv-card:hover {
-          transform:
-            translateY(-7px)
-            scale(1.012);
-
-          box-shadow:
-            0 22px 52px
-              rgba(79,70,229,.17),
-            0 5px 18px
-              rgba(0,0,0,.05);
-
-          border-color:
-            rgba(99,102,241,.28);
+          transform: translateY(-6px);
+          border-color: rgba(99,102,241,.20);
+          box-shadow: 0 18px 42px rgba(15,23,42,.10), 0 6px 18px rgba(79,70,229,.09);
         }
 
-
-        /* ======================================================
-           IMAGE TRACK
-        ====================================================== */
+        .rv-image-area {
+          position: relative;
+          height: 160px;
+          overflow: hidden;
+          background: radial-gradient(circle at 50% 18%, rgba(99,102,241,.10), transparent 58%), linear-gradient(145deg,#f8faff,#f4f6ff);
+        }
 
         .rv-track {
           display: flex;
-
           width: 100%;
           height: 100%;
-
-          will-change:
-            transform;
-
-          transition:
-            transform .42s
-              cubic-bezier(.22,1,.36,1);
-
-          touch-action:
-            pan-y;
+          will-change: transform;
+          transition: transform .42s cubic-bezier(.22,1,.36,1);
+          touch-action: pan-y;
         }
-
 
         .rv-slide {
-          flex:
-            0 0 100%;
-
+          flex: 0 0 100%;
           width: 100%;
           height: 100%;
-
           display: flex;
-
           align-items: center;
           justify-content: center;
-
-          background:
-            #f8faff;
+          padding: 6px;
         }
-
 
         .rv-slide img {
           width: 100%;
           height: 100%;
-
           object-fit: contain;
-
           user-select: none;
-
           -webkit-user-drag: none;
-
-          transition:
-            transform .5s
-              cubic-bezier(.22,1,.36,1);
+          transition: transform .45s cubic-bezier(.22,1,.36,1);
+          filter: drop-shadow(0 8px 12px rgba(15,23,42,.06));
         }
 
-
-        .rv-card:hover
-        .rv-slide img {
-          transform:
-            scale(1.07);
+        .rv-card:hover .rv-slide img {
+          transform: scale(1.045);
         }
 
-
-        /* ======================================================
-           OVERLAY
-        ====================================================== */
-
-        .rv-overlay {
+        .rv-badge {
           position: absolute;
-
-          inset: 0;
-
-          z-index: 18;
-
-          display: flex;
-
-          align-items: flex-end;
-          justify-content: center;
-
-          padding-bottom: 13px;
-
-          background:
-            linear-gradient(
-              to bottom,
-              transparent 45%,
-              rgba(20,16,60,.52) 100%
-            );
-
-          opacity: 0;
-
-          transition:
-            opacity .26s ease;
-
-          pointer-events:
-            none;
-        }
-
-
-        .rv-card:hover
-        .rv-overlay {
-          opacity: 1;
-        }
-
-
-        /* ======================================================
-           QUICK VIEW
-        ====================================================== */
-
-        .rv-quick-btn {
+          top: 11px;
+          left: 11px;
+          z-index: 15;
           display: inline-flex;
-
           align-items: center;
-          justify-content: center;
-
-          gap: 6px;
-
-          border: 0;
-
+          gap: 5px;
+          padding: 5px 9px;
+          border: 1px solid rgba(255,255,255,.28);
           border-radius: 999px;
-
-          padding:
-            7px 16px;
-
-          background:
-            rgba(255,255,255,.94);
-
-          color:
-            #1e1b4b;
-
-          font-size:
-            11.5px;
-
-          font-weight:
-            700;
-
-          box-shadow:
-            0 5px 18px
-              rgba(0,0,0,.14);
-
-          transform:
-            translateY(9px);
-
-          opacity: 0;
-
-          cursor: pointer;
-
-          transition:
-            transform .26s .04s,
-            opacity .26s .04s;
-
-          pointer-events:
-            none;
+          background: rgba(15,23,42,.68);
+          color: white;
+          font-size: 8.5px;
+          font-weight: 800;
+          letter-spacing: .04em;
+          text-transform: uppercase;
+          backdrop-filter: blur(10px);
+          box-shadow: 0 5px 15px rgba(15,23,42,.14);
         }
 
-
-        .rv-card:hover
-        .rv-quick-btn {
-          transform:
-            translateY(0);
-
-          opacity: 1;
-
-          pointer-events:
-            auto;
-        }
-
-
-        .rv-quick-btn:hover {
-          background: #fff;
-
-          color:
-            #4f46e5;
-        }
-
-
-        /* ======================================================
-           AUTO PROGRESS
-        ====================================================== */
-
-        .rv-auto-progress {
+        .rv-discount {
           position: absolute;
-
-          left: 0;
-          right: 0;
-
-          bottom: 0;
-
-          z-index: 28;
-
-          height: 2px;
-
-          overflow: hidden;
-
-          background:
-            rgba(255,255,255,.30);
-
-          pointer-events:
-            none;
+          left: 11px;
+          bottom: 11px;
+          z-index: 15;
+          padding: 5px 9px;
+          border-radius: 999px;
+          background: rgba(16,185,129,.94);
+          color: white;
+          font-size: 9px;
+          font-weight: 800;
+          box-shadow: 0 5px 14px rgba(16,185,129,.22);
         }
 
-
-        .rv-auto-progress::after {
-          content: "";
-
-          display: block;
-
-          width: 100%;
-          height: 100%;
-
-          transform-origin:
-            left;
-
-          background:
-            rgba(255,255,255,.92);
-
-          animation:
-            rvProgress
-            1.4s linear infinite;
+        .rv-count {
+          position: absolute;
+          right: 11px;
+          bottom: 11px;
+          z-index: 15;
+          padding: 5px 8px;
+          border: 1px solid rgba(255,255,255,.20);
+          border-radius: 999px;
+          background: rgba(15,23,42,.58);
+          color: white;
+          font-size: 9px;
+          font-weight: 800;
+          backdrop-filter: blur(8px);
         }
-
-
-        @keyframes rvProgress {
-          from {
-            transform:
-              scaleX(0);
-          }
-
-          to {
-            transform:
-              scaleX(1);
-          }
-        }
-
-
-        /* ======================================================
-           ARROWS
-        ====================================================== */
 
         .rv-arrow {
           position: absolute;
-
           top: 50%;
-
           z-index: 25;
-
-          width: 31px;
-          height: 31px;
-
-          transform:
-            translateY(-50%);
-
-          border:
-            1px solid
-            rgba(99,102,241,.18);
-
+          width: 32px;
+          height: 32px;
+          transform: translateY(-50%);
+          border: 1px solid rgba(255,255,255,.80);
           border-radius: 50%;
-
-          background:
-            rgba(255,255,255,.92);
-
-          color:
-            #4f46e5;
-
-          box-shadow:
-            0 3px 12px
-              rgba(0,0,0,.12);
-
+          background: rgba(255,255,255,.90);
+          color: #4f46e5;
+          box-shadow: 0 5px 16px rgba(15,23,42,.13);
           display: flex;
-
           align-items: center;
           justify-content: center;
-
           cursor: pointer;
-
           opacity: 0;
-
-          transition:
-            .2s;
+          transition: opacity .2s ease, transform .2s ease, background .2s ease;
         }
 
-
-        .rv-card:hover
-        .rv-arrow {
+        .rv-card:hover .rv-arrow {
           opacity: 1;
         }
-
 
         .rv-arrow:hover {
-          background:
-            #fff;
-
-          transform:
-            translateY(-50%)
-            scale(1.08);
+          background: #fff;
+          transform: translateY(-50%) scale(1.08);
         }
 
-
-        .rv-left {
-          left: 9px;
-        }
-
-
-        .rv-right {
-          right: 9px;
-        }
-
-
-        /* ======================================================
-           IMAGE DOTS
-        ====================================================== */
+        .rv-left { left: 9px; }
+        .rv-right { right: 9px; }
 
         .rv-dots {
           position: absolute;
-
           left: 50%;
-
-          bottom: 14px;
-
+          bottom: 11px;
           z-index: 20;
-
           display: flex;
-
           align-items: center;
           justify-content: center;
-
-          gap: 5px;
-
-          transform:
-            translateX(-50%);
+          gap: 4px;
+          transform: translateX(-50%);
+          padding: 4px 6px;
+          border-radius: 999px;
+          background: rgba(15,23,42,.20);
+          backdrop-filter: blur(7px);
         }
-
 
         .rv-dot {
           width: 5px;
           height: 5px;
-
           padding: 0;
-
           border: 0;
-
-          border-radius: 50%;
-
-          background:
-            rgba(255,255,255,.55);
-
+          border-radius: 999px;
+          background: rgba(255,255,255,.62);
           cursor: pointer;
-
-          transition:
-            width .22s ease,
-            background .22s ease,
-            transform .22s ease;
+          transition: width .22s ease, background .22s ease;
         }
-
 
         .rv-dot.active {
-          width: 20px;
-          height: 2px;
-
-          border-radius: 3px;
-
-          background:
-            #5046e4;
-
-          box-shadow:
-            0 0 7px
-              rgba(80,70,228,.35);
+          width: 15px;
+          background: #6366f1;
+          box-shadow: 0 0 7px rgba(99,102,241,.35);
         }
 
-
-        .rv-dot:hover {
-          background:
-            rgba(80,70,228,.75);
+        .rv-info {
+          padding: 7px 9px 8px;
         }
 
-
-        .rv-dot:focus-visible {
-          outline:
-            2px solid
-            #5046e4;
-
-          outline-offset:
-            3px;
+        .rv-category {
+          margin-bottom: 5px;
+          color: #6366f1;
+          font-size: 8.5px;
+          font-weight: 800;
+          letter-spacing: .10em;
+          text-transform: uppercase;
         }
 
+        .rv-title {
+          min-height: 32px;
+          margin: 0;
+          color: #0f172a;
+          font-size: 12px;
+          font-weight: 750;
+          line-height: 1.3;
+          letter-spacing: -.01em;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          cursor: pointer;
+          transition: color .18s ease;
+        }
 
-        /* ======================================================
-           VIEWED BADGE
-        ====================================================== */
+        .rv-title:hover {
+          color: #4f46e5;
+        }
 
-        .rv-badge {
-          position: absolute;
-
-          top: 11px;
-          left: 11px;
-
-          z-index: 15;
-
-          display: inline-flex;
-
+        .rv-rating {
+          display: flex;
           align-items: center;
-
-          gap: 5px;
-
-          padding:
-            4px 9px;
-
-          border-radius:
-            999px;
-
-          background:
-            linear-gradient(
-              135deg,
-              #4f46e5,
-              #2563eb
-            );
-
-          color:
-            white;
-
-          font-size:
-            8.5px;
-
-          font-weight:
-            700;
-
-          letter-spacing:
-            .04em;
-
-          text-transform:
-            uppercase;
-
-          box-shadow:
-            0 3px 10px
-              rgba(79,70,229,.35);
+          gap: 4px;
+          min-height: 17px;
+          margin-top: 5px;
         }
 
-
-        /* ======================================================
-           PRODUCT COUNT
-        ====================================================== */
-
-        .rv-count {
-          position: absolute;
-
-          right: 10px;
-          bottom: 10px;
-
-          z-index: 15;
-
-          padding:
-            3px 7px;
-
-          border-radius:
-            7px;
-
-          background:
-            rgba(15,14,42,.55);
-
-          color:
-            white;
-
-          font-size:
-            9px;
-
-          font-weight:
-            700;
-
-          backdrop-filter:
-            blur(7px);
+        .rv-rating-value {
+          color: #64748b;
+          font-size: 9px;
+          font-weight: 700;
         }
 
+        .rv-rating-count {
+          color: #94a3b8;
+          font-size: 9px;
+        }
 
-        /* ======================================================
-           PRICE
-        ====================================================== */
+        .rv-price-row {
+          display: flex;
+          align-items: baseline;
+          gap: 7px;
+          margin-top: 6px;
+        }
 
         .rv-price {
-          background:
-            linear-gradient(
-              135deg,
-              #4f46e5,
-              #2563eb
-            );
-
-          -webkit-background-clip:
-            text;
-
-          -webkit-text-fill-color:
-            transparent;
-
-          background-clip:
-            text;
+          font-size: 16px;
+          font-weight: 900;
+          background: linear-gradient(135deg,#4f46e5,#2563eb);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
 
+        .rv-original {
+          color: #94a3b8;
+          font-size: 9px;
+          font-weight: 600;
+        }
 
-        /* ======================================================
-           LOADING HORIZONTAL SCROLL
-        ====================================================== */
+        .rv-footer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          margin-top: 7px;
+          padding-top: 7px;
+          border-top: 1px solid rgba(15,23,42,.06);
+        }
+
+        .rv-view-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 27px;
+          padding: 5px 9px;
+          border: 1px solid rgba(99,102,241,.12);
+          border-radius: 10px;
+          background: #f8faff;
+          color: #4f46e5;
+          font-size: 9px;
+          font-weight: 800;
+          cursor: pointer;
+          transition: transform .18s ease, background .18s ease, color .18s ease;
+        }
+
+        .rv-view-btn:hover {
+          transform: translateY(-1px);
+          background: linear-gradient(135deg,#4f46e5,#2563eb);
+          color: white;
+        }
 
         .rv-loading-scroll {
           display: flex;
-
           gap: 14px;
-
-          overflow-x: auto;
-
-          overflow-y: hidden;
-
-          padding-bottom: 12px;
-
-          scrollbar-width: thin;
+          overflow-x: hidden;
+          padding: 3px 3px 10px;
         }
-
 
         .rv-loading-card {
-          flex:
-            0 0 210px;
-
-          width: 210px;
-
-          min-width: 210px;
+          flex: 0 0 218px;
+          width: 218px;
+          min-width: 218px;
+          overflow: hidden;
+          border: 1px solid rgba(15,23,42,.06);
+          border-radius: 24px;
+          background: white;
+          box-shadow: 0 7px 24px rgba(15,23,42,.05);
         }
 
-
-        /* ======================================================
-           MOBILE
-        ====================================================== */
-
         @media (max-width: 640px) {
-
-          .rv-products-scroll {
-            gap: 10px;
-
-            padding-bottom: 8px;
-
-            scrollbar-width:
-              none;
-          }
-
-
-          .rv-products-scroll::-webkit-scrollbar {
-            display: none;
-          }
-
-
-          .rv-product-item {
-            flex:
-              0 0 175px;
-
-            width: 175px;
-
-            min-width: 175px;
-          }
-
-
-          .rv-loading-scroll {
-            gap: 10px;
-
-            padding-bottom: 8px;
-
-            scrollbar-width:
-              none;
-          }
-
-
-          .rv-loading-scroll::-webkit-scrollbar {
-            display: none;
-          }
-
-
+          .rv-product-item,
           .rv-loading-card {
-            flex:
-              0 0 175px;
-
-            width: 175px;
-
-            min-width: 175px;
+            flex: 0 0 172px;
+            width: 172px;
+            min-width: 172px;
           }
 
-
-          .rv-dots {
-            bottom: 10px;
-
-            gap: 4px;
+          .rv-image-area {
+            height: 120px;
           }
 
-
-          .rv-dot {
-            width: 5px;
-            height: 5px;
+          .rv-info {
+            padding: 8px 9px 9px;
           }
 
-
-          .rv-dot.active {
-            width: 16px;
-            height: 5px;
+          .rv-title {
+            font-size: 11px;
           }
 
+          .rv-price {
+            font-size: 14px;
+          }
+
+          .rv-card:hover {
+            transform: translateY(-3px);
+          }
 
           .rv-arrow {
             opacity: 1;
           }
 
-
-          .rv-overlay {
-            opacity: 1;
-
-            background:
-              linear-gradient(
-                to bottom,
-                transparent 50%,
-                rgba(20,16,60,.34) 100%
-              );
-          }
-
-
-          .rv-quick-btn {
-            opacity: 1;
-
-            transform:
-              translateY(0);
-
-            pointer-events:
-              auto;
-
-            padding:
-              6px 13px;
-
-            font-size:
-              10px;
-          }
-
-
-          .rv-card:hover {
-            transform:
-              translateY(-3px);
+          .rv-products-scroll {
+            gap: 10px;
+            padding-bottom: 10px;
+            scroll-padding-left: 3px;
           }
         }
 
-
-        /* ======================================================
-           REDUCED MOTION
-        ====================================================== */
-
-        @media (
-          prefers-reduced-motion: reduce
-        ) {
-
+        @media (prefers-reduced-motion: reduce) {
           .rv-card,
           .rv-track,
           .rv-slide img,
           .rv-arrow,
           .rv-products-scroll {
-            transition:
-              none !important;
-
-            scroll-behavior:
-              auto !important;
+            transition: none !important;
+            scroll-behavior: auto !important;
           }
         }
-
       `}</style>
 
-      <section className="rv-root mx-auto w-full max-w-7xl px-3 py-8 sm:px-5 lg:px-8">
+      <section className="rv-root mx-auto w-full max-w-7xl px-3 py-5 sm:px-5 lg:px-8">
 
         {/* ======================================================
             HEADER
@@ -1279,10 +867,10 @@ export default function RecentlyViewed() {
                   ================================================== */}
 
                   <div
-                    className="relative overflow-hidden"
+                    className="rv-image-area"
                     style={{
                       height:
-                        "clamp(175px,21vw,225px)",
+                        "clamp(130px,16vw,165px)",
 
                       background:
                         "radial-gradient(circle at 50% 20%, rgba(99,102,241,.08), transparent 55%), #f8faff",
@@ -1443,7 +1031,7 @@ export default function RecentlyViewed() {
                     ================================================== */}
 
                     {discount > 0 && (
-                      <span className="absolute bottom-3 left-3 z-15 rounded-full bg-emerald-500 px-2.5 py-1 text-[9px] font-extrabold text-white shadow-md">
+                      <span className="rv-discount">
                         {discount}% OFF
                       </span>
                     )}
@@ -1547,9 +1135,9 @@ export default function RecentlyViewed() {
                       PRODUCT INFORMATION
                   ================================================== */}
 
-                  <div className="p-3 sm:p-4">
+                  <div className="rv-info">
 
-                    <p className="mb-1 truncate text-[9px] font-bold uppercase tracking-[0.12em] text-indigo-500">
+                    <p className="rv-category">
                       {product?.category
                         ?.name ||
                         "Product"}
@@ -1563,7 +1151,7 @@ export default function RecentlyViewed() {
                         )
                       }
 
-                      className="min-h-[38px] cursor-pointer line-clamp-2 text-[12.5px] font-semibold leading-[1.35] text-slate-800 transition-colors hover:text-indigo-600 sm:text-sm"
+                      className="rv-title"
                     >
                       {product.title}
                     </h3>
@@ -1573,7 +1161,7 @@ export default function RecentlyViewed() {
                         RATING
                     ================================================== */}
 
-                    <div className="mt-2 flex min-h-[18px] items-center gap-1">
+                    <div className="rv-rating">
 
                       {rating > 0 ? (
                         <>
@@ -1611,7 +1199,7 @@ export default function RecentlyViewed() {
                           </div>
 
 
-                          <span className="ml-1 text-[10px] font-semibold text-slate-400">
+                          <span className="rv-rating-value">
                             {rating.toFixed(
                               1,
                             )}
@@ -1624,7 +1212,7 @@ export default function RecentlyViewed() {
                       )}
 
 
-                      <span className="text-[9px] text-slate-400">
+                      <span className="rv-rating-count">
                         (
                         {
                           product?.numReviews ||
@@ -1640,15 +1228,15 @@ export default function RecentlyViewed() {
                         PRICE
                     ================================================== */}
 
-                    <div className="mt-2.5 flex items-baseline gap-1.5">
+                    <div className="rv-price-row">
 
-                      <span className="text-sm font-extrabold sm:text-base">
+                      <span className="rv-price">
 
                         <span className="mr-0.5 text-indigo-600">
                           ₹
                         </span>
 
-                        <span className="rv-price">
+                        <span className="rv-price-number">
                           {price.toLocaleString(
                             "en-IN",
                           )}
@@ -1659,7 +1247,7 @@ export default function RecentlyViewed() {
 
                       {originalPrice >
                         price && (
-                        <del className="text-[9px] font-medium text-slate-400">
+                        <del className="rv-original">
                           ₹
                           {originalPrice.toLocaleString(
                             "en-IN",
@@ -1667,6 +1255,21 @@ export default function RecentlyViewed() {
                         </del>
                       )}
 
+                    </div>
+
+                    <div className="rv-footer">
+                      <span className="text-[9px] font-semibold text-slate-400">
+                        Recently viewed
+                      </span>
+
+                      <button
+                        type="button"
+                        className="rv-view-btn"
+                        onClick={() => openProduct(product)}
+                        aria-label={`View ${product?.title || "product"}`}
+                      >
+                        View product
+                      </button>
                     </div>
 
                   </div>

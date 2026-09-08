@@ -33,24 +33,11 @@ export default function TrendingProducts() {
 
   const fetchTrendingProducts =
     useCallback(async () => {
-      console.log("");
-      console.log(
-        "=========================================="
-      );
 
-      console.log(
-        "🔥 TRENDING PRODUCTS FETCH START"
-      );
 
-      const url =
+const url =
         `${BACKEND_URL}/api/products/trending`;
-
-      console.log(
-        "🔥 API URL:",
-        url
-      );
-
-      try {
+try {
         setLoading(true);
         setError("");
 
@@ -64,25 +51,9 @@ export default function TrendingProducts() {
             },
           });
 
-        console.log(
-          "🟢 Trending status:",
-          response.status
-        );
-
-        console.log(
-          "🟢 Trending OK:",
-          response.ok
-        );
-
-        const data =
+const data =
           await response.json();
-
-        console.log(
-          "🟢 Trending API response:",
-          data
-        );
-
-        if (!response.ok) {
+if (!response.ok) {
           throw new Error(
             data?.message ||
               `HTTP ${response.status}`
@@ -96,25 +67,10 @@ export default function TrendingProducts() {
             ? data.products
             : [];
 
-        console.log(
-          "🔥 Trending product count:",
-          list.length
-        );
-
-        console.log(
-          "🔥 Trending products:",
-          list
-        );
-
-        setProducts(list);
+setProducts(list);
 
       } catch (error) {
-        console.error(
-          "🔴 TRENDING PRODUCTS ERROR:",
-          error
-        );
-
-        setError(
+setError(
           error?.message ||
             "Failed to load trending products"
         );
@@ -124,14 +80,7 @@ export default function TrendingProducts() {
       } finally {
         setLoading(false);
 
-        console.log(
-          "🔥 TRENDING PRODUCTS FETCH END"
-        );
-
-        console.log(
-          "=========================================="
-        );
-      }
+}
     }, []);
 
   /* =====================================================
@@ -139,17 +88,10 @@ export default function TrendingProducts() {
   ===================================================== */
 
   useEffect(() => {
-    console.log(
-      "🟣 TrendingProducts mounted"
-    );
-
-    fetchTrendingProducts();
+fetchTrendingProducts();
 
     return () => {
-      console.log(
-        "🟣 TrendingProducts unmounted"
-      );
-    };
+};
   }, [fetchTrendingProducts]);
 
   /* =====================================================
@@ -224,17 +166,8 @@ export default function TrendingProducts() {
   ===================================================== */
 
   const openProduct = (product) => {
-    console.log(
-      "🟣 Trending product clicked:",
-      product?._id
-    );
-
-    if (!product?._id) {
-      console.error(
-        "❌ Trending product ID missing"
-      );
-
-      return;
+if (!product?._id) {
+return;
     }
 
     navigate(
@@ -339,11 +272,7 @@ export default function TrendingProducts() {
   ===================================================== */
 
   if (!products.length) {
-    console.log(
-      "🟡 No trending products"
-    );
-
-    return null;
+return null;
   }
 
   /* =====================================================
@@ -351,370 +280,391 @@ export default function TrendingProducts() {
   ===================================================== */
 
   return (
-    <section className="max-w-7xl mx-auto px-1.5 sm:px-4 py-8">
+    <>
+      <style>{`
+        .tp-root {
+          position: relative;
+          width: 100%;
+        }
 
-      {/* HEADER */}
+        .tp-scroll {
+          display: flex;
+          gap: 12px;
+          width: 100%;
+          overflow-x: auto;
+          overflow-y: hidden;
+          padding: 4px 3px 10px;
+          scroll-snap-type: x proximity;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+        }
 
-      <div
-        data-aos="fade-up"
-        className="
-          flex
-          items-center
-          justify-between
-          mb-6
-        "
-      >
+        .tp-scroll::-webkit-scrollbar {
+          display: none;
+        }
 
-        <h2 className="
-          text-xl
-          sm:text-3xl
-          font-bold
-          flex
-          items-center
-          gap-2
-          text-gray-900
-        ">
-          <FaFire className="text-orange-500" />
-          Trending Now
-        </h2>
+        .tp-item {
+          flex: 0 0 190px;
+          width: 190px;
+          min-width: 190px;
+          scroll-snap-align: start;
+        }
 
-        <button
-          onClick={() =>
-            navigate("/products")
+        .tp-card {
+          position: relative;
+          overflow: hidden;
+          height: 100%;
+          border: 1px solid rgba(15, 23, 42, .08);
+          border-radius: 20px;
+          background: rgba(255, 255, 255, .96);
+          box-shadow: 0 7px 24px rgba(15, 23, 42, .055);
+          cursor: pointer;
+          transition:
+            transform .28s cubic-bezier(.34,1.2,.64,1),
+            box-shadow .28s ease,
+            border-color .2s ease;
+        }
+
+        .tp-card:hover {
+          transform: translateY(-5px);
+          border-color: rgba(249, 115, 22, .2);
+          box-shadow: 0 16px 36px rgba(15, 23, 42, .10);
+        }
+
+        .tp-image-wrap {
+          position: relative;
+          height: clamp(135px, 16vw, 175px);
+          overflow: hidden;
+          background:
+            radial-gradient(circle at 50% 15%, rgba(249, 115, 22, .08), transparent 52%),
+            linear-gradient(145deg, #fffaf5, #f8fafc);
+        }
+
+        .tp-image {
+          width: 100%;
+          height: 100%;
+          padding: 9px;
+          object-fit: contain;
+          user-select: none;
+          -webkit-user-drag: none;
+          transition: transform .45s cubic-bezier(.22,1,.36,1);
+        }
+
+        .tp-card:hover .tp-image {
+          transform: scale(1.06);
+        }
+
+        .tp-hot {
+          position: absolute;
+          top: 9px;
+          left: 9px;
+          z-index: 2;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          padding: 5px 8px;
+          border: 1px solid rgba(255,255,255,.35);
+          border-radius: 999px;
+          background: linear-gradient(135deg, #f97316, #ef4444);
+          color: #fff;
+          font-size: 8px;
+          font-weight: 800;
+          letter-spacing: .05em;
+          box-shadow: 0 5px 14px rgba(239, 68, 68, .2);
+        }
+
+        .tp-discount {
+          position: absolute;
+          right: 9px;
+          bottom: 9px;
+          z-index: 2;
+          padding: 4px 7px;
+          border-radius: 7px;
+          background: rgba(22, 163, 74, .92);
+          color: #fff;
+          font-size: 8px;
+          font-weight: 800;
+          backdrop-filter: blur(7px);
+        }
+
+        .tp-content {
+          padding: 11px 12px 12px;
+        }
+
+        .tp-category {
+          margin-bottom: 4px;
+          overflow: hidden;
+          color: #ea580c;
+          font-size: 8px;
+          font-weight: 800;
+          letter-spacing: .1em;
+          text-transform: uppercase;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+
+        .tp-title {
+          min-height: 34px;
+          display: -webkit-box;
+          overflow: hidden;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+          color: #1e293b;
+          font-size: 12px;
+          font-weight: 700;
+          line-height: 1.4;
+          transition: color .2s ease;
+        }
+
+        .tp-card:hover .tp-title {
+          color: #ea580c;
+        }
+
+        .tp-meta {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 6px;
+          min-height: 18px;
+          margin-top: 7px;
+        }
+
+        .tp-rating {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          min-width: 0;
+        }
+
+        .tp-rating-text {
+          color: #475569;
+          font-size: 9px;
+          font-weight: 800;
+        }
+
+        .tp-reviews {
+          color: #94a3b8;
+          font-size: 8px;
+        }
+
+        .tp-views {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          color: #94a3b8;
+          font-size: 8px;
+          font-weight: 700;
+          white-space: nowrap;
+        }
+
+        .tp-price-row {
+          display: flex;
+          align-items: baseline;
+          gap: 6px;
+          margin-top: 8px;
+          padding-top: 8px;
+          border-top: 1px solid #f1f5f9;
+        }
+
+        .tp-price {
+          font-size: 14px;
+          font-weight: 900;
+          color: #ea580c;
+        }
+
+        .tp-original {
+          color: #94a3b8;
+          font-size: 8px;
+          font-weight: 600;
+        }
+
+        .tp-view-all {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          border: 1px solid rgba(249,115,22,.14);
+          border-radius: 999px;
+          padding: 8px 12px;
+          background: rgba(255,255,255,.9);
+          color: #ea580c;
+          font-size: 10px;
+          font-weight: 800;
+          box-shadow: 0 3px 12px rgba(15,23,42,.045);
+          transition: .2s ease;
+        }
+
+        .tp-view-all:hover {
+          transform: translateY(-1px);
+          background: #fff7ed;
+          border-color: rgba(249,115,22,.24);
+        }
+
+        @media (max-width: 640px) {
+          .tp-item {
+            flex-basis: 165px;
+            width: 165px;
+            min-width: 165px;
           }
-          className="
-            text-sm
-            font-semibold
-            text-indigo-600
-            hover:text-indigo-700
-            transition
-          "
-        >
-          View All →
-        </button>
 
-      </div>
+          .tp-card {
+            border-radius: 17px;
+          }
 
-      {/* GRID */}
+          .tp-content {
+            padding: 10px;
+          }
 
-      <div
-        data-aos="fade-up"
-        data-aos-delay="100"
-        className="
-          grid
-          grid-cols-2
-          sm:grid-cols-3
-          lg:grid-cols-4
-          gap-1.5
-          sm:gap-3
-        "
-      >
+          .tp-card:hover {
+            transform: translateY(-2px);
+          }
+        }
 
-        {products.map(
-          (product, index) => {
+        @media (prefers-reduced-motion: reduce) {
+          .tp-card,
+          .tp-image {
+            transition: none !important;
+          }
 
-            const price =
-              getPrice(product);
+          .tp-scroll {
+            scroll-behavior: auto;
+          }
+        }
+      `}</style>
 
-            const originalPrice =
-              getOriginalPrice(
-                product
-              );
+      <section className="tp-root mx-auto w-full max-w-7xl px-3 py-7 sm:px-5 lg:px-8">
+        <div className="relative z-10 mb-4 flex items-end justify-between gap-3">
+          <div className="min-w-0">
+            <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full border border-orange-100 bg-orange-50/80 px-2.5 py-1 text-[8px] font-extrabold uppercase tracking-wider text-orange-600">
+              <FaFire size={9} />
+              Hot picks
+            </div>
 
-            const rating =
-              Number(
-                product?.rating || 0
-              );
+            <h2 className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-orange-50 text-orange-500 sm:h-9 sm:w-9">
+                <FaFire size={15} />
+              </span>
+              Trending Now
+            </h2>
 
-            const views =
-              Number(
-                product?.analytics
-                  ?.views || 0
-              );
+            <p className="mt-1 text-[10px] text-slate-500 sm:text-xs">
+              Popular products shoppers are checking out right now.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => navigate("/products")}
+            className="tp-view-all shrink-0"
+          >
+            View All
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+
+        <div className="tp-scroll">
+          {products.map((product) => {
+            const price = getPrice(product);
+            const originalPrice = getOriginalPrice(product);
+
+            const rating = Number(
+              product?.rating?.average ??
+                product?.rating ??
+                0
+            );
+
+            const views = Number(
+              product?.analytics?.views || 0
+            );
 
             const discount =
-              originalPrice > price
+              originalPrice > price && originalPrice > 0
                 ? Math.round(
-                    ((originalPrice -
-                      price) /
-                      originalPrice) *
-                      100
+                    ((originalPrice - price) / originalPrice) * 100
                   )
                 : 0;
 
             return (
               <article
-                key={
-                  product._id
-                }
-                data-aos="zoom-in"
-                data-aos-delay={
-                  index * 80
-                }
-                data-aos-once="true"
-                onClick={() =>
-                  openProduct(
-                    product
-                  )
-                }
-                className="
-                  group
-                  relative
-                  bg-white
-                  rounded-2xl
-                  border
-                  border-gray-100
-                  overflow-hidden
-                  cursor-pointer
-                  transition-all
-                  duration-300
-                  hover:shadow-xl
-                  hover:-translate-y-1
-                  bg-gradient-to-br
-                  from-white
-                  via-blue-50
-                  to-indigo-50
-                "
+                key={product._id}
+                className="tp-item"
               >
+                <div
+                  className="tp-card"
+                  onClick={() => openProduct(product)}
+                >
+                  <div className="tp-image-wrap">
+                    <img
+                      src={getImage(product)}
+                      alt={product?.title || "Product"}
+                      className="tp-image"
+                      loading="lazy"
+                      decoding="async"
+                      draggable="false"
+                    />
 
-                {/* IMAGE */}
-
-                <div className="
-                  relative
-                  flex
-                  items-center
-                  justify-center
-                  h-[160px]
-                  sm:h-[210px]
-                  p-4
-                ">
-
-                  {/* GLOW */}
-
-                  <div className="
-                    absolute
-                    w-28
-                    h-28
-                    bg-orange-100
-                    rounded-full
-                    blur-3xl
-                    opacity-0
-                    group-hover:opacity-100
-                    transition
-                  " />
-
-                  {/* PRODUCT IMAGE */}
-
-                  <img
-                    src={getImage(
-                      product
-                    )}
-                    alt={
-                      product?.title ||
-                      "Product"
-                    }
-                    className="
-                      relative
-                      z-10
-                      max-h-[135px]
-                      sm:max-h-[175px]
-                      max-w-full
-                      object-contain
-                      transition-transform
-                      duration-500
-                      group-hover:scale-110
-                    "
-                  />
-
-                  {/* HOT BADGE */}
-
-                  <span className="
-                    absolute
-                    top-3
-                    left-3
-                    z-20
-                    flex
-                    items-center
-                    gap-1
-                    bg-gradient-to-r
-                    from-orange-500
-                    to-red-500
-                    text-white
-                    text-[9px]
-                    sm:text-[10px]
-                    font-bold
-                    px-2
-                    py-1
-                    rounded-full
-                    shadow
-                  ">
-                    <FaFire size={9} />
-                    HOT
-                  </span>
-
-                  {/* DISCOUNT */}
-
-                  {discount > 0 && (
-                    <span className="
-                      absolute
-                      right-3
-                      bottom-3
-                      z-20
-                      bg-green-500
-                      text-white
-                      text-[9px]
-                      sm:text-[10px]
-                      font-bold
-                      px-2
-                      py-1
-                      rounded
-                    ">
-                      {discount}% OFF
+                    <span className="tp-hot">
+                      <FaFire size={8} />
+                      HOT
                     </span>
-                  )}
 
-                </div>
-
-                {/* CONTENT */}
-
-                <div className="p-3 sm:p-4">
-
-                  {/* CATEGORY */}
-
-                  <p className="
-                    text-[9px]
-                    sm:text-xs
-                    uppercase
-                    tracking-wide
-                    text-indigo-500
-                    font-medium
-                    mb-1
-                  ">
-                    {product?.category
-                      ?.name ||
-                      "Trending"}
-                  </p>
-
-                  {/* TITLE */}
-
-                  <h3 className="
-                    text-sm
-                    sm:text-base
-                    font-semibold
-                    text-gray-800
-                    line-clamp-2
-                    min-h-[40px]
-                    group-hover:text-indigo-600
-                    transition
-                  ">
-                    {product?.title ||
-                      "Product"}
-                  </h3>
-
-                  {/* RATING + VIEWS */}
-
-                  <div className="
-                    flex
-                    items-center
-                    justify-between
-                    mt-2
-                  ">
-
-                    <div className="
-                      flex
-                      items-center
-                      gap-1
-                    ">
-
-                      <FaStar
-                        className="text-yellow-400"
-                        size={12}
-                      />
-
-                      <span className="
-                        text-xs
-                        font-semibold
-                        text-gray-700
-                      ">
-                        {rating > 0
-                          ? rating.toFixed(
-                              1
-                            )
-                          : "New"}
+                    {discount > 0 && (
+                      <span className="tp-discount">
+                        {discount}% OFF
                       </span>
-
-                      <span className="
-                        text-[10px]
-                        text-gray-400
-                      ">
-                        (
-                        {product?.numReviews ||
-                          0}
-                        )
-                      </span>
-
-                    </div>
-
-                    <div className="
-                      flex
-                      items-center
-                      gap-1
-                      text-[10px]
-                      text-gray-400
-                    ">
-                      <FaEye size={10} />
-
-                      {views}
-                    </div>
-
+                    )}
                   </div>
 
-                  {/* PRICE */}
+                  <div className="tp-content">
+                    <p className="tp-category">
+                      {product?.category?.name || "Trending"}
+                    </p>
 
-                  <div className="
-                    flex
-                    items-center
-                    gap-2
-                    mt-3
-                  ">
+                    <h3 className="tp-title">
+                      {product?.title || "Product"}
+                    </h3>
 
-                    <span className="
-                      text-base
-                      sm:text-lg
-                      font-bold
-                      text-gray-900
-                    ">
-                      ₹
-                      {price.toLocaleString(
-                        "en-IN"
+                    <div className="tp-meta">
+                      <div className="tp-rating">
+                        <FaStar className="text-amber-400" size={9} />
+
+                        <span className="tp-rating-text">
+                          {rating > 0 ? rating.toFixed(1) : "New"}
+                        </span>
+
+                        <span className="tp-reviews">
+                          ({product?.numReviews || 0})
+                        </span>
+                      </div>
+
+                      {views > 0 && (
+                        <span
+                          className="tp-views"
+                          title={`${views.toLocaleString("en-IN")} views`}
+                        >
+                          <FaEye size={9} />
+                          {views.toLocaleString("en-IN")}
+                        </span>
                       )}
-                    </span>
+                    </div>
 
-                    {originalPrice >
-                      price && (
-                      <del className="
-                        text-[10px]
-                        sm:text-xs
-                        text-gray-400
-                      ">
-                        ₹
-                        {originalPrice.toLocaleString(
-                          "en-IN"
-                        )}
-                      </del>
-                    )}
+                    <div className="tp-price-row">
+                      <span className="tp-price">
+                        ₹{price.toLocaleString("en-IN")}
+                      </span>
 
+                      {originalPrice > price && (
+                        <del className="tp-original">
+                          ₹{originalPrice.toLocaleString("en-IN")}
+                        </del>
+                      )}
+                    </div>
                   </div>
-
                 </div>
-
               </article>
             );
-          }
-        )}
-
-      </div>
-
-    </section>
+          })}
+        </div>
+      </section>
+    </>
   );
 }

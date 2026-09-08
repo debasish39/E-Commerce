@@ -10,8 +10,6 @@ import {
   FaStar,
   FaAward,
   FaEye,
-  FaChevronLeft,
-  FaChevronRight,
 } from "react-icons/fa";
 
 const BACKEND_URL =
@@ -412,9 +410,9 @@ export default function TopRatedProducts() {
         .tr-card:hover {
           transform: translateY(-7px) scale(1.012);
           border-color: rgba(79,70,229,.24);
-          box-shadow:
-            0 22px 52px rgba(79,70,229,.12),
-            0 5px 18px rgba(0,0,0,.05);
+          // box-shadow:
+          //   0 22px 52px rgba(79,70,229,.12),
+          //   0 5px 18px rgba(0,0,0,.05);
         }
 
         .tr-track {
@@ -476,60 +474,6 @@ export default function TopRatedProducts() {
           box-shadow: 0 5px 14px rgba(79,70,229,.24);
         }
 
-        .tr-discount {
-          position: absolute;
-          top: 11px;
-          right: 11px;
-          z-index: 21;
-          display: inline-flex;
-          align-items: center;
-          padding: 5px 9px;
-          border: 1px solid rgba(255,255,255,.35);
-          border-radius: 999px;
-          background: #10b981;
-          color: white;
-          font-size: 9px;
-          font-weight: 800;
-          box-shadow: 0 6px 15px rgba(16,185,129,.25);
-          transition: transform .2s ease;
-        }
-
-        .tr-card:hover .tr-discount {
-          transform: scale(1.04) translateY(-1px);
-        }
-
-        .tr-arrow {
-          position: absolute;
-          top: 50%;
-          z-index: 28;
-          width: 31px;
-          height: 31px;
-          transform: translateY(-50%);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: 1px solid rgba(79,70,229,.16);
-          border-radius: 50%;
-          background: rgba(255,255,255,.94);
-          color: #4338ca;
-          box-shadow: 0 3px 12px rgba(0,0,0,.12);
-          cursor: pointer;
-          opacity: 0;
-          transition: .2s;
-        }
-
-        .tr-card:hover .tr-arrow {
-          opacity: 1;
-        }
-
-        .tr-arrow:hover {
-          background: #fff;
-          transform: translateY(-50%) scale(1.08);
-        }
-
-        .tr-left { left: 9px; }
-        .tr-right { right: 9px; }
-
         .tr-dots {
           position: absolute;
           left: 50%;
@@ -572,59 +516,6 @@ export default function TopRatedProducts() {
           font-size: 9px;
           font-weight: 700;
           backdrop-filter: blur(7px);
-        }
-
-        .tr-overlay {
-          position: absolute;
-          inset: 0;
-          z-index: 23;
-          display: flex;
-          align-items: flex-end;
-          justify-content: center;
-          padding-bottom: 13px;
-          background: linear-gradient(
-            to bottom,
-            transparent 45%,
-            rgba(30,27,75,.52) 100%
-          );
-          opacity: 0;
-          transition: opacity .26s ease;
-          pointer-events: none;
-        }
-
-        .tr-card:hover .tr-overlay {
-          opacity: 1;
-        }
-
-        .tr-quick {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-          padding: 7px 16px;
-          border: 0;
-          border-radius: 999px;
-          background: rgba(255,255,255,.95);
-          color: #312e81;
-          font-size: 11.5px;
-          font-weight: 700;
-          box-shadow: 0 5px 18px rgba(0,0,0,.14);
-          transform: translateY(9px);
-          opacity: 0;
-          cursor: pointer;
-          transition: transform .26s .04s, opacity .26s .04s;
-          pointer-events: none;
-        }
-
-        .tr-card:hover .tr-quick {
-          transform: translateY(0);
-          opacity: 1;
-          pointer-events: auto;
-        }
-
-        .tr-quick:hover {
-          color: #4338ca;
-          box-shadow: 0 8px 24px rgba(79,70,229,.16);
         }
 
         .tr-progress {
@@ -682,8 +573,30 @@ export default function TopRatedProducts() {
           box-shadow: 0 8px 20px rgba(79,70,229,.08);
         }
 
-        .tr-quick:focus-visible,
-        .tr-arrow:focus-visible,
+        .tr-products-scroll {
+          display: flex;
+          gap: 12px;
+          width: 100%;
+          overflow-x: auto;
+          overflow-y: hidden;
+          padding: 3px 3px 10px;
+          scroll-behavior: smooth;
+          scroll-snap-type: x proximity;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+        }
+
+        .tr-products-scroll::-webkit-scrollbar {
+          display: none;
+        }
+
+        .tr-product-item {
+          flex: 0 0 190px;
+          width: 190px;
+          min-width: 190px;
+          scroll-snap-align: start;
+        }
+
         .tr-dot:focus-visible,
         .tr-view-all:focus-visible {
           outline: 2px solid rgba(79,70,229,.45);
@@ -695,25 +608,10 @@ export default function TopRatedProducts() {
             border-radius: 20px;
           }
 
-          .tr-arrow {
-            opacity: 1;
-          }
-
-          .tr-overlay {
-            opacity: 1;
-            background: linear-gradient(
-              to bottom,
-              transparent 52%,
-              rgba(30,27,75,.30) 100%
-            );
-          }
-
-          .tr-quick {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
-            padding: 6px 13px;
-            font-size: 10px;
+          .tr-product-item {
+            flex-basis: 165px;
+            width: 165px;
+            min-width: 165px;
           }
 
           .tr-card:hover {
@@ -724,9 +622,7 @@ export default function TopRatedProducts() {
         @media (prefers-reduced-motion: reduce) {
           .tr-card,
           .tr-track,
-          .tr-slide img,
-          .tr-arrow,
-          .tr-quick {
+          .tr-slide img {
             transition: none !important;
           }
         }
@@ -735,7 +631,7 @@ export default function TopRatedProducts() {
       <section className="tr-root mx-auto w-full max-w-7xl px-3 py-8 sm:px-5 lg:px-8">
         <div className="tr-glow" />
 
-        <div className="relative z-10 mb-6 flex items-end justify-between gap-4">
+        <div className="relative z-10 mb-4 flex items-end justify-between gap-3">
           <div>
             <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-amber-100 bg-white/80 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-600 shadow-sm backdrop-blur">
               <FaAward size={10} />
@@ -767,7 +663,7 @@ export default function TopRatedProducts() {
           </button>
         </div>
 
-        <div className="relative z-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="tr-products-scroll relative z-10">
           {products.map((product) => {
             const images = getImages(product);
             const activeIdx =
@@ -791,19 +687,10 @@ export default function TopRatedProducts() {
               product?.analytics?.views || 0
             );
 
-            const discount =
-              originalPrice > price
-                ? Math.round(
-                    ((originalPrice - price) /
-                      originalPrice) *
-                      100
-                  )
-                : 0;
-
             return (
               <article
                 key={product._id}
-                className="tr-card"
+                className="tr-card tr-product-item"
                 onMouseEnter={() =>
                   setHoveredCard(product._id)
                 }
@@ -819,7 +706,7 @@ export default function TopRatedProducts() {
                   className="relative overflow-hidden"
                   style={{
                     height:
-                      "clamp(185px,22vw,235px)",
+                      "clamp(135px,16vw,175px)",
                   }}
                   onTouchStart={(event) => {
                     event.currentTarget.dataset.touchX =
@@ -889,15 +776,9 @@ export default function TopRatedProducts() {
                   </div>
 
                   <span className="tr-badge">
-                    <FaAward size={9} />
+                    <FaAward size={9} className="text-white" />
                     Top Rated
                   </span>
-
-                  {discount > 0 && (
-                    <span className="tr-discount">
-                      {discount}% OFF
-                    </span>
-                  )}
 
                   {hoveredCard === product._id &&
                     images.length > 1 && (
@@ -907,54 +788,8 @@ export default function TopRatedProducts() {
                       />
                     )}
 
-                  <div className="tr-overlay">
-                    <button
-                      type="button"
-                      className="tr-quick"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        openProduct(product);
-                      }}
-                    >
-                      <FaEye size={12} />
-                      Quick View
-                    </button>
-                  </div>
-
                   {images.length > 1 && (
                     <>
-                      <button
-                        type="button"
-                        className="tr-arrow tr-left"
-                        onClick={(event) =>
-                          changeImage(
-                            event,
-                            product._id,
-                            images.length,
-                            -1
-                          )
-                        }
-                        aria-label="Previous image"
-                      >
-                        <FaChevronLeft size={10} />
-                      </button>
-
-                      <button
-                        type="button"
-                        className="tr-arrow tr-right"
-                        onClick={(event) =>
-                          changeImage(
-                            event,
-                            product._id,
-                            images.length,
-                            1
-                          )
-                        }
-                        aria-label="Next image"
-                      >
-                        <FaChevronRight size={10} />
-                      </button>
-
                       <div className="tr-dots">
                         {images.map((_, imageIndex) => (
                           <button
@@ -1044,7 +879,7 @@ export default function TopRatedProducts() {
                       </span>
                     )}
                   </div>
-<div className="mt-3 flex items-baseline gap-1.5 border-t border-slate-100 pt-2.5">
+<div className="mt-2 flex items-baseline gap-1.5 border-t border-slate-100 pt-2.5">
                     <span className="text-sm font-extrabold sm:text-base">
                       <span className="mr-0.5 text-amber-600">
                         ₹

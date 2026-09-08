@@ -11,8 +11,6 @@ import {
   FaFire,
   FaShoppingBag,
   FaEye,
-  FaChevronLeft,
-  FaChevronRight,
 } from "react-icons/fa";
 
 const BACKEND_URL =
@@ -366,6 +364,30 @@ export default function PopularProducts() {
           position: relative;
         }
 
+        .pp-products-scroll {
+          display: flex;
+          gap: 12px;
+          width: 100%;
+          overflow-x: auto;
+          overflow-y: hidden;
+          padding: 3px 3px 10px;
+          scroll-behavior: smooth;
+          scroll-snap-type: x proximity;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+        }
+
+        .pp-products-scroll::-webkit-scrollbar {
+          display: none;
+        }
+
+        .pp-product-item {
+          flex: 0 0 190px;
+          width: 190px;
+          min-width: 190px;
+          scroll-snap-align: start;
+        }
+
         .pp-glow {
           position: absolute;
           inset: 0 5% auto;
@@ -415,9 +437,9 @@ export default function PopularProducts() {
         .pp-card:hover {
           transform: translateY(-7px) scale(1.012);
           border-color: rgba(99,102,241,.28);
-          box-shadow:
-            0 22px 52px rgba(79,70,229,.17),
-            0 5px 18px rgba(0,0,0,.05);
+          // box-shadow:
+          //   0 22px 52px rgba(79,70,229,.17),
+          //   0 5px 18px rgba(0,0,0,.05);
         }
 
         .pp-track {
@@ -479,60 +501,6 @@ export default function PopularProducts() {
           box-shadow: 0 5px 14px rgba(79,70,229,.28);
         }
 
-        .pp-discount {
-          position: absolute;
-          top: 11px;
-          right: 11px;
-          z-index: 21;
-          display: inline-flex;
-          align-items: center;
-          padding: 5px 9px;
-          border: 1px solid rgba(255,255,255,.35);
-          border-radius: 999px;
-          background: #10b981;
-          color: white;
-          font-size: 9px;
-          font-weight: 800;
-          box-shadow: 0 6px 15px rgba(16,185,129,.25);
-          transition: transform .2s ease;
-        }
-
-        .pp-card:hover .pp-discount {
-          transform: scale(1.04) translateY(-1px);
-        }
-
-        .pp-arrow {
-          position: absolute;
-          top: 50%;
-          z-index: 28;
-          width: 31px;
-          height: 31px;
-          transform: translateY(-50%);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: 1px solid rgba(99,102,241,.18);
-          border-radius: 50%;
-          background: rgba(255,255,255,.93);
-          color: #4f46e5;
-          box-shadow: 0 3px 12px rgba(0,0,0,.12);
-          cursor: pointer;
-          opacity: 0;
-          transition: .2s;
-        }
-
-        .pp-card:hover .pp-arrow {
-          opacity: 1;
-        }
-
-        .pp-arrow:hover {
-          background: #fff;
-          transform: translateY(-50%) scale(1.08);
-        }
-
-        .pp-left { left: 9px; }
-        .pp-right { right: 9px; }
-
         .pp-dots {
           position: absolute;
           left: 50%;
@@ -575,59 +543,6 @@ export default function PopularProducts() {
           font-size: 9px;
           font-weight: 700;
           backdrop-filter: blur(7px);
-        }
-
-        .pp-overlay {
-          position: absolute;
-          inset: 0;
-          z-index: 23;
-          display: flex;
-          align-items: flex-end;
-          justify-content: center;
-          padding-bottom: 13px;
-          background: linear-gradient(
-            to bottom,
-            transparent 45%,
-            rgba(20,16,60,.52) 100%
-          );
-          opacity: 0;
-          transition: opacity .26s ease;
-          pointer-events: none;
-        }
-
-        .pp-card:hover .pp-overlay {
-          opacity: 1;
-        }
-
-        .pp-quick {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-          padding: 7px 16px;
-          border: 0;
-          border-radius: 999px;
-          background: rgba(255,255,255,.95);
-          color: #1e1b4b;
-          font-size: 11.5px;
-          font-weight: 700;
-          box-shadow: 0 5px 18px rgba(0,0,0,.14);
-          transform: translateY(9px);
-          opacity: 0;
-          cursor: pointer;
-          transition: transform .26s .04s, opacity .26s .04s;
-          pointer-events: none;
-        }
-
-        .pp-card:hover .pp-quick {
-          transform: translateY(0);
-          opacity: 1;
-          pointer-events: auto;
-        }
-
-        .pp-quick:hover {
-          color: #4f46e5;
-          box-shadow: 0 8px 24px rgba(79,70,229,.18);
         }
 
         .pp-progress {
@@ -685,8 +600,6 @@ export default function PopularProducts() {
           box-shadow: 0 8px 20px rgba(79,70,229,.10);
         }
 
-        .pp-quick:focus-visible,
-        .pp-arrow:focus-visible,
         .pp-dot:focus-visible,
         .pp-view-all:focus-visible {
           outline: 2px solid rgba(79,70,229,.45);
@@ -694,29 +607,20 @@ export default function PopularProducts() {
         }
 
         @media (max-width: 640px) {
+          .pp-products-scroll {
+            gap: 9px;
+            padding-bottom: 8px;
+            scroll-padding-left: 3px;
+          }
+
+          .pp-product-item {
+            flex: 0 0 165px;
+            width: 165px;
+            min-width: 165px;
+          }
+
           .pp-card {
             border-radius: 20px;
-          }
-
-          .pp-arrow {
-            opacity: 1;
-          }
-
-          .pp-overlay {
-            opacity: 1;
-            background: linear-gradient(
-              to bottom,
-              transparent 52%,
-              rgba(20,16,60,.32) 100%
-            );
-          }
-
-          .pp-quick {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
-            padding: 6px 13px;
-            font-size: 10px;
           }
 
           .pp-card:hover {
@@ -728,8 +632,6 @@ export default function PopularProducts() {
           .pp-card,
           .pp-track,
           .pp-slide img,
-          .pp-arrow,
-          .pp-quick {
             transition: none !important;
           }
         }
@@ -770,7 +672,7 @@ export default function PopularProducts() {
           </button>
         </div>
 
-        <div className="relative z-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="pp-products-scroll relative z-10">
           {products.map((product, index) => {
             const images = getImages(product);
             const activeIdx =
@@ -802,7 +704,7 @@ export default function PopularProducts() {
             return (
               <article
                 key={product._id}
-                className="pp-card"
+                className="pp-card pp-product-item"
                 onMouseEnter={() =>
                   setHoveredCard(product._id)
                 }
@@ -818,7 +720,7 @@ export default function PopularProducts() {
                   className="relative overflow-hidden"
                   style={{
                     height:
-                      "clamp(185px,22vw,235px)",
+                      "clamp(135px,16vw,175px)",
                   }}
                   onTouchStart={(event) => {
                     event.currentTarget.dataset.touchX =
@@ -892,12 +794,6 @@ export default function PopularProducts() {
                     Popular
                   </span>
 
-                  {discount > 0 && (
-                    <span className="pp-discount">
-                      {discount}% OFF
-                    </span>
-                  )}
-
                   {hoveredCard === product._id &&
                     images.length > 1 && (
                       <div
@@ -906,54 +802,8 @@ export default function PopularProducts() {
                       />
                     )}
 
-                  <div className="pp-overlay">
-                    <button
-                      type="button"
-                      className="pp-quick"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        openProduct(product);
-                      }}
-                    >
-                      <FaEye size={12} />
-                      Quick View
-                    </button>
-                  </div>
-
                   {images.length > 1 && (
                     <>
-                      <button
-                        type="button"
-                        className="pp-arrow pp-left"
-                        onClick={(event) =>
-                          changeImage(
-                            event,
-                            product._id,
-                            images.length,
-                            -1
-                          )
-                        }
-                        aria-label="Previous image"
-                      >
-                        <FaChevronLeft size={10} />
-                      </button>
-
-                      <button
-                        type="button"
-                        className="pp-arrow pp-right"
-                        onClick={(event) =>
-                          changeImage(
-                            event,
-                            product._id,
-                            images.length,
-                            1
-                          )
-                        }
-                        aria-label="Next image"
-                      >
-                        <FaChevronRight size={10} />
-                      </button>
-
                       <div className="pp-dots">
                         {images.map((_, imageIndex) => (
                           <button
@@ -1037,8 +887,12 @@ export default function PopularProducts() {
                     </div>
 
                     {views > 0 && (
-                      <span className="text-[9px] font-semibold text-slate-400">
-                        {views} views
+                      <span
+                        className="flex items-center gap-1 text-[9px] font-semibold text-slate-400"
+                        title={`${views.toLocaleString("en-IN")} users viewed this product`}
+                      >
+                        <FaEye size={9} />
+                        {views.toLocaleString("en-IN")}
                       </span>
                     )}
                   </div>

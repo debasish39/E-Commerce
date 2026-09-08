@@ -861,7 +861,7 @@ export default function Products() {
 
           {loading ? (
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+            <div className="grid grid-cols-2 items-stretch gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6">
 
               {Array.from({
                 length: 12,
@@ -931,7 +931,7 @@ export default function Products() {
               <div
                 className={
                   gridView
-                    ? "grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5"
+                    ? "grid grid-cols-2 items-stretch gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6"
                     : "flex flex-col gap-4"
                 }
               >
@@ -943,7 +943,7 @@ export default function Products() {
                         product?._id ||
                         product?.id
                       }
-                      className="min-w-0"
+                      className="min-w-0 w-full"
                     >
                       <ProductCard
                         product={
@@ -1179,6 +1179,8 @@ function CategoryBanner({
           <img
             src={image}
             alt={categoryName}
+            loading="lazy"
+            decoding="async"
             className="
               absolute
               inset-0
@@ -1478,6 +1480,8 @@ function CategoryBanner({
             <img
               src={image}
               alt=""
+              loading="lazy"
+              decoding="async"
               className="
                 h-full
                 w-full
@@ -1645,6 +1649,8 @@ function CategoryNavCard({
           <img
             src={image}
             alt={name}
+            loading="lazy"
+            decoding="async"
             className="h-full w-full object-contain"
           />
 
