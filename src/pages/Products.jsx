@@ -33,6 +33,8 @@ import ProductCardSkeleton from "../components/ProductCardSkeleton";
 import Lottie from "lottie-react";
 import notfound from "../assets/notfound.json";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 export default function Products() {
   // =========================================================
   // URL
@@ -55,6 +57,7 @@ export default function Products() {
     subCategory,
     brand,
 
+  setSearch,
     priceRange,
     sort,
 
@@ -87,6 +90,10 @@ export default function Products() {
   const [gridView, setGridView] =
     useState(true);
 
+  // Category fetched directly from backend.
+  // This guarantees the UI uses category.name instead of the MongoDB _id.
+  const [apiCategory, setApiCategory] = useState(null);
+
   // =========================================================
   // PRODUCTS
   // =========================================================
@@ -100,60 +107,123 @@ export default function Products() {
   // =========================================================
 
   useEffect(() => {
-    const urlCategory =
-      searchParams.get("category");
+  const urlSearch = searchParams.get("search");
+  const urlCategory = searchParams.get("category");
+  const urlSubCategory = searchParams.get("subCategory");
+  const urlBrand = searchParams.get("brand");
 
-    const urlSubCategory =
-      searchParams.get("subCategory");
+  setSearch(urlSearch || "");
 
-    const urlBrand =
-      searchParams.get("brand");
+  setCategory(urlCategory || "All");
+  setSubCategory(urlSubCategory || "All");
+  setBrand(urlBrand || "All");
+}, [
+  searchParams,
+  setSearch,
+  setCategory,
+  setSubCategory,
+  setBrand,
+]);
 
-    setCategory(
-      urlCategory || "All"
-    );
+  // =========================================================
+  // FETCH SELECTED CATEGORY DETAILS
+  // =========================================================
 
-    setSubCategory(
-      urlSubCategory || "All"
-    );
+  useEffect(() => {
+    let cancelled = false;
 
-    setBrand(
-      urlBrand || "All"
-    );
-  }, [
-    searchParams,
-    setCategory,
-    setSubCategory,
-    setBrand,
-  ]);
+    const fetchSelectedCategory = async () => {
+      if (!category || category === "All") {
+        setApiCategory(null);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${BACKEND_URL}/api/category/${category}`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (!cancelled) {
+          setApiCategory(result?.category || null);
+        }
+      } catch (fetchError) {
+        console.error("Failed to fetch selected category:", fetchError);
+
+        if (!cancelled) {
+          setApiCategory(null);
+        }
+      }
+    };
+
+    fetchSelectedCategory();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [category]);
 
   // =========================================================
   // SELECTED CATEGORY
   // =========================================================
 
   const selectedCategory = useMemo(() => {
-    if (
-      !category ||
-      category === "All"
-    ) {
+    if (!category || category === "All") {
       return null;
     }
 
-    if (
-      !Array.isArray(categoryOnlyData)
-    ) {
-      return null;
+    // First priority: exact category returned by backend.
+    if (apiCategory) {
+      return apiCategory;
     }
 
-    return (
-      categoryOnlyData.find(
-        (item) =>
-          item?._id === category
-      ) || null
-    );
+    // Second priority: category data already available in context.
+    if (Array.isArray(categoryOnlyData)) {
+      const found = categoryOnlyData.find(
+        (item) => String(item?._id) === String(category)
+      );
+
+      if (found) {
+        return found;
+      }
+    }
+
+    // Third priority: category object attached to a product.
+    const productWithCategory = products.find((product) => {
+      const productCategory = product?.category;
+
+      if (!productCategory) {
+        return false;
+      }
+
+      if (typeof productCategory === "object") {
+        return String(productCategory?._id) === String(category);
+      }
+
+      return String(productCategory) === String(category);
+    });
+
+    const productCategory = productWithCategory?.category;
+
+    return typeof productCategory === "object"
+      ? productCategory
+      : null;
   }, [
     category,
+    apiCategory,
     categoryOnlyData,
+    products,
   ]);
 
   // =========================================================
@@ -161,32 +231,23 @@ export default function Products() {
   // =========================================================
 
   const categoryName = useMemo(() => {
-    if (
-      !category ||
-      category === "All"
-    ) {
+    if (!category || category === "All") {
       return "All Products";
     }
 
-    if (
-      typeof category === "object"
-    ) {
-      return (
-        category?.name ||
-        category?.title ||
-        "Products"
-      );
-    }
-
-    return (
+    const name =
       selectedCategory?.name ||
       selectedCategory?.title ||
-      "Products"
-    );
-  }, [
-    category,
-    selectedCategory,
-  ]);
+      selectedCategory?.categoryName ||
+      selectedCategory?.category;
+
+    // Never show the MongoDB ObjectId as the visible category title.
+    if (name && String(name) !== String(category)) {
+      return String(name);
+    }
+
+    return "Products";
+  }, [category, selectedCategory]);
 
   // =========================================================
   // CATEGORY DESCRIPTION

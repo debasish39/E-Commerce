@@ -1,9 +1,516 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineArrowRight } from "react-icons/ai";
 
 export default function Carousel() {
   const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(true);
+
+  /*
+  =====================================================
+  SKELETON LOADING
+  =====================================================
+  */
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 700);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  /*
+  =====================================================
+  MODERN LOADING SKELETON
+  =====================================================
+  */
+
+  if (loading) {
+    return (
+      <section className="offer-skeleton-section mx-auto w-full max-w-7xl">
+        <div className="offer-skeleton-banner">
+          {/* Ambient glow */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -left-20 top-0 h-48 w-48 rounded-full bg-indigo-300/20 blur-3xl"
+          />
+
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute right-0 top-[-80px] h-64 w-64 rounded-full bg-purple-300/20 blur-3xl"
+          />
+
+          {/* Decorative rings */}
+          <div className="offer-skeleton-ring offer-skeleton-ring-one" />
+          <div className="offer-skeleton-ring offer-skeleton-ring-two" />
+
+          {/* =================================================
+              LEFT CONTENT
+          ================================================= */}
+
+          <div className="relative z-10 w-[65%] sm:w-[60%]">
+            {/* Badge */}
+            <div className="offer-skeleton-shimmer mb-3 h-6 w-32 rounded-full sm:h-7 sm:w-40" />
+
+            {/* Heading */}
+            <div className="space-y-2">
+              <div className="offer-skeleton-shimmer h-7 w-44 rounded-lg sm:h-10 sm:w-64" />
+
+              <div className="offer-skeleton-shimmer h-7 w-52 rounded-lg sm:h-10 sm:w-72" />
+            </div>
+
+            {/* Description */}
+            <div className="mt-4 space-y-2">
+              <div className="offer-skeleton-shimmer h-3.5 w-full max-w-[390px] rounded-md" />
+
+              <div className="offer-skeleton-shimmer h-3.5 w-[85%] max-w-[330px] rounded-md" />
+
+              <div className="offer-skeleton-shimmer h-3.5 w-[65%] max-w-[250px] rounded-md" />
+            </div>
+
+            {/* CTA */}
+            <div className="offer-skeleton-shimmer mt-5 h-10 w-28 rounded-full sm:h-11 sm:w-32" />
+          </div>
+
+          {/* =================================================
+              RIGHT VISUAL
+          ================================================= */}
+
+          <div className="offer-skeleton-visual">
+            {/* Main discount circle */}
+            <div className="offer-skeleton-circle">
+              <div className="offer-skeleton-shimmer h-3 w-12 rounded-full" />
+
+              <div className="offer-skeleton-shimmer mt-2 h-12 w-24 rounded-xl sm:h-14 sm:w-28" />
+
+              <div className="offer-skeleton-shimmer mt-2 h-3 w-10 rounded-full" />
+            </div>
+
+            {/* Floating tags */}
+
+            <div className="offer-skeleton-tag offer-skeleton-tag-one">
+              <div className="offer-skeleton-shimmer h-3 w-20 rounded-full" />
+            </div>
+
+            <div className="offer-skeleton-tag offer-skeleton-tag-two">
+              <div className="offer-skeleton-shimmer h-3 w-24 rounded-full" />
+            </div>
+
+            <div className="offer-skeleton-tag offer-skeleton-tag-three">
+              <div className="offer-skeleton-shimmer h-3 w-20 rounded-full" />
+            </div>
+          </div>
+        </div>
+
+        {/* =================================================
+            SKELETON STYLES
+        ================================================= */}
+
+        <style>{`
+          .offer-skeleton-section {
+            width: 100%;
+            padding: 12px 12px 18px;
+            background: #ffffff;
+          }
+
+          .offer-skeleton-banner {
+            position: relative;
+
+            width: 100%;
+            min-height: 280px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            overflow: hidden;
+
+            padding: 42px 55px;
+
+            border-radius: 30px;
+
+            background:
+              radial-gradient(
+                circle at 82% 30%,
+                rgba(255,255,255,.18),
+                transparent 30%
+              ),
+              linear-gradient(
+                120deg,
+                #312e81 0%,
+                #4338ca 45%,
+                #6366f1 72%,
+                #7c3aed 100%
+              );
+
+            box-shadow:
+              0 18px 50px rgba(79,70,229,.18);
+          }
+
+          /* =================================================
+             SHIMMER
+          ================================================= */
+
+          .offer-skeleton-shimmer {
+            position: relative;
+            overflow: hidden;
+
+            background:
+              linear-gradient(
+                110deg,
+                rgba(255,255,255,.16) 8%,
+                rgba(255,255,255,.28) 18%,
+                rgba(224,231,255,.52) 30%,
+                rgba(255,255,255,.28) 42%,
+                rgba(255,255,255,.14) 58%
+              );
+
+            background-size: 250% 100%;
+
+            animation:
+              offerSkeletonShimmer 1.8s ease-in-out infinite;
+
+            box-shadow:
+              inset 0 0 16px rgba(255,255,255,.08),
+              0 0 18px rgba(255,255,255,.025);
+          }
+
+          .offer-skeleton-shimmer::after {
+            content: "";
+
+            position: absolute;
+            inset: 0;
+
+            background:
+              linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255,255,255,.08) 25%,
+                rgba(255,255,255,.5) 50%,
+                rgba(255,255,255,.08) 65%,
+                transparent 100%
+              );
+
+            transform: translateX(-120%);
+
+            animation:
+              offerSkeletonGlow 2.2s ease-in-out infinite;
+          }
+
+          /* =================================================
+             DISCOUNT CIRCLE
+          ================================================= */
+
+          .offer-skeleton-circle {
+            width: 190px;
+            height: 190px;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            background:
+              radial-gradient(
+                circle at 35% 30%,
+                rgba(255,255,255,.96),
+                rgba(245,243,255,.9) 65%,
+                rgba(221,214,254,.82)
+              );
+
+            box-shadow:
+              0 18px 45px rgba(0,0,0,.18),
+              0 0 55px rgba(255,255,255,.08);
+
+            transform: rotate(-6deg);
+
+            animation:
+              offerSkeletonFloat 4s ease-in-out infinite;
+          }
+
+          /* =================================================
+             RIGHT VISUAL
+          ================================================= */
+
+          .offer-skeleton-visual {
+            position: relative;
+
+            width: 310px;
+            height: 245px;
+
+            flex-shrink: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            z-index: 4;
+          }
+
+          /* =================================================
+             FLOATING TAGS
+          ================================================= */
+
+          .offer-skeleton-tag {
+            position: absolute;
+
+            padding: 8px 12px;
+
+            border:
+              1px solid
+              rgba(255,255,255,.14);
+
+            border-radius: 999px;
+
+            background:
+              rgba(255,255,255,.09);
+
+            backdrop-filter: blur(12px);
+
+            box-shadow:
+              0 7px 22px rgba(0,0,0,.10);
+          }
+
+          .offer-skeleton-tag-one {
+            top: 15px;
+            right: 0;
+
+            transform: rotate(6deg);
+          }
+
+          .offer-skeleton-tag-two {
+            bottom: 15px;
+            left: 0;
+
+            transform: rotate(-6deg);
+          }
+
+          .offer-skeleton-tag-three {
+            top: 50%;
+            right: -18px;
+
+            transform:
+              translateY(-50%)
+              rotate(4deg);
+          }
+
+          /* =================================================
+             DECORATIVE RINGS
+          ================================================= */
+
+          .offer-skeleton-ring {
+            position: absolute;
+
+            border:
+              1px solid
+              rgba(255,255,255,.08);
+
+            border-radius: 50%;
+
+            pointer-events: none;
+          }
+
+          .offer-skeleton-ring-one {
+            width: 300px;
+            height: 300px;
+
+            right: 4%;
+            top: -30px;
+          }
+
+          .offer-skeleton-ring-two {
+            width: 220px;
+            height: 220px;
+
+            right: 13%;
+            top: 40px;
+          }
+
+          /* =================================================
+             ANIMATIONS
+          ================================================= */
+
+          @keyframes offerSkeletonShimmer {
+            0% {
+              background-position: 100% 0;
+            }
+
+            50% {
+              background-position: 0% 0;
+            }
+
+            100% {
+              background-position: -100% 0;
+            }
+          }
+
+          @keyframes offerSkeletonGlow {
+            0% {
+              transform: translateX(-120%);
+            }
+
+            55%,
+            100% {
+              transform: translateX(120%);
+            }
+          }
+
+          @keyframes offerSkeletonFloat {
+            0%,
+            100% {
+              transform:
+                translateY(0)
+                rotate(-6deg);
+            }
+
+            50% {
+              transform:
+                translateY(-7px)
+                rotate(-4deg);
+            }
+          }
+
+          /* =================================================
+             TABLET
+          ================================================= */
+
+          @media (max-width: 900px) {
+            .offer-skeleton-banner {
+              min-height: 250px;
+
+              padding:
+                35px 30px;
+            }
+
+            .offer-skeleton-visual {
+              width: 240px;
+            }
+
+            .offer-skeleton-circle {
+              width: 165px;
+              height: 165px;
+            }
+
+            .offer-skeleton-tag-three {
+              right: -5px;
+            }
+          }
+
+          /* =================================================
+             MOBILE
+          ================================================= */
+
+          @media (max-width: 640px) {
+            .offer-skeleton-section {
+              padding:
+                8px 10px 14px;
+            }
+
+            .offer-skeleton-banner {
+              min-height: 210px;
+
+              padding:
+                25px 19px;
+
+              border-radius: 23px;
+            }
+
+            .offer-skeleton-circle {
+              width: 130px;
+              height: 130px;
+            }
+
+            .offer-skeleton-visual {
+              position: absolute;
+
+              right: -26px;
+
+              width: 175px;
+              height: 175px;
+            }
+
+            .offer-skeleton-tag {
+              padding:
+                5px 7px;
+            }
+
+            .offer-skeleton-tag-one {
+              top: 2px;
+            }
+
+            .offer-skeleton-tag-two {
+              bottom: 2px;
+            }
+
+            .offer-skeleton-tag-three {
+              display: none;
+            }
+
+            .offer-skeleton-ring-one {
+              width: 210px;
+              height: 210px;
+
+              right: -35px;
+              top: 0;
+            }
+
+            .offer-skeleton-ring-two {
+              width: 150px;
+              height: 150px;
+
+              right: 0;
+              top: 30px;
+            }
+          }
+
+          /* =================================================
+             SMALL PHONES
+          ================================================= */
+
+          @media (max-width: 390px) {
+            .offer-skeleton-banner {
+              min-height: 195px;
+
+              padding:
+                21px 15px;
+            }
+
+            .offer-skeleton-circle {
+              transform:
+                scale(.88)
+                rotate(-6deg);
+            }
+
+            .offer-skeleton-visual {
+              right: -34px;
+            }
+          }
+
+          /* =================================================
+             REDUCED MOTION
+          ================================================= */
+
+          @media (prefers-reduced-motion: reduce) {
+            .offer-skeleton-shimmer,
+            .offer-skeleton-shimmer::after,
+            .offer-skeleton-circle {
+              animation: none !important;
+            }
+          }
+        `}</style>
+      </section>
+    );
+  }
+
+  /*
+  =====================================================
+  NORMAL OFFER BANNER
+  =====================================================
+  */
 
   return (
     <>
@@ -12,24 +519,20 @@ export default function Carousel() {
       ===================================================== */}
 
       <section className="offer-section max-w-7xl mx-auto">
-
         <div className="offer-banner">
-
           {/* Decorative background */}
           <div className="offer-glow offer-glow-one" />
           <div className="offer-glow offer-glow-two" />
+
           <div className="offer-shape offer-shape-one" />
           <div className="offer-shape offer-shape-two" />
-
 
           {/* =================================================
               LEFT CONTENT
           ================================================= */}
 
           <div className="offer-content">
-
             {/* Badge */}
-
             <div className="offer-label">
               <span className="offer-label-icon">
                 ⚡
@@ -38,9 +541,7 @@ export default function Carousel() {
               LIMITED TIME OFFER
             </div>
 
-
             {/* Heading */}
-
             <h1 className="offer-title">
               Big Savings.
               <br />
@@ -50,18 +551,14 @@ export default function Carousel() {
               </span>
             </h1>
 
-
             {/* Description */}
-
             <p className="offer-description">
               Discover amazing products at
               unbeatable prices. Shop your
               favourites before the offer ends.
             </p>
 
-
             {/* CTA */}
-
             <button
               type="button"
               onClick={() => navigate("/products")}
@@ -75,20 +572,15 @@ export default function Carousel() {
                 <AiOutlineArrowRight size={16} />
               </span>
             </button>
-
           </div>
-
 
           {/* =================================================
               RIGHT OFFER VISUAL
           ================================================= */}
 
           <div className="offer-visual">
-
             {/* Main discount circle */}
-
             <div className="offer-circle">
-
               <span className="offer-up-to">
                 UP TO
               </span>
@@ -100,39 +592,29 @@ export default function Carousel() {
               <span className="offer-off">
                 OFF
               </span>
-
             </div>
 
-
             {/* Floating badges */}
-
             <div className="offer-tag offer-tag-one">
               🔥 HOT DEAL
             </div>
-
 
             <div className="offer-tag offer-tag-two">
               ✨ BEST PRICE
             </div>
 
-
             <div className="offer-tag offer-tag-three">
               🛍️ SHOP NOW
             </div>
-
           </div>
-
         </div>
-
       </section>
-
 
       {/* =====================================================
           STYLES
       ===================================================== */}
 
       <style>{`
-
         /* ===================================================
            SECTION
         =================================================== */
@@ -142,7 +624,6 @@ export default function Carousel() {
           padding: 12px 12px 18px;
           background: #ffffff;
         }
-
 
         /* ===================================================
            MAIN BANNER
@@ -183,7 +664,6 @@ export default function Carousel() {
             rgba(79,70,229,0.18);
         }
 
-
         /* ===================================================
            DECORATIVE GLOW
         =================================================== */
@@ -198,7 +678,6 @@ export default function Carousel() {
           filter: blur(2px);
         }
 
-
         .offer-glow-one {
           width: 230px;
           height: 230px;
@@ -209,7 +688,6 @@ export default function Carousel() {
           background:
             rgba(255,255,255,0.08);
         }
-
 
         .offer-glow-two {
           width: 180px;
@@ -222,7 +700,6 @@ export default function Carousel() {
             rgba(255,255,255,0.07);
         }
 
-
         /* ===================================================
            DECORATIVE SHAPES
         =================================================== */
@@ -230,14 +707,14 @@ export default function Carousel() {
         .offer-shape {
           position: absolute;
 
-          border: 1px solid
+          border:
+            1px solid
             rgba(255,255,255,0.08);
 
           border-radius: 50%;
 
           pointer-events: none;
         }
-
 
         .offer-shape-one {
           width: 300px;
@@ -247,7 +724,6 @@ export default function Carousel() {
           top: -30px;
         }
 
-
         .offer-shape-two {
           width: 220px;
           height: 220px;
@@ -255,7 +731,6 @@ export default function Carousel() {
           right: 13%;
           top: 40px;
         }
-
 
         /* ===================================================
            CONTENT
@@ -268,7 +743,6 @@ export default function Carousel() {
 
           max-width: 620px;
         }
-
 
         /* ===================================================
            LABEL
@@ -307,7 +781,6 @@ export default function Carousel() {
             blur(10px);
         }
 
-
         .offer-label-icon {
           width: 22px;
           height: 22px;
@@ -324,7 +797,6 @@ export default function Carousel() {
 
           font-size: 12px;
         }
-
 
         /* ===================================================
            TITLE
@@ -345,11 +817,9 @@ export default function Carousel() {
           font-weight: 900;
         }
 
-
         .offer-title span {
           color: #c4b5fd;
         }
-
 
         /* ===================================================
            DESCRIPTION
@@ -368,7 +838,6 @@ export default function Carousel() {
 
           line-height: 1.65;
         }
-
 
         /* ===================================================
            BUTTON
@@ -408,7 +877,6 @@ export default function Carousel() {
             background 180ms ease;
         }
 
-
         .offer-button:hover {
           background: #f5f3ff;
 
@@ -420,12 +888,10 @@ export default function Carousel() {
             rgba(0,0,0,0.18);
         }
 
-
         .offer-button:active {
           transform:
             scale(0.96);
         }
-
 
         .offer-button-icon {
           width: 27px;
@@ -443,7 +909,6 @@ export default function Carousel() {
 
           color: white;
         }
-
 
         /* ===================================================
            RIGHT VISUAL
@@ -464,7 +929,6 @@ export default function Carousel() {
 
           z-index: 4;
         }
-
 
         /* ===================================================
            DISCOUNT CIRCLE
@@ -506,7 +970,6 @@ export default function Carousel() {
             infinite;
         }
 
-
         .offer-up-to {
           font-size: 11px;
 
@@ -514,7 +977,6 @@ export default function Carousel() {
 
           letter-spacing: 0.16em;
         }
-
 
         .offer-circle strong {
           margin-top: -4px;
@@ -528,7 +990,6 @@ export default function Carousel() {
           letter-spacing: -0.07em;
         }
 
-
         .offer-off {
           margin-top: 3px;
 
@@ -538,7 +999,6 @@ export default function Carousel() {
 
           letter-spacing: 0.25em;
         }
-
 
         /* ===================================================
            FLOATING TAGS
@@ -574,7 +1034,6 @@ export default function Carousel() {
             rgba(0,0,0,0.12);
         }
 
-
         .offer-tag-one {
           top: 15px;
 
@@ -584,7 +1043,6 @@ export default function Carousel() {
             rotate(6deg);
         }
 
-
         .offer-tag-two {
           bottom: 15px;
 
@@ -593,7 +1051,6 @@ export default function Carousel() {
           transform:
             rotate(-6deg);
         }
-
 
         .offer-tag-three {
           top: 50%;
@@ -605,13 +1062,11 @@ export default function Carousel() {
             rotate(4deg);
         }
 
-
         /* ===================================================
            FLOAT ANIMATION
         =================================================== */
 
         @keyframes offer-float {
-
           0%,
           100% {
             transform:
@@ -624,16 +1079,13 @@ export default function Carousel() {
               translateY(-7px)
               rotate(-4deg);
           }
-
         }
-
 
         /* ===================================================
            TABLET
         =================================================== */
 
         @media (max-width: 900px) {
-
           .offer-banner {
             min-height: 250px;
 
@@ -641,47 +1093,38 @@ export default function Carousel() {
               35px 30px;
           }
 
-
           .offer-title {
             font-size:
               clamp(30px, 5vw, 45px);
           }
 
-
           .offer-visual {
             width: 240px;
           }
-
 
           .offer-circle {
             width: 165px;
             height: 165px;
           }
 
-
           .offer-circle strong {
             font-size: 49px;
           }
 
-
           .offer-tag-three {
             right: -5px;
           }
-
         }
-
 
         /* ===================================================
            MOBILE
         =================================================== */
 
         @media (max-width: 640px) {
-
           .offer-section {
             padding:
               8px 10px 14px;
           }
-
 
           .offer-banner {
             min-height: 210px;
@@ -692,11 +1135,9 @@ export default function Carousel() {
             border-radius: 23px;
           }
 
-
           .offer-content {
             max-width: 69%;
           }
-
 
           .offer-label {
             margin-bottom: 9px;
@@ -711,7 +1152,6 @@ export default function Carousel() {
             letter-spacing: .07em;
           }
 
-
           .offer-label-icon {
             width: 18px;
             height: 18px;
@@ -719,14 +1159,12 @@ export default function Carousel() {
             font-size: 9px;
           }
 
-
           .offer-title {
             font-size: 25px;
 
             letter-spacing:
               -0.035em;
           }
-
 
           .offer-description {
             margin:
@@ -737,7 +1175,6 @@ export default function Carousel() {
             line-height: 1.5;
           }
 
-
           .offer-button {
             gap: 7px;
 
@@ -747,12 +1184,10 @@ export default function Carousel() {
             font-size: 9px;
           }
 
-
           .offer-button-icon {
             width: 22px;
             height: 22px;
           }
-
 
           .offer-visual {
             position: absolute;
@@ -763,27 +1198,22 @@ export default function Carousel() {
             height: 175px;
           }
 
-
           .offer-circle {
             width: 130px;
             height: 130px;
           }
 
-
           .offer-circle strong {
             font-size: 37px;
           }
-
 
           .offer-up-to {
             font-size: 7px;
           }
 
-
           .offer-off {
             font-size: 8px;
           }
-
 
           .offer-tag {
             padding:
@@ -792,23 +1222,19 @@ export default function Carousel() {
             font-size: 6px;
           }
 
-
           .offer-tag-one {
             top: 2px;
             right: 0;
           }
-
 
           .offer-tag-two {
             bottom: 2px;
             left: 0;
           }
 
-
           .offer-tag-three {
             display: none;
           }
-
 
           .offer-shape-one {
             width: 210px;
@@ -819,7 +1245,6 @@ export default function Carousel() {
             top: 0;
           }
 
-
           .offer-shape-two {
             width: 150px;
             height: 150px;
@@ -828,16 +1253,13 @@ export default function Carousel() {
 
             top: 30px;
           }
-
         }
-
 
         /* ===================================================
            SMALL PHONES
         =================================================== */
 
         @media (max-width: 390px) {
-
           .offer-banner {
             min-height: 195px;
 
@@ -845,16 +1267,13 @@ export default function Carousel() {
               21px 15px;
           }
 
-
           .offer-content {
             max-width: 70%;
           }
 
-
           .offer-title {
             font-size: 22px;
           }
-
 
           .offer-description {
             font-size: 8px;
@@ -863,36 +1282,28 @@ export default function Carousel() {
               8px 0 12px;
           }
 
-
           .offer-visual {
             right: -34px;
 
             transform:
               scale(.88);
           }
-
         }
-
 
         /* ===================================================
            REDUCED MOTION
         =================================================== */
 
         @media (prefers-reduced-motion: reduce) {
-
           .offer-circle {
             animation: none;
           }
 
-
           .offer-button {
             transition: none;
           }
-
         }
-
       `}</style>
     </>
   );
 }
-

@@ -179,41 +179,263 @@ return;
      LOADING
   ===================================================== */
 
-  if (loading) {
-    return (
-      <section className="max-w-7xl mx-auto px-1.5 sm:px-4 py-8">
+if (loading) {
+  return (
+    <section className="relative mx-auto w-full max-w-7xl overflow-hidden px-3 py-7 sm:px-5 lg:px-8">
+      {/* Ambient glow */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-24 top-0 h-52 w-52 rounded-full bg-orange-400/10 blur-3xl"
+      />
 
-        <div className="flex items-center justify-between mb-6">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute right-[-90px] top-10 h-60 w-60 rounded-full bg-rose-400/10 blur-3xl"
+      />
 
-          <h2 className="text-xl sm:text-3xl font-bold flex items-center gap-2">
-            <FaFire className="text-orange-500" />
-            Trending Now
-          </h2>
+      {/* HEADER */}
+      <div className="relative z-10 mb-5 flex items-end justify-between gap-3">
+        <div className="min-w-0">
+          {/* Hot picks badge */}
+          <div className="trending-skeleton-shimmer mb-2 h-6 w-24 rounded-full" />
 
+          {/* Title */}
+          <div className="trending-skeleton-shimmer h-8 w-44 rounded-xl sm:h-9 sm:w-52" />
+
+          {/* Description */}
+          <div className="trending-skeleton-shimmer mt-2 h-3.5 w-64 rounded-md sm:w-80" />
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-3">
+        {/* View All */}
+        <div className="trending-skeleton-shimmer h-9 w-20 shrink-0 rounded-full" />
+      </div>
 
-          {[1, 2, 3, 4].map(
-            (item) => (
+      {/* HORIZONTAL PRODUCT SCROLLER */}
+      <div className="relative z-10 flex w-full gap-3 overflow-hidden pb-2">
+        {[1, 2, 3, 4, 5].map((item) => (
+          <article
+            key={item}
+            className="
+              trending-skeleton-card
+              relative
+              w-[165px]
+              min-w-[165px]
+              overflow-hidden
+              rounded-[17px]
+              border
+              border-slate-200/70
+              bg-white/90
+              shadow-[0_8px_28px_rgba(15,23,42,0.055)]
+              backdrop-blur-sm
+              sm:w-[190px]
+              sm:min-w-[190px]
+              sm:rounded-[20px]
+            "
+          >
+            {/* Card edge glow */}
+            <div
+              aria-hidden="true"
+              className="
+                pointer-events-none
+                absolute
+                -inset-px
+                rounded-[inherit]
+                bg-gradient-to-r
+                from-transparent
+                via-orange-200/30
+                to-transparent
+                opacity-70
+                blur-[1px]
+              "
+            />
+
+            {/* IMAGE */}
+            <div
+              className="
+                relative
+                h-[150px]
+                overflow-hidden
+                bg-gradient-to-br
+                from-orange-50/70
+                via-slate-50
+                to-slate-100
+                sm:h-[175px]
+              "
+            >
+              {/* Main shimmer */}
+              <div className="trending-skeleton-shimmer absolute inset-0" />
+
+              {/* Fake product image */}
               <div
-                key={item}
                 className="
-                  h-72
+                  absolute
+                  left-1/2
+                  top-1/2
+                  h-24
+                  w-24
+                  -translate-x-1/2
+                  -translate-y-1/2
                   rounded-2xl
-                  bg-gray-100
-                  animate-pulse
+                  bg-white/60
+                  shadow-[0_0_50px_rgba(249,115,22,0.12)]
+                  backdrop-blur-sm
+                  sm:h-28
+                  sm:w-28
                 "
               />
-            )
-          )}
 
-        </div>
+              {/* Fake HOT badge */}
+              <div
+                className="
+                  trending-skeleton-shimmer
+                  absolute
+                  left-2.5
+                  top-2.5
+                  h-5
+                  w-14
+                  rounded-full
+                "
+              />
 
-      </section>
-    );
-  }
+              {/* Fake discount badge */}
+              <div
+                className="
+                  trending-skeleton-shimmer
+                  absolute
+                  bottom-2.5
+                  right-2.5
+                  h-5
+                  w-14
+                  rounded-md
+                "
+              />
+            </div>
 
+            {/* CONTENT */}
+            <div className="relative p-2.5 sm:p-3">
+              {/* Category */}
+              <div className="trending-skeleton-shimmer mb-2 h-2.5 w-16 rounded-full" />
+
+              {/* Product title */}
+              <div className="min-h-[34px] space-y-1.5">
+                <div className="trending-skeleton-shimmer h-3.5 w-full rounded-md" />
+                <div className="trending-skeleton-shimmer h-3.5 w-3/4 rounded-md" />
+              </div>
+
+              {/* Rating + Views */}
+              <div className="mt-2 flex min-h-[18px] items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-1">
+                  {/* Star */}
+                  <div className="trending-skeleton-shimmer h-2.5 w-2.5 rounded-sm" />
+
+                  {/* Rating */}
+                  <div className="trending-skeleton-shimmer h-2.5 w-7 rounded-full" />
+
+                  {/* Reviews */}
+                  <div className="trending-skeleton-shimmer h-2.5 w-8 rounded-full" />
+                </div>
+
+                {/* Views */}
+                <div className="trending-skeleton-shimmer h-2.5 w-10 rounded-full" />
+              </div>
+
+              {/* Price */}
+              <div className="mt-2 flex items-baseline gap-1.5 border-t border-slate-100 pt-2">
+                <div className="trending-skeleton-shimmer h-4 w-16 rounded-md" />
+                <div className="trending-skeleton-shimmer h-2.5 w-12 rounded-md" />
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {/* SHIMMER + GLOW */}
+      <style>{`
+        .trending-skeleton-shimmer {
+          position: relative;
+          overflow: hidden;
+
+          background: linear-gradient(
+            110deg,
+            #f1f5f9 8%,
+            #f8fafc 18%,
+            #ffedd5 30%,
+            #f8fafc 42%,
+            #eef2f7 58%
+          );
+
+          background-size: 250% 100%;
+
+          animation:
+            trendingSkeletonShimmer 1.8s ease-in-out infinite;
+
+          box-shadow:
+            inset 0 0 14px rgba(255, 255, 255, 0.55),
+            0 0 14px rgba(249, 115, 22, 0.025);
+        }
+
+        .trending-skeleton-shimmer::after {
+          content: "";
+
+          position: absolute;
+          inset: 0;
+
+          background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.25) 28%,
+            rgba(255, 255, 255, 0.85) 50%,
+            rgba(253, 186, 116, 0.22) 62%,
+            transparent 100%
+          );
+
+          transform: translateX(-120%);
+
+          animation:
+            trendingSkeletonGlow 2.25s ease-in-out infinite;
+        }
+
+        @keyframes trendingSkeletonShimmer {
+          0% {
+            background-position: 100% 0;
+          }
+
+          50% {
+            background-position: 0% 0;
+          }
+
+          100% {
+            background-position: -100% 0;
+          }
+        }
+
+        @keyframes trendingSkeletonGlow {
+          0% {
+            transform: translateX(-120%);
+          }
+
+          55%,
+          100% {
+            transform: translateX(120%);
+          }
+        }
+
+        @media (max-width: 640px) {
+          .trending-skeleton-shimmer {
+            background-size: 200% 100%;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .trending-skeleton-shimmer,
+          .trending-skeleton-shimmer::after {
+            animation: none !important;
+          }
+        }
+      `}</style>
+    </section>
+  );
+}
   /* =====================================================
      ERROR
   ===================================================== */

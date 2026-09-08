@@ -169,6 +169,9 @@ const getProductImage = (product) => {
 export const DataProvider = ({ children }) => {
   const [data, setData] = useState([]);
 
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+
   const [loading, setLoading] = useState(true);
 
   const [error, setError] = useState(null);
@@ -191,195 +194,96 @@ export const DataProvider = ({ children }) => {
      FETCH PRODUCTS
   ===================================================== */
 
-  const fetchAllProducts = async () => {
-    console.log("");
-    console.log("========================================");
-    console.log("📦 FETCHING PRODUCTS");
-    console.log("========================================");
+ const fetchAllProducts = async (searchValue = "") => {
+  setLoading(true);
+  setError(null);
 
-    setLoading(true);
-    setError(null);
+  try {
+    const params = new URLSearchParams();
 
-    try {
-      const url =
-        `${BACKEND_URL}/api/products`;
-
-      console.log("➡️ REQUEST URL:", url);
-
-      const res = await axios.get(url);
-
-      console.log("⬅️ RESPONSE STATUS:", res.status);
-
-      console.log(
-        "⬅️ RESPONSE DATA:",
-        res.data
-      );
-
-      const rawProducts =
-        Array.isArray(res.data?.products)
-          ? res.data.products
-          : [];
-
-      console.log(
-        "📊 RAW PRODUCT COUNT:",
-        rawProducts.length
-      );
-
-      const productsData =
-        rawProducts.map((product) => ({
-          ...product,
-
-          displayPrice:
-            getProductPrice(product),
-
-          originalPrice:
-            getProductOriginalPrice(
-              product
-            ),
-
-          totalStock:
-            getProductStock(product),
-
-          image:
-            getProductImage(product),
-        }));
-
-      console.log(
-        "🟢 FINAL PRODUCT COUNT:",
-        productsData.length
-      );
-
-      productsData.forEach(
-        (product, index) => {
-          console.log(
-            `🛍️ PRODUCT ${index + 1}:`,
-            {
-              id: product?._id,
-
-              title: product?.title,
-
-              brand: product?.brand,
-
-              category:
-                typeof product?.category ===
-                "object"
-                  ? {
-                      id:
-                        product?.category?._id,
-                      name:
-                        product?.category?.name,
-                    }
-                  : product?.category,
-
-              subCategory:
-                typeof product?.subCategory ===
-                "object"
-                  ? {
-                      id:
-                        product?.subCategory?._id,
-                      name:
-                        product?.subCategory
-                          ?.name,
-                    }
-                  : product?.subCategory,
-
-              status: product?.status,
-
-              isActive:
-                product?.isActive,
-
-              isDeleted:
-                product?.isDeleted,
-
-              image:
-                product?.image,
-            }
-          );
-        }
-      );
-
-      setData(productsData);
-    } catch (err) {
-      console.error(
-        "❌ FETCH PRODUCTS ERROR:",
-        err
-      );
-
-      console.error(
-        "❌ ERROR MESSAGE:",
-        err?.message
-      );
-
-      console.error(
-        "❌ ERROR RESPONSE:",
-        err?.response?.data
-      );
-
-      console.error(
-        "❌ ERROR STATUS:",
-        err?.response?.status
-      );
-
-      setError(
-        err?.message ||
-          "Failed to fetch products"
-      );
-
-      setData([]);
-
-      toast.error(
-        "Failed to fetch products"
-      );
-    } finally {
-      setLoading(false);
-
-      console.log(
-        "🏁 PRODUCT FETCH FINISHED"
-      );
-
-      console.log(
-        "========================================"
-      );
+    if (searchValue.trim()) {
+      params.set("search", searchValue.trim());
     }
-  };
 
+    const url = `${BACKEND_URL}/api/products${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
+
+    const res = await axios.get(url);
+
+    const rawProducts = Array.isArray(res.data?.products)
+      ? res.data.products
+      : [];
+
+    const productsData = rawProducts.map((product) => ({
+      ...product,
+      displayPrice: getProductPrice(product),
+      originalPrice: getProductOriginalPrice(product),
+      totalStock: getProductStock(product),
+      image: getProductImage(product),
+    }));
+
+    setData(productsData);
+  } catch (err) {
+    console.error("FETCH PRODUCTS ERROR:", err);
+    setError(err?.message || "Failed to fetch products");
+    setData([]);
+    toast.error("Failed to fetch products");
+  } finally {
+    setLoading(false);
+  }
+};
   /* =====================================================
      FETCH ON MOUNT
   ===================================================== */
 
   useEffect(() => {
-    fetchAllProducts();
+    fetchAllProducts(search);
+  }, [search]);
+
+  /* =====================================================
+     FETCH CATEGORIES
+  ===================================================== */
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+
+        const res = await axios.get(
+          `${BACKEND_URL}/api/category`
+        );
+
+        const categoryData = Array.isArray(
+          res.data?.categories
+        )
+          ? res.data.categories
+          : [];
+
+        setCategories(categoryData);
+      } catch (err) {
+        console.error(
+          "FETCH CATEGORIES ERROR:",
+          err
+        );
+        setCategories([]);
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    fetchCategories();
   }, []);
 
   /* =====================================================
-     UNIQUE CATEGORIES
+     CATEGORIES
   ===================================================== */
 
   const categoryOnlyData = useMemo(() => {
-    const categoryMap = new Map();
-
-    data.forEach((item) => {
-      if (!item?.category) return;
-
-      const id = getId(item.category);
-
-      if (!id) return;
-
-      const name =
-        typeof item.category === "object"
-          ? item.category?.name
-          : String(item.category);
-
-      categoryMap.set(id, {
-        _id: id,
-        name: name || "Unnamed Category",
-      });
-    });
-
-    return [
-      ...categoryMap.values(),
-    ];
-  }, [data]);
+    return Array.isArray(categories)
+      ? categories
+      : [];
+  }, [categories]);
 
   /* =====================================================
      UNIQUE SUBCATEGORIES
@@ -488,54 +392,54 @@ export const DataProvider = ({ children }) => {
        SEARCH
     ===================================================== */
 
-    if (search.trim()) {
-      const searchValue =
-        normalizeText(search);
+    // if (search.trim()) {
+    //   const searchValue =
+    //     normalizeText(search);
 
-      temp = temp.filter((item) => {
-        const title =
-          normalizeText(item?.title);
+    //   temp = temp.filter((item) => {
+    //     const title =
+    //       normalizeText(item?.title);
 
-        const description =
-          normalizeText(
-            item?.description
-          );
+    //     const description =
+    //       normalizeText(
+    //         item?.description
+    //       );
 
-        const shortDescription =
-          normalizeText(
-            item?.shortDescription
-          );
+    //     const shortDescription =
+    //       normalizeText(
+    //         item?.shortDescription
+    //       );
 
-        const brandName =
-          normalizeText(
-            item?.brand
-          );
+    //     const brandName =
+    //       normalizeText(
+    //         item?.brand
+    //       );
 
-        const tags =
-          Array.isArray(item?.tags)
-            ? normalizeText(
-                item.tags.join(" ")
-              )
-            : "";
+    //     const tags =
+    //       Array.isArray(item?.tags)
+    //         ? normalizeText(
+    //             item.tags.join(" ")
+    //           )
+    //         : "";
 
-        return (
-          title.includes(searchValue) ||
-          description.includes(searchValue) ||
-          shortDescription.includes(
-            searchValue
-          ) ||
-          brandName.includes(
-            searchValue
-          ) ||
-          tags.includes(searchValue)
-        );
-      });
+    //     return (
+    //       title.includes(searchValue) ||
+    //       description.includes(searchValue) ||
+    //       shortDescription.includes(
+    //         searchValue
+    //       ) ||
+    //       brandName.includes(
+    //         searchValue
+    //       ) ||
+    //       tags.includes(searchValue)
+    //     );
+    //   });
 
-      console.log(
-        "🔎 After SEARCH:",
-        temp.length
-      );
-    }
+    //   console.log(
+    //     "🔎 After SEARCH:",
+    //     temp.length
+    //   );
+    // }
 
     /* =====================================================
        CATEGORY
@@ -855,6 +759,8 @@ export const DataProvider = ({ children }) => {
     handleBrandChange,
 
     categoryOnlyData,
+    categories,
+    categoriesLoading,
     subCategoryOnlyData,
     brandOnlyData,
 

@@ -308,44 +308,215 @@ export default function RecentlyViewed() {
   // LOADING
   // ============================================================
 
-  if (loading) {
-    return (
-      <section className="mx-auto w-full max-w-7xl px-3 py-8 sm:px-5 lg:px-8">
-        <div className="mb-4">
-          <div className="mb-2 h-6 w-28 animate-pulse rounded-full bg-slate-200" />
 
-          <div className="h-8 w-56 animate-pulse rounded-lg bg-slate-200" />
+if (loading) {
+  return (
+    <section className="relative mx-auto w-full max-w-7xl overflow-hidden px-3 py-6 sm:px-5 lg:px-8">
+      {/* Ambient background glow */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-20 top-10 h-40 w-40 rounded-full bg-indigo-400/10 blur-3xl"
+      />
 
-          <div className="mt-2 h-4 w-64 animate-pulse rounded bg-slate-100" />
-        </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-20 top-20 h-48 w-48 rounded-full bg-blue-400/10 blur-3xl"
+      />
 
-        {/* Horizontal loading cards */}
-        <div className="rv-loading-scroll">
-          {[1, 2, 3, 4, 5].map(
-            (item) => (
+      {/* Header skeleton */}
+      <div className="relative mb-6">
+        {/* Small badge */}
+        <div className="skeleton-shimmer mb-3 h-6 w-28 rounded-full" />
+
+        {/* Title */}
+        <div className="skeleton-shimmer h-8 w-52 rounded-lg sm:w-64" />
+
+        {/* Description */}
+        <div className="skeleton-shimmer mt-3 h-4 w-64 rounded-md sm:w-80" />
+      </div>
+
+      {/* Product skeletons */}
+      <div className="relative flex gap-4 overflow-hidden pb-3">
+        {[1, 2, 3, 4, 5].map((item) => (
+          <div
+            key={item}
+            className="
+              group
+              relative
+              min-w-[218px]
+              overflow-hidden
+              rounded-[22px]
+              border
+              border-slate-200/70
+              bg-white/80
+              shadow-[0_8px_30px_rgba(15,23,42,0.06)]
+              backdrop-blur-sm
+              sm:min-w-[220px]
+            "
+          >
+            {/* Card glow */}
+            <div
+              aria-hidden="true"
+              className="
+                pointer-events-none
+                absolute
+                -inset-px
+                rounded-[22px]
+                bg-gradient-to-r
+                from-transparent
+                via-indigo-200/30
+                to-transparent
+                opacity-70
+                blur-[1px]
+              "
+            />
+
+            {/* Image */}
+            <div className="relative h-[155px] overflow-hidden bg-gradient-to-br from-slate-100 via-slate-50 to-indigo-50/60">
+              <div className="skeleton-shimmer absolute inset-0" />
+
+              {/* Image placeholder glow */}
               <div
-                key={item}
-                className="rv-loading-card overflow-hidden rounded-[22px] border border-slate-100 bg-white"
-              >
-                <div className="h-40 animate-pulse bg-slate-100" />
+                className="
+                  absolute
+                  left-1/2
+                  top-1/2
+                  h-20
+                  w-20
+                  -translate-x-1/2
+                  -translate-y-1/2
+                  rounded-2xl
+                  bg-white/50
+                  shadow-[0_0_45px_rgba(99,102,241,0.12)]
+                  backdrop-blur-sm
+                "
+              />
 
-                <div className="space-y-2.5 p-3">
-                  <div className="h-3 w-20 animate-pulse rounded bg-slate-100" />
+              {/* Fake badge */}
+              <div className="skeleton-shimmer absolute left-3 top-3 h-5 w-16 rounded-full" />
 
-                  <div className="h-4 w-full animate-pulse rounded bg-slate-100" />
+              {/* Fake discount */}
+              <div className="skeleton-shimmer absolute bottom-3 left-3 h-5 w-14 rounded-full" />
+            </div>
 
-                  <div className="h-4 w-3/4 animate-pulse rounded bg-slate-100" />
+            {/* Product information */}
+            <div className="relative space-y-3 p-3.5">
+              {/* Category */}
+              <div className="skeleton-shimmer h-3 w-20 rounded-full" />
 
-                  <div className="h-5 w-24 animate-pulse rounded bg-slate-100" />
-                </div>
+              {/* Product title */}
+              <div className="space-y-2">
+                <div className="skeleton-shimmer h-4 w-full rounded-md" />
+                <div className="skeleton-shimmer h-4 w-3/4 rounded-md" />
               </div>
-            ),
-          )}
-        </div>
-      </section>
-    );
-  }
 
+              {/* Rating */}
+              <div className="flex items-center gap-1.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <div
+                    key={star}
+                    className="skeleton-shimmer h-3 w-3 rounded-sm"
+                  />
+                ))}
+
+                <div className="skeleton-shimmer ml-1 h-3 w-8 rounded-full" />
+              </div>
+
+              {/* Price */}
+              <div className="flex items-center gap-2">
+                <div className="skeleton-shimmer h-5 w-20 rounded-md" />
+                <div className="skeleton-shimmer h-3 w-14 rounded-md" />
+              </div>
+
+              {/* Footer */}
+              <div className="flex items-center justify-between border-t border-slate-100 pt-3">
+                <div className="skeleton-shimmer h-7 w-20 rounded-lg" />
+                <div className="skeleton-shimmer h-7 w-7 rounded-full" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Skeleton animation */}
+      <style>{`
+        .skeleton-shimmer {
+          position: relative;
+          overflow: hidden;
+          background:
+            linear-gradient(
+              110deg,
+              #eef2f7 8%,
+              #f8fafc 18%,
+              #e8edff 30%,
+              #f8fafc 42%,
+              #eef2f7 58%
+            );
+          background-size: 250% 100%;
+          animation: skeletonShimmer 1.8s ease-in-out infinite;
+          box-shadow:
+            inset 0 0 12px rgba(255, 255, 255, 0.45),
+            0 0 10px rgba(99, 102, 241, 0.025);
+        }
+
+        .skeleton-shimmer::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(
+              90deg,
+              transparent,
+              rgba(255, 255, 255, 0.55),
+              rgba(165, 180, 252, 0.16),
+              rgba(255, 255, 255, 0.55),
+              transparent
+            );
+          transform: translateX(-100%);
+          animation: skeletonGlow 2.2s ease-in-out infinite;
+        }
+
+        @keyframes skeletonShimmer {
+          0% {
+            background-position: 100% 0;
+          }
+
+          50% {
+            background-position: 0% 0;
+          }
+
+          100% {
+            background-position: -100% 0;
+          }
+        }
+
+        @keyframes skeletonGlow {
+          0% {
+            transform: translateX(-120%);
+          }
+
+          55%,
+          100% {
+            transform: translateX(120%);
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .skeleton-shimmer,
+          .skeleton-shimmer::after {
+            animation: none !important;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .skeleton-shimmer {
+            background-size: 200% 100%;
+          }
+        }
+      `}</style>
+    </section>
+  );
+}
   // ============================================================
   // ERROR
   // ============================================================
@@ -418,9 +589,9 @@ export default function RecentlyViewed() {
         }
 
         .rv-product-item {
-          flex: 0 0 218px;
-          width: 218px;
-          min-width: 218px;
+          flex: 0 0 190px;
+          width: 190px;
+          min-width: 190px;
           scroll-snap-align: start;
         }
 
@@ -445,7 +616,7 @@ export default function RecentlyViewed() {
 
         .rv-image-area {
           position: relative;
-          height: 160px;
+          height: 155px;
           overflow: hidden;
           background: radial-gradient(circle at 50% 18%, rgba(99,102,241,.10), transparent 58%), linear-gradient(145deg,#f8faff,#f4f6ff);
         }
@@ -870,7 +1041,7 @@ export default function RecentlyViewed() {
                     className="rv-image-area"
                     style={{
                       height:
-                        "clamp(130px,16vw,165px)",
+                        "clamp(135px,15vw,155px)",
 
                       background:
                         "radial-gradient(circle at 50% 20%, rgba(99,102,241,.08), transparent 55%), #f8faff",
@@ -1257,20 +1428,7 @@ export default function RecentlyViewed() {
 
                     </div>
 
-                    <div className="rv-footer">
-                      <span className="text-[9px] font-semibold text-slate-400">
-                        Recently viewed
-                      </span>
-
-                      <button
-                        type="button"
-                        className="rv-view-btn"
-                        onClick={() => openProduct(product)}
-                        aria-label={`View ${product?.title || "product"}`}
-                      >
-                        View product
-                      </button>
-                    </div>
+                  
 
                   </div>
 

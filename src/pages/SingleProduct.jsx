@@ -961,8 +961,61 @@ useEffect(() => {
     if (!el) return;
     el.scrollTo({ left: index * el.clientWidth, behavior: 'smooth' });
   }, []);
+const showPrevImage = useCallback(() => {
+  if (!galleryImages.length) return;
 
+  setCurrentIndex((prev) => {
+    const nextIndex =
+      prev === 0 ? galleryImages.length - 1 : prev - 1;
 
+    setSelectedImage(galleryImages[nextIndex]);
+
+    return nextIndex;
+  });
+}, [galleryImages]);
+
+const showNextImage = useCallback(() => {
+  if (!galleryImages.length) return;
+
+  setCurrentIndex((prev) => {
+    const nextIndex =
+      prev === galleryImages.length - 1 ? 0 : prev + 1;
+
+    setSelectedImage(galleryImages[nextIndex]);
+
+    return nextIndex;
+  });
+}, [galleryImages]);
+const handleMouseDown = useCallback((e) => {
+  const slider = galleryRef.current;
+  if (!slider) return;
+
+  setIsDragging(true);
+  setStartX(e.pageX - slider.offsetLeft);
+  setScrollLeft(slider.scrollLeft);
+}, []);
+
+const handleMouseMove = useCallback((e) => {
+  if (!isDragging) return;
+
+  const slider = galleryRef.current;
+  if (!slider) return;
+
+  e.preventDefault();
+
+  const x = e.pageX - slider.offsetLeft;
+  const walk = (x - startX) * 1.5;
+
+  slider.scrollLeft = scrollLeft - walk;
+}, [isDragging, startX, scrollLeft]);
+
+const handleMouseUp = useCallback(() => {
+  setIsDragging(false);
+}, []);
+
+const handleMouseLeave = useCallback(() => {
+  setIsDragging(false);
+}, []);
   const isInCart = cartItem.some(c => String(c.productId) === String(product?._id));
   const isWishlisted = wishlist.some(w => String(w.productId) === String(product?._id));
 

@@ -53,7 +53,7 @@ const NAV_LINKS = [
   {
     name: "Shop",
     path: "/products",
-    icon: <ShoppingBag size={15} />,
+    icon: <ShoppingBag size={17} />,
   },
 ];
 
@@ -63,11 +63,11 @@ const BOTTOM_LINKS = [
     path: "/",
     icon: Home,
   },
-  {
-    name: "Shop",
-    path: "/products",
-    icon: ShoppingBag,
-  },
+  // {
+  //   name: "Shop",
+  //   path: "/products",
+  //   icon: ShoppingBag,
+  // },
   {
     name: "Orders",
     path: "/order-history",
@@ -629,6 +629,11 @@ export default function Navbar({
       );
   }, []);
 
+
+  const openSearchPage = () => {
+    setSearchOpen(false);
+    navigate("/search");
+  };
 
   /* =====================================================
      PRODUCT SEARCH
@@ -1477,21 +1482,21 @@ export default function Navbar({
               LOGO + LOCATION
           ================================================= */}
 
-          <div className="flex min-w-0 items-center gap-2.5 sm:gap-4">
+          <div className="flex min-w-0 items-center gap-1 sm:gap-3">
             <Link
               to="/"
-              className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200 md:hidden"
+              className="flex h-12 w-21 shrink-0 items-center justify-center overflow-hidden md:hidden"
             >
               <img
                 src="/logo.png"
                 alt="Logo"
-                className="h-8 w-auto object-contain"
+                className=" w-auto object-contain"
               />
             </Link>
 
             <Link
               to="/"
-              className="group hidden h-10 items-center justify-center rounded-xl px-2 transition hover:bg-indigo-50 md:flex"
+              className="group hidden h-10 items-center justify-center px-1 transition-transform duration-200 hover:scale-[1.03] md:flex"
             >
               <img
                 src="/logo.png"
@@ -1533,14 +1538,10 @@ export default function Navbar({
 
           <div className="hidden max-w-[480px] flex-1 md:flex">
             <button
-              onClick={() =>
-                setSearchOpen(
-                  true
-                )
-              }
-              className="group flex h-11 w-full items-center gap-2.5 rounded-xl border border-transparent bg-slate-50 px-3 text-left text-slate-500 transition-all duration-200 hover:border-indigo-100 hover:bg-indigo-50/70 hover:text-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/10"
+              onClick={openSearchPage}
+              className="group flex h-12 w-full items-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-3.5 text-left text-slate-500 shadow-sm transition-all duration-200 hover:border-indigo-200 hover:shadow-md hover:shadow-indigo-500/5 focus:outline-none focus:ring-4 focus:ring-indigo-500/10"
             >
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-indigo-600 shadow-sm">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition group-hover:bg-indigo-100">
                 <Search
                   size={15}
                 />
@@ -1617,7 +1618,7 @@ export default function Navbar({
               to="/wishlist"
               className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 transition-all duration-200 hover:-translate-y-0.5 hover:bg-indigo-50 hover:text-indigo-600 focus:outline-none focus:ring-4 focus:ring-indigo-500/10"
             >
-              <Heart size={19} />
+              <Heart size={21} />
 
               {wishlist.length >
                 0 && (
@@ -1771,12 +1772,8 @@ export default function Navbar({
 
           <div className="flex flex-1 items-center justify-end gap-2 sm:hidden">
             <button
-              onClick={() =>
-                setSearchOpen(
-                  true
-                )
-              }
-              className="flex h-10 min-w-0 max-w-[150px] flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-2.5 text-left transition hover:border-indigo-200 hover:bg-indigo-50/70"
+              onClick={openSearchPage}
+              className="flex h-11 min-w-0 max-w-[170px] flex-1 items-center gap-2.5 rounded-2xl border border-slate-200/80 bg-white px-3 text-left shadow-sm transition-all duration-200 hover:border-indigo-200 hover:bg-indigo-50/50 hover:shadow-md"
             >
               <span className="shrink-0 text-indigo-600">
                 <Search

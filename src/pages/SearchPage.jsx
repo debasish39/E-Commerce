@@ -23,11 +23,6 @@ import {
 
 import { getData } from "../context/DataContext";
 
-
-/* =========================================================
-   SEARCH PAGE
-========================================================= */
-
 export default function SearchPage() {
   const navigate = useNavigate();
 
@@ -36,29 +31,35 @@ export default function SearchPage() {
     setSearchParams,
   ] = useSearchParams();
 
+  /* =========================================================
+     DATA CONTEXT
+     ========================================================= */
+
   const {
-    products = [],
+    filteredData = [],
     categoryOnlyData = [],
     brandOnlyData = [],
+    search,
+    setSearch,
+    loading,
+    error,
   } = getData();
 
+  /* =========================================================
+     URL SEARCH
+     ========================================================= */
 
-  /* =======================================================
-     STATE
-  ======================================================= */
+  const urlSearch =
+    searchParams.get("search") || "";
 
-  const initialQuery =
-    searchParams.get("q") || "";
-
-  const [
-    query,
-    setQuery,
-  ] = useState(initialQuery);
+  /* =========================================================
+     LOCAL INPUT
+     ========================================================= */
 
   const [
     searchInput,
     setSearchInput,
-  ] = useState(initialQuery);
+  ] = useState(urlSearch);
 
   const [
     sort,
@@ -70,10 +71,185 @@ export default function SearchPage() {
     setRecentSearches,
   ] = useState([]);
 
+  /* =========================================================
+     HELPERS
+     ========================================================= */
 
-  /* =======================================================
+  const normalize = (value) =>
+    String(value || "")
+      .toLowerCase()
+      .trim();
+
+  const getProductName = (product) =>
+    product?.name ||
+    product?.title ||
+    product?.productName ||
+    product?.product_title ||
+    "Untitled Product";
+
+  const getProductCategory = (product) => {
+    const category = product?.category;
+
+    if (typeof category === "string") {
+      return category;
+    }
+
+    if (
+      category &&
+      typeof category === "object"
+    ) {
+      return (
+        category?.name ||
+        category?.title ||
+        category?.category ||
+        ""
+      );
+    }
+
+    return (
+      product?.categoryName ||
+      product?.category_name ||
+      ""
+    );
+  };
+
+  const getProductSubCategory = (product) => {
+    const subCategory =
+      product?.subCategory ||
+      product?.subcategory;
+
+    if (typeof subCategory === "string") {
+      return subCategory;
+    }
+
+    if (
+      subCategory &&
+      typeof subCategory === "object"
+    ) {
+      return (
+        subCategory?.name ||
+        subCategory?.title ||
+        ""
+      );
+    }
+
+    return "";
+  };
+
+  const getProductBrand = (product) => {
+    const brand = product?.brand;
+
+    if (typeof brand === "string") {
+      return brand;
+    }
+
+    if (
+      brand &&
+      typeof brand === "object"
+    ) {
+      return (
+        brand?.name ||
+        brand?.title ||
+        ""
+      );
+    }
+
+    return (
+      product?.brandName ||
+      product?.brand_name ||
+      ""
+    );
+  };
+
+  const getProductPrice = (product) =>
+    Number(
+      product?.displayPrice ??
+      product?.price ??
+      product?.sellingPrice ??
+      product?.selling_price ??
+      0
+    );
+
+  const getProductRating = (product) =>
+    Number(
+      product?.rating ??
+      product?.ratings ??
+      product?.averageRating ??
+      0
+    );
+
+  const getProductImage = (product) => {
+    if (product?.image) {
+      return product.image;
+    }
+
+    if (product?.imageUrl) {
+      return product.imageUrl;
+    }
+
+    if (product?.image_url) {
+      return product.image_url;
+    }
+
+    if (product?.thumbnail) {
+      return product.thumbnail;
+    }
+
+    if (
+      Array.isArray(product?.images) &&
+      product.images.length > 0
+    ) {
+      const firstImage =
+        product.images[0];
+
+      if (
+        typeof firstImage ===
+        "string"
+      ) {
+        return firstImage;
+      }
+
+      if (
+        firstImage &&
+        typeof firstImage ===
+          "object"
+      ) {
+        return (
+          firstImage?.url ||
+          firstImage?.image ||
+          firstImage?.src ||
+          ""
+        );
+      }
+    }
+
+    return "";
+  };
+
+  const getProductId = (product) =>
+    product?._id ??
+    product?.id ??
+    product?.productId ??
+    null;
+
+  /* =========================================================
+     SYNC URL -> SEARCH CONTEXT
+     ========================================================= */
+
+  useEffect(() => {
+    const value =
+      searchParams.get("search") || "";
+
+    setSearchInput(value);
+    setSearch(value);
+  }, [
+    searchParams,
+    setSearch,
+  ]);
+
+  /* =========================================================
      LOAD RECENT SEARCHES
-  ======================================================= */
+     ========================================================= */
 
   useEffect(() => {
     try {
@@ -92,340 +268,254 @@ export default function SearchPage() {
     }
   }, []);
 
+  /* =========================================================
+     ACTIVE QUERY
+     ========================================================= */
 
-  /* =======================================================
-     SEARCH QUERY FROM URL
-  ======================================================= */
+  const activeQuery =
+    normalize(search);
+
+  /* =========================================================
+     PRODUCTS
+     
+     IMPORTANT:
+     DataContext exposes filteredData, NOT products.
+     
+     filteredData is already filtered by:
+     - backend search
+     - category
+     - subCategory
+     - brand
+     - price
+     ========================================================= */
+
+  const searchResults = useMemo(() => {
+    if (!activeQuery) {
+      return [];
+    }
+
+    return Array.isArray(filteredData)
+      ? filteredData
+      : [];
+  }, [
+    filteredData,
+    activeQuery,
+  ]);
+
+  /* =========================================================
+     DEBUG
+     ========================================================= */
 
   useEffect(() => {
-    const urlQuery =
-      searchParams.get("q") || "";
-
-    setQuery(urlQuery);
-    setSearchInput(urlQuery);
-  }, [searchParams]);
-
-
-  /* =======================================================
-     NORMALIZE VALUE
-  ======================================================= */
-
-  const normalize = (value) =>
-    String(value || "")
-      .toLowerCase()
-      .trim();
-
-
-  /* =======================================================
-     GET PRODUCT NAME
-  ======================================================= */
-
-  const getProductName = (product) =>
-    product?.name ||
-    product?.title ||
-    product?.productName ||
-    product?.product_title ||
-    "";
-
-
-  /* =======================================================
-     GET CATEGORY
-  ======================================================= */
-
-  const getProductCategory = (
-    product
-  ) =>
-    product?.category ||
-    product?.categoryName ||
-    product?.category_name ||
-    "";
-
-
-  /* =======================================================
-     GET BRAND
-  ======================================================= */
-
-  const getProductBrand = (
-    product
-  ) =>
-    product?.brand ||
-    product?.brandName ||
-    product?.brand_name ||
-    "";
-
-
-  /* =======================================================
-     GET PRICE
-  ======================================================= */
-
-  const getProductPrice = (
-    product
-  ) =>
-    Number(
-      product?.price ??
-        product?.sellingPrice ??
-        product?.selling_price ??
-        0
+    console.log(
+      "========================================"
     );
 
-
-  /* =======================================================
-     GET RATING
-  ======================================================= */
-
-  const getProductRating = (
-    product
-  ) =>
-    Number(
-      product?.rating ??
-        product?.ratings ??
-        product?.averageRating ??
-        0
+    console.log(
+      "🔎 SEARCH PAGE DEBUG"
     );
 
+    console.log(
+      "🔎 URL SEARCH:",
+      urlSearch
+    );
 
-  /* =======================================================
-     GET IMAGE
-  ======================================================= */
+    console.log(
+      "🔎 CONTEXT SEARCH:",
+      search
+    );
 
-  const getProductImage = (
-    product
-  ) =>
-    product?.image ||
-    product?.imageUrl ||
-    product?.image_url ||
-    product?.thumbnail ||
-    product?.images?.[0] ||
-    "";
+    console.log(
+      "🔎 LOADING:",
+      loading
+    );
 
+    console.log(
+      "🔎 FILTERED DATA:",
+      filteredData
+    );
 
-  /* =======================================================
-     SEARCH PRODUCTS
-  ======================================================= */
+    console.log(
+      "🔎 FILTERED DATA LENGTH:",
+      Array.isArray(filteredData)
+        ? filteredData.length
+        : 0
+    );
 
-  const searchResults =
-    useMemo(() => {
+    console.log(
+      "🔎 SEARCH RESULTS:",
+      searchResults
+    );
 
-      const search =
-        normalize(query);
+    console.log(
+      "🔎 SEARCH RESULTS LENGTH:",
+      searchResults.length
+    );
 
-      if (!search) {
-        return [];
-      }
+    console.log(
+      "========================================"
+    );
+  }, [
+    urlSearch,
+    search,
+    loading,
+    filteredData,
+    searchResults,
+  ]);
 
-      const words =
-        search.split(/\s+/);
-
-      return products.filter(
-        (product) => {
-
-          const searchableText =
-            [
-              getProductName(product),
-              getProductCategory(product),
-              getProductBrand(product),
-              product?.description,
-              product?.subCategory,
-              product?.subcategory,
-              product?.tags,
-            ]
-              .flat()
-              .map(normalize)
-              .join(" ");
-
-          return words.every(
-            (word) =>
-              searchableText.includes(
-                word
-              )
-          );
-        }
-      );
-
-    }, [
-      products,
-      query,
-    ]);
-
-
-  /* =======================================================
+  /* =========================================================
      SORT RESULTS
-  ======================================================= */
+     ========================================================= */
 
-  const sortedResults =
-    useMemo(() => {
+  const sortedResults = useMemo(() => {
+    const result = [
+      ...searchResults,
+    ];
 
-      const result = [
-        ...searchResults,
-      ];
-
-      if (
-        sort === "low-high"
-      ) {
+    switch (sort) {
+      case "low-high":
         result.sort(
           (a, b) =>
             getProductPrice(a) -
             getProductPrice(b)
         );
-      }
+        break;
 
-      if (
-        sort === "high-low"
-      ) {
+      case "high-low":
         result.sort(
           (a, b) =>
             getProductPrice(b) -
             getProductPrice(a)
         );
-      }
+        break;
 
-      if (
-        sort === "rating"
-      ) {
+      case "rating":
         result.sort(
           (a, b) =>
             getProductRating(b) -
             getProductRating(a)
         );
-      }
+        break;
 
-      return result;
+      default:
+        break;
+    }
 
-    }, [
-      searchResults,
-      sort,
-    ]);
+    return result;
+  }, [
+    searchResults,
+    sort,
+  ]);
 
+  /* =========================================================
+     CATEGORY RESULTS
+     ========================================================= */
 
-  /* =======================================================
-     CATEGORY MATCHES
-  ======================================================= */
+  const categoryResults = useMemo(() => {
+    if (!activeQuery) {
+      return [];
+    }
 
-  const categoryResults =
-    useMemo(() => {
+    return (
+      Array.isArray(categoryOnlyData)
+        ? categoryOnlyData
+        : []
+    )
+      .filter((item) => {
+        const name =
+          typeof item === "string"
+            ? item
+            : item?.name ||
+              item?.category ||
+              "";
 
-      const search =
-        normalize(query);
+        return normalize(name).includes(
+          activeQuery
+        );
+      })
+      .slice(0, 6);
+  }, [
+    categoryOnlyData,
+    activeQuery,
+  ]);
 
-      if (!search) {
-        return [];
-      }
+  /* =========================================================
+     BRAND RESULTS
+     ========================================================= */
 
-      return categoryOnlyData
-        .filter((item) => {
+  const brandResults = useMemo(() => {
+    if (!activeQuery) {
+      return [];
+    }
 
-          const name =
-            typeof item === "string"
-              ? item
-              : item?.name ||
-                item?.category ||
-                "";
+    return (
+      Array.isArray(brandOnlyData)
+        ? brandOnlyData
+        : []
+    )
+      .filter((item) => {
+        const name =
+          typeof item === "string"
+            ? item
+            : item?.name ||
+              item?.brand ||
+              "";
 
-          return normalize(
-            name
-          ).includes(search);
+        return normalize(name).includes(
+          activeQuery
+        );
+      })
+      .slice(0, 6);
+  }, [
+    brandOnlyData,
+    activeQuery,
+  ]);
 
-        })
-        .slice(0, 6);
-
-    }, [
-      categoryOnlyData,
-      query,
-    ]);
-
-
-  /* =======================================================
-     BRAND MATCHES
-  ======================================================= */
-
-  const brandResults =
-    useMemo(() => {
-
-      const search =
-        normalize(query);
-
-      if (!search) {
-        return [];
-      }
-
-      return brandOnlyData
-        .filter((item) => {
-
-          const name =
-            typeof item === "string"
-              ? item
-              : item?.name ||
-                item?.brand ||
-                "";
-
-          return normalize(
-            name
-          ).includes(search);
-
-        })
-        .slice(0, 6);
-
-    }, [
-      brandOnlyData,
-      query,
-    ]);
-
-
-  /* =======================================================
+  /* =========================================================
      SUGGESTIONS
-  ======================================================= */
+     ========================================================= */
 
-  const suggestions =
-    useMemo(() => {
+  const suggestions = useMemo(() => {
+    const value =
+      normalize(searchInput);
 
-      const search =
-        normalize(searchInput);
+    if (!value) {
+      return [];
+    }
 
-      if (!search) {
-        return [];
-      }
-
-      const values = [
-        ...products.map(
-          getProductName
-        ),
-        ...products.map(
-          getProductCategory
-        ),
-        ...products.map(
-          getProductBrand
-        ),
-      ];
-
-      return [
-        ...new Set(
-          values.filter(
-            (value) =>
-              value &&
-              normalize(
-                value
-              ).includes(search)
-          )
-        ),
-      ].slice(0, 8);
-
-    }, [
-      products,
-      searchInput,
+    const values = (
+      Array.isArray(filteredData)
+        ? filteredData
+        : []
+    ).flatMap((product) => [
+      getProductName(product),
+      getProductCategory(product),
+      getProductBrand(product),
     ]);
 
+    return [
+      ...new Set(
+        values.filter(
+          (item) =>
+            item &&
+            normalize(item).includes(
+              value
+            )
+        )
+      ),
+    ].slice(0, 8);
+  }, [
+    filteredData,
+    searchInput,
+  ]);
 
-  /* =======================================================
+  /* =========================================================
      SAVE RECENT SEARCH
-  ======================================================= */
+     ========================================================= */
 
-  const saveRecentSearch = (
-    value
-  ) => {
-
+  const saveRecentSearch = (value) => {
     const cleaned =
-      String(value || "")
-        .trim();
+      String(value || "").trim();
 
     if (!cleaned) {
       return;
@@ -433,6 +523,7 @@ export default function SearchPage() {
 
     const updated = [
       cleaned,
+
       ...recentSearches.filter(
         (item) =>
           normalize(item) !==
@@ -440,65 +531,68 @@ export default function SearchPage() {
       ),
     ].slice(0, 8);
 
-    setRecentSearches(
-      updated
-    );
+    setRecentSearches(updated);
 
-    localStorage.setItem(
-      "recentSearches",
-      JSON.stringify(updated)
-    );
-
+    try {
+      localStorage.setItem(
+        "recentSearches",
+        JSON.stringify(updated)
+      );
+    } catch {
+      // Ignore
+    }
   };
 
-
-  /* =======================================================
+  /* =========================================================
      EXECUTE SEARCH
-  ======================================================= */
+     ========================================================= */
 
   const executeSearch = (
     value = searchInput
   ) => {
-
     const cleaned =
-      String(value || "")
-        .trim();
+      String(value || "").trim();
 
     if (!cleaned) {
-      setQuery("");
+      setSearchInput("");
+      setSearch("");
       setSearchParams({});
       return;
     }
 
-    saveRecentSearch(
-      cleaned
-    );
+    saveRecentSearch(cleaned);
 
-    setQuery(cleaned);
+    setSearchInput(cleaned);
 
+    /*
+     * Update DataContext.
+     * This triggers:
+     *
+     * GET /api/products?search=cleaned
+     */
+    setSearch(cleaned);
+
+    /*
+     * Stay on dedicated search page.
+     */
     setSearchParams({
-      q: cleaned,
+      search: cleaned,
     });
-
   };
 
-
-  /* =======================================================
+  /* =========================================================
      CLEAR SEARCH
-  ======================================================= */
+     ========================================================= */
 
   const clearSearch = () => {
-
     setSearchInput("");
-    setQuery("");
+    setSearch("");
     setSearchParams({});
-
   };
 
-
-  /* =======================================================
+  /* =========================================================
      POPULAR SEARCHES
-  ======================================================= */
+     ========================================================= */
 
   const popularSearches = [
     "Shoes",
@@ -509,29 +603,22 @@ export default function SearchPage() {
     "Mobiles",
   ];
 
-
-  /* =======================================================
+  /* =========================================================
      FORMAT PRICE
-  ======================================================= */
+     ========================================================= */
 
-  const formatPrice = (
-    value
-  ) =>
+  const formatPrice = (value) =>
     `₹${Number(
       value || 0
-    ).toLocaleString(
-      "en-IN"
-    )}`;
+    ).toLocaleString("en-IN")}`;
 
-
-  /* =======================================================
+  /* =========================================================
      PRODUCT CARD
-  ======================================================= */
+     ========================================================= */
 
   const ProductCard = ({
     product,
   }) => {
-
     const name =
       getProductName(product);
 
@@ -545,22 +632,33 @@ export default function SearchPage() {
       getProductImage(product);
 
     const productId =
-      product?.id ??
-      product?._id ??
-      product?.productId;
+      getProductId(product);
+
+    const brand =
+      getProductBrand(product);
+
+    const category =
+      getProductCategory(product);
 
     return (
       <button
         type="button"
-        onClick={() =>
-          productId
-            ? navigate(
-                `/products/${productId}`
-              )
-            : undefined
-        }
+        onClick={() => {
+          if (!productId) {
+            console.warn(
+              "⚠️ Product ID missing:",
+              product
+            );
+            return;
+          }
+
+          navigate(
+            `/products/${productId}`
+          );
+        }}
         className="
           group
+          w-full
           overflow-hidden
           rounded-2xl
           border
@@ -576,7 +674,6 @@ export default function SearchPage() {
           active:scale-[0.98]
         "
       >
-
         {/* IMAGE */}
 
         <div
@@ -587,7 +684,6 @@ export default function SearchPage() {
             bg-slate-50
           "
         >
-
           {image ? (
             <img
               src={image}
@@ -619,19 +715,16 @@ export default function SearchPage() {
               />
             </div>
           )}
-
         </div>
-
 
         {/* CONTENT */}
 
         <div className="p-3">
-
           <p
             className="
               line-clamp-2
-              min-h-[30px]
-              text-[10px]
+              min-h-[32px]
+              text-[11px]
               font-bold
               leading-4
               text-slate-800
@@ -639,6 +732,35 @@ export default function SearchPage() {
           >
             {name}
           </p>
+
+          {brand && (
+            <p
+              className="
+                mt-1
+                truncate
+                text-[9px]
+                font-semibold
+                text-slate-400
+              "
+            >
+              {brand}
+            </p>
+          )}
+
+          {!brand &&
+            category && (
+              <p
+                className="
+                  mt-1
+                  truncate
+                  text-[9px]
+                  font-semibold
+                  text-slate-400
+                "
+              >
+                {category}
+              </p>
+            )}
 
           <div
             className="
@@ -649,7 +771,6 @@ export default function SearchPage() {
               gap-2
             "
           >
-
             <span
               className="
                 text-sm
@@ -657,9 +778,7 @@ export default function SearchPage() {
                 text-slate-950
               "
             >
-              {formatPrice(
-                price
-              )}
+              {formatPrice(price)}
             </span>
 
             {rating > 0 && (
@@ -677,28 +796,97 @@ export default function SearchPage() {
                   text-emerald-700
                 "
               >
-                {rating.toFixed(
-                  1
-                )}
+                {rating.toFixed(1)}
 
-                <FaStar
-                  size={7}
-                />
+                <FaStar size={7} />
               </span>
             )}
-
           </div>
-
         </div>
-
       </button>
     );
   };
 
+  /* =========================================================
+     LOADING SKELETON
+     ========================================================= */
 
-  /* =======================================================
+  const LoadingSkeleton = () => (
+    <div
+      className="
+        grid
+        grid-cols-2
+        gap-3
+        sm:grid-cols-3
+        lg:grid-cols-4
+        xl:grid-cols-5
+      "
+    >
+      {Array.from({
+        length: 10,
+      }).map((_, index) => (
+        <div
+          key={index}
+          className="
+            overflow-hidden
+            rounded-2xl
+            border
+            border-slate-200
+            bg-white
+          "
+        >
+          <div
+            className="
+              aspect-square
+              animate-pulse
+              bg-slate-100
+            "
+          />
+
+          <div
+            className="
+              space-y-2
+              p-3
+            "
+          >
+            <div
+              className="
+                h-3
+                w-4/5
+                animate-pulse
+                rounded
+                bg-slate-100
+              "
+            />
+
+            <div
+              className="
+                h-3
+                w-2/5
+                animate-pulse
+                rounded
+                bg-slate-100
+              "
+            />
+
+            <div
+              className="
+                h-4
+                w-1/3
+                animate-pulse
+                rounded
+                bg-slate-100
+              "
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  /* =========================================================
      RENDER
-  ======================================================= */
+     ========================================================= */
 
   return (
     <main
@@ -708,10 +896,9 @@ export default function SearchPage() {
         pb-10
       "
     >
-
-      {/* ===================================================
-          SEARCH HEADER
-      =================================================== */}
+      {/* =====================================================
+          HEADER
+          ===================================================== */}
 
       <div
         className="
@@ -724,7 +911,6 @@ export default function SearchPage() {
           backdrop-blur-xl
         "
       >
-
         <div
           className="
             mx-auto
@@ -737,7 +923,6 @@ export default function SearchPage() {
             sm:px-5
           "
         >
-
           {/* BACK */}
 
           <button
@@ -760,21 +945,12 @@ export default function SearchPage() {
             "
             aria-label="Go back"
           >
-            <FaArrowLeft
-              size={13}
-            />
+            <FaArrowLeft size={13} />
           </button>
 
+          {/* SEARCH */}
 
-          {/* SEARCH INPUT */}
-
-          <div
-            className="
-              relative
-              flex-1
-            "
-          >
-
+          <div className="relative flex-1">
             <div
               className="
                 flex
@@ -793,10 +969,12 @@ export default function SearchPage() {
                 focus-within:ring-indigo-100
               "
             >
-
               <FaSearch
                 size={12}
-                className="shrink-0 text-slate-400"
+                className="
+                  shrink-0
+                  text-slate-400
+                "
               />
 
               <input
@@ -808,21 +986,17 @@ export default function SearchPage() {
                   )
                 }
                 onKeyDown={(event) => {
-
                   if (
-                    event.key ===
-                    "Enter"
+                    event.key === "Enter"
                   ) {
                     executeSearch();
                   }
 
                   if (
-                    event.key ===
-                    "Escape"
+                    event.key === "Escape"
                   ) {
                     clearSearch();
                   }
-
                 }}
                 placeholder="
                   Search products, brands & categories
@@ -840,46 +1014,52 @@ export default function SearchPage() {
                 autoFocus
               />
 
-              {searchInput && (
-                <button
-                  type="button"
-                  onClick={
-                    clearSearch
-                  }
+              {loading && (
+                <div
                   className="
-                    flex
-                    h-7
-                    w-7
-                    shrink-0
-                    items-center
-                    justify-center
-                    rounded-lg
-                    text-slate-400
-                    transition
-                    hover:bg-slate-200
-                    hover:text-slate-700
+                    h-4
+                    w-4
+                    animate-spin
+                    rounded-full
+                    border-2
+                    border-slate-200
+                    border-t-indigo-500
                   "
-                  aria-label="Clear search"
-                >
-                  <FaTimes
-                    size={10}
-                  />
-                </button>
+                />
               )}
 
+              {searchInput &&
+                !loading && (
+                  <button
+                    type="button"
+                    onClick={
+                      clearSearch
+                    }
+                    className="
+                      flex
+                      h-7
+                      w-7
+                      shrink-0
+                      items-center
+                      justify-center
+                      rounded-lg
+                      text-slate-400
+                      transition
+                      hover:bg-slate-200
+                      hover:text-slate-700
+                    "
+                    aria-label="Clear search"
+                  >
+                    <FaTimes size={10} />
+                  </button>
+                )}
             </div>
 
-
-            {/* =================================================
-                SEARCH SUGGESTIONS
-            ================================================= */}
+            {/* SUGGESTIONS */}
 
             {searchInput &&
-              suggestions.length >
-                0 &&
-              searchInput !==
-                query && (
-
+              suggestions.length > 0 &&
+              searchInput !== search && (
                 <div
                   className="
                     absolute
@@ -896,13 +1076,11 @@ export default function SearchPage() {
                     shadow-xl
                   "
                 >
-
                   {suggestions.map(
                     (
                       suggestion,
                       index
                     ) => (
-
                       <button
                         key={`${suggestion}-${index}`}
                         type="button"
@@ -924,10 +1102,11 @@ export default function SearchPage() {
                           hover:bg-slate-50
                         "
                       >
-
                         <FaSearch
                           size={10}
-                          className="text-slate-400"
+                          className="
+                            text-slate-400
+                          "
                         />
 
                         <span
@@ -944,28 +1123,22 @@ export default function SearchPage() {
 
                         <FaChevronRight
                           size={8}
-                          className="text-slate-300"
+                          className="
+                            text-slate-300
+                          "
                         />
-
                       </button>
-
                     )
                   )}
-
                 </div>
-
               )}
-
           </div>
-
         </div>
-
       </div>
 
-
-      {/* ===================================================
+      {/* =====================================================
           CONTENT
-      =================================================== */}
+          ===================================================== */}
 
       <div
         className="
@@ -976,19 +1149,13 @@ export default function SearchPage() {
           sm:px-5
         "
       >
+        {/* ===================================================
+            NO SEARCH
+            =================================================== */}
 
-        {/* =================================================
-            NO QUERY
-        ================================================= */}
-
-        {!query ? (
-
+        {!activeQuery ? (
           <>
-
-            {/* TITLE */}
-
             <div className="mb-6">
-
               <p
                 className="
                   text-[9px]
@@ -1026,14 +1193,11 @@ export default function SearchPage() {
                 Search products, brands
                 and categories.
               </p>
-
             </div>
 
-
-            {/* POPULAR SEARCHES */}
+            {/* POPULAR */}
 
             <section className="mb-8">
-
               <div
                 className="
                   mb-3
@@ -1042,10 +1206,11 @@ export default function SearchPage() {
                   gap-2
                 "
               >
-
                 <FaFire
                   size={12}
-                  className="text-orange-500"
+                  className="
+                    text-orange-500
+                  "
                 />
 
                 <h2
@@ -1057,9 +1222,7 @@ export default function SearchPage() {
                 >
                   Popular Searches
                 </h2>
-
               </div>
-
 
               <div
                 className="
@@ -1068,17 +1231,13 @@ export default function SearchPage() {
                   gap-2
                 "
               >
-
                 {popularSearches.map(
                   (item) => (
-
                     <button
                       key={item}
                       type="button"
                       onClick={() =>
-                        executeSearch(
-                          item
-                        )
+                        executeSearch(item)
                       }
                       className="
                         rounded-full
@@ -1100,22 +1259,15 @@ export default function SearchPage() {
                     >
                       {item}
                     </button>
-
                   )
                 )}
-
               </div>
-
             </section>
 
+            {/* RECENT */}
 
-            {/* RECENT SEARCHES */}
-
-            {recentSearches.length >
-              0 && (
-
+            {recentSearches.length > 0 && (
               <section>
-
                 <div
                   className="
                     mb-3
@@ -1124,7 +1276,6 @@ export default function SearchPage() {
                     justify-between
                   "
                 >
-
                   <div
                     className="
                       flex
@@ -1132,10 +1283,11 @@ export default function SearchPage() {
                       gap-2
                     "
                   >
-
                     <FaClock
                       size={11}
-                      className="text-slate-400"
+                      className="
+                        text-slate-400
+                      "
                     />
 
                     <h2
@@ -1147,7 +1299,6 @@ export default function SearchPage() {
                     >
                       Recent Searches
                     </h2>
-
                   </div>
 
                   <button
@@ -1157,9 +1308,13 @@ export default function SearchPage() {
                         []
                       );
 
-                      localStorage.removeItem(
-                        "recentSearches"
-                      );
+                      try {
+                        localStorage.removeItem(
+                          "recentSearches"
+                        );
+                      } catch {
+                        // Ignore
+                      }
                     }}
                     className="
                       text-[9px]
@@ -1170,15 +1325,11 @@ export default function SearchPage() {
                   >
                     Clear
                   </button>
-
                 </div>
 
-
                 <div className="space-y-1">
-
                   {recentSearches.map(
                     (item) => (
-
                       <button
                         key={item}
                         type="button"
@@ -1202,10 +1353,11 @@ export default function SearchPage() {
                           hover:bg-slate-50
                         "
                       >
-
                         <FaClock
                           size={10}
-                          className="text-slate-300"
+                          className="
+                            text-slate-300
+                          "
                         />
 
                         <span
@@ -1221,30 +1373,19 @@ export default function SearchPage() {
 
                         <FaChevronRight
                           size={8}
-                          className="text-slate-300"
+                          className="
+                            text-slate-300
+                          "
                         />
-
                       </button>
-
                     )
                   )}
-
                 </div>
-
               </section>
-
             )}
-
           </>
-
         ) : (
-
-          /* =================================================
-             SEARCH RESULTS
-          ================================================= */
-
           <>
-
             {/* RESULTS HEADER */}
 
             <div
@@ -1257,9 +1398,7 @@ export default function SearchPage() {
                 gap-3
               "
             >
-
               <div>
-
                 <p
                   className="
                     text-[9px]
@@ -1284,431 +1423,442 @@ export default function SearchPage() {
                     sm:text-2xl
                   "
                 >
-                  "{query}"
+                  "{activeQuery}"
                 </h1>
+
+                {!loading && (
+                  <p
+                    className="
+                      mt-1
+                      text-[10px]
+                      font-medium
+                      text-slate-400
+                    "
+                  >
+                    {sortedResults.length}{" "}
+                    {sortedResults.length ===
+                    1
+                      ? "product"
+                      : "products"}{" "}
+                    found
+                  </p>
+                )}
+              </div>
+
+              {!loading && (
+                <div className="relative">
+                  <select
+                    value={sort}
+                    onChange={(event) =>
+                      setSort(
+                        event.target.value
+                      )
+                    }
+                    className="
+                      h-10
+                      appearance-none
+                      rounded-xl
+                      border
+                      border-slate-200
+                      bg-white
+                      pl-3
+                      pr-8
+                      text-[9px]
+                      font-black
+                      text-slate-700
+                      outline-none
+                      shadow-sm
+                      focus:border-indigo-300
+                      focus:ring-2
+                      focus:ring-indigo-100
+                    "
+                  >
+                    <option value="default">
+                      Sort: Relevance
+                    </option>
+
+                    <option value="low-high">
+                      Price: Low → High
+                    </option>
+
+                    <option value="high-low">
+                      Price: High → Low
+                    </option>
+
+                    <option value="rating">
+                      Highest Rated
+                    </option>
+                  </select>
+
+                  <FaChevronDown
+                    size={8}
+                    className="
+                      pointer-events-none
+                      absolute
+                      right-3
+                      top-1/2
+                      -translate-y-1/2
+                      text-slate-400
+                    "
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* ERROR */}
+
+            {error && !loading && (
+              <div
+                className="
+                  mb-5
+                  rounded-2xl
+                  border
+                  border-red-100
+                  bg-red-50
+                  p-4
+                  text-center
+                "
+              >
+                <p
+                  className="
+                    text-sm
+                    font-bold
+                    text-red-600
+                  "
+                >
+                  Failed to load products
+                </p>
 
                 <p
                   className="
                     mt-1
-                    text-[10px]
-                    font-medium
-                    text-slate-400
+                    text-xs
+                    text-red-400
                   "
                 >
-                  {sortedResults.length} products found
+                  {error}
                 </p>
-
               </div>
-
-
-              {/* SORT */}
-
-              <div className="relative">
-
-                <select
-                  value={sort}
-                  onChange={(event) =>
-                    setSort(
-                      event.target.value
-                    )
-                  }
-                  className="
-                    h-10
-                    appearance-none
-                    rounded-xl
-                    border
-                    border-slate-200
-                    bg-white
-                    pl-3
-                    pr-8
-                    text-[9px]
-                    font-black
-                    text-slate-700
-                    outline-none
-                    shadow-sm
-                    focus:border-indigo-300
-                    focus:ring-2
-                    focus:ring-indigo-100
-                  "
-                >
-
-                  <option value="default">
-                    Sort: Relevance
-                  </option>
-
-                  <option value="low-high">
-                    Price: Low → High
-                  </option>
-
-                  <option value="high-low">
-                    Price: High → Low
-                  </option>
-
-                  <option value="rating">
-                    Highest Rated
-                  </option>
-
-                </select>
-
-                <FaChevronDown
-                  size={8}
-                  className="
-                    pointer-events-none
-                    absolute
-                    right-3
-                    top-1/2
-                    -translate-y-1/2
-                    text-slate-400
-                  "
-                />
-
-              </div>
-
-            </div>
-
-
-            {/* CATEGORY / BRAND MATCHES */}
-
-            {(categoryResults.length >
-              0 ||
-              brandResults.length >
-                0) && (
-
-              <div
-                className="
-                  mb-6
-                  grid
-                  gap-3
-                  sm:grid-cols-2
-                "
-              >
-
-                {/* CATEGORY */}
-
-                {categoryResults.length >
-                  0 && (
-
-                  <div
-                    className="
-                      rounded-2xl
-                      border
-                      border-slate-200
-                      bg-white
-                      p-4
-                    "
-                  >
-
-                    <h2
-                      className="
-                        mb-3
-                        text-[10px]
-                        font-black
-                        uppercase
-                        tracking-wider
-                        text-slate-400
-                      "
-                    >
-                      Categories
-                    </h2>
-
-                    <div className="space-y-1">
-
-                      {categoryResults.map(
-                        (item, index) => {
-
-                          const name =
-                            typeof item ===
-                            "string"
-                              ? item
-                              : item?.name ||
-                                item?.category;
-
-                          return (
-                            <button
-                              key={`${name}-${index}`}
-                              type="button"
-                              onClick={() =>
-                                navigate(
-                                  `/category/${encodeURIComponent(
-                                    name
-                                  )}`
-                                )
-                              }
-                              className="
-                                flex
-                                w-full
-                                items-center
-                                justify-between
-                                rounded-lg
-                                px-2
-                                py-2
-                                text-left
-                                text-[10px]
-                                font-bold
-                                text-slate-700
-                                hover:bg-slate-50
-                              "
-                            >
-                              {name}
-
-                              <FaChevronRight
-                                size={7}
-                                className="text-slate-300"
-                              />
-                            </button>
-                          );
-                        }
-                      )}
-
-                    </div>
-
-                  </div>
-
-                )}
-
-
-                {/* BRAND */}
-
-                {brandResults.length >
-                  0 && (
-
-                  <div
-                    className="
-                      rounded-2xl
-                      border
-                      border-slate-200
-                      bg-white
-                      p-4
-                    "
-                  >
-
-                    <h2
-                      className="
-                        mb-3
-                        text-[10px]
-                        font-black
-                        uppercase
-                        tracking-wider
-                        text-slate-400
-                      "
-                    >
-                      Brands
-                    </h2>
-
-                    <div className="space-y-1">
-
-                      {brandResults.map(
-                        (item, index) => {
-
-                          const name =
-                            typeof item ===
-                            "string"
-                              ? item
-                              : item?.name ||
-                                item?.brand;
-
-                          return (
-                            <button
-                              key={`${name}-${index}`}
-                              type="button"
-                              onClick={() =>
-                                executeSearch(
-                                  name
-                                )
-                              }
-                              className="
-                                flex
-                                w-full
-                                items-center
-                                justify-between
-                                rounded-lg
-                                px-2
-                                py-2
-                                text-left
-                                text-[10px]
-                                font-bold
-                                text-slate-700
-                                hover:bg-slate-50
-                              "
-                            >
-                              {name}
-
-                              <FaChevronRight
-                                size={7}
-                                className="text-slate-300"
-                              />
-                            </button>
-                          );
-                        }
-                      )}
-
-                    </div>
-
-                  </div>
-
-                )}
-
-              </div>
-
             )}
 
+            {/* LOADING */}
 
-            {/* PRODUCTS */}
-
-            {sortedResults.length >
-            0 ? (
-
-              <div
-                className="
-                  grid
-                  grid-cols-2
-                  gap-3
-                  sm:grid-cols-3
-                  lg:grid-cols-4
-                  xl:grid-cols-5
-                "
-              >
-
-                {sortedResults.map(
-                  (product, index) => (
-
-                    <ProductCard
-                      key={
-                        product?.id ??
-                        product?._id ??
-                        product?.productId ??
-                        index
-                      }
-                      product={
-                        product
-                      }
-                    />
-
-                  )
-                )}
-
-              </div>
-
+            {loading ? (
+              <LoadingSkeleton />
             ) : (
+              <>
+                {/* CATEGORY / BRAND */}
 
-              /* =================================================
-                 NO RESULTS
-              ================================================= */
-
-              <div
-                className="
-                  flex
-                  min-h-[420px]
-                  flex-col
-                  items-center
-                  justify-center
-                  rounded-3xl
-                  border
-                  border-slate-200
-                  bg-white
-                  px-6
-                  text-center
-                "
-              >
-
-                <div
-                  className="
-                    flex
-                    h-16
-                    w-16
-                    items-center
-                    justify-center
-                    rounded-2xl
-                    bg-slate-100
-                    text-slate-300
-                  "
-                >
-                  <FaSearch
-                    size={22}
-                  />
-                </div>
-
-                <h2
-                  className="
-                    mt-5
-                    text-lg
-                    font-black
-                    text-slate-900
-                  "
-                >
-                  No products found
-                </h2>
-
-                <p
-                  className="
-                    mt-2
-                    max-w-sm
-                    text-[10px]
-                    leading-5
-                    text-slate-400
-                  "
-                >
-                  We couldn't find
-                  anything matching
-                  "{query}". Try another
-                  product, brand or
-                  category.
-                </p>
-
-                <div
-                  className="
-                    mt-5
-                    flex
-                    flex-wrap
-                    justify-center
-                    gap-2
-                  "
-                >
-
-                  {popularSearches
-                    .slice(0, 4)
-                    .map(
-                      (item) => (
-
-                        <button
-                          key={item}
-                          type="button"
-                          onClick={() =>
-                            executeSearch(
-                              item
-                            )
-                          }
+                {(categoryResults.length >
+                  0 ||
+                  brandResults.length >
+                    0) && (
+                  <div
+                    className="
+                      mb-6
+                      grid
+                      gap-3
+                      sm:grid-cols-2
+                    "
+                  >
+                    {categoryResults.length >
+                      0 && (
+                      <div
+                        className="
+                          rounded-2xl
+                          border
+                          border-slate-200
+                          bg-white
+                          p-4
+                        "
+                      >
+                        <h2
                           className="
-                            rounded-full
-                            bg-slate-100
-                            px-3
-                            py-2
-                            text-[9px]
-                            font-bold
-                            text-slate-600
-                            transition
-                            hover:bg-indigo-50
-                            hover:text-indigo-600
+                            mb-3
+                            text-[10px]
+                            font-black
+                            uppercase
+                            tracking-wider
+                            text-slate-400
                           "
                         >
-                          {item}
-                        </button>
+                          Categories
+                        </h2>
 
-                      )
+                        <div className="space-y-1">
+                          {categoryResults.map(
+                            (
+                              item,
+                              index
+                            ) => {
+                              const name =
+                                typeof item ===
+                                "string"
+                                  ? item
+                                  : item?.name ||
+                                    item?.category ||
+                                    "";
+
+                              return (
+                                <button
+                                  key={`${name}-${index}`}
+                                  type="button"
+                                  onClick={() =>
+                                    navigate(
+                                      `/category/${encodeURIComponent(
+                                        name
+                                      )}`
+                                    )
+                                  }
+                                  className="
+                                    flex
+                                    w-full
+                                    items-center
+                                    justify-between
+                                    rounded-lg
+                                    px-2
+                                    py-2
+                                    text-left
+                                    text-[10px]
+                                    font-bold
+                                    text-slate-700
+                                    hover:bg-slate-50
+                                  "
+                                >
+                                  {name}
+
+                                  <FaChevronRight
+                                    size={7}
+                                    className="
+                                      text-slate-300
+                                    "
+                                  />
+                                </button>
+                              );
+                            }
+                          )}
+                        </div>
+                      </div>
                     )}
 
-                </div>
+                    {brandResults.length >
+                      0 && (
+                      <div
+                        className="
+                          rounded-2xl
+                          border
+                          border-slate-200
+                          bg-white
+                          p-4
+                        "
+                      >
+                        <h2
+                          className="
+                            mb-3
+                            text-[10px]
+                            font-black
+                            uppercase
+                            tracking-wider
+                            text-slate-400
+                          "
+                        >
+                          Brands
+                        </h2>
 
-              </div>
+                        <div className="space-y-1">
+                          {brandResults.map(
+                            (
+                              item,
+                              index
+                            ) => {
+                              const name =
+                                typeof item ===
+                                "string"
+                                  ? item
+                                  : item?.name ||
+                                    item?.brand ||
+                                    "";
 
+                              return (
+                                <button
+                                  key={`${name}-${index}`}
+                                  type="button"
+                                  onClick={() =>
+                                    executeSearch(
+                                      name
+                                    )
+                                  }
+                                  className="
+                                    flex
+                                    w-full
+                                    items-center
+                                    justify-between
+                                    rounded-lg
+                                    px-2
+                                    py-2
+                                    text-left
+                                    text-[10px]
+                                    font-bold
+                                    text-slate-700
+                                    hover:bg-slate-50
+                                  "
+                                >
+                                  {name}
+
+                                  <FaChevronRight
+                                    size={7}
+                                    className="
+                                      text-slate-300
+                                    "
+                                  />
+                                </button>
+                              );
+                            }
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* PRODUCTS */}
+
+                {sortedResults.length >
+                0 ? (
+                  <div
+                    className="
+                      grid
+                      grid-cols-2
+                      gap-3
+                      sm:grid-cols-3
+                      lg:grid-cols-4
+                      xl:grid-cols-5
+                    "
+                  >
+                    {sortedResults.map(
+                      (
+                        product,
+                        index
+                      ) => (
+                        <ProductCard
+                          key={
+                            getProductId(
+                              product
+                            ) ??
+                            index
+                          }
+                          product={
+                            product
+                          }
+                        />
+                      )
+                    )}
+                  </div>
+                ) : (
+                  /* EMPTY */
+
+                  <div
+                    className="
+                      flex
+                      min-h-[420px]
+                      flex-col
+                      items-center
+                      justify-center
+                      rounded-3xl
+                      border
+                      border-slate-200
+                      bg-white
+                      px-6
+                      text-center
+                    "
+                  >
+                    <div
+                      className="
+                        flex
+                        h-16
+                        w-16
+                        items-center
+                        justify-center
+                        rounded-2xl
+                        bg-slate-100
+                        text-slate-300
+                      "
+                    >
+                      <FaSearch
+                        size={22}
+                      />
+                    </div>
+
+                    <h2
+                      className="
+                        mt-5
+                        text-lg
+                        font-black
+                        text-slate-900
+                      "
+                    >
+                      No products found
+                    </h2>
+
+                    <p
+                      className="
+                        mt-2
+                        max-w-sm
+                        text-[10px]
+                        leading-5
+                        text-slate-400
+                      "
+                    >
+                      We couldn't find
+                      anything matching "
+                      {activeQuery}". Try another
+                      product, brand or category.
+                    </p>
+
+                    <div
+                      className="
+                        mt-5
+                        flex
+                        flex-wrap
+                        justify-center
+                        gap-2
+                      "
+                    >
+                      {popularSearches
+                        .slice(0, 4)
+                        .map((item) => (
+                          <button
+                            key={item}
+                            type="button"
+                            onClick={() =>
+                              executeSearch(
+                                item
+                              )
+                            }
+                            className="
+                              rounded-full
+                              bg-slate-100
+                              px-3
+                              py-2
+                              text-[9px]
+                              font-bold
+                              text-slate-600
+                              transition
+                              hover:bg-indigo-50
+                              hover:text-indigo-600
+                            "
+                          >
+                            {item}
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
-
           </>
-
         )}
-
       </div>
-
     </main>
   );
 }

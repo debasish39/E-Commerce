@@ -248,53 +248,242 @@ export default function PopularProducts() {
      LOADING
   ===================================================== */
 
-  if (loading) {
-    return (
-      <section className="max-w-7xl mx-auto px-1.5 sm:px-4 py-8">
+if (loading) {
+  return (
+    <section className="relative mx-auto w-full max-w-7xl overflow-hidden px-1.5 py-8 sm:px-4">
+      {/* Ambient background glow */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-24 top-8 h-48 w-48 rounded-full bg-indigo-400/10 blur-3xl"
+      />
 
-        <div className="
-          flex
-          items-center
-          justify-between
-          mb-6
-        ">
-          <h2 className="
-            text-xl
-            sm:text-3xl
-            font-bold
-            flex
-            items-center
-            gap-2
-          ">
-            <FaFire className="text-orange-500" />
-            Popular Products
-          </h2>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-24 top-16 h-56 w-56 rounded-full bg-purple-400/10 blur-3xl"
+      />
+
+      {/* HEADER */}
+      <div className="relative z-10 mb-6 flex items-center justify-between gap-3">
+        <div>
+          {/* Badge */}
+          <div className="skeleton-shimmer mb-3 h-6 w-32 rounded-full" />
+
+          {/* Title */}
+          <div className="skeleton-shimmer h-7 w-48 rounded-lg sm:h-8 sm:w-60" />
+
+          {/* Description */}
+          <div className="skeleton-shimmer mt-3 h-4 w-60 rounded-md sm:w-72" />
         </div>
 
-        <div className="
-          grid
-          grid-cols-2
-          sm:grid-cols-3
-          lg:grid-cols-4
-          gap-1.5
-          sm:gap-3
-        ">
-          {[1, 2, 3, 4].map((item) => (
+        {/* View All */}
+        <div className="skeleton-shimmer hidden h-9 w-20 rounded-full sm:block" />
+      </div>
+
+      {/* PRODUCT GRID */}
+      <div className="relative z-10 grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4">
+        {[1, 2, 3, 4].map((item) => (
+          <div
+            key={item}
+            className="
+              popular-skeleton-card
+              relative
+              overflow-hidden
+              rounded-2xl
+              border
+              border-slate-200/70
+              bg-white/80
+              shadow-[0_8px_30px_rgba(15,23,42,0.06)]
+              backdrop-blur-sm
+              sm:rounded-[22px]
+            "
+          >
+            {/* Card glow */}
             <div
-              key={item}
+              aria-hidden="true"
               className="
-                h-72
-                rounded-2xl
-                bg-gray-100
-                animate-pulse
+                pointer-events-none
+                absolute
+                -inset-px
+                rounded-[inherit]
+                bg-gradient-to-r
+                from-transparent
+                via-indigo-200/30
+                to-transparent
+                opacity-70
+                blur-[1px]
               "
             />
-          ))}
-        </div>
 
-      </section>
-    );
-  }
+            {/* IMAGE */}
+            <div className="relative h-48 overflow-hidden bg-gradient-to-br from-slate-100 via-slate-50 to-indigo-50/70 sm:h-56 lg:h-64">
+              {/* Main shimmer */}
+              <div className="skeleton-shimmer absolute inset-0" />
+
+              {/* Fake product image glow */}
+              <div
+                className="
+                  absolute
+                  left-1/2
+                  top-1/2
+                  h-24
+                  w-24
+                  -translate-x-1/2
+                  -translate-y-1/2
+                  rounded-2xl
+                  bg-white/50
+                  shadow-[0_0_55px_rgba(99,102,241,0.14)]
+                  backdrop-blur-sm
+                  sm:h-28
+                  sm:w-28
+                "
+              />
+
+              {/* Fake popular badge */}
+              <div className="skeleton-shimmer absolute left-2.5 top-2.5 h-5 w-20 rounded-full sm:left-3 sm:top-3" />
+
+              {/* Fake image dots */}
+              <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1 rounded-full bg-slate-900/10 px-2 py-1">
+                <div className="skeleton-shimmer h-1.5 w-1.5 rounded-full" />
+                <div className="skeleton-shimmer h-1.5 w-1.5 rounded-full" />
+                <div className="skeleton-shimmer h-1.5 w-1.5 rounded-full" />
+              </div>
+
+              {/* Fake image counter */}
+              <div className="skeleton-shimmer absolute bottom-2 right-2 h-5 w-9 rounded-md" />
+            </div>
+
+            {/* PRODUCT CONTENT */}
+            <div className="relative p-3 sm:p-4">
+              {/* Category */}
+              <div className="skeleton-shimmer mb-2 h-3 w-20 rounded-full" />
+
+              {/* Product title */}
+              <div className="min-h-[38px] space-y-2">
+                <div className="skeleton-shimmer h-4 w-full rounded-md" />
+                <div className="skeleton-shimmer h-4 w-3/4 rounded-md" />
+              </div>
+
+              {/* Rating + Views */}
+              <div className="mt-3 flex min-h-[18px] items-center justify-between gap-2">
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <div
+                      key={star}
+                      className="skeleton-shimmer h-2.5 w-2.5 rounded-sm"
+                    />
+                  ))}
+
+                  <div className="skeleton-shimmer ml-1 h-3 w-7 rounded-full" />
+                </div>
+
+                <div className="skeleton-shimmer h-3 w-10 rounded-full" />
+              </div>
+
+              {/* Price */}
+              <div className="mt-3 flex items-center gap-2 border-t border-slate-100 pt-3">
+                <div className="skeleton-shimmer h-5 w-20 rounded-md" />
+                <div className="skeleton-shimmer h-3 w-14 rounded-md" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* SHIMMER ANIMATION */}
+      <style>{`
+        .skeleton-shimmer {
+          position: relative;
+          overflow: hidden;
+
+          background:
+            linear-gradient(
+              110deg,
+              #eef2f7 8%,
+              #f8fafc 18%,
+              #e8edff 30%,
+              #f8fafc 42%,
+              #eef2f7 58%
+            );
+
+          background-size: 250% 100%;
+
+          animation:
+            popularSkeletonShimmer 1.8s ease-in-out infinite;
+
+          box-shadow:
+            inset 0 0 14px rgba(255, 255, 255, 0.5),
+            0 0 12px rgba(99, 102, 241, 0.025);
+        }
+
+        .skeleton-shimmer::after {
+          content: "";
+
+          position: absolute;
+          inset: 0;
+
+          background:
+            linear-gradient(
+              90deg,
+              transparent 0%,
+              rgba(255, 255, 255, 0.3) 30%,
+              rgba(255, 255, 255, 0.8) 50%,
+              rgba(165, 180, 252, 0.2) 60%,
+              transparent 100%
+            );
+
+          transform: translateX(-120%);
+
+          animation:
+            popularSkeletonGlow 2.2s ease-in-out infinite;
+        }
+
+        @keyframes popularSkeletonShimmer {
+          0% {
+            background-position: 100% 0;
+          }
+
+          50% {
+            background-position: 0% 0;
+          }
+
+          100% {
+            background-position: -100% 0;
+          }
+        }
+
+        @keyframes popularSkeletonGlow {
+          0% {
+            transform: translateX(-120%);
+          }
+
+          55%,
+          100% {
+            transform: translateX(120%);
+          }
+        }
+
+        @media (max-width: 640px) {
+          .popular-skeleton-card {
+            border-radius: 18px;
+          }
+
+          .skeleton-shimmer {
+            background-size: 200% 100%;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .skeleton-shimmer,
+          .skeleton-shimmer::after {
+            animation: none !important;
+          }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+
 
   /* =====================================================
      ERROR
@@ -790,7 +979,7 @@ export default function PopularProducts() {
                   </div>
 
                   <span className="pp-badge">
-                    <FaFire size={8} />
+                    <FaFire size={8} className="text-white"/>
                     Popular
                   </span>
 
@@ -850,7 +1039,7 @@ export default function PopularProducts() {
                     {product?.title || "Product"}
                   </h3>
 
-                  <div className="mt-2 flex min-h-[18px] items-center justify-between gap-2">
+                  <div className=" flex min-h-[18px] items-center justify-between gap-2">
                     <div className="flex items-center gap-1">
                       {rating > 0 ? (
                         <>
@@ -897,7 +1086,7 @@ export default function PopularProducts() {
                     )}
                   </div>
 
-                  <div className="mt-3 flex items-baseline gap-1.5 border-t border-slate-100 pt-2.5">
+                  <div className=" flex items-baseline gap-1.5 border-t border-slate-100 ">
                     <span className="text-sm font-extrabold sm:text-base">
                       <span className="mr-0.5 text-indigo-600">
                         ₹

@@ -130,48 +130,174 @@ export default function Category() {
   // LOADING
   // =====================================================
 
-  if (loading) {
-    return (
-      <section className="w-full bg-white py-3">
-        <div className="mx-auto max-w-7xl px-3">
+if (loading) {
+  return (
+    <section className="category-skeleton-section relative w-full overflow-hidden bg-white py-4 sm:py-6">
+      {/* Ambient glow */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-20 top-0 h-32 w-32 rounded-full bg-indigo-300/10 blur-3xl"
+      />
 
-          <div className="mb-2 h-4 w-28 animate-pulse rounded bg-gray-200" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-20 bottom-0 h-36 w-36 rounded-full bg-purple-300/10 blur-3xl"
+      />
 
-          <div className="flex gap-4 overflow-hidden">
+      <div className="relative z-10 mx-auto max-w-7xl px-3">
+        {/* CATEGORY HEADER */}
+        <div className="mb-4 flex items-center justify-between">
+          <div className="category-skeleton-shimmer h-5 w-32 rounded-md sm:h-6 sm:w-40" />
 
-            {[1, 2, 3, 4, 5, 6].map((item) => (
+          <div className="category-skeleton-shimmer hidden h-4 w-16 rounded-full sm:block" />
+        </div>
+
+        {/* CATEGORY SCROLLER */}
+        <div
+          className="
+            flex
+            gap-4
+            overflow-hidden
+            pb-1
+          "
+        >
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
+            <div
+              key={item}
+              className="
+                category-skeleton-item
+                flex
+                w-[58px]
+                min-w-[58px]
+                flex-col
+                items-center
+                gap-1
+              "
+            >
+              {/* Category circle */}
               <div
-                key={item}
-                className="w-[58px] min-w-[58px]"
+                className="
+                  category-skeleton-shimmer
+                  relative
+                  h-12
+                  w-12
+                  rounded-full
+                  border
+                  border-slate-100
+                  sm:h-[52px]
+                  sm:w-[52px]
+                "
               >
+                {/* Inner glow */}
                 <div
+                  aria-hidden="true"
                   className="
-                    h-12
-                    w-12
-                    animate-pulse
+                    pointer-events-none
+                    absolute
+                    inset-1.5
                     rounded-full
-                    bg-gray-200
-                  "
-                />
-
-                <div
-                  className="
-                    mt-1.5
-                    h-2
-                    w-12
-                    animate-pulse
-                    rounded
-                    bg-gray-200
+                    bg-white/30
+                    blur-sm
                   "
                 />
               </div>
-            ))}
 
-          </div>
+              {/* Category name */}
+              <div className="category-skeleton-shimmer h-2.5 w-12 rounded-full" />
+            </div>
+          ))}
         </div>
-      </section>
-    );
-  }
+      </div>
+
+      <style>{`
+        .category-skeleton-shimmer {
+          position: relative;
+          overflow: hidden;
+
+          background:
+            linear-gradient(
+              110deg,
+              #f1f5f9 8%,
+              #f8fafc 18%,
+              #e8edff 30%,
+              #f8fafc 42%,
+              #eef2f7 58%
+            );
+
+          background-size: 250% 100%;
+
+          animation:
+            categorySkeletonShimmer 1.8s ease-in-out infinite;
+
+          box-shadow:
+            inset 0 0 12px rgba(255, 255, 255, 0.65),
+            0 0 12px rgba(99, 102, 241, 0.025);
+        }
+
+        .category-skeleton-shimmer::after {
+          content: "";
+
+          position: absolute;
+          inset: 0;
+
+          background:
+            linear-gradient(
+              90deg,
+              transparent 0%,
+              rgba(255, 255, 255, 0.25) 28%,
+              rgba(255, 255, 255, 0.85) 50%,
+              rgba(165, 180, 252, 0.2) 62%,
+              transparent 100%
+            );
+
+          transform: translateX(-120%);
+
+          animation:
+            categorySkeletonGlow 2.2s ease-in-out infinite;
+        }
+
+        @keyframes categorySkeletonShimmer {
+          0% {
+            background-position: 100% 0;
+          }
+
+          50% {
+            background-position: 0% 0;
+          }
+
+          100% {
+            background-position: -100% 0;
+          }
+        }
+
+        @keyframes categorySkeletonGlow {
+          0% {
+            transform: translateX(-120%);
+          }
+
+          55%,
+          100% {
+            transform: translateX(120%);
+          }
+        }
+
+        @media (max-width: 640px) {
+          .category-skeleton-shimmer {
+            background-size: 200% 100%;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .category-skeleton-shimmer,
+          .category-skeleton-shimmer::after {
+            animation: none !important;
+          }
+        }
+      `}</style>
+    </section>
+  );
+}
+
 
   // =====================================================
   // ERROR

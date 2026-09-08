@@ -352,55 +352,194 @@ export default function BestSellerProducts() {
      LOADING
   ===================================================== */
 
-  if (loading) {
-    return (
-      <section className="mx-auto w-full max-w-7xl px-3 py-8 sm:px-5 lg:px-8">
 
-        <div className="mb-6">
 
-          <div className="mb-2 h-6 w-28 animate-pulse rounded-full bg-slate-200" />
+if (loading) {
+  return (
+    <section className="relative mx-auto w-full max-w-7xl overflow-hidden px-3 py-8 sm:px-5 lg:px-8">
+      {/* Ambient Glow */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-24 top-10 h-44 w-44 rounded-full bg-indigo-400/10 blur-3xl"
+      />
 
-          <div className="h-8 w-52 animate-pulse rounded-lg bg-slate-200" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-24 top-20 h-52 w-52 rounded-full bg-blue-400/10 blur-3xl"
+      />
 
-          <div className="mt-2 h-4 w-60 animate-pulse rounded bg-slate-100" />
+      {/* Header */}
+      <div className="relative mb-5 flex items-end justify-between gap-3">
+        <div>
+          {/* Badge */}
+          <div className="skeleton-shimmer mb-3 h-6 w-32 rounded-full" />
 
+          {/* Title */}
+          <div className="skeleton-shimmer h-8 w-52 rounded-lg sm:w-60" />
+
+          {/* Description */}
+          <div className="skeleton-shimmer mt-3 h-4 w-60 rounded-md sm:w-72" />
         </div>
 
+        {/* View All */}
+        <div className="skeleton-shimmer hidden h-9 w-20 rounded-full sm:block" />
+      </div>
 
-        {/* HORIZONTAL LOADING CARDS */}
+      {/* Product Cards */}
+      <div className="relative flex gap-3 overflow-hidden pb-3">
+        {[1, 2, 3, 4, 5].map((item) => (
+          <div
+            key={item}
+            className="bs-loading-card relative overflow-hidden rounded-[20px] border border-slate-200/70 bg-white/85 shadow-[0_8px_28px_rgba(15,23,42,0.06)] backdrop-blur-sm"
+          >
+            {/* Card Glow */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -inset-px rounded-[20px] bg-gradient-to-r from-transparent via-indigo-200/30 to-transparent opacity-70 blur-[1px]"
+            />
 
-        <div className="bs-loading-scroll">
+            {/* Image */}
+            <div className="relative h-[155px] overflow-hidden bg-gradient-to-br from-slate-100 via-slate-50 to-indigo-50/70">
+              <div className="skeleton-shimmer absolute inset-0" />
 
-          {[1, 2, 3, 4, 5].map(
-            (item) => (
-              <div
-                key={item}
-                className="bs-loading-card overflow-hidden rounded-[22px] border border-slate-100 bg-white"
-              >
+              {/* Fake Product Image */}
+              <div className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white/50 shadow-[0_0_50px_rgba(99,102,241,0.13)] backdrop-blur-sm" />
 
-                <div className="h-52 animate-pulse bg-slate-100" />
+              {/* Fake Badge */}
+              <div className="skeleton-shimmer absolute left-2 top-2 h-5 w-20 rounded-full" />
 
-                <div className="space-y-3 p-4">
+              {/* Fake Image Count */}
+              <div className="skeleton-shimmer absolute bottom-2 right-2 h-5 w-8 rounded-full" />
 
-                  <div className="h-3 w-20 animate-pulse rounded bg-slate-100" />
+              {/* Fake Dots */}
+              <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1 rounded-full bg-slate-900/10 px-2 py-1">
+                <div className="skeleton-shimmer h-1.5 w-1.5 rounded-full" />
+                <div className="skeleton-shimmer h-1.5 w-1.5 rounded-full" />
+                <div className="skeleton-shimmer h-1.5 w-1.5 rounded-full" />
+              </div>
+            </div>
 
-                  <div className="h-4 w-full animate-pulse rounded bg-slate-100" />
+            {/* Product Info */}
+            <div className="relative space-y-3 p-3">
+              {/* Category */}
+              <div className="skeleton-shimmer h-3 w-20 rounded-full" />
 
-                  <div className="h-4 w-3/4 animate-pulse rounded bg-slate-100" />
+              {/* Title */}
+              <div className="space-y-2">
+                <div className="skeleton-shimmer h-4 w-full rounded-md" />
+                <div className="skeleton-shimmer h-4 w-3/4 rounded-md" />
+              </div>
 
-                  <div className="h-5 w-24 animate-pulse rounded bg-slate-100" />
+              {/* Rating + Reviews + Sales */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <div
+                      key={star}
+                      className="skeleton-shimmer h-2.5 w-2.5 rounded-sm"
+                    />
+                  ))}
 
+                  <div className="skeleton-shimmer ml-1 h-3 w-7 rounded-full" />
                 </div>
 
+                <div className="skeleton-shimmer h-3 w-12 rounded-full" />
               </div>
-            ),
-          )}
 
-        </div>
+              {/* Price */}
+              <div className="flex items-center gap-2">
+                <div className="skeleton-shimmer h-5 w-20 rounded-md" />
+                <div className="skeleton-shimmer h-3 w-14 rounded-md" />
+              </div>
 
-      </section>
-    );
-  }
+              {/* Orders */}
+              <div className="skeleton-shimmer h-3 w-16 rounded-full" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Skeleton Animation */}
+      <style>{`
+        .skeleton-shimmer {
+          position: relative;
+          overflow: hidden;
+          background: linear-gradient(
+            110deg,
+            #eef2f7 8%,
+            #f8fafc 18%,
+            #e8edff 30%,
+            #f8fafc 42%,
+            #eef2f7 58%
+          );
+          background-size: 250% 100%;
+          animation: skeletonShimmer 1.8s ease-in-out infinite;
+          box-shadow:
+            inset 0 0 14px rgba(255, 255, 255, 0.5),
+            0 0 12px rgba(99, 102, 241, 0.025);
+        }
+
+        .skeleton-shimmer::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.35) 35%,
+            rgba(255, 255, 255, 0.75) 50%,
+            rgba(165, 180, 252, 0.18) 58%,
+            transparent 100%
+          );
+          transform: translateX(-120%);
+          animation: skeletonGlow 2.2s ease-in-out infinite;
+        }
+
+        @keyframes skeletonShimmer {
+          0% {
+            background-position: 100% 0;
+          }
+
+          50% {
+            background-position: 0% 0;
+          }
+
+          100% {
+            background-position: -100% 0;
+          }
+        }
+
+        @keyframes skeletonGlow {
+          0% {
+            transform: translateX(-120%);
+          }
+
+          55%,
+          100% {
+            transform: translateX(120%);
+          }
+        }
+
+        @media (max-width: 640px) {
+          .bs-loading-card {
+            flex: 0 0 165px;
+            width: 165px;
+            min-width: 165px;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .skeleton-shimmer,
+          .skeleton-shimmer::after {
+            animation: none !important;
+          }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+
 
 
   /* =====================================================

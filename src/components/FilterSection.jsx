@@ -110,105 +110,189 @@ export default function FilterSection({
     };
   }, [open]);
 
-  // =========================================================
-  // LOAD SUBCATEGORIES
-  // =========================================================
+// =========================================================
+// LOAD SUBCATEGORIES
+// =========================================================
 
-  useEffect(() => {
-    let mounted = true;
+useEffect(() => {
+  let mounted = true;
 
-    const loadSubCategories =
-      async () => {
-        if (
-          !category ||
-          category === "All"
-        ) {
-          setSubCategories([]);
-          return;
-        }
+  const loadSubCategories = async () => {
+    if (!category) {
+      setSubCategories([]);
+      return;
+    }
 
-        try {
-          setLoadingSubCategories(
-            true
-          );
+    try {
+      setLoadingSubCategories(true);
 
-          const response =
-            await fetch(
-              `${BACKEND_URL}/api/category/${encodeURIComponent(
-                category
-              )}/subcategories`,
-              {
-                method: "GET",
-                credentials:
-                  "include",
-                headers: {
-                  Accept:
-                    "application/json",
-                },
-              }
-            );
+      // =====================================================
+      // ALL CATEGORIES
+      // Load subcategories from every category
+      // =====================================================
+      if (category === "All") {
+        const categories = Array.isArray(categoryOnlyData)
+          ? categoryOnlyData
+          : [];
 
-          const result =
-            await response.json();
-
-          if (!response.ok) {
-            throw new Error(
-              result?.message ||
-                "Unable to load subcategories"
-            );
-          }
-
-          const list =
-            Array.isArray(
-              result?.subCategories
-            )
-              ? result.subCategories
-              : Array.isArray(
-                  result?.subcategories
-                )
-              ? result.subcategories
-              : Array.isArray(
-                  result?.data
-                )
-              ? result.data
-              : Array.isArray(result)
-              ? result
-              : [];
-
-          if (mounted) {
-            setSubCategories(
-              list.filter(
-                (item) =>
-                  item?.isActive !==
-                  false
-              )
-            );
-          }
-        } catch (error) {
-          console.error(
-            "SUBCATEGORY ERROR:",
-            error
-          );
-
+        if (categories.length === 0) {
           if (mounted) {
             setSubCategories([]);
           }
-        } finally {
-          if (mounted) {
-            setLoadingSubCategories(
-              false
-            );
-          }
+          return;
         }
-      };
 
-    loadSubCategories();
+        const responses = await Promise.all(
+          categories.map(async (categoryItem) => {
+            try {
+              const response = await fetch(
+                `${BACKEND_URL}/api/category/${encodeURIComponent(
+                  categoryItem?._id
+                )}/subcategories`,
+                {
+                  method: "GET",
+                  credentials: "include",
+                  headers: {
+                    Accept: "application/json",
+                  },
+                }
+              );
 
-    return () => {
-      mounted = false;
-    };
-  }, [category]);
+              const result = await response.json();
 
+              if (!response.ok) {
+                return [];
+              }
+
+              const list = Array.isArray(
+                result?.subCategories
+              )
+                ? result.subCategories
+                : Array.isArray(
+                    result?.subcategories
+                  )
+                ? result.subcategories
+                : Array.isArray(
+                    result?.data
+                  )
+                ? result.data
+                : Array.isArray(result)
+                ? result
+                : [];
+
+              return list.filter(
+                (item) => item?.isActive !== false
+              );
+            } catch (error) {
+              console.error(
+                `SUBCATEGORY ERROR FOR CATEGORY ${categoryItem?._id}:`,
+                error
+              );
+
+              return [];
+            }
+          })
+        );
+
+        // =====================================================
+        // MERGE + REMOVE DUPLICATES
+        // =====================================================
+
+        const allSubCategories = responses.flat();
+
+        const uniqueSubCategories = Array.from(
+          new Map(
+            allSubCategories
+              .filter((item) => item?._id)
+              .map((item) => [
+                String(item._id),
+                item,
+              ])
+          ).values()
+        );
+
+        if (mounted) {
+          setSubCategories(
+            uniqueSubCategories
+          );
+        }
+
+        return;
+      }
+
+      // =====================================================
+      // SELECTED CATEGORY
+      // Load only that category's subcategories
+      // =====================================================
+
+      const response = await fetch(
+        `${BACKEND_URL}/api/category/${encodeURIComponent(
+          category
+        )}/subcategories`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result?.message ||
+            "Unable to load subcategories"
+        );
+      }
+
+      const list = Array.isArray(
+        result?.subCategories
+      )
+        ? result.subCategories
+        : Array.isArray(
+            result?.subcategories
+          )
+        ? result.subcategories
+        : Array.isArray(
+            result?.data
+          )
+        ? result.data
+        : Array.isArray(result)
+        ? result
+        : [];
+
+      if (mounted) {
+        setSubCategories(
+          list.filter(
+            (item) =>
+              item?.isActive !== false
+          )
+        );
+      }
+    } catch (error) {
+      console.error(
+        "SUBCATEGORY ERROR:",
+        error
+      );
+
+      if (mounted) {
+        setSubCategories([]);
+      }
+    } finally {
+      if (mounted) {
+        setLoadingSubCategories(false);
+      }
+    }
+  };
+
+  loadSubCategories();
+
+  return () => {
+    mounted = false;
+  };
+}, [category, categoryOnlyData]);
   // =========================================================
   // BRANDS
   // =========================================================
@@ -778,86 +862,43 @@ export default function FilterSection({
                     SUBCATEGORY
                 ================================================= */}
 
-                {activeFilter ===
-                  "subcategory" && (
-                  <ContentSection
-                    title="Subcategory"
-                    description={
-                      category ===
-                      "All"
-                        ? "Select a category first"
-                        : "Choose a more specific product group"
-                    }
-                  >
+              {activeFilter === "subcategory" && (
+  <ContentSection
+    title="Subcategory"
+    description={
+      category === "All"
+        ? "Choose from all available subcategories"
+        : "Choose a more specific product group"
+    }
+  >
+    {loadingSubCategories ? (
+      <LoadingGrid />
+    ) : subCategories.length === 0 ? (
+      <EmptyState>
+        No subcategories available.
+      </EmptyState>
+    ) : (
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+        {/* All Subcategories */}
+        <SelectionCard
+          label="All Subcategories"
+          active={subCategory === "All"}
+          onClick={() => setSubCategory("All")}
+        />
 
-                    {category ===
-                    "All" ? (
-
-                      <EmptyState>
-                        Select a category
-                        from the left
-                        menu to view
-                        subcategories.
-                      </EmptyState>
-
-                    ) : loadingSubCategories ? (
-
-                      <LoadingGrid />
-
-                    ) : subCategories.length ===
-                      0 ? (
-
-                      <EmptyState>
-                        No subcategories
-                        available for
-                        this category.
-                      </EmptyState>
-
-                    ) : (
-
-                      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-
-                        <SelectionCard
-                          label="All Subcategories"
-                          active={
-                            subCategory ===
-                            "All"
-                          }
-                          onClick={() =>
-                            setSubCategory(
-                              "All"
-                            )
-                          }
-                        />
-
-                        {subCategories.map(
-                          (item) => (
-                            <SelectionCard
-                              key={
-                                item?._id
-                              }
-                              label={
-                                item?.name
-                              }
-                              active={
-                                subCategory ===
-                                item?._id
-                              }
-                              onClick={() =>
-                                setSubCategory(
-                                  item?._id
-                                )
-                              }
-                            />
-                          )
-                        )}
-
-                      </div>
-
-                    )}
-
-                  </ContentSection>
-                )}
+        {/* Subcategories */}
+        {subCategories.map((item) => (
+          <SubCategoryCard
+            key={item?._id}
+            item={item}
+            active={subCategory === item?._id}
+            onClick={() => setSubCategory(item?._id)}
+          />
+        ))}
+      </div>
+    )}
+  </ContentSection>
+)}
 
                 {/* =================================================
                     BRAND
@@ -926,102 +967,118 @@ export default function FilterSection({
                 {/* =================================================
                     PRICE
                 ================================================= */}
+                  {activeFilter === "price" && (
+                    <ContentSection
+                      title="Price Range"
+                      description="Set your budget and find products within your range"
+                    >
+                      <div className="w-full max-w-3xl">
+                        <div className="relative overflow-hidden rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm sm:rounded-[28px] sm:p-6">
+                          <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-indigo-50 blur-2xl" />
 
-                {activeFilter ===
-                  "price" && (
-                  <ContentSection
-                    title="Price Range"
-                    description="Set the price range that fits your budget"
-                  >
+                          <div className="relative">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                              <div>
+                                <div className="mb-1 flex items-center gap-2">
+                                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 text-sm font-black text-indigo-600">
+                                    ₹
+                                  </span>
+                                  <p className="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400 sm:text-[10px]">
+                                    Your budget
+                                  </p>
+                                </div>
 
-                    <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-7">
+                                <h3 className="text-2xl font-black tracking-tight text-slate-900 sm:text-4xl">
+                                  ₹{minPrice.toLocaleString("en-IN")}
+                                  <span className="mx-2 text-slate-300">—</span>
+                                  ₹{maxPrice.toLocaleString("en-IN")}
+                                </h3>
 
-                      {/* Current price */}
+                                <p className="mt-1.5 text-[9px] font-medium text-slate-400 sm:text-[10px]">
+                                  Products between your selected prices
+                                </p>
+                              </div>
 
-                      <div className="mb-7 flex items-end justify-between gap-3">
+                              <div className="flex items-center gap-2">
+                                <PriceBadge
+                                  label="MIN"
+                                  value={`₹${minPrice.toLocaleString("en-IN")}`}
+                                />
+                                <PriceBadge
+                                  label="MAX"
+                                  value={`₹${maxPrice.toLocaleString("en-IN")}`}
+                                />
+                              </div>
+                            </div>
 
-                        <div>
+                            <div className="mt-7 rounded-2xl bg-slate-50 p-4 sm:mt-8 sm:p-5">
+                              <div className="mb-4 flex items-center justify-between">
+                                <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 sm:text-[10px]">
+                                  Price range
+                                </span>
 
-                          <p className="text-[8px] font-black uppercase tracking-wider text-slate-400 sm:text-[9px]">
-                            Selected budget
-                          </p>
+                                <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[8px] font-bold text-slate-500 sm:text-[9px]">
+                                  ₹0 — ₹5,000+
+                                </span>
+                              </div>
 
-                          <h3 className="mt-1 text-xl font-black text-slate-900 sm:text-3xl">
+                              <div className="grid gap-4 sm:grid-cols-2">
+                                <PriceInput
+                                  label="Minimum"
+                                  value={minPrice}
+                                  onChange={updateMinPrice}
+                                />
 
-                            ₹
-                            {minPrice.toLocaleString(
-                              "en-IN"
-                            )}
+                                <PriceInput
+                                  label="Maximum"
+                                  value={maxPrice}
+                                  onChange={updateMaxPrice}
+                                />
+                              </div>
+                            </div>
 
-                            <span className="mx-1.5 text-slate-300">
-                              —
-                            </span>
+                            <div className="mt-5">
+                              <p className="mb-2.5 text-[9px] font-black uppercase tracking-wider text-slate-400 sm:text-[10px]">
+                                Quick select
+                              </p>
 
-                            ₹
-                            {maxPrice.toLocaleString(
-                              "en-IN"
-                            )}
+                              <div className="flex flex-wrap gap-2">
+                                <PricePreset
+                                  label="Under ₹500"
+                                  active={minPrice === 0 && maxPrice === 500}
+                                  onClick={() => setPriceRange([0, 500])}
+                                />
 
-                          </h3>
+                                <PricePreset
+                                  label="₹500 – ₹1,000"
+                                  active={minPrice === 500 && maxPrice === 1000}
+                                  onClick={() => setPriceRange([500, 1000])}
+                                />
 
+                                <PricePreset
+                                  label="₹1,000 – ₹2,500"
+                                  active={minPrice === 1000 && maxPrice === 2500}
+                                  onClick={() => setPriceRange([1000, 2500])}
+                                />
+
+                                <PricePreset
+                                  label="₹2,500+"
+                                  active={minPrice === 2500 && maxPrice === 5000}
+                                  onClick={() => setPriceRange([2500, 5000])}
+                                />
+
+                                <PricePreset
+                                  label="Any price"
+                                  active={minPrice === 0 && maxPrice === 5000}
+                                  onClick={() => setPriceRange([0, 5000])}
+                                />
+                              </div>
+                            </div>
+                          </div>
                         </div>
-
-                        <div className="rounded-xl bg-indigo-50 px-3 py-2 sm:rounded-2xl sm:px-4 sm:py-3">
-
-                          <p className="text-[8px] font-bold text-indigo-400">
-                            Maximum
-                          </p>
-
-                          <p className="text-xs font-black text-indigo-700 sm:text-sm">
-                            ₹5,000+
-                          </p>
-
-                        </div>
-
                       </div>
-
-                      {/* Minimum */}
-
-                      <PriceInput
-                        label="Minimum Price"
-                        value={
-                          minPrice
-                        }
-                        onChange={
-                          updateMinPrice
-                        }
-                      />
-
-                      <div className="my-6 border-t border-dashed border-slate-200" />
-
-                      {/* Maximum */}
-
-                      <PriceInput
-                        label="Maximum Price"
-                        value={
-                          maxPrice
-                        }
-                        onChange={
-                          updateMaxPrice
-                        }
-                      />
-
-                      <div className="mt-4 flex justify-between text-[8px] font-bold text-slate-400 sm:text-[9px]">
-
-                        <span>
-                          ₹0
-                        </span>
-
-                        <span>
-                          ₹5,000+
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </ContentSection>
-                )}
+                    </ContentSection>
+                  )}
 
                 {/* =================================================
                     SORT
@@ -1312,20 +1369,38 @@ function CategoryCard({
       `}
     >
 
-      {/* Category image */}
-{/* 
-      {item?.image ? (
-        <img
-          src={item.image}
-          alt={
-            item?.name ||
-            "Category"
-          }
-          className="h-9 w-9 shrink-0 rounded-xl bg-slate-50 object-contain p-1 sm:h-11 sm:w-11"
-        />
+      {/* Category icon */}
+      {item?.icon ? (
+        typeof item.icon === "string" &&
+        (item.icon.startsWith("http://") ||
+          item.icon.startsWith("https://")) ? (
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50 p-1 sm:h-11 sm:w-11">
+            <img
+              src={item.icon}
+              alt={item?.name || "Category"}
+              className="h-full w-full object-contain"
+              loading="lazy"
+            />
+          </div>
+        ) : (
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-lg sm:h-11 sm:w-11 sm:text-xl">
+            {item.icon}
+          </div>
+        )
+      ) : item?.image ? (
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50 p-1 sm:h-11 sm:w-11">
+          <img
+            src={item.image}
+            alt={item?.name || "Category"}
+            className="h-full w-full object-contain"
+            loading="lazy"
+          />
+        </div>
       ) : (
-        <div className="h-9 w-9 shrink-0 rounded-xl bg-slate-100 sm:h-11 sm:w-11" />
-      )} */}
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400 sm:h-11 sm:w-11">
+          <span className="text-sm sm:text-base">📦</span>
+        </div>
+      )}
 
       {/* Name */}
 
@@ -1347,7 +1422,114 @@ function CategoryCard({
     </button>
   );
 }
+// =============================================================
+// SUBCATEGORY CARD
+// =============================================================
 
+function SubCategoryCard({
+  item,
+  active,
+  onClick,
+}) {
+  const icon = item?.icon?.trim?.() || "";
+  const image = item?.image?.trim?.() || "";
+
+  const isIconUrl =
+    icon.startsWith("http://") ||
+    icon.startsWith("https://");
+
+  const isImageUrl =
+    image.startsWith("http://") ||
+    image.startsWith("https://");
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`
+        relative
+        flex
+        min-h-[58px]
+        w-full
+        items-center
+        gap-2.5
+        rounded-xl
+        border
+        p-2
+        text-left
+        transition-all
+        duration-200
+        active:scale-[0.97]
+        sm:min-h-[68px]
+        sm:rounded-2xl
+        sm:p-2.5
+        ${
+          active
+            ? "border-indigo-300 bg-indigo-50 shadow-sm"
+            : "border-slate-200 bg-white hover:border-indigo-200 hover:shadow-sm"
+        }
+      `}
+    >
+      {/* =====================================================
+          SUBCATEGORY ICON
+      ===================================================== */}
+
+      {icon ? (
+        isIconUrl ? (
+          // Icon is an image URL
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50 p-1 sm:h-11 sm:w-11">
+            <img
+              src={icon}
+              alt={item?.name || "Subcategory"}
+              className="h-full w-full object-contain"
+              loading="lazy"
+            />
+          </div>
+        ) : (
+          // Icon is emoji/text, e.g. 💄
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-lg sm:h-11 sm:w-11 sm:text-xl">
+            {icon}
+          </div>
+        )
+      ) : isImageUrl ? (
+        // No icon, use image instead
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50 p-1 sm:h-11 sm:w-11">
+          <img
+            src={image}
+            alt={item?.name || "Subcategory"}
+            className="h-full w-full object-contain"
+            loading="lazy"
+          />
+        </div>
+      ) : (
+        // Final fallback
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400 sm:h-11 sm:w-11">
+          <span className="text-sm sm:text-base">
+            📦
+          </span>
+        </div>
+      )}
+
+      {/* =====================================================
+          NAME
+      ===================================================== */}
+
+      <span className="min-w-0 flex-1 break-words pr-5 text-[9px] font-extrabold leading-4 text-slate-700 sm:text-[11px]">
+        {item?.name || "Subcategory"}
+      </span>
+
+      {/* =====================================================
+          CHECK
+      ===================================================== */}
+
+      {active && (
+        <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-white">
+          <FaCheck size={8} />
+        </span>
+      )}
+    </button>
+  );
+}
 // =============================================================
 // BRAND CHIP
 // =============================================================
@@ -1473,7 +1655,66 @@ function SortCard({
 }
 
 // =============================================================
+// PRICE BADGE
+// =============================================================
+
+function PriceBadge({
+  label,
+  value,
+}) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 sm:rounded-2xl sm:px-4 sm:py-2.5">
+      <p className="text-[7px] font-black tracking-wider text-slate-400 sm:text-[8px]">
+        {label}
+      </p>
+      <p className="mt-0.5 text-[9px] font-black text-slate-800 sm:text-[10px]">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+// =============================================================
+// PRICE PRESET
+// =============================================================
+
+function PricePreset({
+  label,
+  active,
+  onClick,
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`
+        rounded-full
+        border
+        px-3
+        py-2
+        text-[8px]
+        font-extrabold
+        transition-all
+        duration-200
+        active:scale-95
+        sm:px-3.5
+        sm:py-2.5
+        sm:text-[9px]
+        ${
+          active
+            ? "border-indigo-600 bg-indigo-600 text-white shadow-md shadow-indigo-100"
+            : "border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+        }
+      `}
+    >
+      {label}
+    </button>
+  );
+}
+
+// =============================================================
 // PRICE INPUT
+// =============================================================
 // =============================================================
 
 function PriceInput({
@@ -1481,40 +1722,48 @@ function PriceInput({
   value,
   onChange,
 }) {
+  const numericValue = Number(value) || 0;
+  const percentage = Math.min(
+    100,
+    Math.max(0, (numericValue / 5000) * 100)
+  );
+
   return (
-    <div>
-
-      <div className="mb-2.5 flex items-center justify-between">
-
-        <span className="text-[9px] font-black text-slate-500 sm:text-[10px]">
+    <div className="rounded-xl border border-slate-200 bg-white p-3 sm:rounded-2xl sm:p-4">
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 sm:text-[10px]">
           {label}
         </span>
 
-        <span className="rounded-lg bg-indigo-50 px-2.5 py-1 text-[9px] font-black text-indigo-600 sm:text-[10px]">
-          ₹
-          {Number(
-            value
-          ).toLocaleString(
-            "en-IN"
-          )}
+        <span className="rounded-lg bg-indigo-50 px-2.5 py-1.5 text-[9px] font-black text-indigo-700 sm:text-[10px]">
+          ₹{numericValue.toLocaleString("en-IN")}
         </span>
-
       </div>
 
-      <input
-        type="range"
-        min="0"
-        max="5000"
-        step="100"
-        value={value}
-        onChange={(event) =>
-          onChange(
-            event.target.value
-          )
-        }
-        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-indigo-100 accent-indigo-600"
-      />
+      <div className="relative pt-1">
+        <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+          <div
+            className="h-full rounded-full bg-indigo-600 transition-all duration-200"
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
 
+        <input
+          type="range"
+          min="0"
+          max="5000"
+          step="100"
+          value={numericValue}
+          onChange={(event) => onChange(event.target.value)}
+          aria-label={label}
+          className="absolute inset-0 h-2 w-full cursor-pointer appearance-none bg-transparent accent-indigo-600"
+        />
+      </div>
+
+      <div className="mt-2 flex justify-between text-[7px] font-bold text-slate-400 sm:text-[8px]">
+        <span>₹0</span>
+        <span>₹5,000+</span>
+      </div>
     </div>
   );
 }
